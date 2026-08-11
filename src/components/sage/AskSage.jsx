@@ -1,6 +1,17 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 
+function cleanSage(text) {
+  let t = String(text);
+  t = t.replace(/^#{1,6}\s+/gm, '');        // markdown headings
+  t = t.replace(/[*_`~]{1,3}/g, '');          // bold/italic/code markers
+  t = t.replace(/^\s*[-•]\s+/gm, '');        // bullet dashes
+  t = t.replace(/^-{3,}\s*$/gm, '');          // horizontal rules (---)
+  t = t.replace(/—|–/g, ', ');               // em/en dashes -> commas
+  t = t.replace(/\s{2,}/g, ' ').trim();      // collapse stray spaces
+  return t;
+}
+
 export default function AskSage() {
   const [grade, setGrade] = useState('11th grade');
   const [question, setQuestion] = useState('');
@@ -12,9 +23,10 @@ export default function AskSage() {
     setLoading(true);
     setAnswer('');
     const res = await base44.integrations.Core.InvokeLLM({
-      prompt: `You are Sage, a warm, concrete college and career advisor for high school students on Pathways. The student is in ${grade}. Answer their question in under 180 words, with specific, actionable next steps and no fluff.\n\nQuestion: ${question}`,
+      prompt: `You are Sage, a warm, concrete college and career advisor for high school students on Pathways. The student is in ${grade}. Answer in plain text only, under 180 words, with specific, actionable next steps and no fluff. Do not use markdown, asterisks, hash signs, dashes as bullets, or horizontal rules. Use commas instead of em dashes.\n\nQuestion: ${question}`,
     });
-    setAnswer(typeof res === 'string' ? res : JSON.stringify(res));
+    const raw = typeof res === 'string' ? res : JSON.stringify(res);
+    setAnswer(cleanSage(raw));
     setLoading(false);
   };
 

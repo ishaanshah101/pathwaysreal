@@ -32,13 +32,24 @@ export default function Hero() {
       </div>
       <div className="relative anim-fade-up" style={{ animationDelay: '.15s' }}>
         <div
-          className="washed"
+          className="washed relative overflow-hidden"
           style={{
             aspectRatio: '4 / 4.6',
             borderRadius: '44% 56% 52% 48% / 52% 46% 54% 48%',
             background: 'linear-gradient(150deg, var(--color-accent-2-400), var(--color-accent-300) 55%, var(--color-accent-400))',
           }}
-        />
+        >
+          <img
+            src="https://images.unsplash.com/photo-1523240795612-9a054b0db6a3?auto=format&fit=crop&w=900&q=80"
+            alt="A high school student studying with mentors"
+            className="absolute inset-0 w-full h-full object-cover"
+            style={{ mixBlendMode: 'multiply', opacity: 0.92 }}
+          />
+          <div
+            className="absolute inset-0"
+            style={{ background: 'linear-gradient(150deg, rgba(174,191,146,0.35), rgba(255,198,165,0.2) 55%, rgba(246,160,107,0.45))' }}
+          />
+        </div>
         <div className="card elev-lg anim-drift" style={{ position: 'absolute', left: -14, bottom: 34, width: 230, padding: '14px 16px', gap: 6 }}>
           <span className="card-kicker">Connected</span>
           <span style={{ fontSize: 13, lineHeight: 1.45 }}>

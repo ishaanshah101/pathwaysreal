@@ -13,7 +13,7 @@ export default function Nav() {
   return (
     <nav className="flex items-center gap-4 sm:gap-[26px] py-[22px] flex-wrap">
       <Link to="/" className="flex items-center gap-[9px] mr-auto no-underline text-inherit">
-        <BrandMark />
+        <BrandMark size={38} />
         <span style={{ fontFamily: 'var(--font-heading)', fontSize: 21 }}>Pathways</span>
       </Link>
       {tabs.map((t) => {

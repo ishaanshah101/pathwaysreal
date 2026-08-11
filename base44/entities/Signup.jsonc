@@ -1,0 +1,42 @@
+{
+  "name": "Signup",
+  "type": "object",
+  "properties": {
+    "full_name": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string",
+      "format": "email"
+    },
+    "role": {
+      "type": "string",
+      "enum": [
+        "student",
+        "college_student",
+        "educator",
+        "counselor"
+      ],
+      "default": "student"
+    },
+    "grade": {
+      "type": "string"
+    },
+    "goals": {
+      "type": "string"
+    },
+    "plan_interest": {
+      "type": "string",
+      "enum": [
+        "free",
+        "sage_monthly",
+        "sage_yearly"
+      ],
+      "default": "free"
+    }
+  },
+  "required": [
+    "full_name",
+    "email"
+  ]
+}

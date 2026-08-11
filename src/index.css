@@ -1,92 +1,151 @@
+@import url('https://fonts.googleapis.com/css2?family=Caprasimo&family=Figtree:wght@400;600;700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 3.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 3.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 3.9%;
-    --primary: 0 0% 9%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 0 0% 96.1%;
-    --secondary-foreground: 0 0% 9%;
-    --muted: 0 0% 96.1%;
-    --muted-foreground: 0 0% 45.1%;
-    --accent: 0 0% 96.1%;
-    --accent-foreground: 0 0% 9%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
-    --ring: 0 0% 3.9%;
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
-    --radius: 0.5rem;
-    --font-heading: ui-sans-serif, system-ui, sans-serif;
-    --font-body: ui-sans-serif, system-ui, sans-serif;
-    --font-display: ui-sans-serif, system-ui, sans-serif;
-    --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
-  }
+:root {
+  --color-bg: #f5ead8;
+  --color-surface: #ebddc5;
+  --color-text: #201e1d;
+  --color-accent: #c67139;
+  --color-accent-2: #7a8a5e;
+  --color-divider: rgba(32, 30, 29, 0.16);
 
-  .dark {
-    --background: 0 0% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
-    --secondary: 0 0% 14.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
-    --accent: 0 0% 14.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 0 0% 83.1%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
-  }
+  --color-neutral-100: #f9f4ed;
+  --color-neutral-200: #eee7db;
+  --color-neutral-300: #dcd3c4;
+  --color-neutral-400: #c0b6a5;
+  --color-neutral-500: #a19786;
+  --color-neutral-600: #82796a;
+  --color-neutral-700: #645c50;
+  --color-neutral-800: #474238;
+  --color-neutral-900: #2e2b25;
+
+  --color-accent-100: #fff2eb;
+  --color-accent-200: #ffe1d0;
+  --color-accent-300: #ffc6a5;
+  --color-accent-400: #f6a06b;
+  --color-accent-500: #d67f48;
+  --color-accent-600: #b2622d;
+  --color-accent-700: #8c491a;
+  --color-accent-800: #643312;
+  --color-accent-900: #402310;
+
+  --color-accent-2-100: #f0fae1;
+  --color-accent-2-200: #e1eecc;
+  --color-accent-2-300: #ccdbb2;
+  --color-accent-2-400: #aebf92;
+  --color-accent-2-500: #8fa073;
+  --color-accent-2-600: #728157;
+  --color-accent-2-700: #56633f;
+  --color-accent-2-800: #3d472b;
+  --color-accent-2-900: #272e1b;
+
+  --font-heading: "Caprasimo", system-ui, sans-serif;
+  --font-body: "Figtree", system-ui, sans-serif;
+
+  --radius-md: 16px;
+  --radius-lg: 28px;
+
+  --shadow-sm: 0 1px 2px rgba(46, 43, 37, 0.14);
+  --shadow-md: 0 3px 10px rgba(46, 43, 37, 0.16);
+  --shadow-lg: 0 12px 32px rgba(46, 43, 37, 0.22);
 }
 
+html { scroll-behavior: smooth; }
 
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.55;
+}
 
-@layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  font-weight: 400;
+  line-height: 1.12;
+  letter-spacing: -0.015em;
+  margin: 0 0 8.8px;
+}
 
-  body {
-    @apply bg-background text-foreground font-body;
-  }
+.text-muted { color: rgba(32, 30, 29, 0.55); }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  cursor: pointer; text-decoration: none;
+  font-family: var(--font-heading); font-weight: 400;
+  font-size: 14px; line-height: 1.2; color: var(--color-text);
+  background: transparent; border: 1px solid transparent;
+  padding: 8.8px 15.8px; border-radius: 999px;
+  transition: background .18s ease, transform .18s ease;
+}
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.btn-primary { background: var(--color-accent); color: var(--color-bg); }
+.btn-primary:hover { background: var(--color-accent-600); }
+.btn-primary:active { background: var(--color-accent-700); transform: scale(0.97); }
+.btn-secondary { border-color: var(--color-divider); }
+.btn-secondary:hover { background: rgba(32, 30, 29, 0.07); }
+.btn-ghost { color: var(--color-accent); padding-inline: 4.4px; }
+.btn-ghost:hover { background: rgba(198, 113, 57, 0.1); }
+.btn-block { width: 100%; }
+
+.card {
+  display: flex; flex-direction: column; gap: 8.8px;
+  padding: 13.2px; border-radius: 32px; background: var(--color-surface);
+}
+.card-kicker { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-accent); }
+.elev-sm { box-shadow: var(--shadow-sm); }
+.elev-md { box-shadow: var(--shadow-md); }
+.elev-lg { box-shadow: var(--shadow-lg); }
+
+.tag {
+  display: inline-flex; align-items: center; font-size: 11px;
+  letter-spacing: 0.02em; padding: 3px 10px; border-radius: 999px;
+}
+.tag-accent { background: var(--color-accent-100); color: var(--color-accent-800); }
+.tag-accent-2 { background: var(--color-accent-2-100); color: var(--color-accent-2-800); }
+
+.field > label { display: block; font-size: 12px; margin-bottom: 5px; color: rgba(32,30,29,.7); }
+.input {
+  width: 100%; min-height: 36px; padding: 6px 14px; font: inherit; font-size: 14px;
+  color: var(--color-text); caret-color: var(--color-accent);
+  background: var(--color-surface);
+  border: 1px solid var(--color-divider); border-radius: 999px;
+}
+textarea.input { min-height: 90px; resize: vertical; border-radius: 20px; }
+.input:hover { border-color: rgba(32,30,29,.45); }
+.input:focus { outline: none; border-color: var(--color-accent); }
+
+.seg { display: inline-flex; overflow: hidden; border: 1px solid var(--color-divider); border-radius: 999px; }
+.seg-opt { display: inline-flex; align-items: center; padding: 7px 14px; font-size: 13px; cursor: pointer; background: transparent; border: 0; font: inherit; }
+.seg-opt + .seg-opt { border-left: 1px solid var(--color-divider); }
+.seg-opt[data-on="true"] { background: var(--color-accent); color: var(--color-bg); }
+.seg-opt[data-on="false"]:hover { background: rgba(32,30,29,.07); }
+
+.table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.table th {
+  text-align: left; font-size: 11px; letter-spacing: .08em; text-transform: uppercase;
+  color: rgba(32,30,29,.6); padding: 8.8px; border-bottom: 1px solid var(--color-divider);
+}
+.table td { padding: 8.8px; border-bottom: 1px solid rgba(32,30,29,.08); }
+.table tbody tr:hover { background: rgba(32,30,29,.04); }
+
+.washed { filter: saturate(0.6) contrast(0.85) brightness(1.1) opacity(0.94); }
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+@keyframes fadeSwap { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes drift { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+.anim-fade-up { animation: fadeUp .6s ease both; }
+.anim-fade-swap { animation: fadeSwap .35s ease both; }
+.anim-drift { animation: drift 6s ease-in-out infinite; }
+.anim-drift-slow { animation: drift 7s 1s ease-in-out infinite; }
+
+@media (max-width: 860px) {
+  header.grid, section.card > .grid, .card > .grid { grid-template-columns: minmax(0, 1fr) !important; }
+  [style*="grid-template-columns:repeat(6,1fr)"],
+  .bento-grid { grid-template-columns: repeat(2, 1fr) !important; }
+  .bento-grid > * { grid-column: span 2 !important; }
 }

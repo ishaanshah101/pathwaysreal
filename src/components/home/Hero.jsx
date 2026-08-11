@@ -43,7 +43,7 @@ export default function Hero() {
             src="https://media.base44.com/images/public/6a7ac32706b0616cd94b0ec7/3041b5321_images7.jpeg"
             alt="A Pathways student"
             className="absolute inset-0 w-full h-full object-cover"
-            style={{ objectPosition: 'center 35%', mixBlendMode: 'multiply', opacity: 0.92 }}
+            style={{ objectPosition: 'center center', mixBlendMode: 'multiply', opacity: 0.92 }}
           />
           <div
             className="absolute inset-0"

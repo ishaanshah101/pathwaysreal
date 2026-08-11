@@ -40,8 +40,8 @@ export default function Hero() {
           }}
         >
           <img
-            src="https://images.unsplash.com/photo-1523240795612-9a054b0db6a3?auto=format&fit=crop&w=900&q=80"
-            alt="A high school student studying with mentors"
+            src="https://media.base44.com/images/public/6a7ac32706b0616cd94b0ec7/3041b5321_images7.jpeg"
+            alt="A Pathways student"
             className="absolute inset-0 w-full h-full object-cover"
             style={{ mixBlendMode: 'multiply', opacity: 0.92 }}
           />

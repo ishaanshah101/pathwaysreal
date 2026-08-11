@@ -3,16 +3,16 @@ import React from 'react';
 export default function BrandMark({ size = 26 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
-      <rect width="24" height="24" rx="7" fill="var(--color-accent)" />
+      <rect width="24" height="24" rx="7" fill="var(--color-accent-2-100)" />
+      <circle cx="12" cy="8.3" r="3.3" fill="var(--color-accent)" />
+      <path d="M9.4 22 L12 11 L14.6 22 Z" fill="var(--color-neutral-900)" />
       <path
-        d="M5 18 C 5 12.5 12 12.5 12 8.5 S 19 7.5 19 5"
-        fill="none"
+        d="M12 21.4 L12 11.4"
         stroke="var(--color-bg)"
-        strokeWidth="2.4"
+        strokeWidth="1.3"
         strokeLinecap="round"
-        strokeDasharray="3 2.4"
+        strokeDasharray="1.7 1.7"
       />
-      <circle cx="19" cy="5" r="2.4" fill="var(--color-bg)" />
     </svg>
   );
 }

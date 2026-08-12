@@ -115,8 +115,8 @@ function App() {
           <AuthenticatedApp />
         </Router>
         <Toaster />
-      </QueryClientProvider>
-    </AuthProvider>
+      </AuthProvider>
+    </QueryClientProvider>
   )
 }
 

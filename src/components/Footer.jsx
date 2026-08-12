@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import BrandMark from '@/components/BrandMark';
 
 export default function Footer() {
@@ -11,6 +12,8 @@ export default function Footer() {
         <BrandMark size={16} />
         <span style={{ fontFamily: 'var(--font-heading)', fontSize: 14, color: 'var(--color-text)' }}>Pathways</span>
       </span>
+      <Link to="/privacy" className="no-underline" style={{ color: 'var(--color-neutral-700)' }}>Privacy</Link>
+      <Link to="/terms" className="no-underline" style={{ color: 'var(--color-neutral-700)' }}>Terms</Link>
       <span>14+ · COPPA and FERPA aligned · We never sell student data</span>
     </footer>
   );

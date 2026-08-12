@@ -14,6 +14,9 @@ const SEED_MENTORS = [
 
 function MentorCard({ m, onConnect, connectionState, busy }) {
   const initial = (m.full_name || '?').charAt(0).toUpperCase();
+  // Sample profiles illustrate what the community looks like before it fills
+  // up. They are not real accounts, so they never offer a dead-end message link.
+  const isSample = Boolean(m.is_sample_profile);
   const label =
     connectionState === 'accepted' ? 'Connected'
       : connectionState === 'pending' ? 'Request sent'
@@ -51,23 +54,31 @@ function MentorCard({ m, onConnect, connectionState, busy }) {
         </div>
       )}
 
-      <div className="flex gap-2 flex-wrap" style={{ marginTop: 2 }}>
-        <button
-          type="button"
-          className="btn btn-primary"
-          style={{ fontSize: 13 }}
-          disabled={busy || connectionState === 'accepted' || connectionState === 'pending'}
-          onClick={() => onConnect(m)}
-        >
-          {label}
-        </button>
-        <Link
-          to={`/app/messages?to=${encodeURIComponent(m.user_email)}`}
-          className="btn btn-secondary"
-          style={{ fontSize: 13 }}
-        >
-          Message
-        </Link>
+      <div className="flex gap-2 flex-wrap items-center" style={{ marginTop: 2 }}>
+        {isSample ? (
+          <span style={{ fontSize: 12.5, color: 'var(--color-neutral-600)' }}>
+            Sample profile — real members appear here as they join.
+          </span>
+        ) : (
+          <>
+            <button
+              type="button"
+              className="btn btn-primary"
+              style={{ fontSize: 13 }}
+              disabled={busy || connectionState === 'accepted' || connectionState === 'pending'}
+              onClick={() => onConnect(m)}
+            >
+              {label}
+            </button>
+            <Link
+              to={`/app/messages?to=${encodeURIComponent(m.user_email)}`}
+              className="btn btn-secondary"
+              style={{ fontSize: 13 }}
+            >
+              Message
+            </Link>
+          </>
+        )}
       </div>
     </div>
   );
@@ -126,7 +137,9 @@ export default function Explore() {
 
   const list = useMemo(() => {
     const real = people.filter((p) => p.user_email && p.user_email !== email && p.onboarded);
-    const seedsToShow = SEED_MENTORS.filter((s) => !real.some((r) => r.user_email === s.user_email));
+    const seedsToShow = SEED_MENTORS
+      .filter((s) => !real.some((r) => r.user_email === s.user_email))
+      .map((s) => ({ ...s, is_sample_profile: true }));
     const all = [...real, ...seedsToShow];
     const needle = q.trim().toLowerCase();
     return all.filter((p) => {

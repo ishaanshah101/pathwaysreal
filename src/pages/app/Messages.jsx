@@ -106,7 +106,7 @@ export default function Messages() {
       <h1 style={{ fontSize: 'clamp(26px,3.2vw,36px)', margin: 0 }}>Messages</h1>
 
       <div
-        className="grid"
+        className="grid app-split"
         style={{ gridTemplateColumns: 'minmax(0,4fr) minmax(0,8fr)', gap: 16, alignItems: 'start' }}
       >
         <div className="card elev-sm" style={{ padding: 12, gap: 4, borderRadius: 24 }}>

@@ -1,0 +1,93 @@
+{
+  "name": "Profile",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "Owner's email, used to link the profile to the logged in user"
+    },
+    "full_name": {
+      "type": "string"
+    },
+    "role": {
+      "type": "string",
+      "enum": [
+        "student",
+        "college_student",
+        "educator",
+        "counselor"
+      ],
+      "default": "student"
+    },
+    "grade": {
+      "type": "string",
+      "description": "Grade level or institution"
+    },
+    "school": {
+      "type": "string"
+    },
+    "goals": {
+      "type": "string"
+    },
+    "interests": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "bio": {
+      "type": "string"
+    },
+    "headline": {
+      "type": "string"
+    },
+    "plan": {
+      "type": "string",
+      "enum": [
+        "free",
+        "sage_monthly",
+        "sage_yearly"
+      ],
+      "default": "free"
+    },
+    "onboarded": {
+      "type": "boolean",
+      "default": false,
+      "description": "True once the user has completed onboarding and may enter the main app"
+    }
+  },
+  "required": [
+    "user_email"
+  ],
+  "rls": {
+    "create": null,
+    "read": null,
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

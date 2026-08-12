@@ -145,6 +145,7 @@ textarea.input { min-height: 90px; resize: vertical; border-radius: 20px; }
 
 @media (max-width: 860px) {
   header.grid, section.card > .grid, .card > .grid { grid-template-columns: minmax(0, 1fr) !important; }
+  .app-split { grid-template-columns: minmax(0, 1fr) !important; }
   [style*="grid-template-columns:repeat(6,1fr)"],
   .bento-grid { grid-template-columns: repeat(2, 1fr) !important; }
   .bento-grid > * { grid-column: span 2 !important; }

@@ -32,7 +32,7 @@ export default function Hero() {
       </div>
       <div className="relative anim-fade-up" style={{ animationDelay: '.15s' }}>
         <div
-          className="washed relative overflow-hidden"
+          className="relative overflow-hidden"
           style={{
             aspectRatio: '4 / 4.6',
             borderRadius: '44% 56% 52% 48% / 52% 46% 54% 48%',
@@ -43,11 +43,11 @@ export default function Hero() {
             src="https://media.base44.com/images/public/6a7ac32706b0616cd94b0ec7/3041b5321_images7.jpeg"
             alt="A Pathways student"
             className="absolute inset-0 w-full h-full object-cover"
-            style={{ objectPosition: '44% center', mixBlendMode: 'multiply', opacity: 0.92 }}
+            style={{ objectPosition: '44% center', filter: 'brightness(1.08) contrast(1.05) saturate(1.05)' }}
           />
           <div
             className="absolute inset-0"
-            style={{ background: 'linear-gradient(150deg, rgba(174,191,146,0.35), rgba(255,198,165,0.2) 55%, rgba(246,160,107,0.45))' }}
+            style={{ background: 'linear-gradient(150deg, rgba(174,191,146,0.18), rgba(255,198,165,0.08) 55%, rgba(246,160,107,0.22))', mixBlendMode: 'soft-light' }}
           />
         </div>
         <div className="card elev-lg anim-drift" style={{ position: 'absolute', left: -14, bottom: 34, width: 230, padding: '14px 16px', gap: 6 }}>

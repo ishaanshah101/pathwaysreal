@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Sparkles, Check, Loader2 } from 'lucide-react';
 import { startSageCheckout, SAGE_PRICES } from '@/lib/useSubscription';
+import { SAMPLE_SAGE_EXCHANGES } from '@/data/sampleContent';
 
 const points = [
   'Personalized to your profile, grade, and goals',
@@ -116,6 +117,36 @@ export default function SagePaywall({ notice }) {
           Payment is handled by Stripe on their secure checkout page. Pathways never sees or stores
           your card details.
         </span>
+      </div>
+
+      {/* Real answers, so the value is visible before anyone is asked to pay. */}
+      <div className="flex flex-col" style={{ gap: 12, marginTop: 6 }}>
+        <h2 style={{ fontSize: 'clamp(20px,2.4vw,26px)', margin: 0 }}>What Sage actually sounds like</h2>
+        <p style={{ color: 'var(--color-neutral-700)', margin: '0 0 4px', fontSize: 14 }}>
+          Four real answers, unedited. Yours would also know your grade, school, and goals.
+        </p>
+        {SAMPLE_SAGE_EXCHANGES.map((ex) => (
+          <div key={ex.q} className="card elev-sm" style={{ padding: 20, gap: 12, borderRadius: 24 }}>
+            <div
+              style={{
+                alignSelf: 'flex-end', maxWidth: '85%',
+                background: 'var(--color-accent)', color: 'var(--color-bg)',
+                padding: '10px 15px', borderRadius: 20, fontSize: 14, lineHeight: 1.5,
+              }}
+            >
+              {ex.q}
+            </div>
+            <div
+              style={{
+                alignSelf: 'flex-start', maxWidth: '95%',
+                background: 'var(--color-bg)', padding: '12px 16px', borderRadius: 20,
+                fontSize: 14.5, lineHeight: 1.62, whiteSpace: 'pre-wrap',
+              }}
+            >
+              {ex.a}
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

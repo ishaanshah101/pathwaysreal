@@ -1,0 +1,34 @@
+# Pathways
+
+> Pathways is a free platform that gives every high school student equal access to real, firsthand guidance on college and careers. Students, professors, and admissions counselors share experience, connect as mentors, and answer questions in one focused space, with no addiction loops and no data selling.
+
+## Key facts
+
+- The core app is free forever: feed, search, connections, messaging, and profiles. There is no premium tier.
+- The only paid feature is Sage, an optional AI college and career advisor, at $5 per month or $40 per year. Paying for Sage also turns off college advertising across the app.
+- Colleges pay for clearly labeled ad placements, which is what keeps the platform free for students.
+- Open to anyone 14 or older, from 9th grade up.
+- Educators, professors, and admissions counselors join as verified mentors using their institutional email.
+- Pathways never sells student data. Handling of student information is aligned with COPPA and FERPA expectations.
+- A private college counselor can cost about $200 an hour, and most families never have one. Roughly 16 million US high schoolers face these decisions with unequal support. Closing that gap is the reason Pathways exists.
+
+## What makes it different
+
+- A long-form feed only. No short-form video loops, no reposts, no infinite scroll.
+- Mutual connections before direct messaging. One-on-one conversations only, never group chats, with contact-sharing and meetup arranging blocked automatically.
+- A community-rated credibility tier system, from Regular Bronze to Gold Triple Palm, filtered by AI.
+- Search across people, high schools, colleges with public/private and in-state filters, summer programs, and majors.
+
+## Pages
+
+- [Home](https://cac-pathways-d94b0ec7.base44.app/): What Pathways is and who it is for.
+- [How it works](https://cac-pathways-d94b0ec7.base44.app/how-it-works): Features in detail, and how Pathways compares to TikTok, Instagram, Reddit, College Confidential, LinkedIn, and Google search.
+- [Sage](https://cac-pathways-d94b0ec7.base44.app/sage): The optional AI advisor, what it does, and what it costs.
+- [FAQ](https://cac-pathways-d94b0ec7.base44.app/faq): Direct answers on cost, eligibility, and how Pathways differs from a private counselor.
+- [Join free](https://cac-pathways-d94b0ec7.base44.app/join): Create an account with Google or email.
+- [Privacy Policy](https://cac-pathways-d94b0ec7.base44.app/privacy)
+- [Terms of Service](https://cac-pathways-d94b0ec7.base44.app/terms)
+
+## Contact
+
+ishaanshah101@gmail.com

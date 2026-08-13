@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { NavLink, Outlet, Link } from 'react-router-dom';
 import { Home, Compass, MessageCircle, Sparkles, User, LogOut } from 'lucide-react';
 import BrandMark from '@/components/BrandMark';
+import Seo from '@/components/Seo';
 import { useAuth } from '@/lib/AuthContext';
 import { useProfile } from '@/lib/useProfile';
 
@@ -44,6 +45,8 @@ export default function AppShell() {
 
   return (
     <div style={{ minHeight: '100vh' }}>
+      {/* Signed-in screens hold nothing a search engine should index. */}
+      <Seo title="Pathways" noindex />
       <div
         style={{
           position: 'sticky',
@@ -113,7 +116,7 @@ export default function AppShell() {
         </div>
       </div>
 
-      <main style={{ maxWidth: 1080, margin: '0 auto', padding: '24px clamp(16px,4vw,40px) 80px' }}>
+      <main id="main" style={{ maxWidth: 1080, margin: '0 auto', padding: '24px clamp(16px,4vw,40px) 80px' }}>
         <Outlet />
       </main>
     </div>

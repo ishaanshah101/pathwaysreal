@@ -4,6 +4,7 @@ import { base44 } from '@/api/base44Client';
 import { useProfile, ROLE_LABELS, CATEGORY_LABELS } from '@/lib/useProfile';
 import { SAMPLE_FEED, authorAvatar, initialsOf } from '@/data/sampleContent';
 import CoverArt from '@/components/app/CoverArt';
+import Seo from '@/components/Seo';
 
 const PAGE_SIZE = 12;
 
@@ -230,6 +231,7 @@ export default function Feed() {
 
   return (
     <div className="flex flex-col" style={{ gap: 20 }}>
+      <Seo title="Your Feed | Pathways" description="Long-form, firsthand college and career advice from students, professors, and counselors on Pathways." path="/app" noindex />
       <div>
         <h1 style={{ fontSize: 'clamp(26px,3.2vw,36px)', margin: '0 0 6px' }}>
           Welcome back{profile?.full_name ? `, ${profile.full_name.split(' ')[0]}` : ''}.

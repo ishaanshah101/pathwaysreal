@@ -4,6 +4,7 @@ import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
 import { useProfile, ROLE_LABELS } from '@/lib/useProfile';
 import BrandMark from '@/components/BrandMark';
+import Seo from '@/components/Seo';
 
 const INTEREST_OPTIONS = [
   'Applications', 'Essays', 'Scholarships', 'Choosing a major',
@@ -96,6 +97,7 @@ export default function Onboarding() {
 
   return (
     <div style={{ maxWidth: 660, margin: '0 auto', padding: '0 clamp(20px,4vw,48px) 60px' }}>
+      <Seo title="Set Up Your Profile | Pathways" description="Tell Pathways your grade, school, and goals so we can match you with mentors who've been where you are." path="/onboarding" noindex />
       <div className="flex items-center gap-[9px] py-[22px]">
         <BrandMark size={38} />
         <span style={{ fontFamily: 'var(--font-heading)', fontSize: 21 }}>Pathways</span>

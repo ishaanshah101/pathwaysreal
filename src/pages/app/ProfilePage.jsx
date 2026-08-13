@@ -4,6 +4,7 @@ import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
 import { useProfile, ROLE_LABELS } from '@/lib/useProfile';
 import { useSubscription, openBillingPortal, SAGE_PRICES } from '@/lib/useSubscription';
+import Seo from '@/components/Seo';
 
 const INTEREST_OPTIONS = [
   'Applications', 'Essays', 'Scholarships', 'Choosing a major',
@@ -84,6 +85,7 @@ export default function ProfilePage() {
     // dead area on the right. Now it uses the full content width and splits
     // into two columns on desktop, collapsing to one on narrow screens.
     <div className="flex flex-col" style={{ gap: 20, width: '100%' }}>
+      <Seo title="Your Profile | Pathways" description="Edit your Pathways profile, topics, and Sage subscription." path="/app/profile" noindex />
       <div>
         <h1 style={{ fontSize: 'clamp(26px,3.2vw,36px)', margin: '0 0 6px' }}>Your profile</h1>
         <p style={{ color: 'var(--color-neutral-800)', margin: 0 }}>

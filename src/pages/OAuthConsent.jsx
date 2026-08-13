@@ -3,6 +3,7 @@ import { appParams } from "@/lib/app-params";
 import { Button } from "@/components/ui/button";
 import { ShieldCheck, Loader2 } from "lucide-react";
 import AuthLayout from "@/components/AuthLayout";
+import Seo from '@/components/Seo';
 
 // App-side OAuth consent page for the app's MCP server. The platform redirects
 // AI clients here (see base44/mcp/config.json `consent_path`) with an opaque
@@ -137,6 +138,7 @@ export default function OAuthConsent() {
   if (checking) {
     return (
       <AuthLayout icon={ShieldCheck} title="Authorize access">
+        <Seo title="Authorize Access | Pathways" description="Review and approve an AI client's request to access your Pathways account." path="/oauth-consent" noindex />
         <div className="flex items-center justify-center py-6 text-muted-foreground">
           <Loader2 className="w-5 h-5 mr-2 animate-spin" aria-hidden="true" />
           Loading…

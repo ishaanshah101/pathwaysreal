@@ -6,6 +6,7 @@ import { useMessages, deliveryStateOf } from '@/lib/MessagesContext';
 import DeliveryTicks from '@/components/app/DeliveryTicks';
 import UnreadBadge from '@/components/app/UnreadBadge';
 import { SAMPLE_MESSAGE_THREADS, authorAvatar, initialsOf } from '@/data/sampleContent';
+import Seo from '@/components/Seo';
 
 function clockTime(iso) {
   if (!iso) return '';
@@ -156,6 +157,7 @@ export default function Messages() {
 
   return (
     <div className="flex flex-col" style={{ gap: 18 }}>
+      <Seo title="Messages | Pathways" description="One-on-one mentoring conversations on Pathways with students, professors, and counselors." path="/app/messages" noindex />
       <div>
         <h1 style={{ fontSize: 'clamp(26px,3.2vw,36px)', margin: '0 0 6px' }}>Messages</h1>
         <p style={{ color: 'var(--color-neutral-800)', margin: 0 }}>

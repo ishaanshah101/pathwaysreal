@@ -5,6 +5,7 @@ import { useProfile, ROLE_LABELS } from '@/lib/useProfile';
 import { useSubscription, openBillingPortal } from '@/lib/useSubscription';
 import SagePaywall from '@/components/app/SagePaywall';
 import { Spinner } from '@/components/RequireAuth';
+import Seo from '@/components/Seo';
 
 const STARTERS = [
   'How do I build a college list that actually fits me?',
@@ -154,6 +155,7 @@ Sage:`,
 
   return (
     <div className="flex flex-col" style={{ gap: 16 }}>
+      <Seo title="Ask Sage | Pathways" description="Chat with Sage, your AI college and career advisor on Pathways, personalized to your grade, school, and goals." path="/app/sage" noindex />
       {checkout === 'success' && (
         <div
           className="card"

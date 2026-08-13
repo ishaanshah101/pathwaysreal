@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useProfile, ROLE_LABELS } from '@/lib/useProfile';
 import { SAMPLE_MENTORS, authorAvatar, initialsOf } from '@/data/sampleContent';
+import Seo from '@/components/Seo';
 
 const PAGE_SIZE = 12;
 
@@ -158,6 +159,7 @@ export default function Explore() {
 
   return (
     <div className="flex flex-col" style={{ gap: 20 }}>
+      <Seo title="Find a Mentor | Pathways" description="Search and connect with students, professors, and counselors on Pathways. Connecting is always free." path="/app/explore" noindex />
       <div>
         <h1 style={{ fontSize: 'clamp(26px,3.2vw,36px)', margin: '0 0 6px' }}>Find someone who's been there.</h1>
         <p style={{ color: 'var(--color-neutral-800)', margin: 0 }}>

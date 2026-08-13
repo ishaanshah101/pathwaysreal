@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Lock, Loader2, AlertTriangle } from "lucide-react";
 import AuthLayout from "@/components/AuthLayout";
+import Seo from '@/components/Seo';
 
 export default function ResetPassword() {
   const [searchParams] = useSearchParams();
@@ -46,6 +47,7 @@ export default function ResetPassword() {
           </Link>
         }
       >
+        <Seo title="Set a New Password | Pathways" description="Choose a new password for your Pathways account." path="/reset-password" noindex />
         <p className="text-sm text-foreground text-center">
           The link you used appears to be incomplete. Please request a new password reset email.
         </p>
@@ -59,6 +61,7 @@ export default function ResetPassword() {
       title="New password"
       subtitle="Enter your new password below"
     >
+      <Seo title="Set a New Password | Pathways" description="Choose a new password for your Pathways account." path="/reset-password" noindex />
       {error && (
         <div className="mb-4 p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
           {error}

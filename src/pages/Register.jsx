@@ -10,6 +10,7 @@ import AuthLayout from "@/components/AuthLayout";
 import GoogleIcon from "@/components/GoogleIcon";
 import { toast } from "@/components/ui/use-toast";
 import { safeReturnTo } from "@/lib/authReturnTo";
+import Seo from '@/components/Seo';
 
 export default function Register() {
   const [email, setEmail] = useState("");
@@ -142,6 +143,7 @@ export default function Register() {
         </>
       }
     >
+      <Seo title="Create Your Free Account | Pathways" description="Sign up for Pathways free with Google or email and start getting firsthand college and career guidance." path="/register" noindex />
       <Button
         variant="outline"
         className="w-full h-12 text-sm font-medium mb-6"

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import BrandMark from '@/components/BrandMark';
+import GoogleButton from '@/components/GoogleButton';
 import { useAuth } from '@/lib/AuthContext';
 import { useProfile } from '@/lib/useProfile';
 
@@ -19,23 +20,27 @@ export default function Nav() {
   const first = (profile?.full_name || '').split(' ')[0];
 
   return (
-    <nav className="flex items-center gap-4 sm:gap-[26px] py-[22px] flex-wrap">
+    <nav
+      className="flex items-center gap-4 sm:gap-[26px] flex-wrap"
+      style={{ paddingTop: 20, paddingBottom: 20 }}
+    >
       <Link to="/" className="flex items-center gap-[9px] mr-auto no-underline text-inherit">
-        <BrandMark size={38} />
-        <span style={{ fontFamily: 'var(--font-heading)', fontSize: 21 }}>Pathways</span>
+        <BrandMark size={36} />
+        <span style={{ fontFamily: 'var(--font-heading)', fontSize: 20 }}>Pathways</span>
       </Link>
+
       {tabs.map((t) => {
         const on = pathname === t.to;
         return (
           <Link
             key={t.to}
             to={t.to}
-            className="no-underline pb-[3px] hover:!text-[var(--color-accent-600)]"
+            aria-current={on ? 'page' : undefined}
+            className="no-underline hover:!text-[var(--color-accent-600)]"
             style={{
-              fontSize: 14,
+              fontSize: 14.5,
               color: on ? 'var(--color-accent-700)' : 'var(--color-text)',
-              fontWeight: on ? 700 : 400,
-              borderBottom: `2px solid ${on ? 'var(--color-accent)' : 'transparent'}`,
+              fontWeight: on ? 600 : 400,
             }}
           >
             {t.label}
@@ -43,19 +48,18 @@ export default function Nav() {
         );
       })}
 
-      {/* Reflect real auth state. Showing a permanent "Join free" to someone who
-          is already signed in is what makes an app feel stuck in a login loop. */}
       {checking ? (
-        <span style={{ width: 92, height: 34 }} aria-hidden="true" />
+        <span style={{ width: 150, height: 38 }} aria-hidden="true" />
       ) : isAuthenticated ? (
         <Link to={isOnboarded ? '/app' : '/onboarding'} className="btn btn-primary">
           {first ? `Open Pathways, ${first}` : 'Open Pathways'}
         </Link>
       ) : (
         <>
-          <Link to="/login" className="no-underline pb-[3px]" style={{ fontSize: 14, color: 'var(--color-text)' }}>
-            Log in
-          </Link>
+          {/* One click signs an existing member back in and sends a new one to
+              sign-up. Someone who lands back here by accident never has to
+              re-enter anything. */}
+          <GoogleButton label="Log in" variant="secondary" size="sm" returnTo="/" />
           <Link to="/join" className="btn btn-primary">Join free</Link>
         </>
       )}

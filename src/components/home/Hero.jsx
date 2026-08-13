@@ -63,7 +63,7 @@ export default function Hero() {
             alt="A high school student who found a mentor through Pathways"
             width="520"
             height="598"
-            fetchpriority="high"
+            fetchPriority="high"
             decoding="async"
             className="absolute inset-0 w-full h-full object-cover"
             style={{ objectPosition: '44% center', filter: 'brightness(1.08) contrast(1.05) saturate(1.05)' }}

@@ -76,7 +76,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    const appUrl = (Deno.env.get("APP_PUBLIC_URL") || "https://cac-pathways-d94b0ec7.base44.app")
+    const appUrl = (Deno.env.get("APP_PUBLIC_URL") || "https://pathways.uno")
       .replace(/\/+$/, "");
 
     // Reuse the Stripe customer if this person has subscribed before, so a

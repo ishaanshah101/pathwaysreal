@@ -1,4 +1,4 @@
-# Pathways — https://cac-pathways-d94b0ec7.base44.app
+# Pathways — https://pathways.uno
 # Free college and career guidance for high school students.
 
 User-agent: *
@@ -40,4 +40,4 @@ Allow: /
 User-agent: Bingbot
 Allow: /
 
-Sitemap: https://cac-pathways-d94b0ec7.base44.app/sitemap.xml
+Sitemap: https://pathways.uno/sitemap.xml

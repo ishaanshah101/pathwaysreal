@@ -31,7 +31,7 @@ Deno.serve(async (req) => {
       return Response.json({ error: "You do not have a Sage subscription yet." }, { status: 404 });
     }
 
-    const appUrl = (Deno.env.get("APP_PUBLIC_URL") || "https://cac-pathways-d94b0ec7.base44.app")
+    const appUrl = (Deno.env.get("APP_PUBLIC_URL") || "https://pathways.uno")
       .replace(/\/+$/, "");
 
     const body = new URLSearchParams({

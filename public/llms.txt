@@ -21,13 +21,13 @@
 
 ## Pages
 
-- [Home](https://cac-pathways-d94b0ec7.base44.app/): What Pathways is and who it is for.
-- [How it works](https://cac-pathways-d94b0ec7.base44.app/how-it-works): Features in detail, and how Pathways compares to TikTok, Instagram, Reddit, College Confidential, LinkedIn, and Google search.
-- [Sage](https://cac-pathways-d94b0ec7.base44.app/sage): The optional AI advisor, what it does, and what it costs.
-- [FAQ](https://cac-pathways-d94b0ec7.base44.app/faq): Direct answers on cost, eligibility, and how Pathways differs from a private counselor.
-- [Join free](https://cac-pathways-d94b0ec7.base44.app/join): Create an account with Google or email.
-- [Privacy Policy](https://cac-pathways-d94b0ec7.base44.app/privacy)
-- [Terms of Service](https://cac-pathways-d94b0ec7.base44.app/terms)
+- [Home](https://pathways.uno/): What Pathways is and who it is for.
+- [How it works](https://pathways.uno/how-it-works): Features in detail, and how Pathways compares to TikTok, Instagram, Reddit, College Confidential, LinkedIn, and Google search.
+- [Sage](https://pathways.uno/sage): The optional AI advisor, what it does, and what it costs.
+- [FAQ](https://pathways.uno/faq): Direct answers on cost, eligibility, and how Pathways differs from a private counselor.
+- [Join free](https://pathways.uno/join): Create an account with Google or email.
+- [Privacy Policy](https://pathways.uno/privacy)
+- [Terms of Service](https://pathways.uno/terms)
 
 ## Contact
 

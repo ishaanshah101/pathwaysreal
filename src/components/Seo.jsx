@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 
-const SITE = 'https://cac-pathways-d94b0ec7.base44.app';
+const SITE = 'https://pathways.uno';
 
 function upsertMeta(selector, attr, name, content) {
   if (!content) return;

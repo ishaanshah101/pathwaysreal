@@ -1,4 +1,5 @@
 import React from 'react';
+import Seo from '@/components/Seo';
 
 const S = ({ title, children }) => (
   <section style={{ marginBottom: 26 }}>
@@ -9,9 +10,15 @@ const S = ({ title, children }) => (
 
 export default function Privacy() {
   return (
-    <section style={{ padding: 'clamp(32px,6vh,72px) 0', maxWidth: '68ch' }}>
-      <span className="tag tag-accent-2">Privacy</span>
-      <h1 style={{ fontSize: 'clamp(28px,4vw,44px)', margin: '14px 0 8px' }}>Privacy Policy</h1>
+    <section style={{ padding: 'clamp(28px,6vh,64px) 0 clamp(36px,6vh,64px)', maxWidth: '68ch' }}>
+      <Seo
+        title="Privacy Policy | Pathways"
+        description="How Pathways handles student information. We never sell student data, and our handling is aligned with COPPA and FERPA expectations."
+        path="/privacy"
+      />
+      {/* Tag removed: it said "Privacy" directly above a heading reading
+          "Privacy Policy". */}
+      <h1 style={{ fontSize: 'clamp(30px,4.2vw,46px)', margin: '0 0 8px' }}>Privacy Policy</h1>
       <p style={{ color: 'var(--color-neutral-600)', fontSize: 13, marginBottom: 28 }}>
         Last updated August 2026
       </p>

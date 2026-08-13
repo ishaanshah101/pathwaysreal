@@ -1,0 +1,43 @@
+# Pathways — https://cac-pathways-d94b0ec7.base44.app
+# Free college and career guidance for high school students.
+
+User-agent: *
+Allow: /
+# Signed-in areas hold nothing useful to a crawler and should not be indexed.
+Disallow: /app
+Disallow: /onboarding
+Disallow: /oauth-consent
+Disallow: /reset-password
+
+# --- AI search crawlers: explicitly allowed, we want to be citable ---
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-SearchBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Perplexity-User
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+Sitemap: https://cac-pathways-d94b0ec7.base44.app/sitemap.xml

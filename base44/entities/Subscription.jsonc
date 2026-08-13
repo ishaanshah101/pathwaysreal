@@ -1,0 +1,85 @@
+{
+  "name": "Subscription",
+  "type": "object",
+  "description": "Sage subscription state. Written ONLY by the Stripe webhook running as service role. Users can read their own row but can never create or modify one, so nobody can grant themselves Sage by editing their profile.",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "The subscriber's email, matched to the signed-in user"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "trialing",
+        "past_due",
+        "canceled",
+        "incomplete",
+        "unpaid"
+      ],
+      "default": "incomplete",
+      "description": "Mirrors the Stripe subscription status"
+    },
+    "plan": {
+      "type": "string",
+      "enum": [
+        "sage_monthly",
+        "sage_yearly"
+      ],
+      "description": "Which Sage price the customer is on"
+    },
+    "stripe_customer_id": {
+      "type": "string"
+    },
+    "stripe_subscription_id": {
+      "type": "string"
+    },
+    "stripe_price_id": {
+      "type": "string"
+    },
+    "current_period_end": {
+      "type": "string",
+      "description": "ISO timestamp when the paid period ends"
+    },
+    "cancel_at_period_end": {
+      "type": "boolean",
+      "default": false
+    },
+    "last_event_at": {
+      "type": "string",
+      "description": "ISO timestamp of the last Stripe event applied to this row"
+    }
+  },
+  "required": [
+    "user_email"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "stripe_service_only"
+      }
+    },
+    "read": {
+      "$or": [
+        {
+          "data.user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "stripe_service_only"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "stripe_service_only"
+      }
+    }
+  }
+}

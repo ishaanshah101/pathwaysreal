@@ -1,6 +1,7 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { appParams } from '@/lib/app-params';
+import { queryClientInstance } from '@/lib/query-client';
 import { createAxiosClient } from '@base44/sdk/dist/utils/axios-client';
 
 const AuthContext = createContext();
@@ -117,10 +118,16 @@ export const AuthProvider = ({ children }) => {
   const logout = (shouldRedirect = true) => {
     setUser(null);
     setIsAuthenticated(false);
-    
+
+    // Drop the cached profile too. Without this a later sign-in on the same
+    // browser could briefly render the previous account's name.
+    queryClientInstance.clear();
+
     if (shouldRedirect) {
-      // Use the SDK's logout method which handles token cleanup and redirect
-      base44.auth.logout(window.location.href);
+      // Always land on the Phase 1 home page. Returning to the current URL
+      // meant signing out of /app/profile bounced through the login screen,
+      // because the page you came from requires auth.
+      base44.auth.logout(`${window.location.origin}/`);
     } else {
       // Just remove the token without redirect
       base44.auth.logout();

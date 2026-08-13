@@ -83,7 +83,11 @@ export default function Onboarding() {
     setSaving(true);
     try {
       await saveProfile({ ...form, onboarded: true });
-      navigate('/app', { replace: true });
+      // Someone who came in from a Sage pricing link lands on the Sage page so
+      // they can finish the purchase they started, not on a feed they did not
+      // ask for.
+      const wantsSage = ['sage_monthly', 'sage_yearly'].includes(form.plan);
+      navigate(wantsSage ? '/app/sage' : '/app', { replace: true });
     } catch (err) {
       setError(err?.message || 'Could not save your profile. Please try again.');
       setSaving(false);

@@ -1,4 +1,5 @@
 import React from 'react';
+import Seo from '@/components/Seo';
 
 const S = ({ title, children }) => (
   <section style={{ marginBottom: 26 }}>
@@ -9,9 +10,13 @@ const S = ({ title, children }) => (
 
 export default function Terms() {
   return (
-    <section style={{ padding: 'clamp(32px,6vh,72px) 0', maxWidth: '68ch' }}>
-      <span className="tag tag-accent-2">Terms</span>
-      <h1 style={{ fontSize: 'clamp(28px,4vw,44px)', margin: '14px 0 8px' }}>Terms of Service</h1>
+    <section style={{ padding: 'clamp(28px,6vh,64px) 0 clamp(36px,6vh,64px)', maxWidth: '68ch' }}>
+      <Seo
+        title="Terms of Service | Pathways"
+        description="The terms for using Pathways: who can join, how to behave, what Pathways is and is not, and how the free core app and optional Sage subscription work."
+        path="/terms"
+      />
+      <h1 style={{ fontSize: 'clamp(30px,4.2vw,46px)', margin: '0 0 8px' }}>Terms of Service</h1>
       <p style={{ color: 'var(--color-neutral-600)', fontSize: 13, marginBottom: 28 }}>
         Last updated August 2026
       </p>

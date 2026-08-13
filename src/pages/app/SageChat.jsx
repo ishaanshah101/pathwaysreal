@@ -1,6 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useProfile, ROLE_LABELS } from '@/lib/useProfile';
+import { useSubscription, openBillingPortal } from '@/lib/useSubscription';
+import SagePaywall from '@/components/app/SagePaywall';
+import { Spinner } from '@/components/RequireAuth';
 
 const STARTERS = [
   'How do I build a college list that actually fits me?',
@@ -22,13 +26,36 @@ function cleanSage(text) {
 
 export default function SageChat() {
   const { profile, email } = useProfile();
+  const {
+    subscription, hasSage, isPastDue, isCanceling,
+    isLoadingSubscription, refetchSubscription,
+  } = useSubscription();
+  const [params, setParams] = useSearchParams();
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [thinking, setThinking] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [billingError, setBillingError] = useState('');
   const endRef = useRef(null);
 
+  const checkout = params.get('checkout');
+
+  // Stripe redirects back here the instant payment succeeds, but the webhook
+  // that actually grants access lands a moment later. Poll briefly so the user
+  // is not told to pay again for something they just bought.
   useEffect(() => {
+    if (checkout !== 'success' || hasSage) return undefined;
+    let tries = 0;
+    const id = setInterval(() => {
+      tries += 1;
+      refetchSubscription();
+      if (tries >= 10) clearInterval(id);
+    }, 1500);
+    return () => clearInterval(id);
+  }, [checkout, hasSage, refetchSubscription]);
+
+  useEffect(() => {
+    if (!hasSage) { setLoading(false); return; }
     (async () => {
       try {
         const rows = await base44.entities.SageMessage.list('created_date', 200);
@@ -38,7 +65,7 @@ export default function SageChat() {
       }
       setLoading(false);
     })();
-  }, []);
+  }, [hasSage]);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: 'smooth' });

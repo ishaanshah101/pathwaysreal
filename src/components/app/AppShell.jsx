@@ -140,3 +140,13 @@ function AppShellInner() {
     </div>
   );
 }
+
+// The provider wraps the shell rather than the Messages page, so the badge
+// keeps updating while the user is anywhere in the app.
+export default function AppShell() {
+  return (
+    <MessagesProvider>
+      <AppShellInner />
+    </MessagesProvider>
+  );
+}

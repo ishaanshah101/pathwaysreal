@@ -1,0 +1,70 @@
+{
+  "name": "MessageReceipt",
+  "type": "object",
+  "description": "Delivery and read state for a single message, written only by the recipient. Kept separate from Message so a recipient can confirm delivery without being able to edit the message they received.",
+  "properties": {
+    "message_id": {
+      "type": "string",
+      "description": "The Message record this receipt belongs to"
+    },
+    "thread_key": {
+      "type": "string"
+    },
+    "recipient_email": {
+      "type": "string",
+      "description": "The person who received the message. Only they may write this row."
+    },
+    "sender_email": {
+      "type": "string",
+      "description": "The original sender, so they can read their own receipts"
+    },
+    "delivered_at": {
+      "type": "string",
+      "description": "ISO timestamp when the recipient's client first saw the message"
+    },
+    "read_at": {
+      "type": "string",
+      "description": "ISO timestamp when the recipient opened the conversation"
+    }
+  },
+  "required": [
+    "message_id",
+    "recipient_email",
+    "sender_email"
+  ],
+  "rls": {
+    "create": {
+      "data.recipient_email": "{{user.email}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.recipient_email": "{{user.email}}"
+        },
+        {
+          "data.sender_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "data.recipient_email": "{{user.email}}"
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

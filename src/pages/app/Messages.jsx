@@ -2,14 +2,19 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useProfile, threadKey } from '@/lib/useProfile';
+import { useMessages, deliveryStateOf } from '@/lib/MessagesContext';
+import DeliveryTicks from '@/components/app/DeliveryTicks';
+import UnreadBadge from '@/components/app/UnreadBadge';
 import { SAMPLE_MESSAGE_THREADS, authorAvatar, initialsOf } from '@/data/sampleContent';
 
-function nameFor(msgs, other) {
-  const fromThem = msgs.find((m) => m.from_email === other && m.from_name);
-  return fromThem?.from_name || other;
+function clockTime(iso) {
+  if (!iso) return '';
+  try {
+    return new Date(iso).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+  } catch { return ''; }
 }
 
-function Bubble({ mine, children }) {
+function Bubble({ mine, children, meta }) {
   return (
     <div
       style={{
@@ -17,7 +22,7 @@ function Bubble({ mine, children }) {
         maxWidth: '80%',
         background: mine ? 'var(--color-accent)' : 'var(--color-bg)',
         color: mine ? 'var(--color-bg)' : 'var(--color-text)',
-        padding: '10px 15px',
+        padding: '9px 14px 6px',
         borderRadius: 20,
         fontSize: 14,
         lineHeight: 1.55,
@@ -25,37 +30,39 @@ function Bubble({ mine, children }) {
       }}
     >
       {children}
+      {meta && (
+        <span
+          className="flex items-center justify-end gap-[5px]"
+          style={{ marginTop: 3, fontSize: 10.5, opacity: 0.85, lineHeight: 1 }}
+        >
+          {meta}
+        </span>
+      )}
     </div>
   );
 }
 
 export default function Messages() {
   const { profile, email } = useProfile();
+  const {
+    messages, receiptByMessage, loading,
+    unreadByThread, markThreadRead, sendMessage, setActiveThread,
+  } = useMessages();
+
   const [params, setParams] = useSearchParams();
   const activeWith = params.get('to');
 
-  const [messages, setMessages] = useState([]);
   const [people, setPeople] = useState([]);
   const [draft, setDraft] = useState('');
-  const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
+  const [sendError, setSendError] = useState('');
   const endRef = useRef(null);
 
-  const load = async () => {
-    try {
-      const [msgs, profs] = await Promise.all([
-        base44.entities.Message.list('-created_date', 400).catch(() => []),
-        base44.entities.Profile.list('-created_date', 200).catch(() => []),
-      ]);
-      setMessages(Array.isArray(msgs) ? msgs.slice().reverse() : []);
-      setPeople(Array.isArray(profs) ? profs : []);
-    } catch {
-      setMessages([]);
-    }
-    setLoading(false);
-  };
-
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    base44.entities.Profile.list('-created_date', 200)
+      .then((r) => setPeople(Array.isArray(r) ? r : []))
+      .catch(() => setPeople([]));
+  }, []);
 
   const sampleByEmail = useMemo(() => {
     const m = new Map();
@@ -63,8 +70,20 @@ export default function Messages() {
     return m;
   }, []);
 
-  // Real conversations first, then the sample ones, so a member's own threads
-  // are never pushed below demo content.
+  const activeSample = activeWith ? sampleByEmail.get(activeWith) : null;
+
+  // Tell the provider which conversation is open so an arriving message in
+  // this thread is marked read instead of bumping the badge.
+  useEffect(() => {
+    setActiveThread(activeSample ? null : activeWith);
+    return () => setActiveThread(null);
+  }, [activeWith, activeSample, setActiveThread]);
+
+  // Opening a conversation clears its unread count.
+  useEffect(() => {
+    if (activeWith && !activeSample) markThreadRead(activeWith);
+  }, [activeWith, activeSample, markThreadRead, messages.length]);
+
   const threads = useMemo(() => {
     const map = new Map();
     for (const m of messages) {
@@ -77,36 +96,36 @@ export default function Messages() {
     const real = [...map.entries()].map(([other, last]) => ({
       other,
       preview: last.body,
-      name: people.find((p) => p.user_email === other)?.full_name || nameFor(messages, other),
+      at: last.created_date,
+      name: people.find((p) => p.user_email === other)?.full_name || last.from_name || other,
+      unread: unreadByThread[other] || 0,
       is_sample: false,
-    }));
+    })).sort((a, b) => new Date(b.at) - new Date(a.at));
 
     if (activeWith && !real.some((r) => r.other === activeWith) && !sampleByEmail.has(activeWith)) {
       real.unshift({
         other: activeWith,
         preview: 'Start the conversation',
         name: people.find((p) => p.user_email === activeWith)?.full_name || activeWith,
+        unread: 0,
         is_sample: false,
       });
     }
 
     const samples = SAMPLE_MESSAGE_THREADS.map((t) => ({
-      other: t.other,
-      preview: t.last.body,
-      name: t.name,
-      subtitle: t.subtitle,
-      is_sample: true,
+      other: t.other, preview: t.last.body, name: t.name,
+      subtitle: t.subtitle, unread: 0, is_sample: true,
     }));
 
     return [...real, ...samples];
-  }, [messages, people, email, activeWith, sampleByEmail]);
-
-  const activeSample = activeWith ? sampleByEmail.get(activeWith) : null;
+  }, [messages, people, email, activeWith, sampleByEmail, unreadByThread]);
 
   const thread = useMemo(() => {
     if (!activeWith || activeSample) return [];
     const key = threadKey(email, activeWith);
-    return messages.filter((m) => m.thread_key === key);
+    return messages
+      .filter((m) => m.thread_key === key)
+      .sort((a, b) => new Date(a.created_date) - new Date(b.created_date));
   }, [messages, activeWith, email, activeSample]);
 
   useEffect(() => {
@@ -116,20 +135,19 @@ export default function Messages() {
   const send = async (e) => {
     e.preventDefault();
     if (!draft.trim() || !activeWith || activeSample) return;
-    setSending(true);
     const body = draft.trim();
     setDraft('');
+    setSending(true);
+    setSendError('');
     try {
-      await base44.entities.Message.create({
-        thread_key: threadKey(email, activeWith),
-        from_email: email,
-        from_name: profile?.full_name || '',
-        to_email: activeWith,
+      await sendMessage({
+        toEmail: activeWith,
+        threadKey: threadKey(email, activeWith),
         body,
+        fromName: profile?.full_name || '',
       });
-      await load();
     } catch {
-      setDraft(body);
+      setSendError('That message did not send. Check your connection and try again.');
     }
     setSending(false);
   };
@@ -141,7 +159,7 @@ export default function Messages() {
       <div>
         <h1 style={{ fontSize: 'clamp(26px,3.2vw,36px)', margin: '0 0 6px' }}>Messages</h1>
         <p style={{ color: 'var(--color-neutral-800)', margin: 0 }}>
-          One-on-one only, never group chats. Open a sample conversation to see how mentoring works here.
+          One-on-one only, never group chats. Messages arrive instantly, no refresh needed.
         </p>
       </div>
 
@@ -176,14 +194,23 @@ export default function Messages() {
                   >
                     {initialsOf(t.name)}
                   </span>
-                  <span className="flex flex-col" style={{ minWidth: 0, gap: 1 }}>
-                    <span style={{ fontSize: 14, fontWeight: 600 }}>{t.name}</span>
+                  <span className="flex flex-col" style={{ minWidth: 0, gap: 1, flex: 1 }}>
+                    <span className="flex items-center gap-2">
+                      <span style={{ fontSize: 14, fontWeight: t.unread ? 700 : 600 }}>{t.name}</span>
+                      {t.unread > 0 && (
+                        <span style={{ marginLeft: 'auto' }}>
+                          <UnreadBadge count={t.unread} standalone />
+                        </span>
+                      )}
+                    </span>
                     {t.subtitle && (
                       <span style={{ fontSize: 11.5, color: 'var(--color-accent-700)' }}>{t.subtitle}</span>
                     )}
                     <span
                       style={{
-                        fontSize: 12, color: 'var(--color-neutral-600)',
+                        fontSize: 12,
+                        color: t.unread ? 'var(--color-text)' : 'var(--color-neutral-600)',
+                        fontWeight: t.unread ? 600 : 400,
                         overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '100%',
                       }}
                     >
@@ -214,19 +241,44 @@ export default function Messages() {
               <div className="flex flex-col" style={{ gap: 9, flex: 1, overflowY: 'auto', maxHeight: 420, paddingRight: 4 }}>
                 {activeSample ? (
                   activeSample.messages.map((m, i) => (
-                    <Bubble key={i} mine={m.me}>{m.body}</Bubble>
+                    <Bubble
+                      key={i}
+                      mine={m.me}
+                      meta={m.me ? <DeliveryTicks state="read" /> : null}
+                    >
+                      {m.body}
+                    </Bubble>
                   ))
                 ) : thread.length === 0 ? (
                   <span style={{ fontSize: 13.5, color: 'var(--color-neutral-600)' }}>
                     No messages yet. Be direct about what you need help with, people respond to that.
                   </span>
                 ) : (
-                  thread.map((m) => (
-                    <Bubble key={m.id} mine={m.from_email === email}>{m.body}</Bubble>
-                  ))
+                  thread.map((m) => {
+                    const mine = m.from_email === email;
+                    const state = deliveryStateOf(m, receiptByMessage.get(m.id));
+                    return (
+                      <Bubble
+                        key={m.id}
+                        mine={mine}
+                        meta={
+                          <>
+                            <span>{clockTime(m.created_date)}</span>
+                            {mine && <DeliveryTicks state={state} />}
+                          </>
+                        }
+                      >
+                        {m.body}
+                      </Bubble>
+                    );
+                  })
                 )}
                 <div ref={endRef} />
               </div>
+
+              {sendError && (
+                <span style={{ fontSize: 12.5, color: 'var(--color-accent-700)' }}>{sendError}</span>
+              )}
 
               {activeSample ? (
                 <div

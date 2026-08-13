@@ -1,23 +1,29 @@
 import React from 'react';
 import Reveal from '@/components/Reveal';
 
+// Every figure here has to be about the student reading it. A global
+// out-of-school statistic was doing nothing for a US high schooler deciding
+// whether to sign up, so it is gone.
 const stats = [
-  { num: '244M', label: 'children and adolescents are out of school worldwide (UNESCO)' },
-  { num: '$200/hr', label: 'what a private college counselor can cost. Most families never have one.' },
-  { num: '16M', label: 'US high schoolers navigating the same decisions, with wildly unequal support' },
+  { num: '$200/hr', label: 'What a private college counselor can cost. Most families never have one.' },
+  { num: '16M', label: 'US high schoolers making these decisions right now, with wildly unequal support.' },
+  { num: '$0', label: 'What Pathways costs a student. Forever, not as a trial.' },
 ];
 
 export default function Stats() {
   return (
     <Reveal
       as="section"
+      aria-label="Why Pathways exists"
       className="grid gap-[14px]"
-      style={{ gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))', padding: '10px 0 26px' }}
+      style={{ gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))', padding: '4px 0 30px' }}
     >
       {stats.map((s) => (
-        <div key={s.num} className="card elev-sm" style={{ gap: 4, padding: '20px 22px' }}>
-          <span style={{ fontFamily: 'var(--font-heading)', fontSize: 30, color: 'var(--color-accent-700)' }}>{s.num}</span>
-          <span style={{ fontSize: 13, color: 'var(--color-neutral-800)' }}>{s.label}</span>
+        <div key={s.num} className="card elev-sm" style={{ gap: 6, padding: '22px 24px' }}>
+          <span style={{ fontFamily: 'var(--font-heading)', fontSize: 32, color: 'var(--color-accent-700)', lineHeight: 1 }}>
+            {s.num}
+          </span>
+          <span style={{ fontSize: 13.5, lineHeight: 1.5, color: 'var(--color-neutral-800)' }}>{s.label}</span>
         </div>
       ))}
     </Reveal>

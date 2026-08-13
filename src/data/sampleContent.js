@@ -19,6 +19,11 @@ const NOW = Date.now();
 
 function toPost(raw, index) {
   const author = ALL_AUTHORS[raw.a] || {};
+  // Give roughly a third of the plain posts generated cover art, spaced out so
+  // the feed alternates between visual and text-led cards rather than clumping.
+  const variant = raw.v && raw.v !== 'plain'
+    ? raw.v
+    : (index % 3 === 1 ? 'cover' : 'plain');
   return {
     id: `sample-${raw.a}-${raw.c}-${index}`,
     is_sample: true,
@@ -31,7 +36,7 @@ function toPost(raw, index) {
     body: raw.body,
     category: raw.c,
     tags: raw.tags || [],
-    variant: raw.v || 'plain',
+    variant,
     stats: raw.stats,
     items: raw.items,
     quote: raw.quote,

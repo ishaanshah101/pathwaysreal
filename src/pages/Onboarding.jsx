@@ -105,12 +105,12 @@ export default function Onboarding() {
         </button>
       </div>
 
-      <span className="tag tag-accent-2">One last step</span>
-      <h1 style={{ fontSize: 'clamp(28px,4vw,42px)', maxWidth: '20ch', margin: '14px 0 10px', textWrap: 'balance' }}>
+      <h1 style={{ fontSize: 'clamp(28px,4vw,42px)', maxWidth: '20ch', margin: '0 0 10px', textWrap: 'balance' }}>
         Tell us who you are.
       </h1>
-      <p style={{ maxWidth: '52ch', color: 'var(--color-neutral-800)', marginBottom: 24 }}>
-        This is how we match you with people who've been exactly where you are. You can change any of it later.
+      <p style={{ maxWidth: '52ch', color: 'var(--color-neutral-800)', marginBottom: 26, fontSize: 15.5, lineHeight: 1.6 }}>
+        Last step. This is how we match you with people who've been exactly where you are, and you
+        can change any of it later.
       </p>
 
       <form onSubmit={submit} className="card elev-sm" style={{ padding: 28, gap: 16 }}>

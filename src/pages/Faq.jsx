@@ -1,4 +1,5 @@
 import React from 'react';
+import Seo from '@/components/Seo';
 
 const faqs = [
   { q: 'What is Pathways?', a: 'Pathways is a free platform that gives every high school student equal access to real, firsthand guidance on college and careers. Students, professors, and admissions counselors share experience, connect as mentors, and answer questions in one focused space with no addiction loops.' },
@@ -12,16 +13,29 @@ const faqs = [
 
 export default function Faq() {
   return (
-    <section id="faq" style={{ padding: 'clamp(20px,4vh,48px) 0' }}>
-      <h2 style={{ fontSize: 'clamp(26px,3vw,36px)', margin: '0 0 22px' }}>Questions, answered plainly</h2>
-      <div className="grid gap-[14px]" style={{ gridTemplateColumns: 'repeat(auto-fit,minmax(300px,1fr))' }}>
-        {faqs.map((f) => (
-          <div key={f.q} className="card elev-sm" style={{ gap: 8, padding: '22px 24px' }}>
-            <h3 style={{ fontSize: 16.5, margin: 0 }}>{f.q}</h3>
-            <p style={{ margin: 0, fontSize: 13.5, lineHeight: 1.6, color: 'var(--color-neutral-800)' }}>{f.a}</p>
-          </div>
-        ))}
-      </div>
-    </section>
+    <>
+      <Seo
+        title="Pathways FAQ — Cost, Eligibility, and How It Compares"
+        description="Straight answers about Pathways: what it is, what it costs, who can join, how it differs from a private college counselor, and what Sage the AI advisor does."
+        path="/faq"
+      />
+      <section id="faq" style={{ padding: 'clamp(28px,6vh,64px) 0 clamp(36px,6vh,64px)' }}>
+        <h1 style={{ fontSize: 'clamp(32px,4.4vw,52px)', margin: '0 0 12px', textWrap: 'balance' }}>
+          Questions, answered plainly
+        </h1>
+        <p style={{ maxWidth: '56ch', color: 'var(--color-neutral-800)', fontSize: 'clamp(15.5px,1.3vw,17px)', lineHeight: 1.6, margin: '0 0 30px' }}>
+          If something you need isn't here, ask Sage once for free on the Sage page.
+        </p>
+
+        <div className="grid gap-[14px]" style={{ gridTemplateColumns: 'repeat(auto-fit,minmax(320px,1fr))' }}>
+          {faqs.map((f) => (
+            <div key={f.q} className="card elev-sm" style={{ gap: 9, padding: '24px 26px' }}>
+              <h2 style={{ fontSize: 17, margin: 0, lineHeight: 1.3 }}>{f.q}</h2>
+              <p style={{ margin: 0, fontSize: 14, lineHeight: 1.62, color: 'var(--color-neutral-800)' }}>{f.a}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+    </>
   );
 }

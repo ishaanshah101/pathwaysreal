@@ -97,9 +97,8 @@ Sage:`,
   return (
     <div className="flex flex-col" style={{ gap: 16 }}>
       <div>
-        <span className="tag tag-accent-2">Sage · your AI advisor</span>
-        <h1 style={{ fontSize: 'clamp(26px,3.2vw,36px)', margin: '12px 0 6px' }}>Ask Sage anything.</h1>
-        <p style={{ color: 'var(--color-neutral-800)', margin: 0, maxWidth: '56ch' }}>
+        <h1 style={{ fontSize: 'clamp(26px,3.2vw,36px)', margin: '0 0 6px' }}>Ask Sage anything.</h1>
+        <p style={{ color: 'var(--color-neutral-800)', margin: 0, maxWidth: '56ch', lineHeight: 1.6 }}>
           Sage knows your grade, your school, and your goals, and answers like a mentor who has all the time in the world.
         </p>
       </div>

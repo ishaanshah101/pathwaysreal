@@ -12,13 +12,13 @@ const bento = [
 
 export default function BentoGrid() {
   return (
-    <section id="how" style={{ padding: 'clamp(36px,7vh,72px) 0' }}>
-      <span className="tag tag-accent">How Pathways works</span>
-      <h2 style={{ fontSize: 'clamp(28px,3.4vw,40px)', maxWidth: '22ch', margin: '14px 0 8px', textWrap: 'balance' }}>
+    <section id="how" style={{ padding: 'clamp(24px,4vh,44px) 0' }}>
+      {/* The eyebrow tag here repeated the page title word for word. Gone. */}
+      <h2 style={{ fontSize: 'clamp(26px,3.2vw,38px)', maxWidth: '22ch', margin: '0 0 10px', textWrap: 'balance' }}>
         One focused place, built for students, by students.
       </h2>
-      <p style={{ maxWidth: '56ch', color: 'var(--color-neutral-800)', marginBottom: 30 }}>
-        The best of Instagram, Reddit, and LinkedIn, minus the parts that waste your time or your trust.
+      <p style={{ maxWidth: '56ch', color: 'var(--color-neutral-800)', marginBottom: 28, fontSize: 15.5, lineHeight: 1.6 }}>
+        Everything below exists because something else was wasting your time or your trust.
       </p>
       <div className="grid gap-[14px] bento-grid" style={{ gridTemplateColumns: 'repeat(6,1fr)', gridAutoRows: 'minmax(150px,auto)' }}>
         {bento.map((b, i) => (
@@ -34,7 +34,7 @@ export default function BentoGrid() {
                 {b.d2 ? <path d={b.d2} /> : null}
               </svg>
             </span>
-            <span style={{ fontFamily: 'var(--font-heading)', fontSize: 19 }}>{b.title}</span>
+            <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: 19, margin: 0, fontWeight: 400 }}>{b.title}</h3>
             <span style={{ fontSize: 13.5, lineHeight: 1.55, color: 'var(--color-neutral-800)' }}>{b.body}</span>
           </Reveal>
         ))}

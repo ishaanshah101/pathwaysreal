@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
 import { useProfile, ROLE_LABELS } from '@/lib/useProfile';
+import { useSubscription, openBillingPortal, SAGE_PRICES } from '@/lib/useSubscription';
 
 const INTEREST_OPTIONS = [
   'Applications', 'Essays', 'Scholarships', 'Choosing a major',
@@ -11,6 +13,8 @@ const INTEREST_OPTIONS = [
 export default function ProfilePage() {
   const { user, logout } = useAuth();
   const { profile, email, saveProfile } = useProfile();
+  const { subscription, hasSage, isPastDue, isCanceling } = useSubscription();
+  const [billingError, setBillingError] = useState('');
 
   const [form, setForm] = useState(null);
   const [saving, setSaving] = useState(false);
@@ -29,7 +33,6 @@ export default function ProfilePage() {
       bio: profile.bio || '',
       goals: profile.goals || '',
       interests: profile.interests || [],
-      plan: profile.plan || 'free',
     });
   }, [profile]);
 
@@ -183,13 +186,60 @@ export default function ProfilePage() {
           </div>
         </div>
 
+        {/* Subscription state is read-only here on purpose. It is written only
+            by the Stripe webhook, so picking a paid plan from a dropdown can
+            never grant access. */}
         <div className="field">
-          <label htmlFor="pf-plan">Sage plan</label>
-          <select id="pf-plan" className="input" value={form.plan} onChange={set('plan')}>
-            <option value="free">Free app only</option>
-            <option value="sage_monthly">Sage — $5 per month</option>
-            <option value="sage_yearly">Sage — $40 per year</option>
-          </select>
+          <label>Sage subscription</label>
+          <div
+            style={{
+              background: 'var(--color-bg)', borderRadius: 18, padding: '14px 16px',
+              display: 'flex', flexDirection: 'column', gap: 8,
+            }}
+          >
+            {hasSage ? (
+              <>
+                <span style={{ fontSize: 14 }}>
+                  <b>Active</b>
+                  {subscription?.plan ? ` · ${SAGE_PRICES[subscription.plan]?.amount} ${SAGE_PRICES[subscription.plan]?.cadence}` : ''}
+                </span>
+                {subscription?.current_period_end && (
+                  <span style={{ fontSize: 12.5, color: 'var(--color-neutral-600)' }}>
+                    {isCanceling ? 'Ends' : 'Renews'}{' '}
+                    {new Date(subscription.current_period_end).toLocaleDateString()}
+                  </span>
+                )}
+                <button
+                  type="button"
+                  className="btn btn-secondary self-start"
+                  style={{ fontSize: 13 }}
+                  onClick={async () => {
+                    setBillingError('');
+                    try { await openBillingPortal(); } catch (err) { setBillingError(err.message); }
+                  }}
+                >
+                  Manage or cancel
+                </button>
+              </>
+            ) : (
+              <>
+                <span style={{ fontSize: 14 }}>
+                  <b>{isPastDue ? 'Payment failed' : 'Free plan'}</b>
+                </span>
+                <span style={{ fontSize: 12.5, color: 'var(--color-neutral-600)', lineHeight: 1.5 }}>
+                  {isPastDue
+                    ? 'Sage is paused until a payment goes through.'
+                    : 'Everything on Pathways is free. Sage is the one optional add-on.'}
+                </span>
+                <Link to="/app/sage" className="btn btn-primary self-start no-underline" style={{ fontSize: 13 }}>
+                  {isPastDue ? 'Fix payment' : 'Get Sage'}
+                </Link>
+              </>
+            )}
+            {billingError && (
+              <span style={{ fontSize: 12, color: 'var(--color-accent-700)' }}>{billingError}</span>
+            )}
+          </div>
         </div>
 
         {error && <span style={{ fontSize: 13, color: 'var(--color-accent-700)' }}>{error}</span>}

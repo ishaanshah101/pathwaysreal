@@ -73,7 +73,7 @@ export default function SageChat() {
 
   const ask = async (text) => {
     const question = (text ?? input).trim();
-    if (!question || thinking) return;
+    if (!question || thinking || !hasSage) return;
     setInput('');
     setThinking(true);
 
@@ -121,13 +121,83 @@ Sage:`,
     setThinking(false);
   };
 
+  if (isLoadingSubscription) return <Spinner />;
+
+  // The paywall is the whole page when there is no active subscription. Sage
+  // is the one paid thing on Pathways, so this is the only gate in the app.
+  if (!hasSage) {
+    const notice =
+      checkout === 'success'
+        ? { tone: 'ok', text: 'Payment received. Confirming with Stripe now, this usually takes a few seconds.' }
+        : checkout === 'cancel'
+          ? { tone: 'ok', text: 'No charge was made. You can subscribe whenever you are ready.' }
+          : isPastDue
+            ? { tone: 'error', text: 'Your last payment did not go through, so Sage is paused. Updating your card will switch it straight back on.' }
+            : null;
+    return <SagePaywall notice={notice} />;
+  }
+
+  const manageBilling = async () => {
+    setBillingError('');
+    try {
+      await openBillingPortal();
+    } catch (err) {
+      setBillingError(err.message);
+    }
+  };
+
+  const renewalDate = subscription?.current_period_end
+    ? new Date(subscription.current_period_end).toLocaleDateString(undefined, {
+        month: 'long', day: 'numeric', year: 'numeric',
+      })
+    : null;
+
   return (
     <div className="flex flex-col" style={{ gap: 16 }}>
-      <div>
-        <h1 style={{ fontSize: 'clamp(26px,3.2vw,36px)', margin: '0 0 6px' }}>Ask Sage anything.</h1>
-        <p style={{ color: 'var(--color-neutral-800)', margin: 0, maxWidth: '56ch', lineHeight: 1.6 }}>
-          Sage knows your grade, your school, and your goals, and answers like a mentor who has all the time in the world.
-        </p>
+      {checkout === 'success' && (
+        <div
+          className="card"
+          style={{
+            padding: '12px 16px', borderRadius: 18, gap: 0,
+            background: 'var(--color-accent-2-100)', border: '1px solid var(--color-accent-2-400)',
+          }}
+        >
+          <span className="flex items-center gap-3 flex-wrap" style={{ fontSize: 14 }}>
+            You're subscribed to Sage. Ask it anything.
+            <button
+              type="button"
+              className="btn btn-ghost"
+              style={{ fontSize: 13, marginLeft: 'auto' }}
+              onClick={() => setParams({})}
+            >
+              Dismiss
+            </button>
+          </span>
+        </div>
+      )}
+
+      <div className="flex items-start gap-4 flex-wrap">
+        <div style={{ flex: '1 1 340px' }}>
+          <h1 style={{ fontSize: 'clamp(26px,3.2vw,36px)', margin: '0 0 6px' }}>Ask Sage anything.</h1>
+          <p style={{ color: 'var(--color-neutral-800)', margin: 0, maxWidth: '56ch', lineHeight: 1.6 }}>
+            Sage knows your grade, your school, and your goals, and answers like a mentor who has all the time in the world.
+          </p>
+        </div>
+        <div className="flex flex-col items-end" style={{ gap: 4 }}>
+          <button type="button" className="btn btn-secondary" style={{ fontSize: 13 }} onClick={manageBilling}>
+            Manage subscription
+          </button>
+          {renewalDate && (
+            <span style={{ fontSize: 11.5, color: 'var(--color-neutral-600)' }}>
+              {isCanceling ? `Ends ${renewalDate}` : `Renews ${renewalDate}`}
+            </span>
+          )}
+          {billingError && (
+            <span style={{ fontSize: 11.5, color: 'var(--color-accent-700)', maxWidth: 220, textAlign: 'right' }}>
+              {billingError}
+            </span>
+          )}
+        </div>
       </div>
 
       <div className="card elev-sm" style={{ padding: 20, gap: 14, borderRadius: 26, minHeight: 420 }}>

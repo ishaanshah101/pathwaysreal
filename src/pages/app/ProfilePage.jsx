@@ -77,7 +77,10 @@ export default function ProfilePage() {
   if (!form) return <p style={{ color: 'var(--color-neutral-600)' }}>Loading your profile…</p>;
 
   return (
-    <div className="flex flex-col" style={{ gap: 20, maxWidth: 680 }}>
+    // Was pinned to a 680px column hugging the left edge, which left a large
+    // dead area on the right. Now it uses the full content width and splits
+    // into two columns on desktop, collapsing to one on narrow screens.
+    <div className="flex flex-col" style={{ gap: 20, width: '100%' }}>
       <div>
         <h1 style={{ fontSize: 'clamp(26px,3.2vw,36px)', margin: '0 0 6px' }}>Your profile</h1>
         <p style={{ color: 'var(--color-neutral-800)', margin: 0 }}>
@@ -106,7 +109,8 @@ export default function ProfilePage() {
         </div>
       )}
 
-      <form onSubmit={submit} className="card elev-sm" style={{ padding: 26, gap: 16, borderRadius: 26 }}>
+      <form onSubmit={submit} className="grid app-split" style={{ gridTemplateColumns: 'minmax(0,7fr) minmax(0,5fr)', gap: 16, alignItems: 'start' }}>
+        <div className="card elev-sm" style={{ padding: 26, gap: 16, borderRadius: 26 }}>
         <div className="field">
           <label htmlFor="pf-name">Full name</label>
           <input id="pf-name" className="input" required value={form.full_name} onChange={set('full_name')} />
@@ -130,7 +134,7 @@ export default function ProfilePage() {
           />
         </div>
 
-        <div className="grid" style={{ gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+        <div className="grid app-split" style={{ gridTemplateColumns: '1fr 1fr', gap: 12 }}>
           <div className="field">
             <label htmlFor="pf-grade">Grade or year</label>
             <input id="pf-grade" className="input" value={form.grade} onChange={set('grade')} />
@@ -151,7 +155,9 @@ export default function ProfilePage() {
             placeholder="What can people ask you about?"
           />
         </div>
+        </div>
 
+        <div className="card elev-sm" style={{ padding: 26, gap: 16, borderRadius: 26 }}>
         <div className="field">
           <label>Topics</label>
           <div className="flex flex-wrap gap-2" style={{ marginTop: 4 }}>
@@ -201,6 +207,7 @@ export default function ProfilePage() {
           >
             Sign out
           </button>
+        </div>
         </div>
       </form>
     </div>

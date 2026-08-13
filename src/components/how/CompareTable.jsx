@@ -9,15 +9,15 @@ const rows = [
 
 export default function CompareTable() {
   return (
-    <section id="compare" style={{ padding: 'clamp(36px,7vh,72px) 0' }}>
-      <h2 style={{ fontSize: 'clamp(26px,3vw,36px)', maxWidth: '24ch', margin: '0 0 10px', textWrap: 'balance' }}>What is Pathways?</h2>
-      <p style={{ maxWidth: '64ch', fontSize: 15.5, lineHeight: 1.65, color: 'var(--color-neutral-800)' }}>
-        Pathways is a free platform that gives every high school student equal access to real, firsthand guidance on college and
-        careers. Students, professors, and admissions counselors share experience, connect as mentors, and answer questions in one
-        focused space, with no addiction loops and no data selling. It blends the best of Instagram, Reddit, and LinkedIn into one
-        place built only for education.
+    <section id="compare" style={{ padding: 'clamp(24px,4vh,48px) 0 clamp(36px,6vh,64px)' }}>
+      {/* The definition that used to sit here now opens the page, where it
+          belongs. This section does one job: the comparison. */}
+      <h2 style={{ fontSize: 'clamp(26px,3.2vw,38px)', maxWidth: '24ch', margin: '0 0 10px', textWrap: 'balance' }}>
+        Where students look today, and what goes wrong
+      </h2>
+      <p style={{ maxWidth: '58ch', fontSize: 15.5, lineHeight: 1.6, color: 'var(--color-neutral-800)', marginBottom: 22 }}>
+        Every one of these is somewhere students already go for answers. Here is what each gets wrong.
       </p>
-      <h3 style={{ fontSize: 20, margin: '28px 0 14px' }}>How Pathways compares to the alternatives</h3>
       <div style={{ overflowX: 'auto' }}>
         <table className="table" style={{ minWidth: 560 }}>
           <thead>

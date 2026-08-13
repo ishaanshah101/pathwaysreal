@@ -24,6 +24,17 @@ export function MessagesProvider({ children }) {
   const activeThreadRef = useRef(null);
   const setActiveThread = useCallback((other) => { activeThreadRef.current = other; }, []);
 
+  // Latest receipts, readable from callbacks without adding them as a
+  // dependency. Reading state inside a setState updater would be a side effect
+  // in a place React is allowed to run twice.
+  const receiptsRef = useRef([]);
+  useEffect(() => { receiptsRef.current = receipts; }, [receipts]);
+
+  // Message ids we have already started writing a receipt for. Without this,
+  // the initial load and the realtime event for the same message can both fire
+  // and create two receipt rows.
+  const receiptInFlight = useRef(new Set());
+
   const upsert = useCallback((setter) => (row) => {
     if (!row?.id) return;
     setter((prev) => {
@@ -40,14 +51,18 @@ export function MessagesProvider({ children }) {
 
   // Confirm delivery for anything addressed to me that has no receipt yet.
   // This is what turns the sender's single tick into a double tick.
-  const ensureReceipts = useCallback(async (msgs, existing) => {
+  const ensureReceipts = useCallback(async (msgs) => {
     if (!email) return;
-    const have = new Set(existing.map((r) => r.message_id));
-    const mine = msgs.filter((m) => m.to_email === email && m.id && !have.has(m.id));
+    const have = new Set(receiptsRef.current.map((r) => r.message_id));
+    const mine = msgs.filter(
+      (m) => m.to_email === email && m.id && !String(m.id).startsWith('pending-')
+        && !have.has(m.id) && !receiptInFlight.current.has(m.id),
+    );
     if (mine.length === 0) return;
 
     const nowIso = new Date().toISOString();
     for (const m of mine) {
+      receiptInFlight.current.add(m.id);
       const isOpen = activeThreadRef.current && activeThreadRef.current === m.from_email;
       try {
         const created = await base44.entities.MessageReceipt.create({
@@ -61,7 +76,8 @@ export function MessagesProvider({ children }) {
         });
         upsertReceipt(created);
       } catch {
-        // A duplicate or a transient failure is not worth interrupting the UI.
+        // A transient failure just means we retry on the next poll.
+        receiptInFlight.current.delete(m.id);
       }
     }
   }, [email, upsertReceipt]);
@@ -77,7 +93,8 @@ export function MessagesProvider({ children }) {
       const r = Array.isArray(recs) ? recs : [];
       setMessages(m);
       setReceipts(r);
-      ensureReceipts(m, r);
+      receiptsRef.current = r;
+      ensureReceipts(m);
     } catch {
       setMessages([]);
     }
@@ -103,9 +120,7 @@ export function MessagesProvider({ children }) {
         // Only care about conversations this person is part of.
         if (row.to_email !== email && row.from_email !== email) return;
         upsertMessage(row);
-        if (row.to_email === email) {
-          setReceipts((prev) => { ensureReceipts([row], prev); return prev; });
-        }
+        if (row.to_email === email) ensureReceipts([row]);
       }));
     } catch { /* realtime unavailable, polling below still covers it */ }
 

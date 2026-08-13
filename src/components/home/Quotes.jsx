@@ -15,7 +15,7 @@ const quotes = [
 
 export default function Quotes() {
   return (
-    <Reveal as="section" style={{ padding: 'clamp(20px,4vh,44px) 0' }}>
+    <Reveal as="section" aria-label="What mentors on Pathways sound like" style={{ padding: 'clamp(16px,3vh,40px) 0' }}>
       <div className="grid gap-[14px]" style={{ gridTemplateColumns: 'repeat(auto-fit,minmax(260px,1fr))' }}>
         {quotes.map((qt) => (
           <figure key={qt.name} className="card elev-sm" style={{ gap: 12, padding: 24, margin: 0 }}>
@@ -36,8 +36,8 @@ export default function Quotes() {
           </figure>
         ))}
       </div>
-      <p style={{ fontSize: 11, color: 'var(--color-neutral-500)', margin: '10px 4px 0' }}>
-        Illustrative quotes from the seeded community.
+      <p style={{ fontSize: 11.5, color: 'var(--color-neutral-600)', margin: '12px 4px 0' }}>
+        Example advice, shown to illustrate the kind of answers Pathways is built for.
       </p>
     </Reveal>
   );

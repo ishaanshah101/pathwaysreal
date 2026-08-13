@@ -32,9 +32,9 @@ export default function AskSage() {
 
   return (
     <section style={{ padding: 'clamp(20px,4vh,44px) 0' }}>
-      <h3 style={{ fontSize: 22, margin: '0 0 6px' }}>Try Sage on one question, free</h3>
-      <p style={{ maxWidth: '52ch', color: 'var(--color-neutral-800)', marginBottom: 18 }}>
-        Ask anything about applications, majors, essays, or scholarships.
+      <h2 style={{ fontSize: 'clamp(22px,2.6vw,28px)', margin: '0 0 8px' }}>Try Sage on one question, free</h2>
+      <p style={{ maxWidth: '52ch', color: 'var(--color-neutral-800)', marginBottom: 20, fontSize: 15, lineHeight: 1.6 }}>
+        Ask anything about applications, majors, essays, or scholarships. No account needed.
       </p>
       <div className="card elev-sm" style={{ padding: 24, gap: 14, maxWidth: 720 }}>
         <div className="field">

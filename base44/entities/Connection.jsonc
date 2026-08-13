@@ -25,6 +25,11 @@
     },
     "note": {
       "type": "string"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Optional short description of the connection request or relationship"
     }
   },
   "required": [

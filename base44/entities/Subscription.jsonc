@@ -48,6 +48,11 @@
     "last_event_at": {
       "type": "string",
       "description": "ISO timestamp of the last Stripe event applied to this row"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Optional short description of the subscription"
     }
   },
   "required": [

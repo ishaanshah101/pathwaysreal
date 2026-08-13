@@ -33,6 +33,11 @@
         "sage_yearly"
       ],
       "default": "free"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Optional short description from the person signing up"
     }
   },
   "required": [

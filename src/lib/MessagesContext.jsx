@@ -4,6 +4,11 @@ import { useAuth } from '@/lib/AuthContext';
 
 const MessagesContext = createContext(null);
 
+// Module scope on purpose. A ref resets when the provider remounts, which
+// happens whenever RequireAuth flips to its spinner and back, and that race
+// produced two receipt rows for the same message in production.
+const receiptInFlight = new Set();
+
 // One realtime subscription for the whole signed-in app.
 //
 // It lives above the router so the unread badge keeps counting while the user
@@ -30,10 +35,6 @@ export function MessagesProvider({ children }) {
   const receiptsRef = useRef([]);
   useEffect(() => { receiptsRef.current = receipts; }, [receipts]);
 
-  // Message ids we have already started writing a receipt for. Without this,
-  // the initial load and the realtime event for the same message can both fire
-  // and create two receipt rows.
-  const receiptInFlight = useRef(new Set());
 
   const upsert = useCallback((setter) => (row) => {
     if (!row?.id) return;
@@ -56,15 +57,25 @@ export function MessagesProvider({ children }) {
     const have = new Set(receiptsRef.current.map((r) => r.message_id));
     const mine = msgs.filter(
       (m) => m.to_email === email && m.id && !String(m.id).startsWith('pending-')
-        && !have.has(m.id) && !receiptInFlight.current.has(m.id),
+        && !have.has(m.id) && !receiptInFlight.has(m.id),
     );
     if (mine.length === 0) return;
 
     const nowIso = new Date().toISOString();
     for (const m of mine) {
-      receiptInFlight.current.add(m.id);
+      receiptInFlight.add(m.id);
       const isOpen = activeThreadRef.current && activeThreadRef.current === m.from_email;
       try {
+        // Last line of defence: ask the server before writing. Two tabs, or a
+        // remount mid-flight, can still both get past the in-memory guard.
+        const existing = await base44.entities.MessageReceipt
+          .filter({ message_id: m.id, recipient_email: email })
+          .catch(() => []);
+        if (Array.isArray(existing) && existing.length > 0) {
+          existing.forEach(upsertReceipt);
+          continue;
+        }
+
         const created = await base44.entities.MessageReceipt.create({
           message_id: m.id,
           thread_key: m.thread_key,
@@ -77,7 +88,7 @@ export function MessagesProvider({ children }) {
         upsertReceipt(created);
       } catch {
         // A transient failure just means we retry on the next poll.
-        receiptInFlight.current.delete(m.id);
+        receiptInFlight.delete(m.id);
       }
     }
   }, [email, upsertReceipt]);
@@ -152,9 +163,16 @@ export function MessagesProvider({ children }) {
     return () => { clearInterval(id); document.removeEventListener('visibilitychange', onVisible); };
   }, [isAuthenticated, email, reload]);
 
+  // If duplicates exist from before this was fixed, the most-progressed one
+  // wins. Otherwise a read message could keep showing as merely delivered.
   const receiptByMessage = useMemo(() => {
+    const rank = (r) => (r?.read_at ? 2 : r?.delivered_at ? 1 : 0);
     const map = new Map();
-    for (const r of receipts) if (r.message_id) map.set(r.message_id, r);
+    for (const r of receipts) {
+      if (!r.message_id) continue;
+      const prev = map.get(r.message_id);
+      if (!prev || rank(r) > rank(prev)) map.set(r.message_id, r);
+    }
     return map;
   }, [receipts]);
 

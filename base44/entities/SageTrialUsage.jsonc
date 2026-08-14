@@ -1,0 +1,49 @@
+{
+  "name": "SageTrialUsage",
+  "type": "object",
+  "description": "Rate-limit ledger for the free public Sage sample on /sage. Written ONLY by the sage-trial backend function running as service role. No client can read or write it, so the free-question limit cannot be reset from the browser.",
+  "properties": {
+    "bucket": {
+      "type": "string",
+      "description": "Hash of the visitor's IP address plus the UTC day, e.g. sha256(ip)+':'+2026-08-14. Never stores a raw IP."
+    },
+    "count": {
+      "type": "number",
+      "default": 0,
+      "description": "How many free questions this bucket has used"
+    },
+    "day": {
+      "type": "string",
+      "description": "UTC date (YYYY-MM-DD) this bucket belongs to, used for cleanup"
+    },
+    "last_at": {
+      "type": "string",
+      "description": "ISO timestamp of the most recent free question from this bucket"
+    }
+  },
+  "required": [
+    "bucket"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "sage_service_only"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "sage_service_only"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "sage_service_only"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "sage_service_only"
+      }
+    }
+  }
+}

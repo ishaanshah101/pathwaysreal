@@ -1,6 +1,16 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { signInWithGoogle } from '@/lib/googleAuth';
+import { parseWixMediaUrl, buildTransformUrl, buildSrcSet } from '@/components/ui/image-helpers';
+
+// Serve a resized, WebP-encoded hero at the rendered size (plus 2x/3x for
+// retina) instead of the full-resolution original JPEG. The crop focal point
+// matches the old object-position so the framing stays identical.
+const HERO_SRC = 'https://media.base44.com/images/public/6a7ac32706b0616cd94b0ec7/3041b5321_images7.jpeg';
+const heroParsed = parseWixMediaUrl(HERO_SRC);
+const heroOpts = { width: 560, height: 644, crop: true, focalPoint: { x: 0.44, y: 0.5 }, quality: 82 };
+const heroSrc = heroParsed ? buildTransformUrl(heroParsed, heroOpts) : HERO_SRC;
+const heroSrcSet = heroParsed ? buildSrcSet(heroParsed, heroOpts) : undefined;
 
 export default function Hero() {
   return (
@@ -59,14 +69,16 @@ export default function Hero() {
           }}
         >
           <img
-            src="https://media.base44.com/images/public/6a7ac32706b0616cd94b0ec7/3041b5321_images7.jpeg"
+            src={heroSrc}
+            srcSet={heroSrcSet}
+            sizes="(min-width: 860px) 42vw, 92vw"
             alt="A high school student who found a mentor through Pathways"
             width="520"
             height="598"
             fetchPriority="high"
             decoding="async"
             className="absolute inset-0 w-full h-full object-cover"
-            style={{ objectPosition: '44% center', filter: 'brightness(1.08) contrast(1.05) saturate(1.05)' }}
+            style={{ filter: 'brightness(1.08) contrast(1.05) saturate(1.05)' }}
           />
           <div
             className="absolute inset-0"

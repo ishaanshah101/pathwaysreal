@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
-import { useProfile, ROLE_LABELS } from '@/lib/useProfile';
+import { useProfile } from '@/lib/useProfile';
 import { useSubscription, openBillingPortal } from '@/lib/useSubscription';
 import SagePaywall from '@/components/app/SagePaywall';
 import { Spinner } from '@/components/RequireAuth';
@@ -26,7 +26,9 @@ function cleanSage(text) {
 }
 
 export default function SageChat() {
-  const { profile, email } = useProfile();
+  // Profile context is assembled server side in sage-ask now, so this page
+  // only needs the email to write the conversation log.
+  const { email } = useProfile();
   const {
     subscription, hasSage, isPastDue, isCanceling,
     isLoadingSubscription, refetchSubscription,

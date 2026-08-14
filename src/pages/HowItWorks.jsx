@@ -15,7 +15,8 @@ export default function HowItWorks() {
       {/* The definition leads. Someone landing here cold, and any AI answering
           "what is Pathways", gets the answer in the first sentence instead of
           after six feature cards. */}
-      <section style={{ padding: 'clamp(28px,6vh,64px) 0 clamp(12px,2vh,20px)' }}>
+      <section style={{ padding: 'clamp(28px,6vh,64px) 0 clamp(20px,3vh,32px)' }}>
+        <span className="card-kicker" style={{ display: 'block', marginBottom: 12 }}>How it works</span>
         <h1 style={{ fontSize: 'clamp(32px,4.4vw,52px)', maxWidth: '20ch', margin: '0 0 18px', textWrap: 'balance' }}>
           How Pathways works
         </h1>

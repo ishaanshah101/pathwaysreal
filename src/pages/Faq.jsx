@@ -19,11 +19,12 @@ export default function Faq() {
         description="Straight answers about Pathways: what it is, what it costs, who can join, how it differs from a private college counselor, and what Sage the AI advisor does."
         path="/faq"
       />
-      <section id="faq" style={{ padding: 'clamp(28px,6vh,64px) 0 clamp(36px,6vh,64px)' }}>
-        <h1 style={{ fontSize: 'clamp(32px,4.4vw,52px)', margin: '0 0 12px', textWrap: 'balance' }}>
+      <section id="faq" style={{ padding: 'clamp(28px,6vh,64px) 0 clamp(40px,6vh,64px)' }}>
+        <span className="card-kicker" style={{ display: 'block', marginBottom: 12 }}>Frequently asked questions</span>
+        <h1 style={{ fontSize: 'clamp(32px,4.4vw,52px)', margin: '0 0 14px', textWrap: 'balance' }}>
           Questions, answered plainly
         </h1>
-        <p style={{ maxWidth: '56ch', color: 'var(--color-neutral-800)', fontSize: 'clamp(15.5px,1.3vw,17px)', lineHeight: 1.6, margin: '0 0 30px' }}>
+        <p style={{ maxWidth: '56ch', color: 'var(--color-neutral-800)', fontSize: 'clamp(15.5px,1.3vw,17px)', lineHeight: 1.6, margin: '0 0 34px' }}>
           If something you need isn't here, ask Sage once for free on the Sage page.
         </p>
 

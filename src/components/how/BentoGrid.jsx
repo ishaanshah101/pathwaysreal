@@ -1,5 +1,6 @@
 import React from 'react';
 import Reveal from '@/components/Reveal';
+import SectionHeader from '@/components/SectionHeader';
 
 const bento = [
   { span: 4, title: 'A feed that respects your time', body: 'Real posts about campus visits, competitions, internships, and scholarships. Long-form and honest. No short-form video loops, no reposts, no dopamine traps. You leave knowing more than when you arrived.', d: 'M3 10.5 12 3l9 7.5', d2: 'M5 9.5V21h14V9.5', iconBg: 'var(--color-accent-100)', iconFg: 'var(--color-accent-700)' },
@@ -12,14 +13,13 @@ const bento = [
 
 export default function BentoGrid() {
   return (
-    <section id="how" style={{ padding: 'clamp(24px,4vh,44px) 0' }}>
-      {/* The eyebrow tag here repeated the page title word for word. Gone. */}
-      <h2 style={{ fontSize: 'clamp(26px,3.2vw,38px)', maxWidth: '22ch', margin: '0 0 10px', textWrap: 'balance' }}>
-        One focused place, built for students, by students.
-      </h2>
-      <p style={{ maxWidth: '56ch', color: 'var(--color-neutral-800)', marginBottom: 28, fontSize: 15.5, lineHeight: 1.6 }}>
-        Everything below exists because something else was wasting your time or your trust.
-      </p>
+    <section id="how" style={{ padding: 'clamp(28px,5vh,48px) 0' }}>
+      <SectionHeader
+        eyebrow="The features"
+        title="One focused place, built for students, by students."
+        intro="Everything below exists because something else was wasting your time or your trust."
+        titleMaxWidth="22ch"
+      />
       <div className="grid gap-[14px] bento-grid" style={{ gridTemplateColumns: 'repeat(6,1fr)', gridAutoRows: 'minmax(150px,auto)' }}>
         {bento.map((b, i) => (
           <Reveal

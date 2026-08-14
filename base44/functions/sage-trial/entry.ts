@@ -58,6 +58,17 @@ function clientIp(req: Request) {
   return req.headers.get("x-real-ip") || req.headers.get("cf-connecting-ip") || "unknown";
 }
 
+// This function serves signed-out visitors, so the request carries no user
+// context. Prefer the service-role client for the model call and fall back to
+// the request-scoped one if this SDK build does not expose it there.
+async function invokeModel(base44: any, prompt: string) {
+  const viaServiceRole = base44?.asServiceRole?.integrations?.Core?.InvokeLLM;
+  if (typeof viaServiceRole === "function") {
+    return await base44.asServiceRole.integrations.Core.InvokeLLM({ prompt });
+  }
+  return await base44.integrations.Core.InvokeLLM({ prompt });
+}
+
 async function sha256(text: string) {
   const data = new TextEncoder().encode(text);
   const digest = await crypto.subtle.digest("SHA-256", data);
@@ -164,7 +175,7 @@ ${question}
 
 Sage:`;
 
-    const res = await base44.integrations.Core.InvokeLLM({ prompt });
+    const res = await invokeModel(base44, prompt);
     const raw = typeof res === "string" ? res : JSON.stringify(res);
 
     if (answerLooksWrong(raw)) {

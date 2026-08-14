@@ -35,6 +35,10 @@ export function MessagesProvider({ children }) {
   const receiptsRef = useRef([]);
   useEffect(() => { receiptsRef.current = receipts; }, [receipts]);
 
+  // A reload in flight. The mount effect, the 20s poll, and a visibilitychange
+  // can all fire reload() at the same instant, which duplicated the list calls.
+  const reloadInFlight = useRef(false);
+
 
   const upsert = useCallback((setter) => (row) => {
     if (!row?.id) return;
@@ -95,6 +99,8 @@ export function MessagesProvider({ children }) {
 
   const reload = useCallback(async () => {
     if (!email) { setMessages([]); setReceipts([]); setLoading(false); return; }
+    if (reloadInFlight.current) return;
+    reloadInFlight.current = true;
     try {
       const [msgs, recs] = await Promise.all([
         base44.entities.Message.list('-created_date', 500).catch(() => []),
@@ -110,6 +116,7 @@ export function MessagesProvider({ children }) {
       setMessages([]);
     }
     setLoading(false);
+    reloadInFlight.current = false;
   }, [email, ensureReceipts]);
 
   useEffect(() => { reload(); }, [reload]);

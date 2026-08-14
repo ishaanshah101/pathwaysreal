@@ -37,7 +37,18 @@
     "to_email"
   ],
   "rls": {
-    "create": null,
+    "create": {
+      "$or": [
+        {
+          "data.from_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
     "read": {
       "$or": [
         {

@@ -6,7 +6,7 @@ import Seo from '@/components/Seo';
 import UnreadBadge from '@/components/app/UnreadBadge';
 import { useAuth } from '@/lib/AuthContext';
 import { useProfile } from '@/lib/useProfile';
-import { MessagesProvider, useMessages } from '@/lib/MessagesContext';
+import { useMessages } from '@/lib/MessagesContext';
 
 const TABS = [
   { to: '/app', end: true, label: 'Feed', Icon: Home },
@@ -41,7 +41,7 @@ function TabLink({ to, end, label, Icon, badge = 0 }) {
   );
 }
 
-function AppShellInner() {
+export default function AppShell() {
   const { logout } = useAuth();
   const { profile } = useProfile();
   const { unreadTotal } = useMessages();
@@ -138,15 +138,5 @@ function AppShellInner() {
         <Outlet />
       </main>
     </div>
-  );
-}
-
-// The provider wraps the shell rather than the Messages page, so the badge
-// keeps updating while the user is anywhere in the app.
-export default function AppShell() {
-  return (
-    <MessagesProvider>
-      <AppShellInner />
-    </MessagesProvider>
   );
 }

@@ -4,6 +4,7 @@ import { queryClientInstance } from '@/lib/query-client'
 import { BrowserRouter as Router, Navigate, Route, Routes } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
+import { MessagesProvider } from '@/lib/MessagesContext';
 import { useProfile } from '@/lib/useProfile';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import RequireAuth, { Spinner } from '@/components/RequireAuth';
@@ -110,11 +111,19 @@ function App() {
   return (
     <QueryClientProvider client={queryClientInstance}>
       <AuthProvider>
-        <Router>
-          <ScrollToTop />
-          <AuthenticatedApp />
-        </Router>
-        <Toaster />
+        {/* MessagesProvider sits DIRECTLY inside AuthProvider, mounted once for
+            the whole app. It used to be nested deep inside AppShell, where the
+            route guard could remount it and leave it reading a stale auth
+            context. Here its useAuth() is guaranteed a live provider, and every
+            messaging component shares this single instance. It no-ops while
+            signed out, so public pages are unaffected. */}
+        <MessagesProvider>
+          <Router>
+            <ScrollToTop />
+            <AuthenticatedApp />
+          </Router>
+          <Toaster />
+        </MessagesProvider>
       </AuthProvider>
     </QueryClientProvider>
   )

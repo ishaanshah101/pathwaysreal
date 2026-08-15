@@ -116,20 +116,22 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = (shouldRedirect = true) => {
-    setUser(null);
-    setIsAuthenticated(false);
-
-    // Drop the cached profile too. Without this a later sign-in on the same
-    // browser could briefly render the previous account's name.
+    // Drop cached data so a later sign-in on the same browser can't briefly
+    // render the previous account's name.
     queryClientInstance.clear();
 
     if (shouldRedirect) {
-      // Always land on the Phase 1 home page. Returning to the current URL
-      // meant signing out of /app/profile bounced through the login screen,
-      // because the page you came from requires auth.
+      // Hard-redirect to the Phase 1 home page WITHOUT first clearing the
+      // React auth state. Flipping isAuthenticated to false here would
+      // re-render the still-mounted /app tree, and its RequireAuth guard
+      // would race this redirect, bouncing the just-signed-out user to
+      // /login?returnTo=/app/... instead of the home page. Let the full
+      // reload re-initialize auth from scratch.
       base44.auth.logout(`${window.location.origin}/`);
     } else {
-      // Just remove the token without redirect
+      // Just remove the token without redirecting.
+      setUser(null);
+      setIsAuthenticated(false);
       base44.auth.logout();
     }
   };

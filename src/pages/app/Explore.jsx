@@ -233,6 +233,18 @@ export default function Explore() {
         </p>
       </div>
 
+      {connectError && (
+        <div
+          className="card"
+          style={{
+            padding: '12px 16px', fontSize: 14, lineHeight: 1.55,
+            background: 'var(--color-accent-100)', color: 'var(--color-accent-800)',
+          }}
+        >
+          {connectError}
+        </div>
+      )}
+
       <div className="flex flex-col" style={{ gap: 10 }}>
         <input
           className="input"

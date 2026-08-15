@@ -1,6 +1,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 import { screenContent, classifyRisk, logModerationEvent, excerptOf, MODERATION_BLOCK_REASON } from '../../shared/moderation.ts';
 import { consumeRateLimit } from '../../shared/rateLimit.ts';
+import { validateAttachments, screenAttachments, screenImage, IMAGE_BLOCK_REASON } from '../../shared/attachments.ts';
 
 const CATEGORIES = [
   'applications', 'essays', 'scholarships', 'majors',
@@ -36,6 +37,14 @@ export default async function (req: Request): Promise<Response> {
       return Response.json({ code: 'rate_limited', error: limit.message }, { status: 429 });
     }
 
+    // Attachment shape and type checks happen before anything expensive.
+    const heroUrl = String(payload?.hero_image || '').trim();
+    const footerUrl = String(payload?.footer_image || '').trim();
+    const valid = validateAttachments(payload?.attachments);
+    if (!valid.ok) {
+      return Response.json({ error: valid.error, code: valid.code }, { status: 400 });
+    }
+
     const combined = `${title}\n\n${body}`;
     const screened = screenContent(combined);
     if (screened.blocked) {
@@ -65,6 +74,37 @@ export default async function (req: Request): Promise<Response> {
       });
     }
 
+    // Every image is looked at by a vision model before it can be published.
+    // This fails closed: an image that cannot be checked does not go up.
+    for (const [label, url] of [['hero_image', heroUrl], ['footer_image', footerUrl]] as const) {
+      if (!url) continue;
+      const verdict = await screenImage(base44, url);
+      if (!verdict.safe) {
+        await logModerationEvent(base44, {
+          sender_email: authorEmail,
+          surface: 'post',
+          rule: `image_${verdict.category || label}`,
+          severity: verdict.severity === 'high' ? 'high' : 'low',
+          excerpt: `${label}: ${url}`,
+          detail: verdict.reason,
+        });
+        return Response.json({ blocked: true, reason: IMAGE_BLOCK_REASON });
+      }
+    }
+
+    const screenedFiles = await screenAttachments(base44, valid.files);
+    if (!screenedFiles.ok) {
+      await logModerationEvent(base44, {
+        sender_email: authorEmail,
+        surface: 'post',
+        rule: `image_${screenedFiles.verdict.category || 'unsafe'}`,
+        severity: screenedFiles.verdict.severity === 'high' ? 'high' : 'low',
+        excerpt: `${screenedFiles.file.name}: ${screenedFiles.file.url}`,
+        detail: screenedFiles.verdict.reason,
+      });
+      return Response.json({ blocked: true, reason: IMAGE_BLOCK_REASON });
+    }
+
     // Author identity is taken from the profile on the server, never from the
     // browser, so nobody can publish as a verified professor.
     const profiles = await base44.asServiceRole.entities.Profile.filter({ user_email: authorEmail });
@@ -78,6 +118,9 @@ export default async function (req: Request): Promise<Response> {
       author_name: profile?.full_name || user.full_name || 'A Pathways member',
       author_role: profile?.role || 'student',
       author_headline: profile?.headline || [profile?.grade, profile?.school].filter(Boolean).join(' · '),
+      hero_image: heroUrl || undefined,
+      footer_image: footerUrl || undefined,
+      attachments: screenedFiles.files,
     });
 
     return Response.json({ post: created });

@@ -1,6 +1,7 @@
 {
   "name": "Post",
   "type": "object",
+  "description": "Feed posts. Written ONLY by the create-post backend function, which sets the author from the session and runs the same safety screening as messaging.",
   "properties": {
     "author_email": {
       "type": "string"
@@ -54,7 +55,9 @@
   ],
   "rls": {
     "create": {
-      "data.author_email": "{{user.email}}"
+      "user_condition": {
+        "role": "post_service_only"
+      }
     },
     "read": null,
     "update": {

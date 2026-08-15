@@ -21,17 +21,26 @@ export function useProfile() {
     },
   });
 
+  // Saving goes through the save-profile backend function, which is what
+  // enforces the age floor and derives is_minor. Writing the row directly from
+  // here would let a browser set those itself, which is the whole point of
+  // having the function.
+  //
+  // Errors are re-thrown with the server's message and code attached, so the
+  // onboarding form can tell an under-13 visitor something kind rather than
+  // showing a generic failure.
   const saveProfile = async (patch) => {
     if (!email) throw new Error('Not signed in');
-    const existing = query.data;
-    let saved;
-    if (existing?.id) {
-      saved = await base44.entities.Profile.update(existing.id, patch);
-    } else {
-      saved = await base44.entities.Profile.create({ user_email: email, ...patch });
+    try {
+      const res = await base44.functions.invoke('save-profile', patch);
+      await queryClient.invalidateQueries({ queryKey: ['profile', email] });
+      return res?.data?.profile ?? null;
+    } catch (err) {
+      const data = err?.response?.data;
+      const e = new Error(data?.error || 'Could not save your profile. Please try again.');
+      e.code = data?.code;
+      throw e;
     }
-    await queryClient.invalidateQueries({ queryKey: ['profile', email] });
-    return saved;
   };
 
   return {

@@ -35,6 +35,7 @@ import Feed from '@/pages/app/Feed';
 import Explore from '@/pages/app/Explore';
 import Messages from '@/pages/app/Messages';
 import SageChat from '@/pages/app/SageChat';
+import AdminModeration from '@/pages/app/AdminModeration';
 import ProfilePage from '@/pages/app/ProfilePage';
 
 // The root decides Phase 1 vs Phase 2 from REAL auth state, not a hardcoded
@@ -102,6 +103,9 @@ const AuthenticatedApp = () => {
         <Route path="messages" element={<Messages />} />
         <Route path="sage" element={<SageChat />} />
         <Route path="profile" element={<ProfilePage />} />
+        {/* Admin only. The page itself renders the 404 for everyone else, so
+            the route never advertises that it exists. */}
+        <Route path="admin/moderation" element={<AdminModeration />} />
       </Route>
 
       <Route path="*" element={<PageNotFound />} />

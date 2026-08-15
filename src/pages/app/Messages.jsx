@@ -5,7 +5,7 @@ import { useProfile, threadKey } from '@/lib/useProfile';
 import { useMessages, deliveryStateOf } from '@/lib/MessagesContext';
 import DeliveryTicks from '@/components/app/DeliveryTicks';
 import UnreadBadge from '@/components/app/UnreadBadge';
-import { SAMPLE_MESSAGE_THREADS, authorAvatar, initialsOf } from '@/data/sampleContent';
+import { authorAvatar, initialsOf } from '@/lib/avatar';
 import SafetyActions from '@/components/safety/SafetyActions';
 import { useBlocks } from '@/lib/useBlocks';
 import Seo from '@/components/Seo';
@@ -116,16 +116,18 @@ export default function Messages() {
       });
     }
 
-    const samples = SAMPLE_MESSAGE_THREADS.map((t) => ({
-      other: t.other, preview: t.last.body, name: t.name,
-      subtitle: t.subtitle, unread: 0, is_sample: true,
-    }));
-
     // Conversations with anyone I have blocked drop out of the list.
     const visible = real.filter((r) => !blockedEmails.includes(r.other));
 
-    return [...visible, ...samples];
-  }, [messages, people, email, activeWith, sampleByEmail, unreadByThread, blockedEmails]);
+    // Archiving is one-sided, so this filter only ever applies to my own view.
+    // The conversation the user currently has open always stays visible, so
+    // archiving does not make the thread vanish from under them mid-read.
+    return visible.filter((r) => (
+      showArchived
+        ? archivedEmails.includes(r.other)
+        : !archivedEmails.includes(r.other) || r.other === activeWith
+    ));
+  }, [messages, people, email, activeWith, sampleByEmail, unreadByThread, blockedEmails, archivedEmails, showArchived]);
 
   const thread = useMemo(() => {
     if (!activeWith || activeSample) return [];

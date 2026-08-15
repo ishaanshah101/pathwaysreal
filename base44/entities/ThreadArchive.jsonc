@@ -1,0 +1,55 @@
+{
+  "name": "ThreadArchive",
+  "type": "object",
+  "description": "One row per person per conversation they have archived. Archiving is one-sided, like email: the other person is never told and their view does not change. A user can only ever see or change their own rows.",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "The person who archived it. Only they may write or read this row."
+    },
+    "other_email": {
+      "type": "string",
+      "description": "The other participant in the archived conversation"
+    },
+    "archived_at": {
+      "type": "string",
+      "description": "ISO timestamp of when it was archived"
+    }
+  },
+  "required": [
+    "user_email",
+    "other_email"
+  ],
+  "rls": {
+    "create": {
+      "data.user_email": "{{user.email}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "data.user_email": "{{user.email}}"
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,85 @@
+{
+  "name": "VerificationRequest",
+  "type": "object",
+  "description": "An adult asking to have their stated role verified. A human reviews each one and sets Profile.verified. Deliberately manual: at our scale a person checking a faculty page is stronger evidence than an automated domain check that anyone can fake with a typed address.",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "The member requesting verification"
+    },
+    "full_name": {
+      "type": "string"
+    },
+    "claimed_role": {
+      "type": "string",
+      "enum": [
+        "college_student",
+        "educator",
+        "counselor"
+      ],
+      "description": "Students never need verification, so they cannot request it"
+    },
+    "institution": {
+      "type": "string",
+      "description": "School, college, or organisation they say they are with"
+    },
+    "institutional_email": {
+      "type": "string",
+      "description": "Their work or school address, which should match the institution"
+    },
+    "evidence_url": {
+      "type": "string",
+      "description": "A faculty page, staff directory, or professional profile a reviewer can open"
+    },
+    "note": {
+      "type": "string",
+      "maxLength": 1000
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "rejected"
+      ],
+      "default": "pending"
+    },
+    "reviewer_notes": {
+      "type": "string"
+    },
+    "submitted_at": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "user_email",
+    "claimed_role"
+  ],
+  "rls": {
+    "create": {
+      "data.user_email": "{{user.email}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

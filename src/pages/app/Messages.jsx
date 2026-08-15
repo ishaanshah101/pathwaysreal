@@ -60,7 +60,14 @@ export default function Messages() {
   const [draft, setDraft] = useState('');
   const [sending, setSending] = useState(false);
   const [sendError, setSendError] = useState('');
+  const [archives, setArchives] = useState([]);
+  const [showArchived, setShowArchived] = useState(false);
+  const [archiveBusy, setArchiveBusy] = useState(false);
   const endRef = useRef(null);
+
+  // There is no sample content any more, so nothing here is fake. Every thread
+  // in this list is a real conversation with a real person.
+  const activeSample = null;
 
   useEffect(() => {
     base44.entities.Profile.list('-created_date', 200)
@@ -68,25 +75,54 @@ export default function Messages() {
       .catch(() => setPeople([]));
   }, []);
 
-  const sampleByEmail = useMemo(() => {
-    const m = new Map();
-    for (const t of SAMPLE_MESSAGE_THREADS) m.set(t.other, t);
-    return m;
-  }, []);
+  const loadArchives = React.useCallback(() => {
+    if (!email) return;
+    base44.entities.ThreadArchive.filter({ user_email: email })
+      .then((r) => setArchives(Array.isArray(r) ? r : []))
+      .catch(() => setArchives([]));
+  }, [email]);
 
-  const activeSample = activeWith ? sampleByEmail.get(activeWith) : null;
+  useEffect(() => { loadArchives(); }, [loadArchives]);
+
+  const archivedEmails = useMemo(() => archives.map((a) => a.other_email), [archives]);
+  const isArchived = Boolean(activeWith && archivedEmails.includes(activeWith));
+
+  // Archiving is per-person and reversible. The other side is never told, and
+  // nothing is deleted: an archived conversation reappears the moment it is
+  // unarchived, with its whole history intact.
+  const toggleArchive = async () => {
+    if (!activeWith || !email || archiveBusy) return;
+    setArchiveBusy(true);
+    try {
+      if (isArchived) {
+        const row = archives.find((a) => a.other_email === activeWith);
+        if (row) await base44.entities.ThreadArchive.delete(row.id);
+      } else {
+        await base44.entities.ThreadArchive.create({
+          user_email: email,
+          other_email: activeWith,
+          archived_at: new Date().toISOString(),
+        });
+        setParams({});
+      }
+      loadArchives();
+    } catch {
+      /* A failed archive is not worth interrupting the conversation over. */
+    }
+    setArchiveBusy(false);
+  };
 
   // Tell the provider which conversation is open so an arriving message in
   // this thread is marked read instead of bumping the badge.
   useEffect(() => {
-    setActiveThread(activeSample ? null : activeWith);
+    setActiveThread(activeWith);
     return () => setActiveThread(null);
-  }, [activeWith, activeSample, setActiveThread]);
+  }, [activeWith, setActiveThread]);
 
   // Opening a conversation clears its unread count.
   useEffect(() => {
-    if (activeWith && !activeSample) markThreadRead(activeWith);
-  }, [activeWith, activeSample, markThreadRead, messages.length]);
+    if (activeWith) markThreadRead(activeWith);
+  }, [activeWith, markThreadRead, messages.length]);
 
   const threads = useMemo(() => {
     const map = new Map();

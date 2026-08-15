@@ -142,7 +142,7 @@ export default function Messages() {
       is_sample: false,
     })).sort((a, b) => new Date(b.at) - new Date(a.at));
 
-    if (activeWith && !real.some((r) => r.other === activeWith) && !sampleByEmail.has(activeWith)) {
+    if (activeWith && !real.some((r) => r.other === activeWith)) {
       real.unshift({
         other: activeWith,
         preview: 'Start the conversation',
@@ -163,7 +163,7 @@ export default function Messages() {
         ? archivedEmails.includes(r.other)
         : !archivedEmails.includes(r.other) || r.other === activeWith
     ));
-  }, [messages, people, email, activeWith, sampleByEmail, unreadByThread, blockedEmails, archivedEmails, showArchived]);
+  }, [messages, people, email, activeWith, unreadByThread, blockedEmails, archivedEmails, showArchived]);
 
   const thread = useMemo(() => {
     if (!activeWith || activeSample) return [];
@@ -214,6 +214,23 @@ export default function Messages() {
         style={{ gridTemplateColumns: 'minmax(0,4fr) minmax(0,8fr)', gap: 16, alignItems: 'start' }}
       >
         <div className="card elev-sm" style={{ padding: 12, gap: 4, borderRadius: 24, maxHeight: 560, overflowY: 'auto' }}>
+          <div className="flex gap-2" style={{ padding: '2px 4px 8px' }}>
+            {[[false, 'Inbox'], [true, `Archived${archivedEmails.length ? ` (${archivedEmails.length})` : ''}`]].map(([val, label]) => (
+              <button
+                key={label}
+                type="button"
+                onClick={() => setShowArchived(val)}
+                style={{
+                  border: 0, cursor: 'pointer', font: 'inherit', fontSize: 12.5, fontWeight: 600,
+                  padding: '5px 12px', borderRadius: 999,
+                  background: showArchived === val ? 'var(--color-accent-200)' : 'transparent',
+                  color: showArchived === val ? 'var(--color-accent-800)' : 'var(--color-neutral-700)',
+                }}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
           {loading ? (
             <span style={{ fontSize: 13, color: 'var(--color-neutral-600)', padding: 10 }}>Loading…</span>
           ) : (
@@ -272,8 +289,9 @@ export default function Messages() {
         <div className="card elev-sm" style={{ padding: 18, gap: 12, borderRadius: 24, minHeight: 440 }}>
           {!activeWith ? (
             <div className="flex items-center justify-center text-center" style={{ flex: 1, color: 'var(--color-neutral-600)', fontSize: 14, padding: 20, lineHeight: 1.6 }}>
-              Pick a conversation on the left. The sample threads show real mentoring exchanges,
-              from essay edits to financial aid appeals.
+              {showArchived
+                ? 'Nothing archived. Conversations you archive move here and stay searchable.'
+                : 'Pick a conversation on the left. To start a new one, find someone in Explore and send a connection request first.'}
             </div>
           ) : (
             <>
@@ -289,6 +307,20 @@ export default function Messages() {
                 </div>
                 {!activeSample && (
                   <span className="flex gap-4 items-center" style={{ marginLeft: 'auto' }}>
+                    <button
+                      type="button"
+                      onClick={toggleArchive}
+                      disabled={archiveBusy}
+                      style={{
+                        border: 0, background: 'transparent', cursor: 'pointer', font: 'inherit',
+                        fontSize: 13, color: 'var(--color-neutral-700)', padding: 0,
+                      }}
+                      title={isArchived
+                        ? 'Move this conversation back to your inbox'
+                        : 'Hide this from your inbox. The other person is not told, and nothing is deleted.'}
+                    >
+                      {archiveBusy ? '…' : isArchived ? 'Unarchive' : 'Archive'}
+                    </button>
                     <SafetyActions
                       targetEmail={activeWith}
                       targetName={activeMeta?.name}

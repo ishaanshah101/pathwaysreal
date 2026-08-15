@@ -39,7 +39,7 @@ function Avatar({ name, authorKey, size = 40 }) {
   );
 }
 
-function PostCard({ post }) {
+function PostCard({ post, canMessage, isMine }) {
   const v = post.variant || 'plain';
   const isLong = (post.body || '').length > 620;
   const [open, setOpen] = useState(false);
@@ -150,13 +150,21 @@ function PostCard({ post }) {
           <span style={{ fontSize: 11.5, color: 'var(--color-neutral-600)' }}>
             Sample post — real members' posts appear here as they join.
           </span>
-        ) : post.author_email ? (
+        ) : isMine ? (
+          <span style={{ fontSize: 11.5, color: 'var(--color-neutral-600)' }}>Your post</span>
+        ) : post.author_email && canMessage ? (
           <Link
             to={`/app/messages?to=${encodeURIComponent(post.author_email)}`}
             className="btn btn-secondary"
             style={{ fontSize: 13 }}
           >
             Message {String(post.author_name || '').split(' ')[0] || 'them'}
+          </Link>
+        ) : post.author_email ? (
+          // Direct messaging is unlocked by a Connection, so an author you have
+          // not connected with sends you to Explore rather than into a DM.
+          <Link to="/app/explore" className="btn btn-secondary" style={{ fontSize: 13 }}>
+            Connect to message
           </Link>
         ) : null}
       </div>
@@ -175,17 +183,29 @@ export default function Feed() {
   const [posting, setPosting] = useState(false);
   const [error, setError] = useState('');
 
+  const [connectedEmails, setConnectedEmails] = useState([]);
+
   const load = async () => {
     try {
-      const rows = await base44.entities.Post.list('-created_date', 100);
+      const [rows, conns] = await Promise.all([
+        base44.entities.Post.list('-created_date', 100),
+        base44.entities.Connection.list('-created_date', 200).catch(() => []),
+      ]);
       setPosts(Array.isArray(rows) ? rows : []);
+      setConnectedEmails(
+        (Array.isArray(conns) ? conns : [])
+          .filter((c) => c.status === 'accepted')
+          .map((c) => (c.from_email === email ? c.to_email : c.from_email)),
+      );
     } catch {
       setPosts([]);
     }
     setLoading(false);
   };
 
-  useEffect(() => { load(); }, []);
+  // Waits for the signed-in email so connections are matched against the real
+  // user instead of null on the first pass.
+  useEffect(() => { if (email) load(); }, [email]);
 
   const publish = async (e) => {
     e.preventDefault();
@@ -316,7 +336,14 @@ export default function Feed() {
       ) : (
         <>
           <div className="flex flex-col" style={{ gap: 16 }}>
-            {filtered.slice(0, visible).map((p) => <PostCard key={p.id} post={p} />)}
+            {filtered.slice(0, visible).map((p) => (
+              <PostCard
+                key={p.id}
+                post={p}
+                canMessage={Boolean(p.author_email && connectedEmails.includes(p.author_email))}
+                isMine={Boolean(email && p.author_email === email)}
+              />
+            ))}
           </div>
 
           {visible < filtered.length && (

@@ -7,13 +7,20 @@ import Seo from '@/components/Seo';
 
 const PAGE_SIZE = 12;
 
-function MentorCard({ m, onConnect, connectionState, busy }) {
+function MentorCard({ m, onConnect, onRespond, connection, busy }) {
   const [bg, fg] = authorAvatar(m.key || m.user_email || m.full_name || '?');
   const isSample = Boolean(m.is_sample_profile);
+  const status = connection?.status || null;
+  const incoming = Boolean(connection && connection.direction === 'incoming');
+  const accepted = status === 'accepted';
+  // "Request sent" was shown even when the OTHER person was the one waiting on
+  // you, which made an incoming request look like a dead end.
   const label =
-    connectionState === 'accepted' ? 'Connected'
-      : connectionState === 'pending' ? 'Request sent'
-        : 'Connect';
+    accepted ? 'Connected'
+      : status === 'pending' && incoming ? 'Accept request'
+        : status === 'pending' ? 'Request sent'
+          : status === 'declined' && incoming ? 'Declined'
+            : 'Connect';
 
   return (
     <div className="card elev-sm" style={{ padding: 22, gap: 12, borderRadius: 26 }}>
@@ -65,18 +72,38 @@ function MentorCard({ m, onConnect, connectionState, busy }) {
               type="button"
               className="btn btn-primary"
               style={{ fontSize: 13 }}
-              disabled={busy || connectionState === 'accepted' || connectionState === 'pending'}
-              onClick={() => onConnect(m)}
+              disabled={busy || accepted || (status === 'pending' && !incoming) || status === 'declined'}
+              onClick={() => (incoming && status === 'pending' ? onRespond(connection, 'accepted') : onConnect(m))}
             >
               {label}
             </button>
-            <Link
-              to={`/app/messages?to=${encodeURIComponent(m.user_email)}`}
-              className="btn btn-secondary"
-              style={{ fontSize: 13 }}
-            >
-              Message
-            </Link>
+            {incoming && status === 'pending' && (
+              <button
+                type="button"
+                className="btn btn-secondary"
+                style={{ fontSize: 13 }}
+                disabled={busy}
+                onClick={() => onRespond(connection, 'declined')}
+              >
+                Decline
+              </button>
+            )}
+            {/* Messaging is what a Connection unlocks, so the button only
+                exists once the connection is mutual. It used to be offered to
+                strangers, which contradicted the product rule. */}
+            {accepted ? (
+              <Link
+                to={`/app/messages?to=${encodeURIComponent(m.user_email)}`}
+                className="btn btn-secondary"
+                style={{ fontSize: 13 }}
+              >
+                Message
+              </Link>
+            ) : (
+              <span style={{ fontSize: 12, color: 'var(--color-neutral-600)' }}>
+                Connect to message
+              </span>
+            )}
           </>
         )}
       </div>
@@ -112,6 +139,10 @@ export default function Explore() {
   useEffect(() => { load(); }, []);
 
   const connect = async (m) => {
+    // A second click, or a request that already exists in either direction,
+    // used to insert a duplicate Connection row and leave two conflicting
+    // states for the same pair.
+    if (connectionFor(m.user_email)) return;
     setBusyEmail(m.user_email);
     try {
       await base44.entities.Connection.create({
@@ -126,13 +157,25 @@ export default function Explore() {
     setBusyEmail(null);
   };
 
-  const stateFor = (targetEmail) => {
+  // Returns the row plus which way it points, so the card can tell "you asked
+  // them" apart from "they asked you".
+  const connectionFor = (targetEmail) => {
     const c = connections.find(
       (x) =>
         (x.from_email === email && x.to_email === targetEmail) ||
         (x.to_email === email && x.from_email === targetEmail),
     );
-    return c?.status || null;
+    if (!c) return null;
+    return { ...c, direction: c.to_email === email ? 'incoming' : 'outgoing' };
+  };
+
+  const respond = async (c, status) => {
+    setBusyEmail(c.from_email);
+    try {
+      await base44.entities.Connection.update(c.id, { status });
+      await load();
+    } catch { /* the request stays pending so it can be retried */ }
+    setBusyEmail(null);
   };
 
   const allTopics = useMemo(() => {
@@ -227,7 +270,8 @@ export default function Explore() {
                 key={m.user_email}
                 m={m}
                 onConnect={connect}
-                connectionState={stateFor(m.user_email)}
+                onRespond={respond}
+                connection={connectionFor(m.user_email)}
                 busy={busyEmail === m.user_email}
               />
             ))}

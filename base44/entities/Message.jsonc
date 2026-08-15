@@ -26,7 +26,9 @@
     "body"
   ],
   "rls": {
-    "create": null,
+    "create": {
+      "data.from_email": "{{user.email}}"
+    },
     "read": {
       "$or": [
         {

@@ -11,7 +11,7 @@ const points = [
 ];
 
 export default function SagePaywall({ notice }) {
-  const [plan, setPlan] = useState('sage_yearly');
+  const [plan, setPlan] = useState('sage_monthly');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const yearly = plan === 'sage_yearly';

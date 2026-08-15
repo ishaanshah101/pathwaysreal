@@ -29,15 +29,32 @@ export default async function(req) {
 
     const base44 = createClientFromRequest(req);
 
-    // This endpoint is reachable without a user session because the signup
-    // workflow calls it. Two guards keep it from being used as a free mailer:
-    // the address must belong to a real registered user, and each address can
-    // only ever receive one welcome email per day.
+    // The endpoint has a public URL, so the caller is never trusted. A request
+    // is only honoured when it is one of the two legitimate cases:
+    //   1. the signup workflow, right after a real signup, or
+    //   2. a signed-in user asking for their own welcome email again.
+    // Anything else is refused, which is what stops a stranger from using this
+    // as a free mailer pointed at arbitrary addresses.
     const users = await base44.asServiceRole.entities.User.filter({ email: toEmail });
-    if (!Array.isArray(users) || users.length === 0) {
+    const target = Array.isArray(users) ? users[0] : null;
+    if (!target) {
       return Response.json({ ok: false, reason: 'not_a_registered_user' }, { status: 403 });
     }
 
+    const caller = await base44.auth.me().catch(() => null);
+    const isOwnAddress = Boolean(caller?.email) && caller.email.toLowerCase() === toEmail.toLowerCase();
+
+    // Case 1: the account was created moments ago, which only the signup
+    // workflow can be reacting to. The window is deliberately short so an
+    // address stops being a valid target almost immediately after signup.
+    const createdAt = target.created_date ? new Date(target.created_date).getTime() : 0;
+    const isFreshSignup = createdAt > 0 && Date.now() - createdAt < 15 * 60 * 1000;
+
+    if (!isOwnAddress && !isFreshSignup) {
+      return Response.json({ ok: false, reason: 'not_authorized' }, { status: 403 });
+    }
+
+    // And even an allowed caller only gets one welcome email per address per day.
     const limit = await consumeRateLimit(base44, toEmail.toLowerCase(), 'welcome_email', { day: 1 });
     if (!limit.ok) {
       return Response.json({ ok: false, reason: 'already_sent_today' }, { status: 429 });

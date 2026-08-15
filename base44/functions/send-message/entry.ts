@@ -1,6 +1,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 import { screenContent, classifyRisk, logModerationEvent, excerptOf, MODERATION_BLOCK_REASON } from '../../shared/moderation.ts';
 import { consumeRateLimit } from '../../shared/rateLimit.ts';
+import { validateAttachments, screenAttachments, IMAGE_BLOCK_REASON } from '../../shared/attachments.ts';
 
 // The ONLY writer of Message rows. The Message entity's create rule is locked to
 // a service-only role, so a browser console can no longer insert a message to an
@@ -18,7 +19,14 @@ export default async function (req: Request): Promise<Response> {
     const toEmail = String(payload?.toEmail || '').trim().toLowerCase();
     const body = String(payload?.body || '').trim();
 
-    if (!toEmail || !body) {
+    const valid = validateAttachments(payload?.attachments);
+    if (!valid.ok) {
+      return Response.json({ error: valid.error, code: valid.code }, { status: 400 });
+    }
+    const hasFiles = valid.files.length > 0;
+
+    // A message carrying files does not need body text, but a bare message does.
+    if (!toEmail || (!body && !hasFiles)) {
       return Response.json({ error: 'A recipient and a message are both required.' }, { status: 400 });
     }
     if (toEmail === fromEmail) {
@@ -69,8 +77,10 @@ export default async function (req: Request): Promise<Response> {
     }
 
     // Deterministic safety checks first: contact details, meetup plans, photo
-    // requests, secrecy, sexual content.
-    const screened = screenContent(body);
+    // requests, secrecy, sexual content. File names are screened alongside the
+    // body, since a filename is just as good a place to hide a phone number.
+    const screenTarget = [body, ...valid.files.map((f: any) => f.name)].filter(Boolean).join('\n');
+    const screened = screenContent(screenTarget);
     if (screened.blocked) {
       await logModerationEvent(base44, {
         sender_email: fromEmail,
@@ -78,7 +88,7 @@ export default async function (req: Request): Promise<Response> {
         surface: 'message',
         rule: screened.rule,
         severity: screened.severity,
-        excerpt: excerptOf(body),
+        excerpt: excerptOf(screenTarget),
       });
       return Response.json({ blocked: true, reason: MODERATION_BLOCK_REASON });
     }

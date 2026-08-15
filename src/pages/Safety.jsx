@@ -56,13 +56,17 @@ export default function Safety() {
       </Section>
 
       <Section title="Reaching a human">
-        If something is urgent, or you would rather talk to a person than file a form, contact the
-        Pathways safety team through the Report form and choose "Something else that felt unsafe",
-        and add that you want to be contacted. We answer every one.
+        If something is urgent, or you would rather talk to a person than file a form, email{' '}
+        <strong>pathways.admins@gmail.com</strong>. It reaches a real person and safety reports are treated
+        as urgent. You can also use the Report form and choose "Something else that felt unsafe", adding that
+        you want to be contacted. We answer every one. A parent, teacher, or counselor can contact us on your
+        behalf if you would rather they did.
         {' '}
         <strong>If you or someone else is in immediate danger, contact your local emergency
-        number first.</strong> In the United States you can also reach the Crisis Text Line by
-        texting HOME to 741741, any time, free.
+        number first.</strong> In the United States, that is 911. You can also reach the Suicide &amp; Crisis
+        Lifeline by calling or texting <strong>988</strong>, or the Crisis Text Line by texting HOME to
+        741741 — both free, confidential, and available any time. To report child exploitation, use{' '}
+        <strong>CyberTipline.org</strong>.
       </Section>
 
       <Section title="Our rules for adults on Pathways">

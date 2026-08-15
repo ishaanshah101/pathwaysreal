@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useProfile, ROLE_LABELS, CATEGORY_LABELS } from '@/lib/useProfile';
-import { SAMPLE_FEED, authorAvatar, initialsOf } from '@/data/sampleContent';
+import { authorAvatar, initialsOf } from '@/lib/avatar';
 import CoverArt from '@/components/app/CoverArt';
 import SafetyActions from '@/components/safety/SafetyActions';
 import { useBlocks } from '@/lib/useBlocks';
@@ -247,13 +247,11 @@ export default function Feed() {
     setPosting(false);
   };
 
-  // Real posts always sit above the sample ones so a new member's post is the
-  // first thing they see after publishing.
-  // Posts from anyone I have blocked never reach the feed.
+  // Every post here is real. Posts from anyone I have blocked never reach me.
   const combined = useMemo(
     () => (loading
       ? []
-      : [...posts.filter((p) => !p.author_email || !blockedEmails.includes(p.author_email)), ...SAMPLE_FEED]),
+      : posts.filter((p) => !p.author_email || !blockedEmails.includes(p.author_email))),
     [loading, posts, blockedEmails],
   );
 
@@ -278,7 +276,9 @@ export default function Feed() {
           Welcome back{profile?.full_name ? `, ${profile.full_name.split(' ')[0]}` : ''}.
         </h1>
         <p style={{ color: 'var(--color-neutral-800)', margin: 0 }}>
-          {combined.length} posts from students, professors, and counselors who've been where you are.
+          {combined.length === 0
+            ? 'Nothing here yet. Be the first to write something someone else needs to read.'
+            : `${combined.length} post${combined.length === 1 ? '' : 's'} from students, professors, and counselors who've been where you are.`}
         </p>
       </div>
 

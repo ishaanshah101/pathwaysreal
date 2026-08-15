@@ -36,9 +36,8 @@ export default function Terms() {
       </S>
 
       <S title="3. Who can join">
-        You must be <b>13 or older</b> to create an account. Accounts belonging to anyone under 13 will be removed.
-        We ask for your birth year at sign-up and use it to apply additional protections to accounts belonging to
-        minors, described in section 6.
+        You must be <b>13 or older</b> to create an account. Accounts belonging to anyone under 13 will be removed
+        as soon as we become aware of them, and you can tell us about one at the address in section 14.
         <br /><br />
         Keep your account details accurate. Do not share your login, and do not create an account on someone else's
         behalf or pretend to be someone you are not.
@@ -75,10 +74,10 @@ export default function Terms() {
         Because many of our members are minors, some rules are not negotiable:
         <ul style={{ margin: '10px 0 0', paddingLeft: 20 }}>
           <li>You can only message someone after you have both accepted a connection</li>
-          <li>An adult member cannot send the first connection request to a member who is a minor. The minor
-            initiates contact or it does not happen</li>
           <li>Messages are screened automatically. Phone numbers, email addresses, social handles, links, and
             attempts to move the conversation off Pathways or arrange to meet in person are blocked</li>
+          <li>Adults are here to give guidance and nothing else. Initiating contact with a student for any other
+            purpose is a violation of these terms</li>
           <li>Asking a minor for photographs, personal contact details, or secrecy will result in immediate
             termination and, where appropriate, a report to law enforcement or the National Center for Missing and
             Exploited Children</li>

@@ -27,7 +27,7 @@ export default function ReportModal({ open, onOpenChange, reportedEmail, reporte
     setState('sending');
     setError('');
     try {
-      await base44.entities.Report.create({
+      const created = await base44.entities.Report.create({
         reporter_email: email,
         reported_email: reportedEmail,
         context_type: contextType || 'profile',
@@ -37,6 +37,12 @@ export default function ReportModal({ open, onOpenChange, reportedEmail, reporte
         status: 'open',
         occurred_at: new Date().toISOString(),
       });
+      // The safety inbox is emailed from here, as the signed-in reporter, so the
+      // alert endpoint can verify who is asking for it. A failed email must
+      // never make a student think their report did not go through.
+      if (created?.id) {
+        base44.functions.invoke('notifyReportFiled', { report_id: created.id }).catch(() => {});
+      }
       setState('done');
     } catch {
       setState('idle');

@@ -18,9 +18,11 @@ const REASON_LABELS: Record<string, string> = {
 // Emails the safety inbox the moment a Report row appears, so an urgent report
 // is not sitting unseen in the moderation queue.
 //
-// The endpoint is safe to leave open: the recipient is a fixed address that
-// never comes from the request, the report must actually exist and be recent,
-// and each report can only ever generate one alert per day.
+// The endpoint has a public URL, so the caller is identified before anything
+// happens: only the member who actually filed the report, or an admin, can ask
+// for its alert. On top of that the recipient is a fixed address that never
+// comes from the request, the report must exist and be recent, and each report
+// can only ever generate one alert per day.
 export default async function (req: Request): Promise<Response> {
   try {
     const base44 = createClientFromRequest(req);
@@ -30,9 +32,20 @@ export default async function (req: Request): Promise<Response> {
       return Response.json({ ok: false, reason: 'no_report_id' }, { status: 400 });
     }
 
+    const caller = await base44.auth.me().catch(() => null);
+    if (!caller?.email) {
+      return Response.json({ ok: false, reason: 'unauthorized' }, { status: 401 });
+    }
+
     const report = await base44.asServiceRole.entities.Report.get(reportId).catch(() => null);
     if (!report) {
       return Response.json({ ok: false, reason: 'report_not_found' }, { status: 404 });
+    }
+
+    const isReporter =
+      String(report.reporter_email || '').toLowerCase() === caller.email.toLowerCase();
+    if (!isReporter && caller.role !== 'admin') {
+      return Response.json({ ok: false, reason: 'not_authorized' }, { status: 403 });
     }
 
     const createdAt = report.created_date ? new Date(report.created_date).getTime() : 0;

@@ -46,6 +46,7 @@ export default function Onboarding() {
         school: profile?.school || '',
         goals: profile?.goals || '',
         interests: profile?.interests || [],
+        birth_year: profile?.birth_year ? String(profile.birth_year) : '',
         plan: profile?.plan || (['sage_monthly', 'sage_yearly'].includes(planFromUrl) ? planFromUrl : 'free'),
       };
       if (!profile && user?.email) {
@@ -81,9 +82,19 @@ export default function Onboarding() {
   const submit = async (e) => {
     e.preventDefault();
     setError('');
+
+    // Checked here as well as on the server, so someone who mistypes finds out
+    // before a round trip. The server is still the one that decides.
+    const year = Number(form.birth_year);
+    const thisYear = new Date().getFullYear();
+    if (!Number.isInteger(year) || year < 1900 || year > thisYear) {
+      setError('Please enter the year you were born, as four digits.');
+      return;
+    }
+
     setSaving(true);
     try {
-      await saveProfile({ ...form, onboarded: true });
+      await saveProfile({ ...form, birth_year: year, onboarded: true });
       // Someone who came in from a Sage pricing link lands on the Sage page so
       // they can finish the purchase they started, not on a feed they did not
       // ask for.

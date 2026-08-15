@@ -1,6 +1,7 @@
 {
   "name": "Profile",
   "type": "object",
+  "description": "A member's profile. Written ONLY by the save-profile backend function (or an admin), so a client can never set is_minor, verified, or suspended on itself. Raw rows are readable only by their owner and admins; every other member sees a shaped view from the get-profile function.",
   "properties": {
     "user_email": {
       "type": "string",
@@ -41,6 +42,25 @@
     "headline": {
       "type": "string"
     },
+    "birth_year": {
+      "type": "number",
+      "description": "Four-digit year of birth, collected at onboarding. Age is computed from this on the server; sign-up is refused under 13."
+    },
+    "is_minor": {
+      "type": "boolean",
+      "default": false,
+      "description": "Computed and written only by the save-profile function from birth_year. Never accepted from a client."
+    },
+    "verified": {
+      "type": "boolean",
+      "default": false,
+      "description": "True only when Pathways has actually checked this person's stated role. Settable by an admin only."
+    },
+    "suspended": {
+      "type": "boolean",
+      "default": false,
+      "description": "Set by an admin from the moderation queue. A suspended account cannot message, post, or send connection requests."
+    },
     "plan": {
       "type": "string",
       "enum": [
@@ -61,16 +81,17 @@
   ],
   "rls": {
     "create": {
-      "data.user_email": "{{user.email}}"
+      "user_condition": {
+        "role": "profile_service_only"
+      }
     },
-    "read": null,
-    "update": {
+    "read": {
       "$or": [
         {
-          "created_by_id": "{{user.id}}"
+          "data.user_email": "{{user.email}}"
         },
         {
-          "data.user_email": "{{user.email}}"
+          "created_by_id": "{{user.id}}"
         },
         {
           "user_condition": {
@@ -78,6 +99,11 @@
           }
         }
       ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
     },
     "delete": {
       "$or": [

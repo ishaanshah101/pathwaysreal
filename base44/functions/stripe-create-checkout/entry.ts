@@ -14,6 +14,40 @@ const PLAN_TO_PRICE_ENV: Record<string, string> = {
   sage_yearly: "STRIPE_PRICE_SAGE_YEARLY",
 };
 
+// Stripe's API errors are written for developers reading logs, not for a
+// sixteen year old looking at a Subscribe button. They also quote account ids
+// and internal config hints, which should never reach a browser. Translate
+// them to something a student can act on, and keep the real text in the logs.
+function friendlyError(raw: string): { message: string; code: string } {
+  const m = raw.toLowerCase();
+
+  if (m.includes("tax code") || m.includes("managed payments")) {
+    return {
+      message: "Sage checkout is not quite finished being set up. This is on our side, not yours. Please try again shortly.",
+      code: "billing_misconfigured",
+    };
+  }
+  if (m.includes("no such price") || m.includes("no such product")) {
+    return {
+      message: "Sage checkout is not quite finished being set up. This is on our side, not yours. Please try again shortly.",
+      code: "billing_misconfigured",
+    };
+  }
+  if (m.includes("cannot accept payments") || m.includes("capabilit") || m.includes("not activated")) {
+    return {
+      message: "Sage is not accepting payments just yet. Please check back soon.",
+      code: "billing_inactive",
+    };
+  }
+  if (m.includes("rate limit")) {
+    return { message: "Too many attempts at once. Give it a few seconds and try again.", code: "rate_limited" };
+  }
+  return {
+    message: "Could not start checkout. Please try again in a moment.",
+    code: "checkout_failed",
+  };
+}
+
 function form(params: Record<string, string | number | boolean | undefined>) {
   const body = new URLSearchParams();
   for (const [k, v] of Object.entries(params)) {
@@ -117,6 +151,10 @@ Deno.serve(async (req) => {
 
     return Response.json({ url: session.url, id: session.id });
   } catch (error) {
-    return Response.json({ error: (error as Error).message }, { status: 500 });
+    const raw = (error as Error).message || "Unknown error";
+    // The full Stripe text goes to the function logs, where you can read it.
+    console.error("[stripe-create-checkout]", raw);
+    const friendly = friendlyError(raw);
+    return Response.json({ error: friendly.message, code: friendly.code }, { status: 500 });
   }
 });

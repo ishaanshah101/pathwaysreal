@@ -34,7 +34,7 @@ export default function Privacy() {
         <b>When you sign up:</b> your name and email address from your sign-in provider.
         <br /><br />
         <b>When you build your profile:</b> your role, grade or institution, school, the topics you want help with,
-        your headline, and your bio. All of this is optional except your role and birth year.
+        your headline, and your bio. All of this is optional except your role.
         <br /><br />
         <b>As you use Pathways:</b> the posts you publish, the messages you send and receive, your connection
         requests, and the questions you ask Sage along with Sage's answers, so your conversation is there when you

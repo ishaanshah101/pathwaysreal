@@ -1,85 +1,13 @@
-// Single entry point for all sample content. Import from here, not from the
-// individual files, so removing seed content later is a one-line change in the
-// three tabs that use it.
+// The seed feed, seed mentors, and seed message threads have been removed.
+// Everything on Pathways is now real content written by real members.
+//
+// What remains here is the Sage sample on the paywall. That is not fake user
+// content: it is four illustrations of what the product produces, shown to
+// someone deciding whether to pay for it. Nobody can mistake it for a person.
+//
+// Avatar helpers used to live alongside the sample data and now live in
+// @/lib/avatar, so deleting seed content never takes real UI with it.
 
-import { AUTHORS, authorAvatar, initialsOf, sampleEmail } from '@/data/sampleAuthors';
-import { AUTHORS_EXTRA } from '@/data/sampleAuthorsExtra';
-import { SAMPLE_POSTS } from '@/data/samplePosts';
-import { SAMPLE_POSTS_EXTRA } from '@/data/samplePostsExtra';
-import { SAMPLE_THREADS } from '@/data/sampleThreads';
-
-export const ALL_AUTHORS = { ...AUTHORS, ...AUTHORS_EXTRA };
-
-export { authorAvatar, initialsOf, sampleEmail };
-
-const DAY = 24 * 60 * 60 * 1000;
-
-// One shared "now" per page load so ordering stays stable while the user reads.
-const NOW = Date.now();
-
-function toPost(raw, index) {
-  const author = ALL_AUTHORS[raw.a] || {};
-  // Give roughly a third of the plain posts generated cover art, spaced out so
-  // the feed alternates between visual and text-led cards rather than clumping.
-  const variant = raw.v && raw.v !== 'plain'
-    ? raw.v
-    : (index % 3 === 1 ? 'cover' : 'plain');
-  return {
-    id: `sample-${raw.a}-${raw.c}-${index}`,
-    is_sample: true,
-    author_key: raw.a,
-    author_email: sampleEmail(raw.a),
-    author_name: author.name,
-    author_role: author.role,
-    author_headline: author.headline,
-    title: raw.title,
-    body: raw.body,
-    category: raw.c,
-    tags: raw.tags || [],
-    variant,
-    stats: raw.stats,
-    items: raw.items,
-    quote: raw.quote,
-    created_date: new Date(NOW - (raw.d ?? index) * DAY).toISOString(),
-  };
-}
-
-export const SAMPLE_FEED = [...SAMPLE_POSTS, ...SAMPLE_POSTS_EXTRA]
-  .map(toPost)
-  .sort((x, y) => new Date(y.created_date) - new Date(x.created_date));
-
-export const SAMPLE_MENTORS = Object.keys(ALL_AUTHORS).map((key) => {
-  const a = ALL_AUTHORS[key];
-  return {
-    key,
-    user_email: sampleEmail(key),
-    full_name: a.name,
-    role: a.role,
-    school: a.school,
-    headline: a.headline,
-    bio: a.bio,
-    interests: a.interests || [],
-    onboarded: true,
-    is_sample_profile: true,
-    // How many sample posts this person has, shown on their Explore card.
-    post_count: SAMPLE_FEED.filter((p) => p.author_key === key).length,
-  };
-});
-
-export const SAMPLE_MESSAGE_THREADS = SAMPLE_THREADS.map((t) => {
-  const a = ALL_AUTHORS[t.key] || {};
-  return {
-    ...t,
-    id: `sample-thread-${t.key}`,
-    is_sample: true,
-    other: sampleEmail(t.key),
-    name: a.name,
-    headline: a.headline,
-    last: t.messages[t.messages.length - 1],
-  };
-});
-
-// Shown on the Sage paywall so people can see the quality before paying.
 export const SAMPLE_SAGE_EXCHANGES = [
   {
     q: 'How do I build a college list that actually fits me?',

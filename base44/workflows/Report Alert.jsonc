@@ -1,0 +1,40 @@
+{
+  "name": "Report Alert",
+  "description": "Emails the Pathways safety inbox through Gmail as soon as a member files a report, so urgent safety issues are seen immediately instead of waiting in the moderation queue.",
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "report_alert",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "send_report_alert": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "notifyReportFiled",
+            "args": {
+              "report_id": "${ .trigger.entity_id }"
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Email the safety inbox",
+            "description": "Sends the report details via Gmail"
+          }
+        }
+      }
+    ]
+  },
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "entity",
+      "events": [
+        "create"
+      ],
+      "entity_name": "Report"
+    }
+  }
+}

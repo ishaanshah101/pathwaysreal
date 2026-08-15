@@ -1,22 +1,9 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 import { consumeRateLimit } from '../../shared/rateLimit.ts';
+import { sendGmail, escapeHtml } from '../../shared/gmail.ts';
 
-// SHARED Gmail connector. The builder connects their own Gmail account once;
-// the token is shared across all app users, so every welcome email sends
-// from that one account.
-
-function utf8ToBase64Url(str) {
-  const bytes = new TextEncoder().encode(str);
-  let bin = '';
-  for (const b of bytes) bin += String.fromCharCode(b);
-  return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-}
-
-function escapeHtml(s) {
-  return String(s).replace(/[&<>"']/g, (c) => ({
-    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
-  }[c]));
-}
+// Mail goes out through the shared Gmail connector, via the shared helper that
+// the moderation alert uses too.
 
 export default async function(req) {
   try {
@@ -60,24 +47,6 @@ export default async function(req) {
       return Response.json({ ok: false, reason: 'already_sent_today' }, { status: 429 });
     }
 
-    const { accessToken } = await base44.asServiceRole.connectors.getConnection('gmail');
-
-    // Resolve the connected address so the From header is valid. Gmail will
-    // otherwise rewrite or reject a From that doesn't match the account.
-    let fromEmail = '';
-    try {
-      const profileRes = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/profile', {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
-      if (profileRes.ok) {
-        const profile = await profileRes.json();
-        fromEmail = profile?.emailAddress || '';
-      }
-    } catch { /* fall back below */ }
-    if (!fromEmail) {
-      return Response.json({ ok: false, reason: 'gmail_not_connected' }, { status: 503 });
-    }
-
     const firstName = (fullName.split(' ')[0] || '').trim() || 'there';
     const subject = 'Welcome to Pathways, let\u2019s get you started';
 
@@ -116,44 +85,13 @@ export default async function(req) {
       `</div>`,
     ].join('');
 
-    const boundary = 'pathways_' + Math.random().toString(36).slice(2);
-    const mime = [
-      `From: Pathways <${fromEmail}>`,
-      `To: ${toEmail}`,
-      `Subject: ${subject}`,
-      `MIME-Version: 1.0`,
-      `Content-Type: multipart/alternative; boundary="${boundary}"`,
-      ``,
-      `--${boundary}`,
-      `Content-Type: text/plain; charset=UTF-8`,
-      `Content-Transfer-Encoding: 8bit`,
-      ``,
-      plain,
-      ``,
-      `--${boundary}`,
-      `Content-Type: text/html; charset=UTF-8`,
-      `Content-Transfer-Encoding: 8bit`,
-      ``,
-      html,
-      ``,
-      `--${boundary}--`,
-      ``,
-    ].join('\r\n');
-
-    const raw = utf8ToBase64Url(mime);
-
-    const sendRes = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send', {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ raw }),
-    });
-
-    if (!sendRes.ok) {
-      const errText = await sendRes.text();
-      return Response.json({ ok: false, error: errText }, { status: 502 });
+    const sent = await sendGmail(base44, { to: toEmail, subject, plain, html });
+    if (!sent.ok) {
+      return Response.json(
+        { ok: false, ...sent },
+        { status: sent.reason === 'gmail_not_connected' ? 503 : 502 },
+      );
     }
-
-    const sent = await sendRes.json();
     return Response.json({ ok: true, id: sent.id });
   } catch (error) {
     return Response.json({ ok: false, error: error.message }, { status: 500 });

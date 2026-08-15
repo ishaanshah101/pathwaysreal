@@ -31,7 +31,7 @@ export default function Privacy() {
       </S>
 
       <S title="2. What we collect">
-        <b>When you sign up:</b> your name and email address from your sign-in provider, and your birth year.
+        <b>When you sign up:</b> your name and email address from your sign-in provider.
         <br /><br />
         <b>When you build your profile:</b> your role, grade or institution, school, the topics you want help with,
         your headline, and your bio. All of this is optional except your role and birth year.
@@ -64,11 +64,11 @@ export default function Privacy() {
       </S>
 
       <S title="5. Who can see your information">
-        <b>Other members:</b> your first name, role, headline, bio, and topics. Your full name, school, grade, and
-        goals are shown only to members you have accepted a connection with. If you are a minor, we show only your
-        first name publicly.
+        <b>Other members:</b> your name, role, headline, school, grade, bio, and topics are visible to other
+        signed-in members, so they can decide whether to connect with you. Only share what you are comfortable
+        being seen — you can clear any of these fields from your Profile tab at any time.
         <br /><br />
-        <b>Only you:</b> your Sage conversations, and your birth year.
+        <b>Only you:</b> your Sage conversations.
         <br /><br />
         <b>You and one other person:</b> your direct messages.
         <br /><br />
@@ -98,12 +98,12 @@ export default function Privacy() {
       </S>
 
       <S title="8. Students under 18">
-        Pathways is for people <b>13 and older</b>. We do not knowingly collect information from anyone under 13, and
-        we ask for birth year at sign-up to enforce this. If you believe a child under 13 has created an account,
-        email us and we will delete it promptly.
+        Pathways is for people <b>13 and older</b>. We do not knowingly collect information from anyone under 13. If
+        you believe a child under 13 has created an account, email us and we will delete it promptly.
         <br /><br />
-        Accounts belonging to minors get additional protections automatically: reduced profile visibility, and a rule
-        that adult members cannot initiate contact with them. See our <Link to="/terms">Terms</Link> section 6.
+        Members who are minors are protected by the rules in our <Link to="/terms">Terms</Link> section 6: messaging
+        requires a mutual connection, and every message is screened for contact details and meetup requests before it
+        sends.
         <br /><br />
         We handle student information consistently with COPPA, and where Pathways is used in connection with a school
         we will work with that school on its FERPA obligations. A parent or guardian can email us to review, correct,

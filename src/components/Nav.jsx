@@ -1,6 +1,5 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import BrandMark from '@/components/BrandMark';
 import GoogleButton from '@/components/GoogleButton';
 import { useAuth } from '@/lib/AuthContext';
 import { useProfile } from '@/lib/useProfile';
@@ -24,8 +23,7 @@ export default function Nav() {
       className="flex items-center gap-4 sm:gap-[26px] flex-wrap"
       style={{ paddingTop: 20, paddingBottom: 20 }}
     >
-      <Link to="/" className="flex items-center gap-[9px] mr-auto no-underline text-inherit">
-        <BrandMark size={36} />
+      <Link to="/" className="flex items-center mr-auto no-underline text-inherit">
         <span style={{ fontFamily: 'var(--font-heading)', fontSize: 20 }}>Pathways</span>
       </Link>
 

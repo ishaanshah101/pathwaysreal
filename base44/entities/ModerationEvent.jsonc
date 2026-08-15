@@ -1,7 +1,7 @@
 {
   "name": "ModerationEvent",
   "type": "object",
-  "description": "Every blocked message or post. Written ONLY by backend functions as service role and readable only by admins, so patterns of attempted grooming stay visible even though the content never sent.",
+  "description": "Every blocked message or post. Written ONLY by backend functions as service role and readable only by admins, so patterns of attempted grooming stay visible even though the content never sent. Admins triage these from the moderation queue.",
   "properties": {
     "sender_email": {
       "type": "string"
@@ -38,6 +38,20 @@
     "detail": {
       "type": "string",
       "description": "Classifier reason or extra context"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "open",
+        "reviewing",
+        "actioned",
+        "dismissed"
+      ],
+      "default": "open",
+      "description": "Triage state, set by an admin in the moderation queue"
+    },
+    "admin_notes": {
+      "type": "string"
     },
     "occurred_at": {
       "type": "string"

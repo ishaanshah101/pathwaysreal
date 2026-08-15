@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { NavLink, Outlet, Link } from 'react-router-dom';
 import { Home, Compass, MessageCircle, Sparkles, User, LogOut } from 'lucide-react';
 import Seo from '@/components/Seo';
+import BrandMark from '@/components/BrandMark';
 import UnreadBadge from '@/components/app/UnreadBadge';
 import { useAuth } from '@/lib/AuthContext';
 import { useProfile } from '@/lib/useProfile';
@@ -71,7 +72,8 @@ export default function AppShell() {
           className="flex items-center gap-2 flex-wrap"
           style={{ maxWidth: 1080, margin: '0 auto', padding: '12px clamp(16px,4vw,40px)' }}
         >
-          <Link to="/app" className="flex items-center no-underline text-inherit" style={{ marginRight: 8 }}>
+          <Link to="/app" className="flex items-center gap-[9px] no-underline text-inherit" style={{ marginRight: 8 }}>
+            <BrandMark size={36} />
             <span style={{ fontFamily: 'var(--font-heading)', fontSize: 18 }}>Pathways</span>
           </Link>
 

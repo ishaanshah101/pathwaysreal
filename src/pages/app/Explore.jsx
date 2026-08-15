@@ -135,6 +135,7 @@ export default function Explore() {
   const [q, setQ] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
   const [topicFilter, setTopicFilter] = useState('all');
+  const [connectError, setConnectError] = useState('');
   const [loading, setLoading] = useState(true);
   const [busyEmail, setBusyEmail] = useState(null);
   const [visible, setVisible] = useState(PAGE_SIZE);
@@ -161,16 +162,17 @@ export default function Explore() {
     // states for the same pair.
     if (connectionFor(m.user_email)) return;
     setBusyEmail(m.user_email);
+    setConnectError('');
     try {
-      await base44.entities.Connection.create({
-        from_email: email,
-        from_name: profile?.full_name || '',
-        to_email: m.user_email,
-        to_name: m.full_name || '',
-        status: 'pending',
-      });
+      // Goes through request-connection, which refuses an adult opening
+      // contact with a member who is under 18. The rule lives on the server,
+      // so hiding this button was never the actual protection.
+      await base44.functions.invoke('request-connection', { toEmail: m.user_email });
       await load();
-    } catch { /* button simply stays on Connect */ }
+    } catch (err) {
+      const data = err?.response?.data;
+      setConnectError(data?.error || 'That request could not be sent. Try again in a moment.');
+    }
     setBusyEmail(null);
   };
 

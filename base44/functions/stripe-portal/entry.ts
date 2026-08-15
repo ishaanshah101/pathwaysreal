@@ -54,6 +54,11 @@ Deno.serve(async (req) => {
 
     return Response.json({ url: json.url });
   } catch (error) {
-    return Response.json({ error: (error as Error).message }, { status: 500 });
+    // Keep Stripe's developer-facing text in the logs, not in a student's face.
+    console.error("[stripe-portal]", (error as Error).message);
+    return Response.json(
+      { error: "Could not open your billing page. Please try again in a moment.", code: "portal_failed" },
+      { status: 500 },
+    );
   }
 });

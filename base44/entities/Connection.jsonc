@@ -1,6 +1,7 @@
 {
   "name": "Connection",
   "type": "object",
+  "description": "A connection between two members. Created ONLY by the request-connection backend function, which refuses suspended accounts and refuses to let an adult send the first request to a minor. Either participant may accept or decline.",
   "properties": {
     "from_email": {
       "type": "string"
@@ -38,16 +39,9 @@
   ],
   "rls": {
     "create": {
-      "$or": [
-        {
-          "data.from_email": "{{user.email}}"
-        },
-        {
-          "user_condition": {
-            "role": "admin"
-          }
-        }
-      ]
+      "user_condition": {
+        "role": "connection_service_only"
+      }
     },
     "read": {
       "$or": [

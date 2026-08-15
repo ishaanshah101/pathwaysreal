@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Sparkles, Check, Loader2 } from 'lucide-react';
 import { startSageCheckout, SAGE_PRICES } from '@/lib/useSubscription';
 import { SAMPLE_SAGE_EXCHANGES } from '@/data/sampleContent';
@@ -11,22 +11,40 @@ const points = [
 ];
 
 export default function SagePaywall({ notice }) {
-  const [plan, setPlan] = useState('sage_monthly');
+  // Someone who picked a plan before they had an account arrives here with
+  // ?plan= in the URL right after onboarding. Preselect it and send them
+  // straight to checkout so they finish the purchase they already started.
+  const urlPlan = new URLSearchParams(window.location.search).get('plan');
+  const validUrlPlan = ['sage_monthly', 'sage_yearly'].includes(urlPlan) ? urlPlan : null;
+
+  const [plan, setPlan] = useState(validUrlPlan || 'sage_monthly');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const yearly = plan === 'sage_yearly';
   const price = SAGE_PRICES[plan];
+  const autoStarted = useRef(false);
 
-  const subscribe = async () => {
+  const subscribe = async (chosen = plan) => {
     setBusy(true);
     setError('');
     try {
-      await startSageCheckout(plan);
+      await startSageCheckout(chosen);
     } catch (err) {
       setError(err.message);
       setBusy(false);
     }
   };
+
+  useEffect(() => {
+    if (!validUrlPlan || autoStarted.current) return;
+    autoStarted.current = true;
+    // Drop the param so back-navigating here doesn't relaunch checkout.
+    const url = new URL(window.location.href);
+    url.searchParams.delete('plan');
+    window.history.replaceState({}, '', url.pathname + url.search);
+    subscribe(validUrlPlan);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="flex flex-col" style={{ gap: 18, maxWidth: 720 }}>
@@ -99,7 +117,7 @@ export default function SagePaywall({ notice }) {
           type="button"
           className="btn btn-primary btn-block"
           style={{ minHeight: 50, fontSize: 15.5, gap: 8 }}
-          onClick={subscribe}
+          onClick={() => subscribe()}
           disabled={busy}
         >
           {busy ? (

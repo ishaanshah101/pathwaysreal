@@ -88,7 +88,9 @@ export default function Onboarding() {
       // they can finish the purchase they started, not on a feed they did not
       // ask for.
       const wantsSage = ['sage_monthly', 'sage_yearly'].includes(form.plan);
-      navigate(wantsSage ? '/app/sage' : '/app', { replace: true });
+      // Carry the chosen plan through so the Sage page can send them straight
+      // to checkout now that the subscription has an account to belong to.
+      navigate(wantsSage ? `/app/sage?plan=${form.plan}` : '/app', { replace: true });
     } catch (err) {
       setError(err?.message || 'Could not save your profile. Please try again.');
       setSaving(false);

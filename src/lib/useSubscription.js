@@ -42,12 +42,17 @@ export function useSubscription() {
   };
 }
 
+// Anything shown here is read by a student, not by whoever set up billing.
+// Backend functions already translate Stripe's raw API errors, so this only
+// needs to catch the cases that never reach them.
 function messageFrom(err, fallback) {
   const data = err?.response?.data;
-  if (data?.code === 'stripe_not_configured') {
-    return 'Sage checkout is not switched on yet. The Stripe keys still need to be added in Base44.';
+  if (data?.code === 'stripe_not_configured' || data?.code === 'billing_misconfigured') {
+    return 'Sage checkout is not quite finished being set up. This is on our side, not yours. Please check back soon.';
   }
-  return data?.error || err?.message || fallback;
+  if (data?.error) return data.error;
+  // Never surface a raw network or SDK error string to a student.
+  return fallback;
 }
 
 // Sends the user to Stripe's hosted checkout. We never touch card details:

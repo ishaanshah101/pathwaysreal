@@ -4,6 +4,8 @@ import { base44 } from '@/api/base44Client';
 import { useProfile, ROLE_LABELS, CATEGORY_LABELS } from '@/lib/useProfile';
 import { SAMPLE_FEED, authorAvatar, initialsOf } from '@/data/sampleContent';
 import CoverArt from '@/components/app/CoverArt';
+import SafetyActions from '@/components/safety/SafetyActions';
+import { useBlocks } from '@/lib/useBlocks';
 import Seo from '@/components/Seo';
 
 const PAGE_SIZE = 12;
@@ -39,7 +41,7 @@ function Avatar({ name, authorKey, size = 40 }) {
   );
 }
 
-function PostCard({ post, canMessage, isMine }) {
+function PostCard({ post, canMessage, isMine, onBlocked }) {
   const v = post.variant || 'plain';
   const isLong = (post.body || '').length > 620;
   const [open, setOpen] = useState(false);
@@ -167,6 +169,20 @@ function PostCard({ post, canMessage, isMine }) {
             Connect to message
           </Link>
         ) : null}
+
+        {/* A post is often the first place something feels off, so report and
+            block live right here rather than only on the profile. */}
+        {!post.is_sample && !isMine && post.author_email && (
+          <span className="flex gap-4 items-center" style={{ marginLeft: 'auto' }}>
+            <SafetyActions
+              targetEmail={post.author_email}
+              targetName={post.author_name}
+              contextType="post"
+              contextId={post.id}
+              onBlocked={onBlocked}
+            />
+          </span>
+        )}
       </div>
     </article>
   );
@@ -174,6 +190,7 @@ function PostCard({ post, canMessage, isMine }) {
 
 export default function Feed() {
   const { profile, email } = useProfile();
+  const { blockedEmails, reloadBlocks } = useBlocks();
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
@@ -232,9 +249,12 @@ export default function Feed() {
 
   // Real posts always sit above the sample ones so a new member's post is the
   // first thing they see after publishing.
+  // Posts from anyone I have blocked never reach the feed.
   const combined = useMemo(
-    () => (loading ? [] : [...posts, ...SAMPLE_FEED]),
-    [loading, posts],
+    () => (loading
+      ? []
+      : [...posts.filter((p) => !p.author_email || !blockedEmails.includes(p.author_email)), ...SAMPLE_FEED]),
+    [loading, posts, blockedEmails],
   );
 
   const filtered = useMemo(
@@ -343,6 +363,7 @@ export default function Feed() {
                 post={p}
                 canMessage={Boolean(p.author_email && connectedEmails.includes(p.author_email))}
                 isMine={Boolean(email && p.author_email === email)}
+                onBlocked={reloadBlocks}
               />
             ))}
           </div>

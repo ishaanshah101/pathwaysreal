@@ -28,6 +28,23 @@ export default async function (req: Request): Promise<Response> {
       return Response.json({ error: 'Messages are limited to 2000 characters.' }, { status: 400 });
     }
 
+    // Blocks come first, before anything else is checked. The refusal is
+    // deliberately identical in both directions so a sender cannot work out
+    // whether they were blocked or simply never connected.
+    const blocks = await base44.asServiceRole.entities.Block.filter({});
+    const isBlocked = (Array.isArray(blocks) ? blocks : []).some((b: any) => {
+      const blocker = String(b.blocker_email || '').toLowerCase();
+      const blocked = String(b.blocked_email || '').toLowerCase();
+      return (blocker === fromEmail && blocked === toEmail)
+        || (blocker === toEmail && blocked === fromEmail);
+    });
+    if (isBlocked) {
+      return Response.json(
+        { code: 'blocked', error: 'You can no longer message this person.' },
+        { status: 403 },
+      );
+    }
+
     // A Connection is what unlocks messaging. Checked server side against the
     // real rows, so hiding the button was never the actual protection.
     const conns = await base44.asServiceRole.entities.Connection.filter({ status: 'accepted' });

@@ -1,0 +1,54 @@
+{
+  "name": "Block",
+  "type": "object",
+  "description": "One user blocking another. Only the blocker can see or remove their own blocks, so a blocked person is never told. send-message reads this as service role and refuses in either direction.",
+  "properties": {
+    "blocker_email": {
+      "type": "string"
+    },
+    "blocked_email": {
+      "type": "string"
+    },
+    "blocked_name": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "blocker_email",
+    "blocked_email"
+  ],
+  "rls": {
+    "create": {
+      "data.blocker_email": "{{user.email}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.blocker_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.blocker_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

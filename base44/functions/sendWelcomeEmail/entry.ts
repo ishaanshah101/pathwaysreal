@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
+import { consumeRateLimit } from '../../shared/rateLimit.ts';
 
 // SHARED Gmail connector. The builder connects their own Gmail account once;
 // the token is shared across all app users, so every welcome email sends
@@ -27,6 +28,21 @@ export default async function(req) {
     }
 
     const base44 = createClientFromRequest(req);
+
+    // This endpoint is reachable without a user session because the signup
+    // workflow calls it. Two guards keep it from being used as a free mailer:
+    // the address must belong to a real registered user, and each address can
+    // only ever receive one welcome email per day.
+    const users = await base44.asServiceRole.entities.User.filter({ email: toEmail });
+    if (!Array.isArray(users) || users.length === 0) {
+      return Response.json({ ok: false, reason: 'not_a_registered_user' }, { status: 403 });
+    }
+
+    const limit = await consumeRateLimit(base44, toEmail.toLowerCase(), 'welcome_email', { day: 1 });
+    if (!limit.ok) {
+      return Response.json({ ok: false, reason: 'already_sent_today' }, { status: 429 });
+    }
+
     const { accessToken } = await base44.asServiceRole.connectors.getConnection('gmail');
 
     // Resolve the connected address so the From header is valid. Gmail will

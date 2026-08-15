@@ -3,11 +3,13 @@ import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useProfile, ROLE_LABELS } from '@/lib/useProfile';
 import { SAMPLE_MENTORS, authorAvatar, initialsOf } from '@/data/sampleContent';
+import SafetyActions from '@/components/safety/SafetyActions';
+import { useBlocks } from '@/lib/useBlocks';
 import Seo from '@/components/Seo';
 
 const PAGE_SIZE = 12;
 
-function MentorCard({ m, onConnect, onRespond, connection, busy }) {
+function MentorCard({ m, onConnect, onRespond, connection, busy, onBlocked }) {
   const [bg, fg] = authorAvatar(m.key || m.user_email || m.full_name || '?');
   const isSample = Boolean(m.is_sample_profile);
   const status = connection?.status || null;
@@ -107,12 +109,27 @@ function MentorCard({ m, onConnect, onRespond, connection, busy }) {
           </>
         )}
       </div>
+
+      {/* Reporting and blocking are available on every real profile, not just
+          once a conversation has already gone wrong. */}
+      {!isSample && (
+        <div className="flex gap-4 items-center" style={{ borderTop: '1px solid var(--color-divider)', paddingTop: 10 }}>
+          <SafetyActions
+            targetEmail={m.user_email}
+            targetName={m.full_name}
+            contextType="profile"
+            contextId={m.user_email}
+            onBlocked={onBlocked}
+          />
+        </div>
+      )}
     </div>
   );
 }
 
 export default function Explore() {
   const { profile, email } = useProfile();
+  const { blockedEmails, reloadBlocks } = useBlocks();
   const [people, setPeople] = useState([]);
   const [connections, setConnections] = useState([]);
   const [q, setQ] = useState('');
@@ -185,7 +202,10 @@ export default function Explore() {
   }, []);
 
   const list = useMemo(() => {
-    const real = people.filter((p) => p.user_email && p.user_email !== email && p.onboarded);
+    // Anyone I have blocked is gone from the directory entirely.
+    const real = people.filter(
+      (p) => p.user_email && p.user_email !== email && p.onboarded && !blockedEmails.includes(p.user_email),
+    );
     const samples = SAMPLE_MENTORS.filter((s) => !real.some((r) => r.user_email === s.user_email));
     const all = [...real, ...samples];
     const needle = q.trim().toLowerCase();
@@ -196,7 +216,7 @@ export default function Explore() {
       return [p.full_name, p.headline, p.school, p.bio, ...(p.interests || [])]
         .filter(Boolean).join(' ').toLowerCase().includes(needle);
     });
-  }, [people, q, roleFilter, topicFilter, email]);
+  }, [people, q, roleFilter, topicFilter, email, blockedEmails]);
 
   useEffect(() => { setVisible(PAGE_SIZE); }, [q, roleFilter, topicFilter]);
 
@@ -273,6 +293,7 @@ export default function Explore() {
                 onRespond={respond}
                 connection={connectionFor(m.user_email)}
                 busy={busyEmail === m.user_email}
+                onBlocked={reloadBlocks}
               />
             ))}
           </div>

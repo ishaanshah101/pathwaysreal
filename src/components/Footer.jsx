@@ -12,6 +12,7 @@ export default function Footer() {
         <BrandMark size={22} />
         <span style={{ fontFamily: 'var(--font-heading)', fontSize: 14, color: 'var(--color-text)' }}>Pathways</span>
       </span>
+      <Link to="/safety" className="no-underline" style={{ color: 'var(--color-accent-700)', fontWeight: 600 }}>Safety</Link>
       <Link to="/privacy" className="no-underline" style={{ color: 'var(--color-neutral-700)' }}>Privacy</Link>
       <Link to="/terms" className="no-underline" style={{ color: 'var(--color-neutral-700)' }}>Terms</Link>
       <span>14+ · COPPA and FERPA aligned · We never sell student data</span>

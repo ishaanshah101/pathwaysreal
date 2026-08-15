@@ -1,0 +1,84 @@
+{
+  "name": "Report",
+  "type": "object",
+  "description": "A user report about another user's message, post, or profile. Anyone can file one about someone else, but only admins can ever read them back: a reporter must not be able to audit their own reports, and a reported user must never learn a report exists.",
+  "properties": {
+    "reporter_email": {
+      "type": "string"
+    },
+    "reported_email": {
+      "type": "string"
+    },
+    "context_type": {
+      "type": "string",
+      "enum": [
+        "message",
+        "post",
+        "profile"
+      ],
+      "default": "profile"
+    },
+    "context_id": {
+      "type": "string",
+      "description": "Id of the reported message or post, or the reported user's email for a profile report"
+    },
+    "reason": {
+      "type": "string",
+      "enum": [
+        "inappropriate_contact",
+        "sexual_content",
+        "harassment",
+        "spam",
+        "impersonation",
+        "safety_concern",
+        "other"
+      ],
+      "default": "safety_concern"
+    },
+    "details": {
+      "type": "string",
+      "maxLength": 2000
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "open",
+        "reviewing",
+        "actioned",
+        "dismissed"
+      ],
+      "default": "open"
+    },
+    "admin_notes": {
+      "type": "string"
+    },
+    "occurred_at": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "reporter_email",
+    "reported_email",
+    "reason"
+  ],
+  "rls": {
+    "create": {
+      "data.reporter_email": "{{user.email}}"
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

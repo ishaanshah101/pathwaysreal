@@ -6,6 +6,8 @@ import { useMessages, deliveryStateOf } from '@/lib/MessagesContext';
 import DeliveryTicks from '@/components/app/DeliveryTicks';
 import UnreadBadge from '@/components/app/UnreadBadge';
 import { SAMPLE_MESSAGE_THREADS, authorAvatar, initialsOf } from '@/data/sampleContent';
+import SafetyActions from '@/components/safety/SafetyActions';
+import { useBlocks } from '@/lib/useBlocks';
 import Seo from '@/components/Seo';
 
 function clockTime(iso) {
@@ -45,6 +47,7 @@ function Bubble({ mine, children, meta }) {
 
 export default function Messages() {
   const { profile, email } = useProfile();
+  const { blockedEmails, reloadBlocks } = useBlocks();
   const {
     messages, receiptByMessage, loading,
     unreadByThread, markThreadRead, sendMessage, setActiveThread,
@@ -118,8 +121,11 @@ export default function Messages() {
       subtitle: t.subtitle, unread: 0, is_sample: true,
     }));
 
-    return [...real, ...samples];
-  }, [messages, people, email, activeWith, sampleByEmail, unreadByThread]);
+    // Conversations with anyone I have blocked drop out of the list.
+    const visible = real.filter((r) => !blockedEmails.includes(r.other));
+
+    return [...visible, ...samples];
+  }, [messages, people, email, activeWith, sampleByEmail, unreadByThread, blockedEmails]);
 
   const thread = useMemo(() => {
     if (!activeWith || activeSample) return [];
@@ -140,16 +146,16 @@ export default function Messages() {
     setDraft('');
     setSending(true);
     setSendError('');
-    try {
-      await sendMessage({
-        toEmail: activeWith,
-        threadKey: threadKey(email, activeWith),
-        body,
-        fromName: profile?.full_name || '',
-      });
-    } catch {
-      setSendError('That message did not send. Check your connection and try again.');
-    }
+    // sendMessage now returns a reason instead of throwing, so a message held
+    // back by the safety filters, by a block, or by a missing connection is
+    // explained in place rather than surfacing as an error.
+    const res = await sendMessage({
+      toEmail: activeWith,
+      threadKey: threadKey(email, activeWith),
+      body,
+      fromName: profile?.full_name || '',
+    });
+    if (res?.blocked) setSendError(res.notice);
     setSending(false);
   };
 
@@ -233,10 +239,26 @@ export default function Messages() {
             </div>
           ) : (
             <>
-              <div style={{ borderBottom: '1px solid var(--color-divider)', paddingBottom: 10 }}>
-                <span style={{ fontSize: 15, fontWeight: 600 }}>{activeMeta?.name || activeWith}</span>
-                {activeSample?.headline && (
-                  <div style={{ fontSize: 12, color: 'var(--color-neutral-600)' }}>{activeSample.headline}</div>
+              <div
+                className="flex items-start gap-3 flex-wrap"
+                style={{ borderBottom: '1px solid var(--color-divider)', paddingBottom: 10 }}
+              >
+                <div style={{ minWidth: 0 }}>
+                  <span style={{ fontSize: 15, fontWeight: 600 }}>{activeMeta?.name || activeWith}</span>
+                  {activeSample?.headline && (
+                    <div style={{ fontSize: 12, color: 'var(--color-neutral-600)' }}>{activeSample.headline}</div>
+                  )}
+                </div>
+                {!activeSample && (
+                  <span className="flex gap-4 items-center" style={{ marginLeft: 'auto' }}>
+                    <SafetyActions
+                      targetEmail={activeWith}
+                      targetName={activeMeta?.name}
+                      contextType="message"
+                      contextId={thread[thread.length - 1]?.id || activeWith}
+                      onBlocked={() => { reloadBlocks(); setParams({}); }}
+                    />
+                  </span>
                 )}
               </div>
 

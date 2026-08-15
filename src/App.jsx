@@ -19,6 +19,7 @@ import Faq from '@/pages/Faq';
 import Join from '@/pages/Join';
 import Privacy from '@/pages/Privacy';
 import Terms from '@/pages/Terms';
+import Safety from '@/pages/Safety';
 
 // Auth
 import Login from '@/pages/Login';
@@ -74,6 +75,7 @@ const AuthenticatedApp = () => {
         <Route path="/join" element={<Join />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/terms" element={<Terms />} />
+        <Route path="/safety" element={<Safety />} />
       </Route>
 
       {/* Auth pages — these existed but were never routed, so every

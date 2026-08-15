@@ -111,6 +111,40 @@ export default async function (req: Request): Promise<Response> {
       });
     }
 
+    // Vision check on every attached image, after the text checks and before
+    // the row exists. Fails closed: an image that cannot be checked is not
+    // delivered. This is the only thing standing between a private message and
+    // an unreviewable image sent to a minor, so it does not get a fast path.
+    const screenedFiles = await screenAttachments(base44, valid.files);
+    if (!screenedFiles.ok) {
+      await logModerationEvent(base44, {
+        sender_email: fromEmail,
+        recipient_email: toEmail,
+        surface: 'message',
+        rule: `image_${screenedFiles.verdict.category || 'unsafe'}`,
+        severity: screenedFiles.verdict.severity === 'high' ? 'high' : 'low',
+        excerpt: `${screenedFiles.file.name}: ${screenedFiles.file.url}`,
+        detail: screenedFiles.verdict.reason,
+      });
+      return Response.json({ blocked: true, reason: IMAGE_BLOCK_REASON });
+    }
+
+    // Any attachment that is not an image reaches the recipient uninspected.
+    // Log it so the moderation queue has a record of what moved through DMs,
+    // even when nothing was wrong with it.
+    const unscanned = screenedFiles.files.filter((f: any) => !f.scanned);
+    if (unscanned.length > 0) {
+      await logModerationEvent(base44, {
+        sender_email: fromEmail,
+        recipient_email: toEmail,
+        surface: 'message',
+        rule: 'unscanned_file',
+        severity: 'low',
+        excerpt: unscanned.map((f: any) => `${f.name} (${f.kind})`).join(', '),
+        detail: 'Non-image attachment delivered without inspection',
+      });
+    }
+
     const threadKey = [fromEmail, toEmail].sort().join('|');
     const created = await base44.asServiceRole.entities.Message.create({
       thread_key: threadKey,
@@ -118,6 +152,7 @@ export default async function (req: Request): Promise<Response> {
       from_name: String(payload?.fromName || user.full_name || ''),
       to_email: toEmail,
       body,
+      attachments: screenedFiles.files,
     });
 
     return Response.json({ message: created });

@@ -236,16 +236,35 @@ export function MessagesProvider({ children }) {
       body, created_date: new Date().toISOString(),
     };
     setMessages((prev) => [...prev, optimistic]);
+
+    // Sending goes through the send-message function now. It is the only writer
+    // of Message rows, and it checks the connection, the rate limit, and the
+    // safety filters before anything is stored.
+    const fail = (notice) => {
+      setMessages((prev) => prev.map((m) => (
+        m.id === tempId ? { ...m, failed: true, pending: false, notice } : m
+      )));
+      return { blocked: true, notice };
+    };
+
     try {
-      const created = await base44.entities.Message.create({
-        thread_key: threadKey, from_email: email, from_name: fromName || '',
-        to_email: toEmail, body,
-      });
+      const res = await base44.functions.invoke('send-message', { toEmail, body, fromName });
+      const data = res?.data || {};
+
+      // A held-back message is not an error: the sender is told why, in place.
+      if (data.blocked) return fail(data.reason);
+
+      const created = data.message;
+      if (!created?.id) return fail('That message did not go through. Try again in a moment.');
+
       setMessages((prev) => prev.map((m) => (m.id === tempId ? created : m)));
       return created;
     } catch (err) {
-      setMessages((prev) => prev.map((m) => (m.id === tempId ? { ...m, failed: true, pending: false } : m)));
-      throw err;
+      const data = err?.response?.data;
+      return fail(
+        data?.error
+        || 'That message did not go through. Check your connection and try again.',
+      );
     }
   }, [email]);
 

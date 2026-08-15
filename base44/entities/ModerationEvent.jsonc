@@ -1,0 +1,72 @@
+{
+  "name": "ModerationEvent",
+  "type": "object",
+  "description": "Every blocked message or post. Written ONLY by backend functions as service role and readable only by admins, so patterns of attempted grooming stay visible even though the content never sent.",
+  "properties": {
+    "sender_email": {
+      "type": "string"
+    },
+    "recipient_email": {
+      "type": "string",
+      "description": "Who it was aimed at, when the content was a message"
+    },
+    "surface": {
+      "type": "string",
+      "enum": [
+        "message",
+        "post"
+      ],
+      "default": "message"
+    },
+    "rule": {
+      "type": "string",
+      "description": "Which check fired, e.g. phone_number, off_platform, sexual_content, classifier"
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "low",
+        "high"
+      ],
+      "default": "low"
+    },
+    "excerpt": {
+      "type": "string",
+      "maxLength": 300,
+      "description": "Truncated excerpt of the blocked content"
+    },
+    "detail": {
+      "type": "string",
+      "description": "Classifier reason or extra context"
+    },
+    "occurred_at": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "sender_email",
+    "rule"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "moderation_service_only"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "name": "RateLimit",
+  "type": "object",
+  "description": "Abuse-control counters. Written ONLY by backend functions running as service role, so a client can never reset its own limit.",
+  "properties": {
+    "bucket": {
+      "type": "string",
+      "description": "user_email:action:window, e.g. sam@x.com:send_message:2026-08-14T19"
+    },
+    "user_email": {
+      "type": "string"
+    },
+    "action": {
+      "type": "string",
+      "description": "send_message, create_post, connection_request, report, profile_update"
+    },
+    "window": {
+      "type": "string",
+      "enum": [
+        "hour",
+        "day"
+      ],
+      "default": "day"
+    },
+    "count": {
+      "type": "number",
+      "default": 0
+    },
+    "last_at": {
+      "type": "string",
+      "description": "ISO timestamp of the most recent counted action"
+    }
+  },
+  "required": [
+    "bucket"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "rate_limit_service_only"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "rate_limit_service_only"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "rate_limit_service_only"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "rate_limit_service_only"
+      }
+    }
+  }
+}

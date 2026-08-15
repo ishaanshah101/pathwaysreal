@@ -213,18 +213,19 @@ export default function Feed() {
     setPosting(true);
     setError('');
     try {
-      await base44.entities.Post.create({
-        ...draft,
-        author_email: email,
-        author_name: profile?.full_name || 'A Pathways member',
-        author_role: profile?.role || 'student',
-        author_headline: profile?.headline || [profile?.grade, profile?.school].filter(Boolean).join(' · '),
-      });
-      setDraft({ title: '', body: '', category: 'applications' });
-      setComposing(false);
-      await load();
+      // Publishing runs through create-post, which sets the author from the
+      // session and screens the content, so the draft is kept on screen if the
+      // post is held back.
+      const res = await base44.functions.invoke('create-post', draft);
+      if (res?.data?.blocked) {
+        setError(res.data.reason);
+      } else {
+        setDraft({ title: '', body: '', category: 'applications' });
+        setComposing(false);
+        await load();
+      }
     } catch (err) {
-      setError(err?.message || 'Could not publish. Please try again.');
+      setError(err?.response?.data?.error || 'Could not publish. Please try again.');
     }
     setPosting(false);
   };

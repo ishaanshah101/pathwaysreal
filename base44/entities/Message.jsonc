@@ -1,6 +1,7 @@
 {
   "name": "Message",
   "type": "object",
+  "description": "One-to-one messages. Written ONLY by the send-message backend function, which verifies an accepted Connection, applies rate limits, and runs safety screening before a row exists.",
   "properties": {
     "thread_key": {
       "type": "string",
@@ -27,7 +28,9 @@
   ],
   "rls": {
     "create": {
-      "data.from_email": "{{user.email}}"
+      "user_condition": {
+        "role": "message_service_only"
+      }
     },
     "read": {
       "$or": [

@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useProfile, ROLE_LABELS } from '@/lib/useProfile';
-import { SAMPLE_MENTORS, authorAvatar, initialsOf } from '@/data/sampleContent';
+import { authorAvatar, initialsOf } from '@/lib/avatar';
 import SafetyActions from '@/components/safety/SafetyActions';
 import { useBlocks } from '@/lib/useBlocks';
 import Seo from '@/components/Seo';
@@ -195,19 +195,20 @@ export default function Explore() {
     setBusyEmail(null);
   };
 
+  // Topics come from the people who are actually here, so the filter never
+  // offers a topic that returns nobody.
   const allTopics = useMemo(() => {
     const set = new Set();
-    for (const m of SAMPLE_MENTORS) (m.interests || []).forEach((t) => set.add(t));
+    for (const p of people) (p.interests || []).forEach((t) => set.add(t));
     return [...set].sort();
-  }, []);
+  }, [people]);
 
   const list = useMemo(() => {
     // Anyone I have blocked is gone from the directory entirely.
     const real = people.filter(
       (p) => p.user_email && p.user_email !== email && p.onboarded && !blockedEmails.includes(p.user_email),
     );
-    const samples = SAMPLE_MENTORS.filter((s) => !real.some((r) => r.user_email === s.user_email));
-    const all = [...real, ...samples];
+    const all = real;
     const needle = q.trim().toLowerCase();
     return all.filter((p) => {
       if (roleFilter !== 'all' && p.role !== roleFilter) return false;

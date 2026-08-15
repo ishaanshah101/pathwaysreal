@@ -31,6 +31,7 @@
     "category": {
       "type": "string",
       "enum": [
+        "general",
         "applications",
         "essays",
         "scholarships",
@@ -40,7 +41,7 @@
         "careers",
         "test_prep"
       ],
-      "default": "applications"
+      "default": "general"
     },
     "tags": {
       "type": "array",

@@ -4,7 +4,7 @@ import { consumeRateLimit } from '../../shared/rateLimit.ts';
 import { validateAttachments, screenAttachments, screenImage, IMAGE_BLOCK_REASON } from '../../shared/attachments.ts';
 
 const CATEGORIES = [
-  'applications', 'essays', 'scholarships', 'majors',
+  'general', 'applications', 'essays', 'scholarships', 'majors',
   'campus_life', 'internships', 'careers', 'test_prep',
 ];
 
@@ -20,7 +20,7 @@ export default async function (req: Request): Promise<Response> {
     const authorEmail = String(user.email).toLowerCase();
     const title = String(payload?.title || '').trim();
     const body = String(payload?.body || '').trim();
-    const category = CATEGORIES.includes(payload?.category) ? payload.category : 'applications';
+    const category = CATEGORIES.includes(payload?.category) ? payload.category : 'general';
 
     if (!title || !body) {
       return Response.json({ error: 'A title and a post are both required.' }, { status: 400 });

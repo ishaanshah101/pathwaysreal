@@ -64,6 +64,7 @@ export const ROLE_LABELS = {
 };
 
 export const CATEGORY_LABELS = {
+  general: 'General',
   applications: 'Applications',
   essays: 'Essays',
   scholarships: 'Scholarships',

@@ -196,7 +196,7 @@ export default function Feed() {
   const [filter, setFilter] = useState('all');
   const [visible, setVisible] = useState(PAGE_SIZE);
   const [composing, setComposing] = useState(false);
-  const [draft, setDraft] = useState({ title: '', body: '', category: 'applications' });
+  const [draft, setDraft] = useState({ title: '', body: '', category: 'general' });
   const [posting, setPosting] = useState(false);
   const [error, setError] = useState('');
 
@@ -237,7 +237,7 @@ export default function Feed() {
       if (res?.data?.blocked) {
         setError(res.data.reason);
       } else {
-        setDraft({ title: '', body: '', category: 'applications' });
+        setDraft({ title: '', body: '', category: 'general' });
         setComposing(false);
         await load();
       }

@@ -2,6 +2,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useProfile, ROLE_LABELS, CATEGORY_LABELS } from '@/lib/useProfile';
+import { useAuth } from '@/lib/AuthContext';
+import EditPostModal from '@/components/app/EditPostModal';
 import { authorAvatar, initialsOf } from '@/lib/avatar';
 import CoverArt from '@/components/app/CoverArt';
 import SafetyActions from '@/components/safety/SafetyActions';
@@ -41,10 +43,11 @@ function Avatar({ name, authorKey, size = 40 }) {
   );
 }
 
-function PostCard({ post, canMessage, isMine, onBlocked }) {
+function PostCard({ post, canMessage, isMine, onBlocked, canEdit, onSaved }) {
   const v = post.variant || 'plain';
   const isLong = (post.body || '').length > 620;
   const [open, setOpen] = useState(false);
+  const [editing, setEditing] = useState(false);
 
   return (
     <article className="card elev-sm" style={{ padding: 22, gap: 13, borderRadius: 26 }}>
@@ -170,6 +173,23 @@ function PostCard({ post, canMessage, isMine, onBlocked }) {
           </Link>
         ) : null}
 
+        {/* Only the app admin sees this. The server's rules on Post already
+            restrict editing to admins, so this button is convenience, not the
+            protection. */}
+        {canEdit && !post.is_sample && (
+          <>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              style={{ fontSize: 13 }}
+              onClick={() => setEditing(true)}
+            >
+              Edit
+            </button>
+            <EditPostModal open={editing} onOpenChange={setEditing} post={post} onSaved={onSaved} />
+          </>
+        )}
+
         {/* A post is often the first place something feels off, so report and
             block live right here rather than only on the profile. */}
         {!post.is_sample && !isMine && post.author_email && (
@@ -190,6 +210,8 @@ function PostCard({ post, canMessage, isMine, onBlocked }) {
 
 export default function Feed() {
   const { profile, email } = useProfile();
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'admin';
   const { blockedEmails, reloadBlocks } = useBlocks();
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -364,6 +386,8 @@ export default function Feed() {
                 canMessage={Boolean(p.author_email && connectedEmails.includes(p.author_email))}
                 isMine={Boolean(email && p.author_email === email)}
                 onBlocked={reloadBlocks}
+                canEdit={isAdmin}
+                onSaved={load}
               />
             ))}
           </div>

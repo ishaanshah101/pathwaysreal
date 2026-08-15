@@ -148,6 +148,25 @@ export default function Onboarding() {
         </div>
 
         <div className="field">
+          <label htmlFor="ob-birth-year">Year you were born</label>
+          <input
+            id="ob-birth-year"
+            className="input"
+            required
+            inputMode="numeric"
+            pattern="[0-9]{4}"
+            maxLength={4}
+            placeholder="2008"
+            value={form.birth_year}
+            onChange={set('birth_year')}
+          />
+          <span style={{ fontSize: 12, color: 'var(--color-neutral-600)', marginTop: 4, display: 'block', lineHeight: 1.5 }}>
+            Pathways is for people 13 and older. We use this to keep younger kids off the platform and to
+            protect members who are under 18. It is never shown on your profile.
+          </span>
+        </div>
+
+        <div className="field">
           <label htmlFor="ob-grade">Grade or year</label>
           <input id="ob-grade" className="input" placeholder="11th grade" value={form.grade} onChange={set('grade')} />
         </div>

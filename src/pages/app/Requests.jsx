@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
-import { useProfile, ROLE_LABELS } from '@/lib/useProfile';
+import { ROLE_LABELS } from '@/lib/useProfile';
 import { useConnections } from '@/lib/useConnections';
 import { useBlocks } from '@/lib/useBlocks';
 import { authorAvatar, initialsOf } from '@/lib/avatar';
@@ -163,7 +163,6 @@ function PersonCard({ conn, who, profile, busy, onAccept, onDecline, onBlocked, 
 
 export default function Requests() {
   const navigate = useNavigate();
-  const { email } = useProfile();
   const { reloadBlocks, blockedEmails } = useBlocks();
   const {
     incomingPending, outgoingPending, loadingConnections,

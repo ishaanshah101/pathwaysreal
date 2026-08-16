@@ -163,7 +163,7 @@ export default function Messages() {
       const iSent = String(c.from_email || '').toLowerCase() === me;
       const other = iSent ? c.to_email : c.from_email;
       if (!other || String(other).toLowerCase() === me) continue;
-      if (real.some((r) => r.other === other)) continue;
+      if (real.some((r) => String(r.other).toLowerCase() === String(other).toLowerCase())) continue;
       const realName = people.find((p) => p.user_email === other)?.full_name
         || (iSent ? c.to_name : c.from_name) || other;
       real.push({

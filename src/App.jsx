@@ -34,6 +34,7 @@ import AppShell from '@/components/app/AppShell';
 import Feed from '@/pages/app/Feed';
 import Explore from '@/pages/app/Explore';
 import Messages from '@/pages/app/Messages';
+import Requests from '@/pages/app/Requests';
 import SageChat from '@/pages/app/SageChat';
 import AdminModeration from '@/pages/app/AdminModeration';
 import ProfilePage from '@/pages/app/ProfilePage';

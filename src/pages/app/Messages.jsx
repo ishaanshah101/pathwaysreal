@@ -370,12 +370,39 @@ export default function Messages() {
               >
                 <div style={{ minWidth: 0 }}>
                   <span style={{ fontSize: 15, fontWeight: 600 }}>{activeMeta?.name || activeWith}</span>
-                  {activeSample?.headline && (
-                    <div style={{ fontSize: 12, color: 'var(--color-neutral-600)' }}>{activeSample.headline}</div>
+                  {/* If a nickname is in use, their real name still shows here so
+                      it is never possible to forget who you are actually
+                      talking to. */}
+                  {activeMeta?.realName && activeMeta.realName !== activeMeta.name && (
+                    <div style={{ fontSize: 12, color: 'var(--color-neutral-600)' }}>
+                      {activeMeta.realName}
+                    </div>
+                  )}
+                  {noteFor(activeWith)?.notes && (
+                    <div
+                      style={{
+                        fontSize: 12, color: 'var(--color-neutral-700)', marginTop: 4,
+                        maxWidth: 420, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                      }}
+                      title={noteFor(activeWith).notes}
+                    >
+                      {noteFor(activeWith).notes}
+                    </div>
                   )}
                 </div>
                 {!activeSample && (
                   <span className="flex gap-4 items-center" style={{ marginLeft: 'auto' }}>
+                    <button
+                      type="button"
+                      onClick={() => setEditingContact(true)}
+                      style={{
+                        border: 0, background: 'transparent', cursor: 'pointer', font: 'inherit',
+                        fontSize: 13, color: 'var(--color-neutral-700)', padding: 0,
+                      }}
+                      title="Add a private nickname and notes about this person. Only you can see them."
+                    >
+                      {noteFor(activeWith) ? 'Edit notes' : 'Add notes'}
+                    </button>
                     <button
                       type="button"
                       onClick={toggleArchive}
@@ -474,6 +501,18 @@ export default function Messages() {
           )}
         </div>
       </div>
+
+      {activeWith && (
+        <ContactDetailsPanel
+          open={editingContact}
+          onOpenChange={setEditingContact}
+          otherEmail={activeWith}
+          realName={activeMeta?.realName || activeWith}
+          note={noteFor(activeWith)}
+          onSave={saveNote}
+          onClear={clearNote}
+        />
+      )}
     </div>
   );
 }

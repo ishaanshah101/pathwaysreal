@@ -5,6 +5,7 @@ import { authorAvatar, initialsOf } from '@/lib/avatar';
 import SafetyActions from '@/components/safety/SafetyActions';
 import ConnectButton from '@/components/app/ConnectButton';
 import { useBlocks } from '@/lib/useBlocks';
+import { useConnections } from '@/lib/useConnections';
 import Seo from '@/components/Seo';
 
 const PAGE_SIZE = 12;
@@ -92,23 +93,25 @@ export default function Explore() {
   const { profile, email } = useProfile();
   const { blockedEmails, reloadBlocks } = useBlocks();
   const [people, setPeople] = useState([]);
-  const [connections, setConnections] = useState([]);
   const [q, setQ] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
   const [topicFilter, setTopicFilter] = useState('all');
-  const [connectError, setConnectError] = useState('');
   const [loading, setLoading] = useState(true);
-  const [busyEmail, setBusyEmail] = useState(null);
   const [visible, setVisible] = useState(PAGE_SIZE);
+
+  // Connections are owned by one hook now, shared with the feed and the shell.
+  // Explore used to keep its own copy and answer requests with a direct
+  // Connection.update, which would have let the person who SENT a request mark
+  // it accepted themselves and unlock messaging. Answering now goes through
+  // respond-connection, which checks who is asking.
+  const {
+    connectionWith, requestConnection, busyEmail, connectionError, clearConnectionError,
+  } = useConnections();
 
   const load = async () => {
     try {
-      const [profiles, conns] = await Promise.all([
-        base44.entities.Profile.list('-created_date', 200).catch(() => []),
-        base44.entities.Connection.list('-created_date', 200).catch(() => []),
-      ]);
+      const profiles = await base44.entities.Profile.list('-created_date', 200).catch(() => []);
       setPeople(Array.isArray(profiles) ? profiles : []);
-      setConnections(Array.isArray(conns) ? conns : []);
     } catch {
       setPeople([]);
     }
@@ -116,47 +119,6 @@ export default function Explore() {
   };
 
   useEffect(() => { load(); }, []);
-
-  const connect = async (m) => {
-    // A second click, or a request that already exists in either direction,
-    // used to insert a duplicate Connection row and leave two conflicting
-    // states for the same pair.
-    if (connectionFor(m.user_email)) return;
-    setBusyEmail(m.user_email);
-    setConnectError('');
-    try {
-      // Goes through request-connection, which refuses an adult opening
-      // contact with a member who is under 18. The rule lives on the server,
-      // so hiding this button was never the actual protection.
-      await base44.functions.invoke('request-connection', { toEmail: m.user_email });
-      await load();
-    } catch (err) {
-      const data = err?.response?.data;
-      setConnectError(data?.error || 'That request could not be sent. Try again in a moment.');
-    }
-    setBusyEmail(null);
-  };
-
-  // Returns the row plus which way it points, so the card can tell "you asked
-  // them" apart from "they asked you".
-  const connectionFor = (targetEmail) => {
-    const c = connections.find(
-      (x) =>
-        (x.from_email === email && x.to_email === targetEmail) ||
-        (x.to_email === email && x.from_email === targetEmail),
-    );
-    if (!c) return null;
-    return { ...c, direction: c.to_email === email ? 'incoming' : 'outgoing' };
-  };
-
-  const respond = async (c, status) => {
-    setBusyEmail(c.from_email);
-    try {
-      await base44.entities.Connection.update(c.id, { status });
-      await load();
-    } catch { /* the request stays pending so it can be retried */ }
-    setBusyEmail(null);
-  };
 
   // Topics come from the people who are actually here, so the filter never
   // offers a topic that returns nobody.

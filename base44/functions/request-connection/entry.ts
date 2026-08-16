@@ -1,5 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 import { consumeRateLimit } from '../../shared/rateLimit.ts';
+import { notify, displayName } from '../../shared/notify.ts';
 
 // The only place a Connection is created.
 //
@@ -91,13 +92,27 @@ export default async function (req: Request): Promise<Response> {
       return Response.json({ code: 'rate_limited', error: limit.message }, { status: 429 });
     }
 
+    const fromName = me?.full_name || user.full_name || '';
+
     const created = await base44.asServiceRole.entities.Connection.create({
       from_email: fromEmail,
-      from_name: me?.full_name || user.full_name || '',
+      from_name: fromName,
       to_email: toEmail,
       to_name: them.full_name || '',
       status: 'pending',
       note,
+    });
+
+    // Tell the person being asked. Without this a request sits unseen until
+    // they happen to open Explore, which is the reason connecting felt broken.
+    await notify(base44, {
+      userEmail: toEmail,
+      type: 'connection_request',
+      actorEmail: fromEmail,
+      actorName: fromName,
+      body: `${displayName(fromName, fromEmail)} requested to connect with you.`,
+      link: '/app/requests',
+      connectionId: created?.id,
     });
 
     return Response.json({ connection: created });

@@ -26,7 +26,7 @@ export default function Terms() {
       </p>
 
       <S title="1. Who operates Pathways">
-        {PRODUCT_NAME} ({PRODUCT_DOMAIN}) is operated by <b>{COMPANY_NAME}</b>, based in {COMPANY_LOCATION}
+        {PRODUCT_NAME} ({PRODUCT_DOMAIN}) is operated by <b>{COMPANY_NAME}</b>, based in {COMPANY_LOCATION}{' '}
         ("{PRODUCT_NAME}", "we", "us"). {COMPANY_NAME} is the party legally responsible for the service,
         including payment processing. You can reach us at <b>{COMPANY_EMAIL}</b>, and we will provide a postal
         address on request.

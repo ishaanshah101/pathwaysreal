@@ -265,8 +265,43 @@ export default function Messages() {
               </button>
             ))}
           </div>
+
+          <div style={{ padding: '0 4px 8px' }}>
+            <input
+              className="input"
+              style={{ fontSize: 13, padding: '8px 12px' }}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search messages and people…"
+              aria-label="Search your messages"
+            />
+            {search.trim() && (
+              <span
+                className="flex items-center gap-2"
+                style={{ fontSize: 11.5, color: 'var(--color-neutral-600)', padding: '6px 2px 0' }}
+              >
+                {threads.length} match{threads.length === 1 ? '' : 'es'}
+                <button
+                  type="button"
+                  onClick={() => setSearch('')}
+                  style={{ background: 'none', border: 0, cursor: 'pointer', font: 'inherit', color: 'var(--color-accent-700)' }}
+                >
+                  Clear
+                </button>
+              </span>
+            )}
+          </div>
+
           {loading ? (
             <span style={{ fontSize: 13, color: 'var(--color-neutral-600)', padding: 10 }}>Loading…</span>
+          ) : threads.length === 0 ? (
+            <span style={{ fontSize: 13, color: 'var(--color-neutral-600)', padding: 10, lineHeight: 1.55 }}>
+              {search.trim()
+                ? 'Nothing matches that search.'
+                : showArchived
+                  ? 'Nothing archived yet.'
+                  : 'No conversations yet.'}
+            </span>
           ) : (
             threads.map((t) => {
               const on = t.other === activeWith;

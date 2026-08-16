@@ -34,6 +34,7 @@ export default function ProfilePage() {
       bio: profile.bio || '',
       goals: profile.goals || '',
       interests: profile.interests || [],
+      birth_year: profile.birth_year ? String(profile.birth_year) : '',
     });
   }, [profile]);
 
@@ -67,10 +68,24 @@ export default function ProfilePage() {
 
   const submit = async (e) => {
     e.preventDefault();
-    setSaving(true);
     setError('');
+    // Members who joined before we asked for a birth year supply it here.
+    // Once one is on file it is immutable, so we only send it when missing.
+    const payload = { ...form, onboarded: true };
+    if (!profile?.birth_year) {
+      const year = Number(form.birth_year);
+      const thisYear = new Date().getFullYear();
+      if (!Number.isInteger(year) || year < 1900 || year > thisYear) {
+        setError('Please enter the year you were born, as four digits.');
+        return;
+      }
+      payload.birth_year = year;
+    } else {
+      delete payload.birth_year;
+    }
+    setSaving(true);
     try {
-      await saveProfile({ ...form, onboarded: true });
+      await saveProfile(payload);
       setSaved(true);
     } catch (err) {
       setError(err?.message || 'Could not save. Please try again.');
@@ -127,6 +142,27 @@ export default function ProfilePage() {
             {Object.entries(ROLE_LABELS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
           </select>
         </div>
+
+        {!profile?.birth_year && (
+          <div className="field">
+            <label htmlFor="pf-birth-year">Year you were born</label>
+            <input
+              id="pf-birth-year"
+              className="input"
+              required
+              inputMode="numeric"
+              pattern="[0-9]{4}"
+              maxLength={4}
+              placeholder="2008"
+              value={form.birth_year}
+              onChange={set('birth_year')}
+            />
+            <span style={{ fontSize: 12, color: 'var(--color-neutral-600)', marginTop: 4, display: 'block', lineHeight: 1.5 }}>
+              You joined before we asked for this. Pathways is for people 13 and older, and we use it to
+              protect members who are under 18. It is never shown on your profile.
+            </span>
+          </div>
+        )}
 
         <div className="field">
           <label htmlFor="pf-headline">Headline</label>

@@ -320,12 +320,12 @@ export default function Onboarding() {
           <>
             <div className="field">
               <label htmlFor="ob-grade">Grade or year</label>
-              <input id="ob-grade" className="input" placeholder="11th grade" value={form.grade} onChange={set('grade')} />
+              <input id="ob-grade" className="input" required placeholder="11th grade" value={form.grade} onChange={set('grade')} />
             </div>
 
             <div className="field">
               <label htmlFor="ob-school">School</label>
-              <input id="ob-school" className="input" placeholder="Lincoln High" value={form.school} onChange={set('school')} />
+              <input id="ob-school" className="input" required placeholder="Lincoln High" value={form.school} onChange={set('school')} />
             </div>
 
             <div className="field">
@@ -353,6 +353,7 @@ export default function Onboarding() {
               <input
                 id="ob-institution"
                 className="input"
+                required
                 placeholder="UC Berkeley, Lincoln High, Acme Admissions…"
                 value={form.institution}
                 onChange={set('institution')}
@@ -364,6 +365,7 @@ export default function Onboarding() {
               <input
                 id="ob-title"
                 className="input"
+                required
                 placeholder="Associate Professor of Biology, or Junior studying CS"
                 value={form.job_title}
                 onChange={set('job_title')}

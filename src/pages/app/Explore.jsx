@@ -1,28 +1,17 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useProfile, ROLE_LABELS } from '@/lib/useProfile';
 import { authorAvatar, initialsOf } from '@/lib/avatar';
 import SafetyActions from '@/components/safety/SafetyActions';
+import ConnectButton from '@/components/app/ConnectButton';
 import { useBlocks } from '@/lib/useBlocks';
 import Seo from '@/components/Seo';
 
 const PAGE_SIZE = 12;
 
-function MentorCard({ m, onConnect, onRespond, connection, busy, onBlocked }) {
+function MentorCard({ m, onConnect, connection, busy, onBlocked }) {
   const [bg, fg] = authorAvatar(m.key || m.user_email || m.full_name || '?');
   const isSample = Boolean(m.is_sample_profile);
-  const status = connection?.status || null;
-  const incoming = Boolean(connection && connection.direction === 'incoming');
-  const accepted = status === 'accepted';
-  // "Request sent" was shown even when the OTHER person was the one waiting on
-  // you, which made an incoming request look like a dead end.
-  const label =
-    accepted ? 'Connected'
-      : status === 'pending' && incoming ? 'Accept request'
-        : status === 'pending' ? 'Request sent'
-          : status === 'declined' && incoming ? 'Declined'
-            : 'Connect';
 
   return (
     <div className="card elev-sm" style={{ padding: 22, gap: 12, borderRadius: 26 }}>

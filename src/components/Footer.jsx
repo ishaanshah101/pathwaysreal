@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import BrandMark from '@/components/BrandMark';
+import { COMPANY_NAME } from '@/lib/company';
 
 export default function Footer() {
   return (
@@ -16,6 +17,7 @@ export default function Footer() {
       <Link to="/privacy" className="no-underline" style={{ color: 'var(--color-neutral-700)' }}>Privacy</Link>
       <Link to="/terms" className="no-underline" style={{ color: 'var(--color-neutral-700)' }}>Terms</Link>
       <span>14+ · COPPA and FERPA aligned · We never sell student data</span>
+      <span>© {new Date().getFullYear()} {COMPANY_NAME}</span>
     </footer>
   );
 }

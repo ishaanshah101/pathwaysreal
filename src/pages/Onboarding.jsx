@@ -164,6 +164,11 @@ export default function Onboarding() {
     e.preventDefault();
     setError('');
 
+    if (!form.account_type) {
+      setError('Please choose whether you are joining as a student or as an adult.');
+      return;
+    }
+
     // Checked here as well as on the server, so someone who mistypes finds out
     // before a round trip. The server is still the one that decides.
     const year = Number(form.birth_year);
@@ -175,7 +180,34 @@ export default function Onboarding() {
 
     setSaving(true);
     try {
-      await saveProfile({ ...form, birth_year: year, onboarded: true });
+      // Only the fields belonging to the chosen track are sent, so an adult who
+      // first clicked "student" does not leave a stray grade on their profile.
+      const common = {
+        full_name: form.full_name,
+        account_type: form.account_type,
+        plan: form.plan,
+        birth_year: year,
+        onboarded: true,
+      };
+      const payload = form.account_type === 'student'
+        ? {
+          ...common,
+          role: 'student',
+          grade: form.grade,
+          school: form.school,
+          goals: form.goals,
+          interests: form.interests,
+        }
+        : {
+          ...common,
+          role: form.role === 'student' ? 'college_student' : form.role,
+          institution: form.institution,
+          job_title: form.job_title,
+          expertise: form.expertise,
+          years_experience: form.years_experience ? Number(form.years_experience) : undefined,
+          help_with: form.help_with,
+        };
+      await saveProfile(payload);
       // Someone who came in from a Sage pricing link lands on the Sage page so
       // they can finish the purchase they started, not on a feed they did not
       // ask for.

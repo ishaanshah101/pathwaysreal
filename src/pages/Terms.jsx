@@ -1,6 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import Seo from '@/components/Seo';
+import {
+  COMPANY_NAME, COMPANY_LOCATION, COMPANY_EMAIL, PRODUCT_NAME, PRODUCT_DOMAIN,
+} from '@/lib/company';
 
 const S = ({ title, children }) => (
   <section style={{ marginBottom: 26 }}>

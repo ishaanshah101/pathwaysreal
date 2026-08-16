@@ -7,12 +7,15 @@ import { useSubscription, openBillingPortal, SAGE_PRICES } from '@/lib/useSubscr
 import Seo from '@/components/Seo';
 import { SkeletonLine, SkeletonTitle } from '@/components/ui/Skeletons';
 import ChipPicker from '@/components/app/ChipPicker';
+import VerificationCard from '@/components/app/VerificationCard';
+import { useFollows } from '@/lib/useFollows';
 import { INTEREST_OPTIONS, EXPERTISE_OPTIONS, ADULT_ROLES } from '@/components/app/profileFields';
 
 export default function ProfilePage() {
   const { user, logout } = useAuth();
   const { profile, email, saveProfile } = useProfile();
   const { subscription, hasSage, isPastDue, isCanceling } = useSubscription();
+  const { followingCount, followerCount } = useFollows();
   const [billingError, setBillingError] = useState('');
 
   const [form, setForm] = useState(null);
@@ -208,7 +211,18 @@ export default function ProfilePage() {
           </div>
         )}
 
-        {!profile?.birth_year && (
+        {/* Once a birth year is on file it is fixed, but it was previously not
+            shown at all, so people could not tell we had it. */}
+        {profile?.birth_year ? (
+          <div className="field">
+            <label>Year you were born</label>
+            <input className="input" value={profile.birth_year} readOnly aria-disabled="true" />
+            <span className="field-hint">
+              Never shown on your profile. It cannot be changed here, because it decides which safety
+              rules apply to your account.
+            </span>
+          </div>
+        ) : (
           <div className="field">
             <label htmlFor="pf-birth-year">Year you were born</label>
             <input
@@ -342,6 +356,24 @@ export default function ProfilePage() {
             </>
           )}
         </div>
+
+        {/* Following is one-way, so these two numbers are not the same thing as
+            connections and are shown separately. */}
+        <div className="field">
+          <label>Follows</label>
+          <div style={{ background: 'var(--color-bg)', borderRadius: 18, padding: '14px 16px', display: 'flex', gap: 26 }}>
+            <Link to="/app/explore" className="no-underline" style={{ color: 'inherit' }}>
+              <span style={{ display: 'block', fontFamily: 'var(--font-heading)', fontSize: 21 }}>{followingCount}</span>
+              <span style={{ fontSize: 12.5, color: 'var(--color-neutral-700)' }}>Following</span>
+            </Link>
+            <span>
+              <span style={{ display: 'block', fontFamily: 'var(--font-heading)', fontSize: 21 }}>{followerCount}</span>
+              <span style={{ fontSize: 12.5, color: 'var(--color-neutral-700)' }}>Followers</span>
+            </span>
+          </div>
+        </div>
+
+        {form.account_type === 'adult' && <VerificationCard profile={profile} email={email} />}
 
         {/* Subscription state is read-only here on purpose. It is written only
             by the Stripe webhook, so picking a paid plan from a dropdown can

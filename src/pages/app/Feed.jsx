@@ -1,5 +1,4 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useProfile, ROLE_LABELS, CATEGORY_LABELS } from '@/lib/useProfile';
 import { useAuth } from '@/lib/AuthContext';

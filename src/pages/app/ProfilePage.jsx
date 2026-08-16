@@ -6,11 +6,8 @@ import { useProfile, ROLE_LABELS } from '@/lib/useProfile';
 import { useSubscription, openBillingPortal, SAGE_PRICES } from '@/lib/useSubscription';
 import Seo from '@/components/Seo';
 import { SkeletonLine, SkeletonTitle } from '@/components/ui/Skeletons';
-
-const INTEREST_OPTIONS = [
-  'Applications', 'Essays', 'Scholarships', 'Choosing a major',
-  'Campus life', 'Internships', 'Careers', 'Test prep',
-];
+import ChipPicker from '@/components/app/ChipPicker';
+import { INTEREST_OPTIONS, EXPERTISE_OPTIONS, ADULT_ROLES } from '@/components/app/profileFields';
 
 export default function ProfilePage() {
   const { user, logout } = useAuth();
@@ -34,6 +31,7 @@ export default function ProfilePage() {
     seededFor.current = profile.id;
     setForm({
       full_name: profile.full_name || '',
+      account_type: profile.account_type || 'student',
       role: profile.role || 'student',
       grade: profile.grade || '',
       school: profile.school || '',
@@ -41,6 +39,11 @@ export default function ProfilePage() {
       bio: profile.bio || '',
       goals: profile.goals || '',
       interests: profile.interests || [],
+      institution: profile.institution || '',
+      job_title: profile.job_title || '',
+      expertise: profile.expertise || [],
+      years_experience: profile.years_experience ? String(profile.years_experience) : '',
+      help_with: profile.help_with || '',
       birth_year: profile.birth_year ? String(profile.birth_year) : '',
     });
   }, [profile]);
@@ -65,11 +68,13 @@ export default function ProfilePage() {
 
   const set = (k) => (e) => { setForm((f) => ({ ...f, [k]: e.target.value })); setSaved(false); };
 
-  const toggleInterest = (label) => {
+  const toggleIn = (key) => (label) => {
     setSaved(false);
     setForm((f) => ({
       ...f,
-      interests: f.interests.includes(label) ? f.interests.filter((i) => i !== label) : [...f.interests, label],
+      [key]: (f[key] || []).includes(label)
+        ? f[key].filter((i) => i !== label)
+        : [...(f[key] || []), label],
     }));
   };
 
@@ -78,7 +83,32 @@ export default function ProfilePage() {
     setError('');
     // Members who joined before we asked for a birth year supply it here.
     // Once one is on file it is immutable, so we only send it when missing.
-    const payload = { ...form, onboarded: true };
+    // Only the fields belonging to the chosen track are sent, so switching from
+    // student to adult does not leave a stray grade behind.
+    const isStudent = form.account_type === 'student';
+    const payload = {
+      full_name: form.full_name,
+      account_type: form.account_type,
+      headline: form.headline,
+      bio: form.bio,
+      onboarded: true,
+      ...(isStudent
+        ? {
+          role: 'student',
+          grade: form.grade,
+          school: form.school,
+          goals: form.goals,
+          interests: form.interests,
+        }
+        : {
+          role: form.role === 'student' ? 'college_student' : form.role,
+          institution: form.institution,
+          job_title: form.job_title,
+          expertise: form.expertise,
+          years_experience: form.years_experience ? Number(form.years_experience) : undefined,
+          help_with: form.help_with,
+        }),
+    };
     if (!profile?.birth_year) {
       const year = Number(form.birth_year);
       const thisYear = new Date().getFullYear();
@@ -154,11 +184,39 @@ export default function ProfilePage() {
         </div>
 
         <div className="field">
-          <label htmlFor="pf-role">I'm a…</label>
-          <select id="pf-role" className="input" value={form.role} onChange={set('role')}>
-            {Object.entries(ROLE_LABELS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+          <label htmlFor="pf-account-type">Account type</label>
+          <select
+            id="pf-account-type"
+            className="input"
+            value={form.account_type}
+            onChange={(e) => {
+              const account_type = e.target.value;
+              setSaved(false);
+              setForm((f) => ({
+                ...f,
+                account_type,
+                role: account_type === 'student'
+                  ? 'student'
+                  : (f.role === 'student' ? 'college_student' : f.role),
+              }));
+            }}
+          >
+            <option value="student">I'm a student</option>
+            <option value="adult">I'm an adult (college student, educator, counselor)</option>
           </select>
+          <span className="field-hint">
+            This decides which details your profile shows. Students reach out first, always.
+          </span>
         </div>
+
+        {form.account_type === 'adult' && (
+          <div className="field">
+            <label htmlFor="pf-role">Which best describes you?</label>
+            <select id="pf-role" className="input" value={form.role} onChange={set('role')}>
+              {ADULT_ROLES.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+            </select>
+          </div>
+        )}
 
         {!profile?.birth_year && (
           <div className="field">
@@ -192,16 +250,81 @@ export default function ProfilePage() {
           />
         </div>
 
-        <div className="grid app-split" style={{ gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-          <div className="field">
-            <label htmlFor="pf-grade">Grade or year</label>
-            <input id="pf-grade" className="input" value={form.grade} onChange={set('grade')} />
-          </div>
-          <div className="field">
-            <label htmlFor="pf-school">School</label>
-            <input id="pf-school" className="input" value={form.school} onChange={set('school')} />
-          </div>
-        </div>
+        {form.account_type === 'student' ? (
+          <>
+            <div className="grid app-split" style={{ gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div className="field">
+                <label htmlFor="pf-grade">Grade or year</label>
+                <input id="pf-grade" className="input" placeholder="11th grade" value={form.grade} onChange={set('grade')} />
+              </div>
+              <div className="field">
+                <label htmlFor="pf-school">School</label>
+                <input id="pf-school" className="input" placeholder="Lincoln High" value={form.school} onChange={set('school')} />
+              </div>
+            </div>
+
+            <div className="field">
+              <label htmlFor="pf-goals">Anything specific on your mind?</label>
+              <textarea
+                id="pf-goals"
+                className="input"
+                value={form.goals}
+                onChange={set('goals')}
+                placeholder="Picking a major, essays, scholarships…"
+              />
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="field">
+              <label htmlFor="pf-institution">Where are you now?</label>
+              <input
+                id="pf-institution"
+                className="input"
+                placeholder="UC Berkeley, Lincoln High, Acme Admissions…"
+                value={form.institution}
+                onChange={set('institution')}
+              />
+            </div>
+
+            <div className="grid app-split" style={{ gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div className="field">
+                <label htmlFor="pf-title">Your title or year</label>
+                <input
+                  id="pf-title"
+                  className="input"
+                  placeholder="Associate Professor of Biology"
+                  value={form.job_title}
+                  onChange={set('job_title')}
+                />
+              </div>
+              <div className="field">
+                <label htmlFor="pf-years">Years in your field</label>
+                <input
+                  id="pf-years"
+                  className="input"
+                  inputMode="numeric"
+                  pattern="[0-9]{1,2}"
+                  maxLength={2}
+                  placeholder="6"
+                  value={form.years_experience}
+                  onChange={set('years_experience')}
+                />
+              </div>
+            </div>
+
+            <div className="field">
+              <label htmlFor="pf-help">What are you happy for students to ask you about?</label>
+              <textarea
+                id="pf-help"
+                className="input"
+                value={form.help_with}
+                onChange={set('help_with')}
+                placeholder="What my major is actually like day to day, how research placements work…"
+              />
+            </div>
+          </>
+        )}
 
         <div className="field">
           <label htmlFor="pf-bio">Short bio</label>
@@ -217,28 +340,17 @@ export default function ProfilePage() {
 
         <div className="card elev-sm" style={{ padding: 26, gap: 16, borderRadius: 26 }}>
         <div className="field">
-          <label>Topics</label>
-          <div className="flex flex-wrap gap-2" style={{ marginTop: 4 }}>
-            {INTEREST_OPTIONS.map((label) => {
-              const on = form.interests.includes(label);
-              return (
-                <button
-                  key={label}
-                  type="button"
-                  onClick={() => toggleInterest(label)}
-                  className="btn"
-                  style={{
-                    fontFamily: 'var(--font-body)', fontSize: 13, padding: '7px 14px',
-                    background: on ? 'var(--color-accent)' : 'transparent',
-                    color: on ? 'var(--color-bg)' : 'var(--color-text)',
-                    borderColor: on ? 'transparent' : 'var(--color-divider)',
-                  }}
-                >
-                  {label}
-                </button>
-              );
-            })}
-          </div>
+          {form.account_type === 'student' ? (
+            <>
+              <label>What do you want help with?</label>
+              <ChipPicker options={INTEREST_OPTIONS} selected={form.interests} onToggle={toggleIn('interests')} />
+            </>
+          ) : (
+            <>
+              <label>What can you speak to?</label>
+              <ChipPicker options={EXPERTISE_OPTIONS} selected={form.expertise} onToggle={toggleIn('expertise')} />
+            </>
+          )}
         </div>
 
         {/* Subscription state is read-only here on purpose. It is written only

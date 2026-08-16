@@ -247,18 +247,55 @@ export default function Onboarding() {
 
       <form onSubmit={submit} className="card elev-sm" style={{ padding: 28, gap: 16 }}>
         <div className="field">
+          <label>Which of these are you?</label>
+          <div
+            className="grid"
+            style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', gap: 12, marginTop: 6 }}
+          >
+            <ChoiceCard
+              title="I'm a student"
+              blurb="You're in high school and looking for someone who has already done what you're about to do."
+              points={['Tell us your grade and school', 'Pick what you want help with', 'You reach out to mentors, not the other way around']}
+              selected={isStudent}
+              onSelect={() => setForm((f) => ({ ...f, account_type: 'student', role: 'student' }))}
+            />
+            <ChoiceCard
+              title="I'm an adult"
+              blurb="You're a college student, educator, or counselor who can answer the questions students actually have."
+              points={['Tell us where you work or study', 'Pick what you can speak to', 'You can ask to have your role verified']}
+              selected={isAdult}
+              onSelect={() => setForm((f) => ({
+                ...f,
+                account_type: 'adult',
+                role: f.role === 'student' ? 'college_student' : f.role,
+              }))}
+            />
+          </div>
+        </div>
+
+        {!form.account_type && (
+          <span style={{ fontSize: 13, color: 'var(--color-neutral-600)', lineHeight: 1.55 }}>
+            Pick one to keep going. It decides what we ask you next, and you can change it later.
+          </span>
+        )}
+
+        {form.account_type && (
+        <>
+        <div className="field">
           <label htmlFor="ob-name">Full name</label>
           <input id="ob-name" className="input" required value={form.full_name} onChange={set('full_name')} />
         </div>
 
-        <div className="field">
-          <label htmlFor="ob-role">I'm a…</label>
-          <select id="ob-role" className="input" value={form.role} onChange={set('role')}>
-            {Object.entries(ROLE_LABELS).map(([v, l]) => (
-              <option key={v} value={v}>{l}</option>
-            ))}
-          </select>
-        </div>
+        {isAdult && (
+          <div className="field">
+            <label htmlFor="ob-role">Which best describes you?</label>
+            <select id="ob-role" className="input" value={form.role} onChange={set('role')}>
+              {ADULT_ROLES.map(([v, l]) => (
+                <option key={v} value={v}>{l}</option>
+              ))}
+            </select>
+          </div>
+        )}
 
         <div className="field">
           <label htmlFor="ob-birth-year">Year you were born</label>
@@ -279,57 +316,114 @@ export default function Onboarding() {
           </span>
         </div>
 
-        <div className="field">
-          <label htmlFor="ob-grade">Grade or year</label>
-          <input id="ob-grade" className="input" placeholder="11th grade" value={form.grade} onChange={set('grade')} />
-        </div>
+        {isStudent && (
+          <>
+            <div className="field">
+              <label htmlFor="ob-grade">Grade or year</label>
+              <input id="ob-grade" className="input" placeholder="11th grade" value={form.grade} onChange={set('grade')} />
+            </div>
 
-        <div className="field">
-          <label htmlFor="ob-school">School</label>
-          <input id="ob-school" className="input" placeholder="Lincoln High" value={form.school} onChange={set('school')} />
-        </div>
+            <div className="field">
+              <label htmlFor="ob-school">School</label>
+              <input id="ob-school" className="input" placeholder="Lincoln High" value={form.school} onChange={set('school')} />
+            </div>
 
-        <div className="field">
-          <label>What do you want help with?</label>
-          <div className="flex flex-wrap gap-2" style={{ marginTop: 4 }}>
-            {INTEREST_OPTIONS.map((label) => {
-              const on = form.interests.includes(label);
-              return (
-                <button
-                  key={label}
-                  type="button"
-                  onClick={() => toggleInterest(label)}
-                  className="btn"
-                  style={{
-                    fontFamily: 'var(--font-body)',
-                    fontSize: 13,
-                    padding: '7px 14px',
-                    background: on ? 'var(--color-accent)' : 'transparent',
-                    color: on ? 'var(--color-bg)' : 'var(--color-text)',
-                    borderColor: on ? 'transparent' : 'var(--color-divider)',
-                  }}
-                >
-                  {label}
-                </button>
-              );
-            })}
-          </div>
-        </div>
+            <div className="field">
+              <label>What do you want help with?</label>
+              <Chips options={INTEREST_OPTIONS} selected={form.interests} onToggle={toggleInterest} />
+            </div>
 
-        <div className="field">
-          <label htmlFor="ob-goals">Anything specific on your mind?</label>
-          <textarea
-            id="ob-goals"
-            className="input"
-            value={form.goals}
-            onChange={set('goals')}
-            placeholder="Picking a major, essays, scholarships…"
-          />
-        </div>
+            <div className="field">
+              <label htmlFor="ob-goals">Anything specific on your mind?</label>
+              <textarea
+                id="ob-goals"
+                className="input"
+                value={form.goals}
+                onChange={set('goals')}
+                placeholder="Picking a major, essays, scholarships…"
+              />
+            </div>
+          </>
+        )}
+
+        {isAdult && (
+          <>
+            <div className="field">
+              <label htmlFor="ob-institution">Where are you now?</label>
+              <input
+                id="ob-institution"
+                className="input"
+                placeholder="UC Berkeley, Lincoln High, Acme Admissions…"
+                value={form.institution}
+                onChange={set('institution')}
+              />
+            </div>
+
+            <div className="field">
+              <label htmlFor="ob-title">Your title or year</label>
+              <input
+                id="ob-title"
+                className="input"
+                placeholder="Associate Professor of Biology, or Junior studying CS"
+                value={form.job_title}
+                onChange={set('job_title')}
+              />
+            </div>
+
+            <div className="field">
+              <label htmlFor="ob-years">Years in your field</label>
+              <input
+                id="ob-years"
+                className="input"
+                inputMode="numeric"
+                pattern="[0-9]{1,2}"
+                maxLength={2}
+                placeholder="6"
+                value={form.years_experience}
+                onChange={set('years_experience')}
+              />
+            </div>
+
+            <div className="field">
+              <label>What can you speak to?</label>
+              <Chips options={EXPERTISE_OPTIONS} selected={form.expertise} onToggle={toggleExpertise} />
+            </div>
+
+            <div className="field">
+              <label htmlFor="ob-help">What are you happy for students to ask you about?</label>
+              <textarea
+                id="ob-help"
+                className="input"
+                value={form.help_with}
+                onChange={set('help_with')}
+                placeholder="What my major is actually like day to day, how research placements work, what I wish I had known applying…"
+              />
+            </div>
+
+            <div
+              style={{
+                fontSize: 13, lineHeight: 1.6, padding: '12px 14px', borderRadius: 16,
+                background: 'var(--color-bg)', color: 'var(--color-neutral-800)',
+              }}
+            >
+              <strong style={{ fontWeight: 600 }}>Two things worth knowing.</strong> Students always
+              send the first message, so you will not be able to open contact with a member who is
+              under 18. And your role shows as unverified until a person here has checked it, which
+              you can request from your profile once you are in.
+            </div>
+          </>
+        )}
+        </>
+        )}
 
         {error && <span style={{ fontSize: 13, color: 'var(--color-accent-700)' }}>{error}</span>}
 
-        <button type="submit" className="btn btn-primary btn-block" style={{ minHeight: 46, fontSize: 15 }} disabled={saving}>
+        <button
+          type="submit"
+          className="btn btn-primary btn-block"
+          style={{ minHeight: 46, fontSize: 15 }}
+          disabled={saving || !form.account_type}
+        >
           {saving ? 'Setting up your account…' : 'Enter Pathways'}
         </button>
         <span style={{ fontSize: 11.5, color: 'var(--color-neutral-600)', textAlign: 'center' }}>

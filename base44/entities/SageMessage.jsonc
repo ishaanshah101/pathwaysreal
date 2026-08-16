@@ -1,9 +1,14 @@
 {
   "name": "SageMessage",
   "type": "object",
+  "description": "One turn in a Sage conversation. Written by the sage-ask function, which is also the only place an answer is generated, so a stored answer always corresponds to a real, paid-for model call.",
   "properties": {
     "user_email": {
       "type": "string"
+    },
+    "thread_id": {
+      "type": "string",
+      "description": "The SageThread this turn belongs to"
     },
     "role": {
       "type": "string",
@@ -15,6 +20,21 @@
     },
     "content": {
       "type": "string"
+    },
+    "attachments": {
+      "type": "array",
+      "description": "Files the student attached to this question, e.g. an essay draft or a transcript",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        }
+      }
     }
   },
   "required": [
@@ -26,6 +46,9 @@
     },
     "read": {
       "$or": [
+        {
+          "data.user_email": "{{user.email}}"
+        },
         {
           "created_by_id": "{{user.id}}"
         },
@@ -39,7 +62,7 @@
     "update": {
       "$or": [
         {
-          "created_by_id": "{{user.id}}"
+          "data.user_email": "{{user.email}}"
         },
         {
           "user_condition": {
@@ -51,7 +74,7 @@
     "delete": {
       "$or": [
         {
-          "created_by_id": "{{user.id}}"
+          "data.user_email": "{{user.email}}"
         },
         {
           "user_condition": {

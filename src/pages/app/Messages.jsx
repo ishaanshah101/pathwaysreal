@@ -7,7 +7,9 @@ import DeliveryTicks from '@/components/app/DeliveryTicks';
 import UnreadBadge from '@/components/app/UnreadBadge';
 import { authorAvatar, initialsOf } from '@/lib/avatar';
 import SafetyActions from '@/components/safety/SafetyActions';
+import ContactDetailsPanel from '@/components/app/ContactDetailsPanel';
 import { useBlocks } from '@/lib/useBlocks';
+import { useContactNotes } from '@/lib/useContactNotes';
 import Seo from '@/components/Seo';
 
 function clockTime(iso) {
@@ -63,7 +65,11 @@ export default function Messages() {
   const [archives, setArchives] = useState([]);
   const [showArchived, setShowArchived] = useState(false);
   const [archiveBusy, setArchiveBusy] = useState(false);
+  const [search, setSearch] = useState('');
+  const [editingContact, setEditingContact] = useState(false);
   const endRef = useRef(null);
+
+  const { noteFor, displayNameFor, saveNote, clearNote } = useContactNotes();
 
   // There is no sample content any more, so nothing here is fake. Every thread
   // in this list is a real conversation with a real person.
@@ -133,20 +139,27 @@ export default function Messages() {
       if (!prev || new Date(m.created_date) > new Date(prev.created_date)) map.set(other, m);
     }
 
-    const real = [...map.entries()].map(([other, last]) => ({
-      other,
-      preview: last.body,
-      at: last.created_date,
-      name: people.find((p) => p.user_email === other)?.full_name || last.from_name || other,
-      unread: unreadByThread[other] || 0,
-      is_sample: false,
-    })).sort((a, b) => new Date(b.at) - new Date(a.at));
+    const real = [...map.entries()].map(([other, last]) => {
+      const realName = people.find((p) => p.user_email === other)?.full_name || last.from_name || other;
+      return {
+        other,
+        preview: last.body,
+        at: last.created_date,
+        realName,
+        // A nickname I set replaces their name everywhere in my own view.
+        name: displayNameFor(other, realName),
+        unread: unreadByThread[other] || 0,
+        is_sample: false,
+      };
+    }).sort((a, b) => new Date(b.at) - new Date(a.at));
 
     if (activeWith && !real.some((r) => r.other === activeWith)) {
+      const realName = people.find((p) => p.user_email === activeWith)?.full_name || activeWith;
       real.unshift({
         other: activeWith,
         preview: 'Start the conversation',
-        name: people.find((p) => p.user_email === activeWith)?.full_name || activeWith,
+        realName,
+        name: displayNameFor(activeWith, realName),
         unread: 0,
         is_sample: false,
       });
@@ -158,12 +171,33 @@ export default function Messages() {
     // Archiving is one-sided, so this filter only ever applies to my own view.
     // The conversation the user currently has open always stays visible, so
     // archiving does not make the thread vanish from under them mid-read.
-    return visible.filter((r) => (
+    const inTab = visible.filter((r) => (
       showArchived
         ? archivedEmails.includes(r.other)
         : !archivedEmails.includes(r.other) || r.other === activeWith
     ));
-  }, [messages, people, email, activeWith, unreadByThread, blockedEmails, archivedEmails, showArchived]);
+
+    // Search covers who the conversation is with and what was actually said in
+    // it, so "scholarship" finds the thread where that came up rather than only
+    // matching names. Notes and nicknames are searched too, since the whole
+    // point of writing a note is being able to find that person again.
+    const q = search.trim().toLowerCase();
+    if (!q) return inTab;
+
+    return inTab.filter((r) => {
+      const note = noteFor(r.other);
+      const haystack = [
+        r.name, r.realName, r.other, r.preview,
+        note?.nickname, note?.notes,
+      ].filter(Boolean).join(' ').toLowerCase();
+      if (haystack.includes(q)) return true;
+      // Fall back to the full history of that conversation.
+      const key = threadKey(email, r.other);
+      return messages.some(
+        (m) => m.thread_key === key && String(m.body || '').toLowerCase().includes(q),
+      );
+    });
+  }, [messages, people, email, activeWith, unreadByThread, blockedEmails, archivedEmails, showArchived, search, displayNameFor, noteFor]);
 
   const thread = useMemo(() => {
     if (!activeWith || activeSample) return [];

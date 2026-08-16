@@ -50,7 +50,25 @@ export default function AppShell() {
   const { incomingPending } = useConnections();
   const pendingCount = incomingPending.length;
   const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = React.useRef(null);
   const first = (profile?.full_name || 'there').split(' ')[0];
+
+  // Clicking anywhere outside the menu closes it, and so does Escape.
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onPointerDown = (e) => {
+      if (!menuRef.current?.contains(e.target)) setMenuOpen(false);
+    };
+    const onKeyDown = (e) => { if (e.key === 'Escape') setMenuOpen(false); };
+    document.addEventListener('mousedown', onPointerDown);
+    document.addEventListener('touchstart', onPointerDown);
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', onPointerDown);
+      document.removeEventListener('touchstart', onPointerDown);
+      document.removeEventListener('keydown', onKeyDown);
+    };
+  }, [menuOpen]);
 
   // Mirror the count in the tab title, the way a mail client does, so an
   // unread message is visible even when the tab is in the background.
@@ -99,9 +117,10 @@ export default function AppShell() {
             <NotificationBell />
           </div>
 
-          <div className="relative">
+          <div className="relative" ref={menuRef}>
             <button
               type="button"
+              aria-expanded={menuOpen}
               onClick={() => setMenuOpen((o) => !o)}
               className="flex items-center justify-center"
               aria-label="Account menu"

@@ -1,0 +1,59 @@
+{
+  "name": "SageThread",
+  "type": "object",
+  "description": "One Sage conversation. Created by the sage-ask function on the first question, titled from that question, and renameable by its owner. Strictly private: only the person it belongs to can ever read it.",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "Owner. Only they may read or write this row."
+    },
+    "title": {
+      "type": "string",
+      "maxLength": 120,
+      "description": "Shown in the conversation list. Auto-written from the first question, then editable."
+    },
+    "last_message_at": {
+      "type": "string",
+      "description": "ISO timestamp of the most recent message, used to order the list"
+    },
+    "message_count": {
+      "type": "number",
+      "default": 0
+    }
+  },
+  "required": [
+    "user_email"
+  ],
+  "rls": {
+    "create": {
+      "data.user_email": "{{user.email}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "data.user_email": "{{user.email}}"
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

@@ -5,49 +5,8 @@ import { useAuth } from '@/lib/AuthContext';
 import { useProfile } from '@/lib/useProfile';
 import BrandMark from '@/components/BrandMark';
 import Seo from '@/components/Seo';
-
-const INTEREST_OPTIONS = [
-  'Applications', 'Essays', 'Scholarships', 'Choosing a major',
-  'Campus life', 'Internships', 'Careers', 'Test prep',
-];
-
-// What an adult can speak to. Deliberately the mirror of INTEREST_OPTIONS so a
-// student's "I need help with essays" and a mentor's "I can help with essays"
-// are the same string and can be matched later without a lookup table.
-const EXPERTISE_OPTIONS = [
-  'Applications', 'Essays', 'Scholarships', 'Choosing a major',
-  'Campus life', 'Internships', 'Careers', 'Test prep',
-  'Financial aid', 'Transfer', 'Grad school', 'First-generation students',
-];
-
-const ADULT_ROLES = [
-  ['college_student', 'College student'],
-  ['educator', 'Educator / professor'],
-  ['counselor', 'Admissions counselor'],
-];
-
-function ChoiceCard({ title, blurb, points, selected, onSelect }) {
-  return (
-    <button
-      type="button"
-      onClick={onSelect}
-      className="card text-left"
-      style={{
-        padding: 20, gap: 8, borderRadius: 22, cursor: 'pointer', font: 'inherit',
-        border: selected ? '2px solid var(--color-accent)' : '1px solid var(--color-divider)',
-        background: selected ? 'var(--color-accent-100)' : 'var(--color-surface)',
-      }}
-    >
-      <span style={{ fontFamily: 'var(--font-heading)', fontSize: 19 }}>{title}</span>
-      <span style={{ fontSize: 14, lineHeight: 1.55, color: 'var(--color-neutral-800)' }}>{blurb}</span>
-      <span className="flex flex-col" style={{ gap: 4, marginTop: 4 }}>
-        {points.map((p) => (
-          <span key={p} style={{ fontSize: 12.5, color: 'var(--color-neutral-700)' }}>{p}</span>
-        ))}
-      </span>
-    </button>
-  );
-}
+import AccountTypeChoice from '@/components/onboarding/AccountTypeChoice';
+import { INTEREST_OPTIONS, EXPERTISE_OPTIONS, ADULT_ROLES } from '@/components/app/profileFields';
 
 export default function Onboarding() {
   const navigate = useNavigate();
@@ -241,43 +200,23 @@ export default function Onboarding() {
         Tell us who you are.
       </h1>
       <p style={{ maxWidth: '52ch', color: 'var(--color-neutral-800)', marginBottom: 26, fontSize: 15.5, lineHeight: 1.6 }}>
-        Last step. This is how we match you with people who've been exactly where you are, and you
-        can change any of it later.
+        Last step. This is how we match you with people who've been exactly where you are. You can
+        edit all of it later from your profile, apart from whether you are a student or an adult.
       </p>
 
       <form onSubmit={submit} className="card elev-sm" style={{ padding: 28, gap: 16 }}>
-        <div className="field">
-          <label>Which of these are you?</label>
-          <div
-            className="grid"
-            style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', gap: 12, marginTop: 6 }}
-          >
-            <ChoiceCard
-              title="I'm a student"
-              blurb="You're in high school and looking for someone who has already done what you're about to do."
-              points={['Tell us your grade and school', 'Pick what you want help with', 'You reach out to mentors, not the other way around']}
-              selected={isStudent}
-              onSelect={() => setForm((f) => ({ ...f, account_type: 'student', role: 'student' }))}
-            />
-            <ChoiceCard
-              title="I'm an adult"
-              blurb="You're a college student, educator, or counselor who can answer the questions students actually have."
-              points={['Tell us where you work or study', 'Pick what you can speak to', 'You can ask to have your role verified']}
-              selected={isAdult}
-              onSelect={() => setForm((f) => ({
-                ...f,
-                account_type: 'adult',
-                role: f.role === 'student' ? 'college_student' : f.role,
-              }))}
-            />
-          </div>
-        </div>
+        <AccountTypeChoice
+          value={form.account_type}
+          onChange={(account_type) => setForm((f) => ({
+            ...f,
+            account_type,
+            role: account_type === 'student'
+              ? 'student'
+              : (f.role === 'student' ? 'college_student' : f.role),
+          }))}
+        />
 
-        {!form.account_type && (
-          <span style={{ fontSize: 13, color: 'var(--color-neutral-600)', lineHeight: 1.55 }}>
-            Pick one to keep going. It decides what we ask you next, and you can change it later.
-          </span>
-        )}
+        {form.account_type && <hr className="divider" />}
 
         {form.account_type && (
         <>

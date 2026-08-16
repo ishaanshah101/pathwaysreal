@@ -9,6 +9,7 @@ import { authorAvatar, initialsOf } from '@/lib/avatar';
 import SafetyActions from '@/components/safety/SafetyActions';
 import ContactDetailsPanel from '@/components/app/ContactDetailsPanel';
 import { useBlocks } from '@/lib/useBlocks';
+import { useConnections } from '@/lib/useConnections';
 import { useContactNotes } from '@/lib/useContactNotes';
 import Seo from '@/components/Seo';
 
@@ -50,6 +51,7 @@ function Bubble({ mine, children, meta }) {
 export default function Messages() {
   const { profile, email } = useProfile();
   const { blockedEmails, reloadBlocks } = useBlocks();
+  const { connections } = useConnections();
   const {
     messages, receiptByMessage, loading,
     unreadByThread, markThreadRead, sendMessage, setActiveThread,
@@ -151,7 +153,31 @@ export default function Messages() {
         unread: unreadByThread[other] || 0,
         is_sample: false,
       };
-    }).sort((a, b) => new Date(b.at) - new Date(a.at));
+    });
+
+    // Every accepted connection gets a conversation here, even before a single
+    // message exists, so connecting with someone immediately opens up a chat.
+    const me = String(email || '').toLowerCase();
+    for (const c of connections) {
+      if (c.status !== 'accepted') continue;
+      const iSent = String(c.from_email || '').toLowerCase() === me;
+      const other = iSent ? c.to_email : c.from_email;
+      if (!other || String(other).toLowerCase() === me) continue;
+      if (real.some((r) => r.other === other)) continue;
+      const realName = people.find((p) => p.user_email === other)?.full_name
+        || (iSent ? c.to_name : c.from_name) || other;
+      real.push({
+        other,
+        preview: 'Start the conversation',
+        at: c.updated_date || c.created_date,
+        realName,
+        name: displayNameFor(other, realName),
+        unread: 0,
+        is_sample: false,
+      });
+    }
+
+    real.sort((a, b) => new Date(b.at) - new Date(a.at));
 
     if (activeWith && !real.some((r) => r.other === activeWith)) {
       const realName = people.find((p) => p.user_email === activeWith)?.full_name || activeWith;
@@ -197,7 +223,7 @@ export default function Messages() {
         (m) => m.thread_key === key && String(m.body || '').toLowerCase().includes(q),
       );
     });
-  }, [messages, people, email, activeWith, unreadByThread, blockedEmails, archivedEmails, showArchived, search, displayNameFor, noteFor]);
+  }, [messages, people, email, activeWith, unreadByThread, blockedEmails, archivedEmails, showArchived, search, displayNameFor, noteFor, connections]);
 
   const thread = useMemo(() => {
     if (!activeWith || activeSample) return [];

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
-import { useProfile, ROLE_LABELS } from '@/lib/useProfile';
+import { useProfile } from '@/lib/useProfile';
 import BrandMark from '@/components/BrandMark';
 import Seo from '@/components/Seo';
 

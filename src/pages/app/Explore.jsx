@@ -90,7 +90,7 @@ function MentorCard({ m, onConnect, connection, busy, onBlocked }) {
 }
 
 export default function Explore() {
-  const { profile, email } = useProfile();
+  const { email } = useProfile();
   const { blockedEmails, reloadBlocks } = useBlocks();
   const [people, setPeople] = useState([]);
   const [q, setQ] = useState('');

@@ -88,7 +88,6 @@ export default function ProfilePage() {
     const isStudent = form.account_type === 'student';
     const payload = {
       full_name: form.full_name,
-      account_type: form.account_type,
       headline: form.headline,
       bio: form.bio,
       onboarded: true,
@@ -183,29 +182,20 @@ export default function ProfilePage() {
           <input id="pf-name" className="input" required value={form.full_name} onChange={set('full_name')} />
         </div>
 
+        {/* Account type is fixed after sign-up on purpose. If an adult could
+            relabel themselves as a student, the rule that students always send
+            the first message would be trivial to get around. */}
         <div className="field">
-          <label htmlFor="pf-account-type">Account type</label>
-          <select
-            id="pf-account-type"
+          <label>Account type</label>
+          <input
             className="input"
-            value={form.account_type}
-            onChange={(e) => {
-              const account_type = e.target.value;
-              setSaved(false);
-              setForm((f) => ({
-                ...f,
-                account_type,
-                role: account_type === 'student'
-                  ? 'student'
-                  : (f.role === 'student' ? 'college_student' : f.role),
-              }));
-            }}
-          >
-            <option value="student">I'm a student</option>
-            <option value="adult">I'm an adult (college student, educator, counselor)</option>
-          </select>
+            value={form.account_type === 'adult' ? 'Adult' : 'Student'}
+            readOnly
+            aria-disabled="true"
+          />
           <span className="field-hint">
-            This decides which details your profile shows. Students reach out first, always.
+            This is set when you create your account and cannot be changed here. If it is wrong,
+            contact us and a person will look at it.
           </span>
         </div>
 

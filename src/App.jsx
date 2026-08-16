@@ -101,6 +101,7 @@ const AuthenticatedApp = () => {
         <Route index element={<Feed />} />
         <Route path="explore" element={<Explore />} />
         <Route path="messages" element={<Messages />} />
+        <Route path="requests" element={<Requests />} />
         <Route path="sage" element={<SageChat />} />
         <Route path="profile" element={<ProfilePage />} />
         {/* Admin only. The page itself renders the 404 for everyone else, so

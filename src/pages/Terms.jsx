@@ -23,10 +23,10 @@ export default function Terms() {
       </p>
 
       <S title="1. Who operates Pathways">
-        Pathways (pathways.uno) is operated by <b>Swati Shah</b>, based in San Ramon, California, United States
-        ("Pathways", "we", "us"). Swati Shah is the account holder for all payment processing and is the party
-        legally responsible for the service. You can reach us at <b>pathways.admins@gmail.com</b>, and we will
-        provide a postal address on request.
+        {PRODUCT_NAME} ({PRODUCT_DOMAIN}) is operated by <b>{COMPANY_NAME}</b>, based in {COMPANY_LOCATION}
+        ("{PRODUCT_NAME}", "we", "us"). {COMPANY_NAME} is the party legally responsible for the service,
+        including payment processing. You can reach us at <b>{COMPANY_EMAIL}</b>, and we will provide a postal
+        address on request.
       </S>
 
       <S title="2. Agreeing to these terms">

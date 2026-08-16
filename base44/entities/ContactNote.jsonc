@@ -1,0 +1,65 @@
+{
+  "name": "ContactNote",
+  "type": "object",
+  "description": "One person's private nickname and notes about another member, like the notes field on a phone contact. Strictly private: only the owner can ever read, write or delete their own rows, and the person being described is never told a note exists. Deliberately never shown to anyone else, because a publicly visible rename would let someone relabel a verified mentor as somebody they are not.",
+  "properties": {
+    "owner_email": {
+      "type": "string",
+      "description": "The person who wrote the note. Only they may read or write this row."
+    },
+    "other_email": {
+      "type": "string",
+      "description": "The member the note is about"
+    },
+    "nickname": {
+      "type": "string",
+      "maxLength": 80,
+      "description": "A private display name shown to the owner instead of the member's real name"
+    },
+    "notes": {
+      "type": "string",
+      "maxLength": 4000,
+      "description": "Private free-text notes, like the notes field on a phone contact"
+    },
+    "updated_at": {
+      "type": "string",
+      "description": "ISO timestamp of the last edit"
+    }
+  },
+  "required": [
+    "owner_email",
+    "other_email"
+  ],
+  "rls": {
+    "create": {
+      "data.owner_email": "{{user.email}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.owner_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "data.owner_email": "{{user.email}}"
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.owner_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

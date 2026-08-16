@@ -74,6 +74,38 @@
       "type": "boolean",
       "default": false,
       "description": "True once the user has completed onboarding and may enter the main app"
+    },
+    "account_type": {
+      "type": "string",
+      "enum": [
+        "student",
+        "adult"
+      ],
+      "default": "student",
+      "description": "Which onboarding track this member chose. Students fill in grade, school and goals; adults fill in institution, title and expertise. Kept separate from `role` because role is the specific label shown to others, while this decides which form and which profile shape apply."
+    },
+    "institution": {
+      "type": "string",
+      "description": "Adult profiles: the college, school or organisation they are with"
+    },
+    "job_title": {
+      "type": "string",
+      "description": "Adult profiles: their title, e.g. Associate Professor of Biology"
+    },
+    "expertise": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Adult profiles: fields they can speak to, the mirror of a student's interests so the two can be matched"
+    },
+    "years_experience": {
+      "type": "number",
+      "description": "Adult profiles: years in their field"
+    },
+    "help_with": {
+      "type": "string",
+      "description": "Adult profiles: what they are happy for students to ask them about"
     }
   },
   "required": [

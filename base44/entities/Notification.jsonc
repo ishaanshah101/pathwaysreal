@@ -1,0 +1,97 @@
+{
+  "name": "Notification",
+  "type": "object",
+  "description": "An in-app notification for one member. Written ONLY by backend functions as service role, so nobody can fabricate a notification that appears to come from someone else. The owner may mark their own as read, and may delete their own.",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "Who this notification belongs to. Only they can read it."
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "connection_request",
+        "connection_accepted",
+        "connection_declined"
+      ],
+      "default": "connection_request",
+      "description": "What happened. Drives the icon and the wording in the UI."
+    },
+    "actor_email": {
+      "type": "string",
+      "description": "The other person involved, the one who acted"
+    },
+    "actor_name": {
+      "type": "string"
+    },
+    "body": {
+      "type": "string",
+      "maxLength": 300,
+      "description": "Prewritten sentence shown in the notification list"
+    },
+    "link": {
+      "type": "string",
+      "description": "In-app path to open when the notification is clicked"
+    },
+    "connection_id": {
+      "type": "string",
+      "description": "The Connection this refers to, when there is one"
+    },
+    "read": {
+      "type": "boolean",
+      "default": false,
+      "description": "Set by the owner when they open the notification centre"
+    },
+    "occurred_at": {
+      "type": "string",
+      "description": "ISO timestamp of the event"
+    }
+  },
+  "required": [
+    "user_email",
+    "type"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "notification_service_only"
+      }
+    },
+    "read": {
+      "$or": [
+        {
+          "data.user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

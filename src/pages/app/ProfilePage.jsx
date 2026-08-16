@@ -22,9 +22,15 @@ export default function ProfilePage() {
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState('');
   const [requests, setRequests] = useState([]);
+  // The form is filled from the profile exactly once. A background refetch used
+  // to re-run this and wipe whatever was typed, which is why the birth year
+  // kept being asked for over and over.
+  const seededFor = React.useRef(null);
 
   useEffect(() => {
     if (!profile) return;
+    if (seededFor.current === profile.id) return;
+    seededFor.current = profile.id;
     setForm({
       full_name: profile.full_name || '',
       role: profile.role || 'student',

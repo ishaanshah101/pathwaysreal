@@ -212,6 +212,9 @@ export default function Feed() {
   const { user } = useAuth();
   const isAdmin = user?.role === 'admin';
   const { blockedEmails, reloadBlocks } = useBlocks();
+  const {
+    connectionWith, requestConnection, busyEmail, connectionError, clearConnectionError,
+  } = useConnections();
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
@@ -221,20 +224,10 @@ export default function Feed() {
   const [posting, setPosting] = useState(false);
   const [error, setError] = useState('');
 
-  const [connectedEmails, setConnectedEmails] = useState([]);
-
   const load = async () => {
     try {
-      const [rows, conns] = await Promise.all([
-        base44.entities.Post.list('-created_date', 100),
-        base44.entities.Connection.list('-created_date', 200).catch(() => []),
-      ]);
+      const rows = await base44.entities.Post.list('-created_date', 100);
       setPosts(Array.isArray(rows) ? rows : []);
-      setConnectedEmails(
-        (Array.isArray(conns) ? conns : [])
-          .filter((c) => c.status === 'accepted')
-          .map((c) => (c.from_email === email ? c.to_email : c.from_email)),
-      );
     } catch {
       setPosts([]);
     }
@@ -302,6 +295,25 @@ export default function Feed() {
             : `${combined.length} post${combined.length === 1 ? '' : 's'} from students, professors, and counselors who've been where you are.`}
         </p>
       </div>
+
+      {connectionError && (
+        <div
+          className="card flex items-start gap-3"
+          style={{
+            padding: '12px 16px', fontSize: 14, lineHeight: 1.55,
+            background: 'var(--color-accent-100)', color: 'var(--color-accent-800)',
+          }}
+        >
+          <span style={{ flex: 1 }}>{connectionError}</span>
+          <button
+            type="button"
+            onClick={clearConnectionError}
+            style={{ background: 'none', border: 0, cursor: 'pointer', font: 'inherit', color: 'inherit', opacity: 0.7 }}
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
 
       {composing ? (
         <form onSubmit={publish} className="card elev-sm" style={{ padding: 22, gap: 14, borderRadius: 26 }}>
@@ -382,7 +394,9 @@ export default function Feed() {
               <PostCard
                 key={p.id}
                 post={p}
-                canMessage={Boolean(p.author_email && connectedEmails.includes(p.author_email))}
+                connection={p.author_email ? connectionWith(p.author_email) : null}
+                busy={busyEmail === p.author_email}
+                onConnect={requestConnection}
                 isMine={Boolean(email && p.author_email === email)}
                 onBlocked={reloadBlocks}
                 canEdit={isAdmin}

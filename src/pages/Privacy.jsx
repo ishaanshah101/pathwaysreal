@@ -23,11 +23,12 @@ export default function Privacy() {
       </p>
 
       <S title="1. Who we are">
-        Pathways (pathways.uno) is a platform that connects high school students with students, educators, and
-        counselors who can give firsthand guidance on college and careers. It is operated by <b>Swati Shah</b>, based
-        in San Ramon, California, United States, who is the data controller for the information described here.
+        {PRODUCT_NAME} ({PRODUCT_DOMAIN}) is a platform that connects high school students with students,
+        educators, and counselors who can give firsthand guidance on college and careers. It is operated by{' '}
+        <b>{COMPANY_NAME}</b>, based in {COMPANY_LOCATION}, which is the data controller for the information
+        described here.
         <br /><br />
-        Contact: <b>pathways.admins@gmail.com</b>. A postal address is available on request.
+        Contact: <b>{COMPANY_EMAIL}</b>. A postal address is available on request.
       </S>
 
       <S title="2. What we collect">

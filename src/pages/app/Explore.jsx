@@ -69,44 +69,16 @@ function MentorCard({ m, onConnect, onRespond, connection, busy, onBlocked }) {
             </span>
           </>
         ) : (
-          <>
-            <button
-              type="button"
-              className="btn btn-primary"
-              style={{ fontSize: 13 }}
-              disabled={busy || accepted || (status === 'pending' && !incoming) || status === 'declined'}
-              onClick={() => (incoming && status === 'pending' ? onRespond(connection, 'accepted') : onConnect(m))}
-            >
-              {label}
-            </button>
-            {incoming && status === 'pending' && (
-              <button
-                type="button"
-                className="btn btn-secondary"
-                style={{ fontSize: 13 }}
-                disabled={busy}
-                onClick={() => onRespond(connection, 'declined')}
-              >
-                Decline
-              </button>
-            )}
-            {/* Messaging is what a Connection unlocks, so the button only
-                exists once the connection is mutual. It used to be offered to
-                strangers, which contradicted the product rule. */}
-            {accepted ? (
-              <Link
-                to={`/app/messages?to=${encodeURIComponent(m.user_email)}`}
-                className="btn btn-secondary"
-                style={{ fontSize: 13 }}
-              >
-                Message
-              </Link>
-            ) : (
-              <span style={{ fontSize: 12, color: 'var(--color-neutral-600)' }}>
-                Connect to message
-              </span>
-            )}
-          </>
+          // The same control the feed uses, so connecting behaves identically
+          // wherever you meet someone. It handles every state itself, including
+          // confirming before a request is sent.
+          <ConnectButton
+            targetEmail={m.user_email}
+            targetName={m.full_name}
+            connection={connection}
+            busy={busy}
+            onConnect={onConnect}
+          />
         )}
       </div>
 

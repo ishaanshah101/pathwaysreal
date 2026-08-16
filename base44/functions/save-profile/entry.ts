@@ -72,6 +72,14 @@ export default async function (req: Request): Promise<Response> {
       return Response.json({ error: 'That is not a valid account type.' }, { status: 400 });
     }
 
+    // Like birth_year, the student/adult track is fixed once it is set. An adult
+    // who could relabel themselves a student would sidestep the rule that
+    // students always send the first message.
+    if (existing?.account_type && patch.account_type !== undefined
+      && String(patch.account_type) !== String(existing.account_type)) {
+      delete patch.account_type;
+    }
+
     // The two tracks have to agree. An account that says it is a student but
     // carries an adult role would sit on the wrong side of the rule in
     // request-connection that stops adults opening contact with minors, so it

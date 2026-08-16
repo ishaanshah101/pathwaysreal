@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { NavLink, Outlet, Link } from 'react-router-dom';
-import { Home, Compass, MessageCircle, Sparkles, User, LogOut, UserPlus } from 'lucide-react';
+import { Home, Compass, MessageCircle, Sparkles, LogOut, UserPlus } from 'lucide-react';
 import Seo from '@/components/Seo';
 import BrandMark from '@/components/BrandMark';
 import UnreadBadge from '@/components/app/UnreadBadge';
@@ -16,7 +16,6 @@ const TABS = [
   { to: '/app/messages', label: 'Messages', Icon: MessageCircle },
   { to: '/app/requests', label: 'Requests', Icon: UserPlus },
   { to: '/app/sage', label: 'Sage', Icon: Sparkles },
-  { to: '/app/profile', label: 'Profile', Icon: User },
 ];
 
 function TabLink({ to, end, label, Icon, badge = 0 }) {

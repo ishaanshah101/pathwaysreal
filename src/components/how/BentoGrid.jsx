@@ -3,7 +3,7 @@ import Reveal from '@/components/Reveal';
 import SectionHeader from '@/components/SectionHeader';
 
 const bento = [
-  { span: 4, title: 'A feed that respects your time', body: 'Real posts about campus visits, competitions, internships, and scholarships. Long-form and honest. No short-form video loops, no reposts, no dopamine traps. You leave knowing more than when you arrived.', d: 'M3 10.5 12 3l9 7.5', d2: 'M5 9.5V21h14V9.5', iconBg: 'var(--color-accent-100)', iconFg: 'var(--color-accent-700)' },
+  { span: 4, title: 'A feed that respects your time', body: 'Real posts about campus visits, competitions, internships, and scholarships. Long-form and honest, with no short-form video and no reposts. You leave knowing more than when you arrived.', d: 'M3 10.5 12 3l9 7.5', d2: 'M5 9.5V21h14V9.5', iconBg: 'var(--color-accent-100)', iconFg: 'var(--color-accent-700)' },
   { span: 2, title: 'Follow or Connect', body: 'Follow to stay updated. Connect, mutually, to actually message and learn from someone.', d: 'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M12 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0', d2: 'M19 8v6M22 11h-6', iconBg: 'var(--color-accent-2-200)', iconFg: 'var(--color-accent-2-800)' },
   { span: 2, title: 'Verified mentors', body: 'Professors and counselors verify with institutional email. Advice you can actually trust.', d: 'M20 6 9 17l-5-5', d2: '', iconBg: 'var(--color-accent-2-200)', iconFg: 'var(--color-accent-2-800)' },
   { span: 2, title: 'A safer inbox', body: 'One-on-one only, never group chats. Messages are permanent, and sharing contact info or arranging meetups is blocked automatically.', d: 'M22 12h-6l-2 3h-4l-2-3H2', d2: 'M5.5 5h13L22 12v5a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-5z', iconBg: 'var(--color-accent-100)', iconFg: 'var(--color-accent-700)' },
@@ -17,7 +17,7 @@ export default function BentoGrid() {
       <SectionHeader
         eyebrow="The features"
         title="One focused place, built for students, by students."
-        intro="Everything below exists because something else was wasting your time or your trust."
+        intro="Everything below exists because students told us it was missing when they went looking for answers."
         titleMaxWidth="22ch"
       />
       <div className="grid gap-[14px] bento-grid" style={{ gridTemplateColumns: 'repeat(6,1fr)', gridAutoRows: 'minmax(150px,auto)' }}>

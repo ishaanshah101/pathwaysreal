@@ -23,9 +23,10 @@ export default function HowItWorks() {
         <p style={{ maxWidth: '64ch', fontSize: 'clamp(15.5px,1.3vw,17px)', lineHeight: 1.65, color: 'var(--color-neutral-800)', margin: 0 }}>
           Pathways is a free platform that gives every high school student equal access to real,
           firsthand guidance on college and careers. Students, professors, and admissions counselors
-          share experience, connect as mentors, and answer questions in one focused space, with no
-          addiction loops and no data selling. It takes the best of Instagram, Reddit, and LinkedIn
-          and builds it for education only.
+          share experience, connect as mentors, and answer questions in one focused space, designed
+          for reading and thinking rather than endless scrolling, and we never sell student data. It
+          takes what works about a feed, a forum, and a professional network, and builds it for
+          education only.
         </p>
       </section>
 

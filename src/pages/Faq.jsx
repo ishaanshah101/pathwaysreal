@@ -2,7 +2,7 @@ import React from 'react';
 import Seo from '@/components/Seo';
 
 const faqs = [
-  { q: 'What is Pathways?', a: 'Pathways is a free platform that gives every high school student equal access to real, firsthand guidance on college and careers. Students, professors, and admissions counselors share experience, connect as mentors, and answer questions in one focused space with no addiction loops.' },
+  { q: 'What is Pathways?', a: 'Pathways is a free platform that gives every high school student equal access to real, firsthand guidance on college and careers. Students, professors, and admissions counselors share experience, connect as mentors, and answer questions in one focused space built for reading and thinking rather than endless scrolling.' },
   { q: 'Is Pathways free?', a: 'Yes. The core app, including the feed, search, connections, messaging, and profiles, is completely free with no premium tier. The only paid feature is Sage, an optional AI advisor, at $5 per month or $40 per year.' },
   { q: 'How is Pathways different from a college counselor?', a: 'Private college counselors can cost $200 an hour. Pathways gives students the same kind of guidance for free, through real students who recently applied, verified professors, and admissions counselors, plus an optional AI advisor at $5 a month.' },
   { q: 'Who can use Pathways?', a: 'Any student 13 or older, from 9th grade up. College students use it for peer mentorship, and educators, professors, and admissions counselors join as verified mentors using their institutional email.' },

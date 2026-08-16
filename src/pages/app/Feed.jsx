@@ -7,7 +7,9 @@ import EditPostModal from '@/components/app/EditPostModal';
 import { authorAvatar, initialsOf } from '@/lib/avatar';
 import CoverArt from '@/components/app/CoverArt';
 import SafetyActions from '@/components/safety/SafetyActions';
+import ConnectButton from '@/components/app/ConnectButton';
 import { useBlocks } from '@/lib/useBlocks';
+import { useConnections } from '@/lib/useConnections';
 import Seo from '@/components/Seo';
 
 const PAGE_SIZE = 12;
@@ -43,7 +45,7 @@ function Avatar({ name, authorKey, size = 40 }) {
   );
 }
 
-function PostCard({ post, canMessage, isMine, onBlocked, canEdit, onSaved }) {
+function PostCard({ post, connection, busy, onConnect, isMine, onBlocked, canEdit, onSaved }) {
   const v = post.variant || 'plain';
   const isLong = (post.body || '').length > 620;
   const [open, setOpen] = useState(false);
@@ -157,20 +159,17 @@ function PostCard({ post, canMessage, isMine, onBlocked, canEdit, onSaved }) {
           </span>
         ) : isMine ? (
           <span style={{ fontSize: 11.5, color: 'var(--color-neutral-600)' }}>Your post</span>
-        ) : post.author_email && canMessage ? (
-          <Link
-            to={`/app/messages?to=${encodeURIComponent(post.author_email)}`}
-            className="btn btn-secondary"
-            style={{ fontSize: 13 }}
-          >
-            Message {String(post.author_name || '').split(' ')[0] || 'them'}
-          </Link>
         ) : post.author_email ? (
-          // Direct messaging is unlocked by a Connection, so an author you have
-          // not connected with sends you to Explore rather than into a DM.
-          <Link to="/app/explore" className="btn btn-secondary" style={{ fontSize: 13 }}>
-            Connect to message
-          </Link>
+          // Messaging is unlocked by an accepted Connection. ConnectButton shows
+          // the right control for wherever this pair currently stands, and asks
+          // before it sends anything.
+          <ConnectButton
+            targetEmail={post.author_email}
+            targetName={post.author_name}
+            connection={connection}
+            busy={busy}
+            onConnect={onConnect}
+          />
         ) : null}
 
         {/* Only the app admin sees this. The server's rules on Post already

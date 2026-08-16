@@ -4,13 +4,15 @@ import { useProfile, ROLE_LABELS } from '@/lib/useProfile';
 import { authorAvatar, initialsOf } from '@/lib/avatar';
 import SafetyActions from '@/components/safety/SafetyActions';
 import ConnectButton from '@/components/app/ConnectButton';
+import FollowButton from '@/components/app/FollowButton';
+import { useFollows } from '@/lib/useFollows';
 import { useBlocks } from '@/lib/useBlocks';
 import { useConnections } from '@/lib/useConnections';
 import Seo from '@/components/Seo';
 
 const PAGE_SIZE = 12;
 
-function MentorCard({ m, onConnect, connection, busy, onBlocked }) {
+function MentorCard({ m, onConnect, connection, busy, onBlocked, following, followBusy, onToggleFollow }) {
   const [bg, fg] = authorAvatar(m.key || m.user_email || m.full_name || '?');
   const isSample = Boolean(m.is_sample_profile);
 
@@ -62,13 +64,25 @@ function MentorCard({ m, onConnect, connection, busy, onBlocked }) {
           // The same control the feed uses, so connecting behaves identically
           // wherever you meet someone. It handles every state itself, including
           // confirming before a request is sent.
-          <ConnectButton
-            targetEmail={m.user_email}
-            targetName={m.full_name}
-            connection={connection}
-            busy={busy}
-            onConnect={onConnect}
-          />
+          <>
+            {/* Follow is the no-permission-needed option: it only adds their
+                posts to your feed. Connect is the mutual one that opens
+                messaging. */}
+            <FollowButton
+              targetEmail={m.user_email}
+              targetName={m.full_name}
+              following={following}
+              busy={followBusy}
+              onToggle={onToggleFollow}
+            />
+            <ConnectButton
+              targetEmail={m.user_email}
+              targetName={m.full_name}
+              connection={connection}
+              busy={busy}
+              onConnect={onConnect}
+            />
+          </>
         )}
       </div>
 
@@ -98,6 +112,13 @@ export default function Explore() {
   const [topicFilter, setTopicFilter] = useState('all');
   const [loading, setLoading] = useState(true);
   const [visible, setVisible] = useState(PAGE_SIZE);
+  const [followingOnly, setFollowingOnly] = useState(false);
+
+  // Follows are their own thing, entirely separate from connections: one-way,
+  // no request, no messaging.
+  const {
+    isFollowing, toggleFollow, followBusyEmail, followingEmails, followingCount, followerCount,
+  } = useFollows();
 
   // Connections are owned by one hook now, shared with the feed and the shell.
   // Explore used to keep its own copy and answer requests with a direct
@@ -136,15 +157,16 @@ export default function Explore() {
     const all = real;
     const needle = q.trim().toLowerCase();
     return all.filter((p) => {
+      if (followingOnly && !followingEmails.includes(String(p.user_email).toLowerCase())) return false;
       if (roleFilter !== 'all' && p.role !== roleFilter) return false;
       if (topicFilter !== 'all' && !(p.interests || []).includes(topicFilter)) return false;
       if (!needle) return true;
       return [p.full_name, p.headline, p.school, p.bio, ...(p.interests || [])]
         .filter(Boolean).join(' ').toLowerCase().includes(needle);
     });
-  }, [people, q, roleFilter, topicFilter, email, blockedEmails]);
+  }, [people, q, roleFilter, topicFilter, email, blockedEmails, followingOnly, followingEmails]);
 
-  useEffect(() => { setVisible(PAGE_SIZE); }, [q, roleFilter, topicFilter]);
+  useEffect(() => { setVisible(PAGE_SIZE); }, [q, roleFilter, topicFilter, followingOnly]);
 
   return (
     <div className="flex flex-col" style={{ gap: 20 }}>
@@ -183,6 +205,31 @@ export default function Explore() {
           value={q}
           onChange={(e) => setQ(e.target.value)}
         />
+
+        {/* Where you keep track of who you follow, without leaving the
+            directory. Following is one-way, so this list is yours alone. */}
+        <div className="flex gap-2 flex-wrap items-center">
+          <button
+            type="button"
+            onClick={() => setFollowingOnly((v) => !v)}
+            className="btn"
+            style={{
+              fontFamily: 'var(--font-body)', fontSize: 13, padding: '6px 13px',
+              background: followingOnly ? 'var(--color-accent)' : 'transparent',
+              color: followingOnly ? 'var(--color-bg)' : 'var(--color-text)',
+              borderColor: followingOnly ? 'transparent' : 'var(--color-divider)',
+            }}
+            aria-pressed={followingOnly}
+          >
+            Following
+            <span style={{ opacity: 0.7, marginLeft: 5, fontSize: 12 }}>{followingCount}</span>
+          </button>
+          {followerCount > 0 && (
+            <span style={{ fontSize: 12.5, color: 'var(--color-neutral-600)' }}>
+              {followerCount} {followerCount === 1 ? 'person follows' : 'people follow'} you
+            </span>
+          )}
+        </div>
 
         <div className="flex gap-2 flex-wrap items-center">
           {[['all', 'Everyone'], ...Object.entries(ROLE_LABELS)].map(([v, l]) => (
@@ -238,6 +285,9 @@ export default function Explore() {
                 connection={connectionWith(m.user_email)}
                 busy={busyEmail === m.user_email}
                 onBlocked={reloadBlocks}
+                following={isFollowing(m.user_email)}
+                followBusy={followBusyEmail === String(m.user_email || '').toLowerCase()}
+                onToggleFollow={toggleFollow}
               />
             ))}
           </div>

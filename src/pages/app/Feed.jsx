@@ -7,6 +7,8 @@ import { authorAvatar, initialsOf } from '@/lib/avatar';
 import CoverArt from '@/components/app/CoverArt';
 import SafetyActions from '@/components/safety/SafetyActions';
 import ConnectButton from '@/components/app/ConnectButton';
+import FollowButton from '@/components/app/FollowButton';
+import { useFollows } from '@/lib/useFollows';
 import { useBlocks } from '@/lib/useBlocks';
 import { useConnections } from '@/lib/useConnections';
 import Seo from '@/components/Seo';
@@ -44,7 +46,10 @@ function Avatar({ name, authorKey, size = 40 }) {
   );
 }
 
-function PostCard({ post, connection, busy, onConnect, isMine, onBlocked, canEdit, onSaved }) {
+function PostCard({
+  post, connection, busy, onConnect, isMine, onBlocked, canEdit, onSaved,
+  following, followBusy, onToggleFollow,
+}) {
   const v = post.variant || 'plain';
   const isLong = (post.body || '').length > 620;
   const [open, setOpen] = useState(false);
@@ -162,13 +167,24 @@ function PostCard({ post, connection, busy, onConnect, isMine, onBlocked, canEdi
           // Messaging is unlocked by an accepted Connection. ConnectButton shows
           // the right control for wherever this pair currently stands, and asks
           // before it sends anything.
-          <ConnectButton
-            targetEmail={post.author_email}
-            targetName={post.author_name}
-            connection={connection}
-            busy={busy}
-            onConnect={onConnect}
-          />
+          <>
+            {/* Following is the lightweight half: one tap, nothing sent to the
+                author, it only decides whether their posts follow you around. */}
+            <FollowButton
+              targetEmail={post.author_email}
+              targetName={post.author_name}
+              following={following}
+              busy={followBusy}
+              onToggle={onToggleFollow}
+            />
+            <ConnectButton
+              targetEmail={post.author_email}
+              targetName={post.author_name}
+              connection={connection}
+              busy={busy}
+              onConnect={onConnect}
+            />
+          </>
         ) : null}
 
         {/* Only the app admin sees this. The server's rules on Post already
@@ -214,6 +230,7 @@ export default function Feed() {
   const {
     connectionWith, requestConnection, busyEmail, connectionError, clearConnectionError,
   } = useConnections();
+  const { isFollowing, toggleFollow, followBusyEmail, followingEmails } = useFollows();
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
@@ -268,10 +285,17 @@ export default function Feed() {
     [loading, posts, blockedEmails],
   );
 
-  const filtered = useMemo(
-    () => (filter === 'all' ? combined : combined.filter((p) => p.category === filter)),
-    [combined, filter],
-  );
+  // "Following" is a view of the same feed narrowed to the people I follow, so
+  // it lives alongside the topic filters rather than being a separate screen.
+  const filtered = useMemo(() => {
+    if (filter === 'all') return combined;
+    if (filter === 'following') {
+      return combined.filter(
+        (p) => p.author_email && followingEmails.includes(String(p.author_email).toLowerCase()),
+      );
+    }
+    return combined.filter((p) => p.category === filter);
+  }, [combined, filter, followingEmails]);
 
   useEffect(() => { setVisible(PAGE_SIZE); }, [filter]);
 
@@ -361,7 +385,7 @@ export default function Feed() {
       )}
 
       <div className="flex gap-2 flex-wrap">
-        {[['all', 'All'], ...Object.entries(CATEGORY_LABELS)].map(([v, l]) => (
+        {[['all', 'All'], ['following', 'Following'], ...Object.entries(CATEGORY_LABELS)].map(([v, l]) => (
           <button
             key={v}
             type="button"
@@ -385,7 +409,11 @@ export default function Feed() {
       {loading ? (
         <p style={{ color: 'var(--color-neutral-600)' }}>Loading the feed…</p>
       ) : filtered.length === 0 ? (
-        <p style={{ color: 'var(--color-neutral-600)' }}>Nothing here yet under this topic. Be the first to post.</p>
+        <p style={{ color: 'var(--color-neutral-600)' }}>
+          {filter === 'following'
+            ? "You're not following anyone who has posted yet. Follow people from Explore to see their posts here."
+            : 'Nothing here yet under this topic. Be the first to post.'}
+        </p>
       ) : (
         <>
           <div className="flex flex-col" style={{ gap: 16 }}>
@@ -400,6 +428,9 @@ export default function Feed() {
                 onBlocked={reloadBlocks}
                 canEdit={isAdmin}
                 onSaved={load}
+                following={p.author_email ? isFollowing(p.author_email) : false}
+                followBusy={followBusyEmail === String(p.author_email || '').toLowerCase()}
+                onToggleFollow={toggleFollow}
               />
             ))}
           </div>

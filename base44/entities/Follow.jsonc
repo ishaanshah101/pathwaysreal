@@ -1,0 +1,58 @@
+{
+  "name": "Follow",
+  "type": "object",
+  "description": "One person following another. Deliberately one-way and separate from Connection: following only affects what you see in your own feed, it never opens messaging and the followed person does not have to agree. Only the follower can create or remove a row, and rows are readable by the follower and by the person being followed.",
+  "properties": {
+    "follower_email": {
+      "type": "string",
+      "description": "The person doing the following. Only they may write this row."
+    },
+    "followed_email": {
+      "type": "string",
+      "description": "The person being followed"
+    },
+    "followed_name": {
+      "type": "string",
+      "description": "Name at the time of following, so a list can render without a second lookup"
+    }
+  },
+  "required": [
+    "follower_email",
+    "followed_email"
+  ],
+  "rls": {
+    "create": {
+      "data.follower_email": "{{user.email}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.follower_email": "{{user.email}}"
+        },
+        {
+          "data.followed_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "data.follower_email": "{{user.email}}"
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.follower_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

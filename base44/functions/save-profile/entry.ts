@@ -15,7 +15,13 @@ const ROLES = ['student', 'college_student', 'educator', 'counselor'];
 const EDITABLE = [
   'full_name', 'role', 'grade', 'school', 'goals',
   'interests', 'bio', 'headline', 'birth_year', 'onboarded',
+  // Adult track. Harmless for a student to have empty, so they are allowed
+  // through the same gate rather than branching the whitelist.
+  'account_type', 'institution', 'job_title', 'expertise',
+  'years_experience', 'help_with',
 ];
+
+const ACCOUNT_TYPES = ['student', 'adult'];
 
 // Fields that are ours, never theirs. Listed explicitly so it is obvious what
 // is being defended and why.
@@ -60,6 +66,31 @@ export default async function (req: Request): Promise<Response> {
 
     if (patch.role !== undefined && !ROLES.includes(String(patch.role))) {
       return Response.json({ error: 'That is not a valid role.' }, { status: 400 });
+    }
+
+    if (patch.account_type !== undefined && !ACCOUNT_TYPES.includes(String(patch.account_type))) {
+      return Response.json({ error: 'That is not a valid account type.' }, { status: 400 });
+    }
+
+    // The two tracks have to agree. An account that says it is a student but
+    // carries an adult role would sit on the wrong side of the rule in
+    // request-connection that stops adults opening contact with minors, so it
+    // is corrected here rather than trusted.
+    if (patch.account_type === 'student') patch.role = 'student';
+    if (patch.account_type === 'adult' && String(patch.role || existing?.role) === 'student') {
+      patch.role = 'college_student';
+    }
+
+    if (patch.years_experience !== undefined) {
+      const yrs = Number(patch.years_experience);
+      patch.years_experience = Number.isFinite(yrs) && yrs >= 0 && yrs <= 80 ? yrs : undefined;
+      if (patch.years_experience === undefined) delete patch.years_experience;
+    }
+
+    if (patch.expertise !== undefined) {
+      patch.expertise = Array.isArray(patch.expertise)
+        ? patch.expertise.map((s: unknown) => String(s).slice(0, 60)).slice(0, 12)
+        : [];
     }
 
     // Age. Required on the first save, and immutable afterwards so nobody

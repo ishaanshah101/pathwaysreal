@@ -5,6 +5,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { useProfile, ROLE_LABELS } from '@/lib/useProfile';
 import { useSubscription, openBillingPortal, SAGE_PRICES } from '@/lib/useSubscription';
 import Seo from '@/components/Seo';
+import { SkeletonLine, SkeletonTitle } from '@/components/ui/Skeletons';
 
 const INTEREST_OPTIONS = [
   'Applications', 'Essays', 'Scholarships', 'Choosing a major',
@@ -99,7 +100,17 @@ export default function ProfilePage() {
     setSaving(false);
   };
 
-  if (!form) return <p style={{ color: 'var(--color-neutral-600)' }}>Loading your profile…</p>;
+  if (!form) {
+    return (
+      <div className="card elev-sm" style={{ padding: 26, gap: 14, borderRadius: 26, maxWidth: 620 }} aria-busy="true">
+        <span className="sr-only">Loading your profile</span>
+        <SkeletonTitle width="40%" />
+        <SkeletonLine width="70%" />
+        <SkeletonLine width="90%" />
+        <SkeletonLine width="60%" />
+      </div>
+    );
+  }
 
   return (
     // Was pinned to a 680px column hugging the left edge, which left a large
@@ -163,7 +174,7 @@ export default function ProfilePage() {
               value={form.birth_year}
               onChange={set('birth_year')}
             />
-            <span style={{ fontSize: 12, color: 'var(--color-neutral-600)', marginTop: 4, display: 'block', lineHeight: 1.5 }}>
+            <span className="field-hint">
               You joined before we asked for this. Pathways is for people 13 and older, and we use it to
               protect members who are under 18. It is never shown on your profile.
             </span>
@@ -281,18 +292,18 @@ export default function ProfilePage() {
               </>
             )}
             {billingError && (
-              <span style={{ fontSize: 12, color: 'var(--color-accent-700)' }}>{billingError}</span>
+              <span className="msg msg-error" role="alert">{billingError}</span>
             )}
           </div>
         </div>
 
-        {error && <span style={{ fontSize: 13, color: 'var(--color-accent-700)' }}>{error}</span>}
+        {error && <span className="msg msg-error" role="alert">{error}</span>}
 
         <div className="flex gap-3 items-center flex-wrap">
           <button type="submit" className="btn btn-primary" disabled={saving}>
             {saving ? 'Saving…' : 'Save changes'}
           </button>
-          {saved && <span style={{ fontSize: 13, color: 'var(--color-accent-2-700)' }}>Saved.</span>}
+          {saved && <span className="msg msg-success" role="status">Saved.</span>}
           <button
             type="button"
             className="btn btn-ghost"

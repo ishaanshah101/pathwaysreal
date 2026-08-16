@@ -12,6 +12,7 @@ import { useBlocks } from '@/lib/useBlocks';
 import { useConnections } from '@/lib/useConnections';
 import { useContactNotes } from '@/lib/useContactNotes';
 import Seo from '@/components/Seo';
+import { SkeletonRows } from '@/components/ui/Skeletons';
 
 function clockTime(iso) {
   if (!iso) return '';
@@ -319,14 +320,14 @@ export default function Messages() {
           </div>
 
           {loading ? (
-            <span style={{ fontSize: 13, color: 'var(--color-neutral-600)', padding: 10 }}>Loading…</span>
+            <SkeletonRows count={4} />
           ) : threads.length === 0 ? (
-            <span style={{ fontSize: 13, color: 'var(--color-neutral-600)', padding: 10, lineHeight: 1.55 }}>
+            <span className="field-hint" style={{ padding: 10 }}>
               {search.trim()
-                ? 'Nothing matches that search.'
+                ? 'Nothing matches that search. Try a name, or a word from the conversation.'
                 : showArchived
-                  ? 'Nothing archived yet.'
-                  : 'No conversations yet.'}
+                  ? 'Nothing archived yet. Conversations you archive move here and stay searchable.'
+                  : 'No conversations yet. Connect with someone in Explore and the conversation opens here.'}
             </span>
           ) : (
             threads.map((t) => {
@@ -493,7 +494,7 @@ export default function Messages() {
               </div>
 
               {sendError && (
-                <span style={{ fontSize: 12.5, color: 'var(--color-accent-700)' }}>{sendError}</span>
+                <span className="notice notice-warning" role="status">{sendError}</span>
               )}
 
               {activeSample ? (

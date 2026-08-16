@@ -156,15 +156,22 @@ export default function Explore() {
         </p>
       </div>
 
-      {connectError && (
+      {connectionError && (
         <div
-          className="card"
+          className="card flex items-start gap-3"
           style={{
             padding: '12px 16px', fontSize: 14, lineHeight: 1.55,
             background: 'var(--color-accent-100)', color: 'var(--color-accent-800)',
           }}
         >
-          {connectError}
+          <span style={{ flex: 1 }}>{connectionError}</span>
+          <button
+            type="button"
+            onClick={clearConnectionError}
+            style={{ background: 'none', border: 0, cursor: 'pointer', font: 'inherit', color: 'inherit', opacity: 0.7 }}
+          >
+            Dismiss
+          </button>
         </div>
       )}
 
@@ -227,9 +234,8 @@ export default function Explore() {
               <MentorCard
                 key={m.user_email}
                 m={m}
-                onConnect={connect}
-                onRespond={respond}
-                connection={connectionFor(m.user_email)}
+                onConnect={requestConnection}
+                connection={connectionWith(m.user_email)}
                 busy={busyEmail === m.user_email}
                 onBlocked={reloadBlocks}
               />

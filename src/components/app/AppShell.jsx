@@ -1,17 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { NavLink, Outlet, Link } from 'react-router-dom';
-import { Home, Compass, MessageCircle, Sparkles, User, LogOut } from 'lucide-react';
+import { Home, Compass, MessageCircle, Sparkles, User, LogOut, UserPlus } from 'lucide-react';
 import Seo from '@/components/Seo';
 import BrandMark from '@/components/BrandMark';
 import UnreadBadge from '@/components/app/UnreadBadge';
+import NotificationBell from '@/components/app/NotificationBell';
 import { useAuth } from '@/lib/AuthContext';
 import { useProfile } from '@/lib/useProfile';
 import { useMessages } from '@/lib/MessagesContext';
+import { useConnections } from '@/lib/useConnections';
 
 const TABS = [
   { to: '/app', end: true, label: 'Feed', Icon: Home },
   { to: '/app/explore', label: 'Explore', Icon: Compass },
   { to: '/app/messages', label: 'Messages', Icon: MessageCircle },
+  { to: '/app/requests', label: 'Requests', Icon: UserPlus },
   { to: '/app/sage', label: 'Sage', Icon: Sparkles },
   { to: '/app/profile', label: 'Profile', Icon: User },
 ];
@@ -45,6 +48,8 @@ export default function AppShell() {
   const { logout } = useAuth();
   const { profile } = useProfile();
   const { unreadTotal } = useMessages();
+  const { incomingPending } = useConnections();
+  const pendingCount = incomingPending.length;
   const [menuOpen, setMenuOpen] = useState(false);
   const first = (profile?.full_name || 'there').split(' ')[0];
 
@@ -82,12 +87,20 @@ export default function AppShell() {
               <TabLink
                 key={t.to}
                 {...t}
-                badge={t.to === '/app/messages' ? unreadTotal : 0}
+                badge={
+                  t.to === '/app/messages' ? unreadTotal
+                    : t.to === '/app/requests' ? pendingCount
+                      : 0
+                }
               />
             ))}
           </nav>
 
-          <div className="relative" style={{ marginLeft: 'auto' }}>
+          <div className="flex items-center gap-2" style={{ marginLeft: 'auto' }}>
+            <NotificationBell />
+          </div>
+
+          <div className="relative">
             <button
               type="button"
               onClick={() => setMenuOpen((o) => !o)}

@@ -11,6 +11,44 @@ const INTEREST_OPTIONS = [
   'Campus life', 'Internships', 'Careers', 'Test prep',
 ];
 
+// What an adult can speak to. Deliberately the mirror of INTEREST_OPTIONS so a
+// student's "I need help with essays" and a mentor's "I can help with essays"
+// are the same string and can be matched later without a lookup table.
+const EXPERTISE_OPTIONS = [
+  'Applications', 'Essays', 'Scholarships', 'Choosing a major',
+  'Campus life', 'Internships', 'Careers', 'Test prep',
+  'Financial aid', 'Transfer', 'Grad school', 'First-generation students',
+];
+
+const ADULT_ROLES = [
+  ['college_student', 'College student'],
+  ['educator', 'Educator / professor'],
+  ['counselor', 'Admissions counselor'],
+];
+
+function ChoiceCard({ title, blurb, points, selected, onSelect }) {
+  return (
+    <button
+      type="button"
+      onClick={onSelect}
+      className="card text-left"
+      style={{
+        padding: 20, gap: 8, borderRadius: 22, cursor: 'pointer', font: 'inherit',
+        border: selected ? '2px solid var(--color-accent)' : '1px solid var(--color-divider)',
+        background: selected ? 'var(--color-accent-100)' : 'var(--color-surface)',
+      }}
+    >
+      <span style={{ fontFamily: 'var(--font-heading)', fontSize: 19 }}>{title}</span>
+      <span style={{ fontSize: 14, lineHeight: 1.55, color: 'var(--color-neutral-800)' }}>{blurb}</span>
+      <span className="flex flex-col" style={{ gap: 4, marginTop: 4 }}>
+        {points.map((p) => (
+          <span key={p} style={{ fontSize: 12.5, color: 'var(--color-neutral-700)' }}>{p}</span>
+        ))}
+      </span>
+    </button>
+  );
+}
+
 export default function Onboarding() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
@@ -18,15 +56,23 @@ export default function Onboarding() {
 
   const [form, setForm] = useState({
     full_name: '',
+    account_type: '',
     role: 'student',
     grade: '',
     school: '',
     goals: '',
     interests: [],
+    institution: '',
+    job_title: '',
+    expertise: [],
+    years_experience: '',
+    help_with: '',
     plan: 'free',
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const isStudent = form.account_type === 'student';
+  const isAdult = form.account_type === 'adult';
 
   // Anyone who already finished this goes straight into the app.
   useEffect(() => {
@@ -41,11 +87,17 @@ export default function Onboarding() {
       const planFromUrl = new URLSearchParams(window.location.search).get('plan');
       const base = {
         full_name: profile?.full_name || user?.full_name || '',
+        account_type: profile?.account_type || '',
         role: profile?.role || 'student',
         grade: profile?.grade || '',
         school: profile?.school || '',
         goals: profile?.goals || '',
         interests: profile?.interests || [],
+        institution: profile?.institution || '',
+        job_title: profile?.job_title || '',
+        expertise: profile?.expertise || [],
+        years_experience: profile?.years_experience ? String(profile.years_experience) : '',
+        help_with: profile?.help_with || '',
         birth_year: profile?.birth_year ? String(profile.birth_year) : '',
         plan: profile?.plan || (['sage_monthly', 'sage_yearly'].includes(planFromUrl) ? planFromUrl : 'free'),
       };
@@ -71,13 +123,42 @@ export default function Onboarding() {
 
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
 
-  const toggleInterest = (label) =>
+  const toggleIn = (key) => (label) =>
     setForm((f) => ({
       ...f,
-      interests: f.interests.includes(label)
-        ? f.interests.filter((i) => i !== label)
-        : [...f.interests, label],
+      [key]: (f[key] || []).includes(label)
+        ? f[key].filter((i) => i !== label)
+        : [...(f[key] || []), label],
     }));
+
+  const toggleInterest = toggleIn('interests');
+  const toggleExpertise = toggleIn('expertise');
+
+  const Chips = ({ options, selected, onToggle }) => (
+    <div className="flex flex-wrap gap-2" style={{ marginTop: 4 }}>
+      {options.map((label) => {
+        const on = (selected || []).includes(label);
+        return (
+          <button
+            key={label}
+            type="button"
+            onClick={() => onToggle(label)}
+            className="btn"
+            style={{
+              fontFamily: 'var(--font-body)',
+              fontSize: 13,
+              padding: '7px 14px',
+              background: on ? 'var(--color-accent)' : 'transparent',
+              color: on ? 'var(--color-bg)' : 'var(--color-text)',
+              borderColor: on ? 'transparent' : 'var(--color-divider)',
+            }}
+          >
+            {label}
+          </button>
+        );
+      })}
+    </div>
+  );
 
   const submit = async (e) => {
     e.preventDefault();

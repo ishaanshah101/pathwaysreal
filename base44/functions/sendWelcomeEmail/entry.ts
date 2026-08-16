@@ -1,6 +1,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 import { consumeRateLimit } from '../../shared/rateLimit.ts';
-import { sendGmail, escapeHtml } from '../../shared/gmail.ts';
+import { sendGmail } from '../../shared/gmail.ts';
+import { welcomeEmail } from '../../shared/welcomeEmailTemplate.ts';
 
 // Mail goes out through the shared Gmail connector, via the shared helper that
 // the moderation alert uses too.
@@ -47,43 +48,7 @@ export default async function(req) {
       return Response.json({ ok: false, reason: 'already_sent_today' }, { status: 429 });
     }
 
-    const firstName = (fullName.split(' ')[0] || '').trim() || 'there';
-    const subject = 'Welcome to Pathways, let\u2019s get you started';
-
-    const plain = [
-      `Hi ${firstName},`,
-      ``,
-      `Welcome to Pathways! We're so glad you're here.`,
-      ``,
-      `Pathways connects you with real students, professors, and counselors who've been exactly where you are. Here's how to get started right away:`,
-      ``,
-      `1. Finish your profile, add your grade, goals, and what you're curious about so we can match you with the right people.`,
-      `2. Explore the feed for firsthand advice on applications, essays, scholarships, majors, and more.`,
-      `3. Reach out and connect with someone who's walked your path.`,
-      ``,
-      `Everything on Pathways is free for every student, forever.`,
-      ``,
-      `Whenever you're ready, head back to Pathways and pick up where you left off.`,
-      ``,
-      `The Pathways Team`,
-      `https://pathways.uno`,
-    ].join('\r\n');
-
-    const html = [
-      `<div style="font-family:Figtree,Arial,sans-serif;color:#201e1d;max-width:560px;margin:0 auto">`,
-      `<h1 style="font-size:22px;color:#b2622d;margin:0 0 12px">Welcome to Pathways, ${escapeHtml(firstName)}!</h1>`,
-      `<p style="font-size:15px;line-height:1.6">We're so glad you're here. Pathways connects you with real students, professors, and counselors who've been exactly where you are.</p>`,
-      `<p style="font-size:15px;line-height:1.6">Here's how to get started right away:</p>`,
-      `<ol style="font-size:15px;line-height:1.7;color:#201e1d;padding-left:22px">`,
-      `<li><b>Finish your profile</b>, add your grade, goals, and what you're curious about so we can match you with the right people.</li>`,
-      `<li><b>Explore the feed</b> for firsthand advice on applications, essays, scholarships, majors, and more.</li>`,
-      `<li><b>Connect</b> with someone who's walked your path.</li>`,
-      `</ol>`,
-      `<p style="font-size:15px;line-height:1.6">Everything on Pathways is free for every student, forever.</p>`,
-      `<p style="font-size:15px;line-height:1.6">Whenever you're ready, head back to <a href="https://pathways.uno" style="color:#b2622d">Pathways</a> and pick up where you left off.</p>`,
-      `<p style="font-size:14px;color:#82796a;margin-top:24px">The Pathways Team<br/><a href="https://pathways.uno" style="color:#82796a">pathways.uno</a></p>`,
-      `</div>`,
-    ].join('');
+    const { subject, plain, html } = welcomeEmail(fullName || target.full_name || '');
 
     const sent = await sendGmail(base44, { to: toEmail, subject, plain, html });
     if (!sent.ok) {

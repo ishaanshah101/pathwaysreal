@@ -462,7 +462,18 @@ export default function Messages() {
                 )}
               </div>
 
-              <div className="flex flex-col" style={{ gap: 9, flex: 1, overflowY: 'auto', maxHeight: 420, paddingRight: 4 }}>
+              {/* role="log" + aria-live so a screen reader user is told when a
+                  reply arrives. Messages stream in without a refresh, and
+                  before this the arrival of a new message was completely
+                  silent — the thread had to be re-read manually to discover it. */}
+              <div
+                role="log"
+                aria-live="polite"
+                aria-relevant="additions"
+                aria-label="Conversation"
+                className="flex flex-col"
+                style={{ gap: 9, flex: 1, overflowY: 'auto', maxHeight: 420, paddingRight: 4 }}
+              >
                 {activeSample ? (
                   activeSample.messages.map((m, i) => (
                     <Bubble
@@ -518,6 +529,8 @@ export default function Messages() {
                 <form onSubmit={send} className="flex gap-2 items-end">
                   <textarea
                     className="input"
+                    aria-label="Write a message"
+                    maxLength={4000}
                     style={{ minHeight: 44, flex: 1 }}
                     value={draft}
                     onChange={(e) => setDraft(e.target.value)}

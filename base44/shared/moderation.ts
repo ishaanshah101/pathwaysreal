@@ -86,12 +86,17 @@ export function excerptOf(text: string) {
 // those and the other compatibility forms down to ASCII before any rule runs,
 // which is why it happens here rather than inside one rule: a normalisation
 // that only covered the phone check would just move the hole somewhere else.
+//
+// The curly apostrophe is folded to the ASCII one for the same reason. NFKC
+// leaves it alone, and every rule written with (?:'?) is spelled with the ASCII
+// character, so without this a phone typing "don’t tell your parents" on its own
+// autocorrect defaults would sail past the secrecy rule.
 function normalizeForMatching(text: string): string {
   const value = String(text || '');
   try {
-    return value.normalize('NFKC');
+    return value.normalize('NFKC').replace(/[‘’ʼ]/g, "'");
   } catch {
-    return value;
+    return value.replace(/[‘’ʼ]/g, "'");
   }
 }
 

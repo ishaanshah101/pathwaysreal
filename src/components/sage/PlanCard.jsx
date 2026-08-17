@@ -57,7 +57,7 @@ export default function PlanCard() {
           <tbody>
             <tr><td style={{ opacity: 0.65 }}>Billed</td><td style={{ textAlign: 'right', fontWeight: 700 }}>{yearly ? '$40 once a year' : '$5 every month'}</td></tr>
             <tr><td style={{ opacity: 0.65 }}>Per week</td><td style={{ textAlign: 'right', fontWeight: 700 }}>{yearly ? '$0.77' : '$1.15'}</td></tr>
-            <tr><td style={{ opacity: 0.65 }}>College ads</td><td style={{ textAlign: 'right', fontWeight: 700 }}>Turned off</td></tr>
+            <tr><td style={{ opacity: 0.65 }}>File attachments</td><td style={{ textAlign: 'right', fontWeight: 700 }}>Included</td></tr>
             <tr><td style={{ opacity: 0.65 }}>Cancel anytime</td><td style={{ textAlign: 'right', fontWeight: 700 }}>Yes</td></tr>
           </tbody>
         </table>

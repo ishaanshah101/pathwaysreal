@@ -171,7 +171,7 @@ export default function AdminModeration() {
       </p>
 
       {error && (
-        <p style={{ color: 'var(--color-danger-700, #b42318)', fontSize: 14 }}>{error}</p>
+        <p role="alert" style={{ color: 'var(--color-danger-700, #b42318)', fontSize: 14 }}>{error}</p>
       )}
 
       <div style={{ display: 'flex', gap: 8, marginBottom: 18 }}>
@@ -197,8 +197,12 @@ export default function AdminModeration() {
 
       {tab === 'reports' && (
         openReports.length === 0 ? (
+          // Only claim the queue is clear when we know it loaded. Otherwise
+          // this reassuring line is exactly what a moderator should not see.
           <p style={{ color: 'var(--color-neutral-700)', fontSize: 14 }}>
-            Nothing open. That is the good outcome.
+            {error
+              ? 'The queue could not be loaded, so we cannot say whether anything is open.'
+              : 'Nothing open. That is the good outcome.'}
           </p>
         ) : (
           <div style={{ display: 'grid', gap: 12 }}>

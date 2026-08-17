@@ -14,7 +14,10 @@ import { useMemo } from 'react';
  * That is the correct trade — the address has to be usable by students and
  * schools. It just should not be free to scrape.
  *
- * The address itself lives in src/lib/company.js. Do not duplicate it here.
+ * The split below is the one deliberate duplication of COMPANY_EMAIL in
+ * src/lib/company.js. Importing that constant would put the joined literal back
+ * into the bundle and defeat the point. If the address ever changes, both
+ * places have to change together.
  */
 const LOCAL = ['pathways', 'admins'];
 const DOMAIN = ['gmail', 'com'];

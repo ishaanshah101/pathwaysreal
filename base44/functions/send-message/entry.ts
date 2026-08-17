@@ -2,6 +2,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 import { screenContent, classifyRisk, logModerationEvent, excerptOf, MODERATION_BLOCK_REASON } from '../../shared/moderation.ts';
 import { consumeRateLimit } from '../../shared/rateLimit.ts';
 import { validateAttachments, screenAttachments, IMAGE_BLOCK_REASON } from '../../shared/attachments.ts';
+import { getProfile, isSuspended, SUSPENDED_MESSAGE } from '../../shared/accounts.ts';
 
 // The ONLY writer of Message rows. The Message entity's create rule is locked to
 // a service-only role, so a browser console can no longer insert a message to an
@@ -18,6 +19,14 @@ export default async function (req: Request): Promise<Response> {
     const fromEmail = String(user.email).toLowerCase();
     const toEmail = String(payload?.toEmail || '').trim().toLowerCase();
     const body = String(payload?.body || '').trim();
+
+    // Suspending an account from the moderation queue has to stop it sending,
+    // not just hide the compose box. The session survives the suspension, so
+    // this is checked here on every message rather than trusted to the client.
+    const senderProfile = await getProfile(base44, fromEmail);
+    if (isSuspended(senderProfile)) {
+      return Response.json({ code: 'suspended', error: SUSPENDED_MESSAGE }, { status: 403 });
+    }
 
     const valid = validateAttachments(payload?.attachments);
     if (!valid.ok) {

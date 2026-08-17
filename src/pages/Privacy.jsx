@@ -141,7 +141,7 @@ export default function Privacy() {
       </S>
 
       <S title="12. Contact">
-        Questions, requests, or concerns about privacy go to <b>pathways.admins@gmail.com</b>. Safety concerns are
+        Questions, requests, or concerns about privacy go to <ContactEmail />. Safety concerns are
         treated as urgent — see our <Link to="/safety">Safety page</Link>.
       </S>
     </section>

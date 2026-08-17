@@ -46,7 +46,7 @@ function Card({ option, selected, onSelect }) {
           className="flex items-center justify-center"
           style={{
             width: 34, height: 34, borderRadius: 'var(--radius-pill)', flex: 'none',
-            background: selected ? 'var(--color-accent)' : 'var(--color-neutral-200)',
+            background: selected ? 'var(--color-action)' : 'var(--color-neutral-200)',
             color: selected ? 'var(--color-bg)' : 'var(--text-muted)',
           }}
         >

@@ -48,14 +48,17 @@ const RULES = [
     // Two deliberate carve-outs, both for things students really write:
     //
     //   "call me Alex"  — a name introduction, not a request to phone someone.
-    //     Matched only when not followed by a capitalised name. A real request
-    //     to call almost always carries a number, which phone_number catches.
+    //     "call me" therefore matches only when what follows is punctuation,
+    //     the end of the sentence, or a word that makes it a real request
+    //     ("call me at", "call me tonight"). A capital-letter test does not
+    //     work here: this regex carries the /i flag, so [A-Z] matches lowercase
+    //     too and "call me tonight" would have slipped through.
     //   "I want to grab a coffee before my interview" — a plan for one person.
     //     The invitation forms (let's, we should, wanna) still match, and the
     //     "with you / together / sometime" form below catches the phrasing that
     //     the I-exclusion would otherwise let through, e.g. "I want to grab
     //     lunch with you".
-    re: /\b(?:text me|give me a call|call me\b(?! *[A-Z][a-z])|facetime|hit me up|let'?s meet|meet up|meet in person|come over|come (?:see|visit) me|my address|where do you live|what'?s your address|what'?s your (?:phone|cell)\b|pick you up|see you in person|(?<!\bI )(?:let'?s|lets|wanna|want to|we should|we could) (?:grab|get|have) (?:a |some )?(?:coffee|lunch|dinner|drinks?)|(?:grab|get|have) (?:a |some )?(?:coffee|lunch|dinner|drinks?) (?:with you|together|sometime)|(?<!\bI )(?:let'?s|lets|wanna|want to|we should|we could) hang ?out|hang ?out (?:with you|sometime|in person|irl))\b/i,
+    re: /\b(?:text me|give me a call|call me\b(?=\s*(?:$|[.,!?;…]|at\b|on\b|back\b|tonight\b|later\b|tomorrow\b|sometime\b|anytime\b|when\b|after\b|if\b|instead\b|please\b|real quick\b))|facetime|hit me up|let'?s meet|meet up|meet in person|come over|come (?:see|visit) me|my address|where do you live|what'?s your address|what'?s your (?:phone|cell)\b|pick you up|see you in person|(?<!\bI )(?:let'?s|lets|wanna|want to|we should|we could) (?:grab|get|have) (?:a |some )?(?:coffee|lunch|dinner|drinks?)|(?:grab|get|have) (?:a |some )?(?:coffee|lunch|dinner|drinks?) (?:with you|together|sometime)|(?<!\bI )(?:let'?s|lets|wanna|want to|we should|we could) hang ?out|hang ?out (?:with you|sometime|in person|irl))\b/i,
   },
   {
     rule: 'photo_request',

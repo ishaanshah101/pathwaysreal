@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { base44 } from '@/api/base44Client';
 import { ROLE_LABELS } from '@/lib/useProfile';
 import { useConnections } from '@/lib/useConnections';
 import { usePeopleByEmail } from '@/lib/usePeople';

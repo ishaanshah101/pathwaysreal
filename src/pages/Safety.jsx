@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import Seo from '@/components/Seo';
 import SectionHeader from '@/components/SectionHeader';
+import ContactEmail from '@/components/ContactEmail';
 
 function Section({ title, children }) {
   return (

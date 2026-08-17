@@ -7,7 +7,7 @@ import AskSage from '@/components/sage/AskSage';
 const sagePoints = [
   'Personalized to your profile, grade, and goals',
   'Saved conversations with streaming answers',
-  'Turns off college ads across the whole app',
+  'Attach an essay draft or transcript and ask about it',
   'Funds free access for everyone else',
 ];
 

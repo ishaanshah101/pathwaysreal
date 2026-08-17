@@ -64,43 +64,43 @@ export default function Hero() {
             so the caption underneath can never push the bottom-anchored card
             off the image. */}
         <div className="relative">
-        <div
-          className="relative overflow-hidden"
-          style={{
-            aspectRatio: '4 / 4.6',
-            borderRadius: '44% 56% 52% 48% / 52% 46% 54% 48%',
-            background: 'linear-gradient(150deg, var(--color-accent-2-400), var(--color-accent-300) 55%, var(--color-accent-400))',
-          }}
-        >
-          <img
-            src={heroSrc}
-            srcSet={heroSrcSet}
-            sizes="(min-width: 860px) 42vw, 92vw"
-            alt="A high school student who found a mentor through Pathways"
-            width="520"
-            height="598"
-            fetchPriority="high"
-            decoding="async"
-            className="absolute inset-0 w-full h-full object-cover"
-            style={{ filter: 'brightness(1.08) contrast(1.05) saturate(1.05)' }}
-          />
           <div
-            className="absolute inset-0"
-            style={{ background: 'linear-gradient(150deg, rgba(174,191,146,0.18), rgba(255,198,165,0.08) 55%, rgba(246,160,107,0.22))', mixBlendMode: 'soft-light' }}
-          />
-        </div>
-        <div className="card elev-lg anim-drift" style={{ position: 'absolute', left: -14, bottom: 34, width: 230, padding: '14px 16px', gap: 6 }}>
-          <span className="card-kicker">Connected</span>
-          <span style={{ fontSize: 13, lineHeight: 1.45 }}>
-            <b>Sofia, CMU first-year</b> accepted your connect request. Ask her anything.
-          </span>
-        </div>
-        <div className="card elev-md anim-drift-slow" style={{ position: 'absolute', right: -8, top: 26, padding: '10px 16px', gap: 2 }}>
-          <span style={{ fontFamily: 'var(--font-heading)', fontSize: 20 }}>
-            $0 <span style={{ fontSize: 12, color: 'var(--color-accent-700)' }}>forever</span>
-          </span>
-          <span style={{ fontSize: 11, color: 'var(--color-neutral-700)' }}>the core app, for every student</span>
-        </div>
+            className="relative overflow-hidden"
+            style={{
+              aspectRatio: '4 / 4.6',
+              borderRadius: '44% 56% 52% 48% / 52% 46% 54% 48%',
+              background: 'linear-gradient(150deg, var(--color-accent-2-400), var(--color-accent-300) 55%, var(--color-accent-400))',
+            }}
+          >
+            <img
+              src={heroSrc}
+              srcSet={heroSrcSet}
+              sizes="(min-width: 860px) 42vw, 92vw"
+              alt="A high school student who found a mentor through Pathways"
+              width="520"
+              height="598"
+              fetchPriority="high"
+              decoding="async"
+              className="absolute inset-0 w-full h-full object-cover"
+              style={{ filter: 'brightness(1.08) contrast(1.05) saturate(1.05)' }}
+            />
+            <div
+              className="absolute inset-0"
+              style={{ background: 'linear-gradient(150deg, rgba(174,191,146,0.18), rgba(255,198,165,0.08) 55%, rgba(246,160,107,0.22))', mixBlendMode: 'soft-light' }}
+            />
+          </div>
+          <div className="card elev-lg anim-drift" style={{ position: 'absolute', left: -14, bottom: 34, width: 230, padding: '14px 16px', gap: 6 }}>
+            <span className="card-kicker">Connected</span>
+            <span style={{ fontSize: 13, lineHeight: 1.45 }}>
+              <b>Sofia, CMU first-year</b> accepted your connect request. Ask her anything.
+            </span>
+          </div>
+          <div className="card elev-md anim-drift-slow" style={{ position: 'absolute', right: -8, top: 26, padding: '10px 16px', gap: 2 }}>
+            <span style={{ fontFamily: 'var(--font-heading)', fontSize: 20 }}>
+              $0 <span style={{ fontSize: 12, color: 'var(--color-accent-700)' }}>forever</span>
+            </span>
+            <span style={{ fontSize: 11, color: 'var(--color-neutral-700)' }}>the core app, for every student</span>
+          </div>
         </div>
         {/* Same standard as the quote and story sections below: the cards
             floating on the photo show what the product looks like, not

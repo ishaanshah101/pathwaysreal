@@ -148,7 +148,7 @@ export default function SagePaywall({ notice }) {
             <div
               style={{
                 alignSelf: 'flex-end', maxWidth: '85%',
-                background: 'var(--color-accent)', color: 'var(--color-bg)',
+                background: 'var(--color-action)', color: 'var(--color-bg)',
                 padding: '10px 15px', borderRadius: 20, fontSize: 14, lineHeight: 1.5,
               }}
             >

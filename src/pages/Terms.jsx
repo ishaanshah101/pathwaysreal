@@ -17,7 +17,7 @@ export default function Terms() {
     <section style={{ padding: 'clamp(28px,6vh,64px) 0 clamp(36px,6vh,64px)', maxWidth: '68ch' }}>
       <Seo
         title="Terms of Service | Pathways"
-        description="The terms for using Pathways: who operates it, who can join, how members must behave, safety rules, and how the free core app and optional Sage subscription work."
+        description="The terms for using Pathways: who operates it, who can join, how members must behave, and how the free core app and optional Sage subscription work."
         path="/terms"
       />
       <h1 style={{ fontSize: 'clamp(30px,4.2vw,46px)', margin: '0 0 8px' }}>Terms of Service</h1>

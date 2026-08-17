@@ -129,17 +129,14 @@ export default function Explore() {
     connectionWith, requestConnection, busyEmail, connectionError, clearConnectionError,
   } = useConnections();
 
-  const load = async () => {
-    try {
-      const profiles = await base44.entities.Profile.list('-created_date', 200).catch(() => []);
-      setPeople(Array.isArray(profiles) ? profiles : []);
-    } catch {
-      setPeople([]);
-    }
-    setLoading(false);
-  };
-
-  useEffect(() => { load(); }, []);
+  // The directory comes from the get-profile function, not from
+  // Profile.list(). The entity's read rule only ever matched your own row or an
+  // admin, so listing from the browser returned a directory of one for every
+  // normal member — and everything for the admin testing it, which is why this
+  // looked fine. get-profile reads as service role and shapes each row for the
+  // person asking, so a student who is not connected to someone never receives
+  // that person's school, grade or goals in the first place.
+  const { people, loading, error: directoryError, reload: load } = useDirectory();
 
   // Topics come from the people who are actually here, so the filter never
   // offers a topic that returns nobody.
@@ -150,7 +147,12 @@ export default function Explore() {
   }, [people]);
 
   const list = useMemo(() => {
-    // Anyone I have blocked is gone from the directory entirely.
+    // Blocks, suspended accounts and un-onboarded rows are already excluded
+    // server-side, and the server filters blocks in BOTH directions — the
+    // client only ever knew about people it had blocked itself, so anyone who
+    // had blocked this member still showed up here. The blockedEmails pass is
+    // kept as a belt-and-braces filter for rows already in state when a block
+    // is made, so the person disappears without waiting for a refetch.
     const real = people.filter(
       (p) => p.user_email && p.user_email !== email && p.onboarded && !blockedEmails.includes(p.user_email),
     );

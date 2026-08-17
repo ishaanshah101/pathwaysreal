@@ -59,7 +59,11 @@ export default function Hero() {
         </p>
       </div>
 
-      <div className="relative anim-fade-up" style={{ animationDelay: '.15s' }}>
+      <div className="anim-fade-up" style={{ animationDelay: '.15s' }}>
+        {/* The photo and the two floating cards share one positioning context,
+            so the caption underneath can never push the bottom-anchored card
+            off the image. */}
+        <div className="relative">
         <div
           className="relative overflow-hidden"
           style={{
@@ -97,8 +101,9 @@ export default function Hero() {
           </span>
           <span style={{ fontSize: 11, color: 'var(--color-neutral-700)' }}>the core app, for every student</span>
         </div>
+        </div>
         {/* Same standard as the quote and story sections below: the cards
-            floating on the photo are a preview of the product, not a record of
+            floating on the photo show what the product looks like, not
             something that happened, so they say so. */}
         <p style={{ fontSize: 11.5, color: 'var(--color-neutral-600)', margin: '12px 4px 0' }}>
           Illustrative preview of a Pathways connection.

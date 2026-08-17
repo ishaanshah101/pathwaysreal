@@ -95,7 +95,7 @@ export default function Hero() {
           <span style={{ fontFamily: 'var(--font-heading)', fontSize: 20 }}>
             $0 <span style={{ fontSize: 12, color: 'var(--color-accent-700)' }}>forever</span>
           </span>
-          <span style={{ fontSize: 11, color: 'var(--color-neutral-700)' }}>every student, every feature</span>
+          <span style={{ fontSize: 11, color: 'var(--color-neutral-700)' }}>the core app, for every student</span>
         </div>
         {/* Same standard as the quote and story sections below: the cards
             floating on the photo are a preview of the product, not a record of

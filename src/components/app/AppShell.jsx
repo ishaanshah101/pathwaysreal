@@ -30,7 +30,7 @@ function TabLink({ to, end, label, Icon, badge = 0 }) {
             padding: '9px 15px',
             borderRadius: 999,
             color: isActive ? 'var(--color-bg)' : 'var(--color-text)',
-            background: isActive ? 'var(--color-accent)' : 'transparent',
+            background: isActive ? 'var(--color-action)' : 'transparent',
             fontWeight: isActive || badge > 0 ? 600 : 400,
           }}
         >

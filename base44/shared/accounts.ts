@@ -47,6 +47,38 @@ export async function areConnected(base44: any, a: string, b: string): Promise<b
   });
 }
 
+// Everyone this person has an accepted connection with, in either direction.
+// One query instead of areConnected() per row, which is what get-profile needs
+// when it shapes a whole directory.
+export async function connectedEmails(base44: any, email: string): Promise<Set<string>> {
+  const me = normalizeEmail(email);
+  const rows = await base44.asServiceRole.entities.Connection.filter({ status: 'accepted' });
+  const out = new Set<string>();
+  for (const c of Array.isArray(rows) ? rows : []) {
+    const from = normalizeEmail(c.from_email);
+    const to = normalizeEmail(c.to_email);
+    if (from === me) out.add(to);
+    else if (to === me) out.add(from);
+  }
+  return out;
+}
+
+// Everyone in a block relationship with this person, in EITHER direction. A
+// person who blocked me has to disappear from my directory too, not just the
+// people I blocked — the client only ever knew about the latter.
+export async function blockedEitherWay(base44: any, email: string): Promise<Set<string>> {
+  const me = normalizeEmail(email);
+  const rows = await base44.asServiceRole.entities.Block.filter({});
+  const out = new Set<string>();
+  for (const b of Array.isArray(rows) ? rows : []) {
+    const blocker = normalizeEmail(b.blocker_email);
+    const blocked = normalizeEmail(b.blocked_email);
+    if (blocker === me) out.add(blocked);
+    else if (blocked === me) out.add(blocker);
+  }
+  return out;
+}
+
 // What a given viewer is allowed to see of a profile. A minor is never exposed
 // by full name plus school plus grade to someone they have not accepted.
 export function shapeProfile(profile: any, level: 'public' | 'connected' | 'self') {
@@ -54,14 +86,23 @@ export function shapeProfile(profile: any, level: 'public' | 'connected' | 'self
   if (level === 'self') return profile;
 
   const base = {
+    id: profile.id,
     user_email: profile.user_email,
     role: profile.role || 'student',
     headline: profile.headline || '',
     bio: profile.bio || '',
     interests: Array.isArray(profile.interests) ? profile.interests : [],
-    is_minor: Boolean(profile.is_minor),
     verified: Boolean(profile.verified),
     onboarded: Boolean(profile.onboarded),
+
+    // An adult's credentials are the whole point of the directory — a student
+    // choosing who to ask needs to see what this person can actually speak to.
+    // None of these are set on student profiles.
+    institution: profile.institution || '',
+    job_title: profile.job_title || '',
+    expertise: Array.isArray(profile.expertise) ? profile.expertise : [],
+    years_experience: profile.years_experience ?? null,
+    help_with: profile.help_with || '',
   };
 
   if (level === 'connected') {
@@ -71,11 +112,18 @@ export function shapeProfile(profile: any, level: 'public' | 'connected' | 'self
       school: profile.school || '',
       grade: profile.grade || '',
       goals: profile.goals || '',
+      is_minor: Boolean(profile.is_minor),
     };
   }
 
   // Anyone signed in: a minor is first name only, and school, grade and goals
   // are withheld entirely.
+  //
+  // is_minor itself is withheld at this level too. It is a true fact about the
+  // row, but exposing it to every signed-in member hands anyone a way to filter
+  // the directory down to the children on it, which is the exact shape of
+  // targeting this function exists to prevent. Connections and the account
+  // itself still see it.
   return {
     ...base,
     full_name: profile.is_minor ? firstNameOf(profile.full_name) : (profile.full_name || ''),

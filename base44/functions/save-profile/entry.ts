@@ -84,8 +84,18 @@ export default async function (req: Request): Promise<Response> {
     // carries an adult role would sit on the wrong side of the rule in
     // request-connection that stops adults opening contact with minors, so it
     // is corrected here rather than trusted.
-    if (patch.account_type === 'student') patch.role = 'student';
-    if (patch.account_type === 'adult' && String(patch.role || existing?.role) === 'student') {
+    //
+    // These tests read the EFFECTIVE track, not patch.account_type. Reading the
+    // patch alone was a hole big enough to drive the whole safety model through:
+    // the guard immediately above DELETES patch.account_type whenever someone
+    // tries to change it, so an adult who simply posted {"role":"student"} with
+    // no account_type at all left patch.account_type undefined, neither branch
+    // fired, and role saved as 'student'. request-connection decides who may
+    // open contact from role, not from account_type, so that one omitted field
+    // turned off the adult-cannot-initiate rule entirely.
+    const effectiveType = String(patch.account_type ?? existing?.account_type ?? '');
+    if (effectiveType === 'student') patch.role = 'student';
+    if (effectiveType === 'adult' && String(patch.role ?? existing?.role ?? '') === 'student') {
       patch.role = 'college_student';
     }
 

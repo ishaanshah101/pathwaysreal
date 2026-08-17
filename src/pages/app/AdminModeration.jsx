@@ -96,7 +96,13 @@ export default function AdminModeration() {
     }
     try {
       const rows = await base44.entities.Message.list('-created_date', 400);
-      const pair = [report.reporter_email, report.reported_email].sort().join('|');
+      // Use the same threadKey() the messages themselves are written with.
+      // Building the key by hand here skipped the lowercasing, so any report
+      // involving an address with a capital letter matched nothing and this
+      // screen told the moderator "No messages found between these two" for a
+      // conversation that was sitting right there. Sorting differed too, since
+      // uppercase sorts ahead of lowercase.
+      const pair = threadKey(report.reporter_email, report.reported_email);
       const thread = (Array.isArray(rows) ? rows : [])
         .filter((m) => m.thread_key === pair)
         .slice(0, 30)
@@ -127,7 +133,16 @@ export default function AdminModeration() {
     try {
       const rows = await base44.entities.Profile.filter({ user_email: report.reported_email });
       const p = Array.isArray(rows) && rows.length ? rows[0] : null;
-      if (p) await base44.entities.Profile.update(p.id, { suspended: true });
+      // No profile means nobody was suspended. This used to fall through to
+      // act(), which closed the report with the note "Suspended account" while
+      // the account carried on untouched — the queue and the audit trail both
+      // said the opposite of what had happened.
+      if (!p) {
+        setError(`${report.reported_email} has no profile yet, so there is nothing to suspend. The report has been left open.`);
+        setBusyId('');
+        return;
+      }
+      await base44.entities.Profile.update(p.id, { suspended: true });
       await act(report, 'actioned', 'Suspended account');
     } catch {
       setError('Could not suspend that account. It may not have a profile yet.');

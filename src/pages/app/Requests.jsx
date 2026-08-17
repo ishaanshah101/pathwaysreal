@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { ROLE_LABELS } from '@/lib/useProfile';
 import { useConnections } from '@/lib/useConnections';
+import { usePeopleByEmail } from '@/lib/usePeople';
 import { useBlocks } from '@/lib/useBlocks';
 import { authorAvatar, initialsOf } from '@/lib/avatar';
 import SafetyActions from '@/components/safety/SafetyActions';

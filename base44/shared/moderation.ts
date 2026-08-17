@@ -45,7 +45,7 @@ const RULES = [
     // meet in person. A counselor and a student talk about deadlines and campus
     // visits all day, so anything that could plausibly be ordinary advice stays
     // out of this list.
-    re: /\b(?:text me|call me|facetime|hit me up|let'?s meet|meet up|meet in person|come over|come (?:see|visit) me|my address|where do you live|what'?s your address|what'?s your (?:phone )?(?:number|cell)|pick you up|see you in person|(?:let'?s|lets|wanna|want to|we should|we could) (?:grab|get|have) (?:a |some )?(?:coffee|lunch|dinner|drinks?)|(?:let'?s|lets|wanna|want to|we should|we could) hang ?out|hang ?out (?:sometime|in person|irl))\b/i,
+    re: /\b(?:text me|call me|facetime|hit me up|let'?s meet|meet up|meet in person|come over|come (?:see|visit) me|my address|where do you live|what'?s your address|what'?s your (?:phone|cell)\b|pick you up|see you in person|(?:let'?s|lets|wanna|want to|we should|we could) (?:grab|get|have) (?:a |some )?(?:coffee|lunch|dinner|drinks?)|(?:let'?s|lets|wanna|want to|we should|we could) hang ?out|hang ?out (?:sometime|in person|irl))\b/i,
   },
   {
     rule: 'photo_request',

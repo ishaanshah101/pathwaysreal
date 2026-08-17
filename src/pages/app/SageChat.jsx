@@ -116,12 +116,17 @@ export default function SageChat() {
       >
         <ThreadList
           threads={chat.threads}
+          folders={chat.folders}
           activeId={chat.activeId}
           loading={chat.loadingThreads}
           onSelect={chat.setActiveId}
           onNew={chat.newChat}
           onRename={chat.renameThread}
           onDelete={chat.deleteThread}
+          onMove={chat.moveThread}
+          onCreateFolder={chat.createFolder}
+          onRenameFolder={chat.renameFolder}
+          onDeleteFolder={chat.deleteFolder}
         />
 
         <div className="card elev-sm" style={{ padding: 20, gap: 14, borderRadius: 26, minHeight: 460 }}>

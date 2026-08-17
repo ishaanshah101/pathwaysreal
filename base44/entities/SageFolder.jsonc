@@ -1,0 +1,51 @@
+{
+  "name": "SageFolder",
+  "type": "object",
+  "description": "A folder a student uses to group their Sage chats, e.g. 'Essays' or 'College list'. Strictly private, same ownership model as SageThread: only the owner can see or change their folders.",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "Owner. Only they may read or write this row."
+    },
+    "name": {
+      "type": "string",
+      "maxLength": 60
+    }
+  },
+  "required": [
+    "user_email",
+    "name"
+  ],
+  "rls": {
+    "create": {
+      "data.user_email": "{{user.email}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "data.user_email": "{{user.email}}"
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

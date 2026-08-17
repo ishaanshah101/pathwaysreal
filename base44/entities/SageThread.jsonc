@@ -12,6 +12,10 @@
       "maxLength": 120,
       "description": "Shown in the conversation list. Auto-written from the first question, then editable."
     },
+    "folder_id": {
+      "type": "string",
+      "description": "The SageFolder this chat is filed under, empty when unfiled. Set by the owner from the chat list."
+    },
     "last_message_at": {
       "type": "string",
       "description": "ISO timestamp of the most recent message, used to order the list"

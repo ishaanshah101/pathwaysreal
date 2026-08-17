@@ -19,6 +19,7 @@ export function cleanSage(text) {
 // the plain client reads only this student's own conversations.
 export function useSageChat(enabled) {
   const [threads, setThreads] = useState([]);
+  const [folders, setFolders] = useState([]);
   const [activeId, setActiveId] = useState(null);
   const [messages, setMessages] = useState([]);
   const [loadingThreads, setLoadingThreads] = useState(true);
@@ -37,14 +38,24 @@ export function useSageChat(enabled) {
     }
   }, []);
 
+  const loadFolders = useCallback(async () => {
+    try {
+      const rows = await base44.entities.SageFolder.list('created_date', 50);
+      setFolders(Array.isArray(rows) ? rows : []);
+    } catch {
+      setFolders([]);
+    }
+  }, []);
+
   useEffect(() => {
     if (!enabled) { setLoadingThreads(false); return; }
+    loadFolders();
     (async () => {
       const list = await loadThreads();
       setActiveId(list.length ? list[0].id : null);
       setLoadingThreads(false);
     })();
-  }, [enabled, loadThreads]);
+  }, [enabled, loadThreads, loadFolders]);
 
   useEffect(() => {
     if (!activeId) { setMessages([]); return; }
@@ -121,9 +132,46 @@ export function useSageChat(enabled) {
     }
   }, [activeId, loadThreads]);
 
+  const moveThread = useCallback(async (id, folderId) => {
+    setThreads((t) => t.map((x) => (x.id === id ? { ...x, folder_id: folderId || '' } : x)));
+    await base44.entities.SageThread.update(id, { folder_id: folderId || '' }).catch(() => loadThreads());
+  }, [loadThreads]);
+
+  const createFolder = useCallback(async (name) => {
+    const clean = name.trim().slice(0, 60);
+    if (!clean) return;
+    try {
+      const me = await base44.auth.me();
+      await base44.entities.SageFolder.create({ user_email: me.email, name: clean });
+      await loadFolders();
+    } catch { /* the folder simply doesn't appear; retry is one click */ }
+  }, [loadFolders]);
+
+  const renameFolder = useCallback(async (id, name) => {
+    const clean = name.trim().slice(0, 60);
+    if (!clean) return;
+    setFolders((f) => f.map((x) => (x.id === id ? { ...x, name: clean } : x)));
+    await base44.entities.SageFolder.update(id, { name: clean }).catch(() => loadFolders());
+  }, [loadFolders]);
+
+  // Deleting a folder never deletes chats: they come out of the folder intact.
+  const deleteFolder = useCallback(async (id) => {
+    setFolders((f) => f.filter((x) => x.id !== id));
+    setThreads((t) => t.map((x) => (x.folder_id === id ? { ...x, folder_id: '' } : x)));
+    try {
+      const inFolder = await base44.entities.SageThread.filter({ folder_id: id }, '-last_message_at', 100);
+      await Promise.all((inFolder || []).map((t) => base44.entities.SageThread.update(t.id, { folder_id: '' }).catch(() => {})));
+      await base44.entities.SageFolder.delete(id);
+    } catch {
+      loadFolders();
+      loadThreads();
+    }
+  }, [loadFolders, loadThreads]);
+
   return {
-    threads, activeId, setActiveId, messages, thinking,
+    threads, folders, activeId, setActiveId, messages, thinking,
     loadingThreads, loadingMessages,
     ask, newChat, renameThread, deleteThread,
+    moveThread, createFolder, renameFolder, deleteFolder,
   };
 }

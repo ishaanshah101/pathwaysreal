@@ -62,11 +62,24 @@ export default function ProfilePage() {
 
   useEffect(() => { if (email) loadRequests(); }, [email]);
 
+  // Answering goes through respond-connection, the same as the Requests page.
+  //
+  // This used to call Connection.update directly, which meant two things: the
+  // requester was never notified that they had been accepted, because only the
+  // function writes that notification as service role; and the entity rule that
+  // permitted the write also permitted the SENDER of a request to accept it on
+  // their own behalf. The entity now refuses direct writes outright, so this
+  // path had to move regardless.
+  const [respondError, setRespondError] = useState('');
+
   const respond = async (c, status) => {
-    try {
-      await base44.entities.Connection.update(c.id, { status });
-      await loadRequests();
-    } catch { /* leave the row in place so it can be retried */ }
+    setRespondError('');
+    const res = await respondToConnection(c.id, status);
+    if (res?.ok === false) {
+      setRespondError(res.error || 'That did not go through. Please try again.');
+      return;
+    }
+    await loadRequests();
   };
 
   const set = (k) => (e) => { setForm((f) => ({ ...f, [k]: e.target.value })); setSaved(false); };

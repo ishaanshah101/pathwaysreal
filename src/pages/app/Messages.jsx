@@ -27,7 +27,7 @@ function Bubble({ mine, children, meta }) {
       style={{
         alignSelf: mine ? 'flex-end' : 'flex-start',
         maxWidth: '80%',
-        background: mine ? 'var(--color-accent)' : 'var(--color-bg)',
+        background: mine ? 'var(--color-action)' : 'var(--color-bg)',
         color: mine ? 'var(--color-bg)' : 'var(--color-text)',
         padding: '9px 14px 6px',
         borderRadius: 20,

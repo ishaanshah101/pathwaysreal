@@ -11,6 +11,7 @@ import ContactDetailsPanel from '@/components/app/ContactDetailsPanel';
 import { useBlocks } from '@/lib/useBlocks';
 import { useConnections } from '@/lib/useConnections';
 import { useContactNotes } from '@/lib/useContactNotes';
+import { usePeopleByEmail } from '@/lib/usePeople';
 import Seo from '@/components/Seo';
 import { SkeletonRows } from '@/components/ui/Skeletons';
 
@@ -61,7 +62,7 @@ export default function Messages() {
   const [params, setParams] = useSearchParams();
   const activeWith = params.get('to');
 
-  const [people, setPeople] = useState([]);
+
   const [draft, setDraft] = useState('');
   const [sending, setSending] = useState(false);
   const [sendError, setSendError] = useState('');

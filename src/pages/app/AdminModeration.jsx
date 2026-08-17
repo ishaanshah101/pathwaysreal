@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
+import { threadKey } from '@/lib/useProfile';
 import PageNotFound from '@/lib/PageNotFound';
 import { Spinner } from '@/components/RequireAuth';
 import Seo from '@/components/Seo';
@@ -60,14 +61,20 @@ export default function AdminModeration() {
     setLoading(true);
     setError('');
     try {
+      // No per-call .catch() here. Swallowing a failed Report.list() into an
+      // empty array made the outer catch unreachable, so an outage rendered as
+      // "0 open reports" under the heading "Nothing open. That is the good
+      // outcome" while reports sat unread. A moderation queue must fail loudly.
       const [r, e] = await Promise.all([
-        base44.entities.Report.list('-created_date', 200).catch(() => []),
-        base44.entities.ModerationEvent.list('-created_date', 200).catch(() => []),
+        base44.entities.Report.list('-created_date', 200),
+        base44.entities.ModerationEvent.list('-created_date', 200),
       ]);
       setReports(Array.isArray(r) ? r : []);
       setEvents(Array.isArray(e) ? e : []);
     } catch (err) {
-      setError('Could not load the queue. Refresh and try again.');
+      setReports([]);
+      setEvents([]);
+      setError('Could not load the queue. This is an error, not an empty queue — refresh and try again.');
     }
     setLoading(false);
   };

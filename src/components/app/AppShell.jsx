@@ -81,6 +81,13 @@ export default function AppShell() {
     <div style={{ minHeight: '100vh' }}>
       {/* Signed-in screens hold nothing a search engine should index. */}
       <Seo title="Pathways" noindex />
+
+      {/* The marketing Layout has had this since the start and the CSS was
+          already there, but the signed-in shell never rendered one — despite
+          the <main id="main"> below being put there for it. Without it a
+          keyboard user tabs the brand link, five nav tabs, the bell and the
+          account menu on every single in-app page load. */}
+      <a href="#main" className="skip-link">Skip to content</a>
       <div
         style={{
           position: 'sticky',

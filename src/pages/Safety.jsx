@@ -57,7 +57,7 @@ export default function Safety() {
 
       <Section title="Reaching a human">
         If something is urgent, or you would rather talk to a person than file a form, email{' '}
-        <strong>pathways.admins@gmail.com</strong>. It reaches a real person and safety reports are treated
+        <ContactEmail />. It reaches a real person and safety reports are treated
         as urgent. You can also use the Report form and choose "Something else that felt unsafe", adding that
         you want to be contacted. We answer every one. A parent, teacher, or counselor can contact us on your
         behalf if you would rather they did.

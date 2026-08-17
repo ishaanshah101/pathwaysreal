@@ -11,7 +11,9 @@ export default function Home() {
     <>
       <Seo
         title="Pathways — Free College & Career Guidance for High School Students"
-        description="Pathways is a free platform where high school students get firsthand college and career guidance from real students, professors, and admissions counselors. No private counselor required."
+        /* Keep under 160 characters; the previous 186-character version was
+           truncated mid-sentence in search results. */
+        description="Free college and career guidance for high school students, from real college students, professors, and admissions counselors who have been there."
         path="/"
       />
       <Hero />

@@ -45,6 +45,10 @@ export default function Privacy() {
         requests, and the questions you ask Sage along with Sage's answers, so your conversation is there when you
         come back.
         <br /><br />
+        <b>Notes you keep on other members:</b> a private nickname and up to 4,000 characters of free-text notes you
+        can write about another member, the way the notes field on a phone contact works. The person you are writing
+        about is never told a note exists.
+        <br /><br />
         <b>For safety:</b> if a message or post is blocked by our safety systems, we keep a record of what rule fired,
         a short excerpt, and who sent it. We keep reports members file about each other.
         <br /><br />
@@ -57,8 +61,8 @@ export default function Privacy() {
 
       <S title="3. What we never do">
         We do not sell student data. We do not share your information with data brokers. We do not use your messages
-        or your Sage conversations to target advertising, and we do not train any AI model on them. Sage subscribers
-        see no college advertising anywhere in the app.
+        or your Sage conversations to target advertising, and we do not train any AI model on them. There is no
+        advertising anywhere on Pathways.
       </S>
 
       <S title="4. How we use what we collect">
@@ -73,12 +77,13 @@ export default function Privacy() {
         signed-in members, so they can decide whether to connect with you. Only share what you are comfortable
         being seen — you can clear any of these fields from your Profile tab at any time.
         <br /><br />
-        <b>Only you:</b> your Sage conversations.
+        <b>No other member:</b> your Sage conversations, and the private notes and nicknames you keep on other
+        people. No member can see either one, and the person a note is about is never told it exists.
         <br /><br />
         <b>You and one other person:</b> your direct messages.
         <br /><br />
-        <b>Us:</b> we can access message content when investigating a safety report or a blocked message. We do not
-        read conversations otherwise.
+        <b>Us:</b> our admins can access message content, Sage conversations, and contact notes. We do that when we
+        are investigating a safety report or a blocked message. We do not read them otherwise.
       </S>
 
       <S title="6. Service providers">

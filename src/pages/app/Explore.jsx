@@ -8,6 +8,7 @@ import FollowButton from '@/components/app/FollowButton';
 import { useFollows } from '@/lib/useFollows';
 import { useBlocks } from '@/lib/useBlocks';
 import { useConnections } from '@/lib/useConnections';
+import { useDirectory } from '@/lib/usePeople';
 import Seo from '@/components/Seo';
 
 const PAGE_SIZE = 12;
@@ -106,11 +107,9 @@ function MentorCard({ m, onConnect, connection, busy, onBlocked, following, foll
 export default function Explore() {
   const { email } = useProfile();
   const { blockedEmails, reloadBlocks } = useBlocks();
-  const [people, setPeople] = useState([]);
   const [q, setQ] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
   const [topicFilter, setTopicFilter] = useState('all');
-  const [loading, setLoading] = useState(true);
   const [visible, setVisible] = useState(PAGE_SIZE);
   const [followingOnly, setFollowingOnly] = useState(false);
 
@@ -175,10 +174,22 @@ export default function Explore() {
       <Seo title="Find a Mentor | Pathways" description="Search and connect with students, professors, and counselors on Pathways. Connecting is always free." path="/app/explore" noindex />
       <div>
         <h1 style={{ fontSize: 'clamp(26px,3.2vw,36px)', margin: '0 0 6px' }}>Find someone who's been there.</h1>
-        <p style={{ color: 'var(--color-neutral-800)', margin: 0 }}>
+        <p style={{ color: 'var(--color-neutral-800)', margin: 0 }} aria-live="polite">
           {list.length} students, professors, and counselors. Connecting is always free.
         </p>
       </div>
+
+      {/* A failed load must not read as an empty directory. Before this, any
+          error resolved to an empty array and the page cheerfully announced
+          "0 students, professors, and counselors". */}
+      {directoryError && (
+        <div className="card" role="alert" style={{ padding: 16, borderRadius: 20 }}>
+          <span style={{ fontSize: 13.5, lineHeight: 1.55 }}>{directoryError}</span>
+          <button type="button" className="btn btn-secondary self-start" style={{ fontSize: 13 }} onClick={load}>
+            Try again
+          </button>
+        </div>
+      )}
 
       {connectionError && (
         <div

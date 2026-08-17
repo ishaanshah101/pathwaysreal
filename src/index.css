@@ -30,7 +30,13 @@
   --color-neutral-300: #dcd3c4;
   --color-neutral-400: #c0b6a5;
   --color-neutral-500: #a19786;
-  --color-neutral-600: #82796a;
+  /* Darkened from #82796a. Every single use of this token in the app is a text
+     colour (never a border, background, or stroke), and at #82796a it computed
+     3.61:1 on the cream page background and 3.21:1 on a card, both below the
+     4.5:1 WCAG AA floor for small text — and it is used almost exclusively at
+     11.5px to 13px. It now clears AA on both surfaces: 5.14:1 on cream,
+     4.57:1 on a card. */
+  --color-neutral-600: #686155;
   --color-neutral-700: #645c50;
   --color-neutral-800: #474238;
   --color-neutral-900: #2e2b25;

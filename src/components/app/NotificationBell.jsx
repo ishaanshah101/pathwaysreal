@@ -63,7 +63,7 @@ export default function NotificationBell() {
             className="flex items-center justify-center"
             style={{
               position: 'absolute', top: -4, right: -4, minWidth: 17, height: 17,
-              padding: '0 4px', borderRadius: 999, background: 'var(--color-accent)',
+              padding: '0 4px', borderRadius: 999, background: 'var(--color-action)',
               color: 'var(--color-bg)', fontSize: 10.5, fontWeight: 700, lineHeight: 1,
             }}
           >

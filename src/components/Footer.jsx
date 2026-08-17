@@ -16,7 +16,7 @@ export default function Footer() {
       <Link to="/safety" className="no-underline" style={{ color: 'var(--color-accent-700)', fontWeight: 600 }}>Safety</Link>
       <Link to="/privacy" className="no-underline" style={{ color: 'var(--color-neutral-700)' }}>Privacy</Link>
       <Link to="/terms" className="no-underline" style={{ color: 'var(--color-neutral-700)' }}>Terms</Link>
-      <span>14+ · COPPA and FERPA aligned · We never sell student data</span>
+      <span>13+ · COPPA and FERPA aligned · We never sell student data</span>
       <span>© {new Date().getFullYear()} {COMPANY_NAME}</span>
     </footer>
   );

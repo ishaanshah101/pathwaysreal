@@ -7,7 +7,7 @@
 - The core app is free forever: feed, search, connections, messaging, and profiles. There is no premium tier.
 - The only paid feature is Sage, an optional AI college and career advisor, at $5 per month or $40 per year. Paying for Sage also turns off college advertising across the app.
 - Colleges pay for clearly labeled ad placements, which is what keeps the platform free for students.
-- Open to anyone 14 or older, from 9th grade up.
+- Open to anyone 13 or older, from 9th grade up.
 - Educators, professors, and admissions counselors join as verified mentors using their institutional email.
 - Pathways never sells student data. Handling of student information is aligned with COPPA and FERPA expectations.
 - A private college counselor can cost about $200 an hour, and most families never have one. Roughly 16 million US high schoolers face these decisions with unequal support. Closing that gap is the reason Pathways exists.

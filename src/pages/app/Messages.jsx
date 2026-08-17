@@ -78,11 +78,17 @@ export default function Messages() {
   // in this list is a real conversation with a real person.
   const activeSample = null;
 
-  useEffect(() => {
-    base44.entities.Profile.list('-created_date', 200)
-      .then((r) => setPeople(Array.isArray(r) ? r : []))
-      .catch(() => setPeople([]));
-  }, []);
+  // Names come from get-profile, resolved for exactly the people in these
+  // threads. Profile.list() from the browser returned only your own row unless
+  // you were an admin, so every conversation was headed by a raw email address
+  // for normal members.
+  const threadEmails = React.useMemo(
+    () => [...new Set(
+      messages.flatMap((m) => [m.from_email, m.to_email]).filter(Boolean),
+    )],
+    [messages],
+  );
+  const { people } = usePeopleByEmail(threadEmails);
 
   const loadArchives = React.useCallback(() => {
     if (!email) return;

@@ -169,17 +169,20 @@ export default function Requests() {
     respondToConnection, busyEmail, connectionError, reloadConnections,
   } = useConnections();
 
-  const [profiles, setProfiles] = useState([]);
+  // Resolve only the people actually involved in these requests, through
+  // get-profile. Profile.list() from the browser could never work here: the
+  // entity's read rule matches your own row or an admin, so every request
+  // rendered as a bare email address with no name, headline or school for
+  // anyone who was not an admin.
+  const involved = useMemo(
+    () => [
+      ...incomingPending.map((c) => c.from_email),
+      ...outgoingPending.map((c) => c.to_email),
+    ].filter(Boolean),
+    [incomingPending, outgoingPending],
+  );
 
-  useEffect(() => {
-    base44.entities.Profile.list('-created_date', 300)
-      .then((rows) => setProfiles(Array.isArray(rows) ? rows : []))
-      .catch(() => setProfiles([]));
-  }, []);
-
-  const profileFor = (addr) => profiles.find(
-    (p) => String(p.user_email || '').toLowerCase() === String(addr || '').toLowerCase(),
-  ) || null;
+  const { profileFor } = usePeopleByEmail(involved);
 
   // Someone I have blocked should not be able to sit in my requests list.
   const incoming = useMemo(

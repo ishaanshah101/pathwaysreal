@@ -9,6 +9,7 @@ import { SkeletonLine, SkeletonTitle } from '@/components/ui/Skeletons';
 import ChipPicker from '@/components/app/ChipPicker';
 import VerificationCard from '@/components/app/VerificationCard';
 import { useFollows } from '@/lib/useFollows';
+import { useConnections } from '@/lib/useConnections';
 import { INTEREST_OPTIONS, EXPERTISE_OPTIONS, ADULT_ROLES } from '@/components/app/profileFields';
 
 export default function ProfilePage() {
@@ -16,6 +17,7 @@ export default function ProfilePage() {
   const { profile, email, saveProfile } = useProfile();
   const { subscription, hasSage, isPastDue, isCanceling } = useSubscription();
   const { followingCount, followerCount } = useFollows();
+  const { respondToConnection } = useConnections();
   const [billingError, setBillingError] = useState('');
 
   const [form, setForm] = useState(null);
@@ -188,6 +190,9 @@ export default function ProfilePage() {
               </div>
             </div>
           ))}
+          {respondError && (
+            <span role="alert" style={{ fontSize: 13, color: 'var(--color-accent-700)' }}>{respondError}</span>
+          )}
         </div>
       )}
 

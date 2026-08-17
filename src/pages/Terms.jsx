@@ -154,7 +154,7 @@ export default function Terms() {
       </S>
 
       <S title="14. Contact">
-        Questions about these terms, or anything else, go to <b>pathways.admins@gmail.com</b>. Safety reports are
+        Questions about these terms, or anything else, go to <ContactEmail />. Safety reports are
         handled through the in-app Report action or the same address, and are treated as urgent.
       </S>
     </section>

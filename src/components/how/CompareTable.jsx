@@ -6,7 +6,7 @@ import SectionHeader from '@/components/SectionHeader';
 // 15-year-old choosing a major.
 const rows = [
   ['TikTok & Instagram', 'Built for short-form entertainment, so college research is easy to lose track of', 'Long-form posts only, so a visit you read about is still useful a month later'],
-  ['Reddit & College Confidential', 'Open forums where great advice and guesswork sit side by side, unlabeled', 'Verified educators and counselors, a credibility tier system, AI-filtered ratings'],
+  ['Reddit & College Confidential', 'Open forums where great advice and guesswork sit side by side, unlabeled', 'Professors and counselors verified by institutional email, so you know who is answering you'],
   ['LinkedIn', 'Designed for working professionals and hiring, not for high school students', 'Built for students, by students. Warm, peer-first, education-only'],
   ['Google', 'Excellent at finding official institutional pages, which is a different thing from firsthand experience', "Real students and mentors who recently lived the exact decision you're facing"],
 ];

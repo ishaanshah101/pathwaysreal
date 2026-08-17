@@ -1,8 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import Seo from '@/components/Seo';
+import ContactEmail from '@/components/ContactEmail';
 import {
-  COMPANY_NAME, COMPANY_LOCATION, COMPANY_EMAIL, PRODUCT_NAME, PRODUCT_DOMAIN,
+  COMPANY_NAME, COMPANY_LOCATION, PRODUCT_NAME, PRODUCT_DOMAIN,
 } from '@/lib/company';
 
 const S = ({ title, children }) => (
@@ -28,7 +29,7 @@ export default function Terms() {
       <S title="1. Who operates Pathways">
         {PRODUCT_NAME} ({PRODUCT_DOMAIN}) is operated by <b>{COMPANY_NAME}</b>, based in {COMPANY_LOCATION}{' '}
         ("{PRODUCT_NAME}", "we", "us"). {COMPANY_NAME} is the party legally responsible for the service,
-        including payment processing. You can reach us at <b>{COMPANY_EMAIL}</b>, and we will provide a postal
+        including payment processing. You can reach us at <ContactEmail />, and we will provide a postal
         address on request.
       </S>
 

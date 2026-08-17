@@ -1,8 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import Seo from '@/components/Seo';
+import ContactEmail from '@/components/ContactEmail';
 import {
-  COMPANY_NAME, COMPANY_LOCATION, COMPANY_EMAIL, PRODUCT_NAME, PRODUCT_DOMAIN,
+  COMPANY_NAME, COMPANY_LOCATION, PRODUCT_NAME, PRODUCT_DOMAIN,
 } from '@/lib/company';
 
 const S = ({ title, children }) => (
@@ -31,7 +32,7 @@ export default function Privacy() {
         <b>{COMPANY_NAME}</b>, based in {COMPANY_LOCATION}, which is the data controller for the information
         described here.
         <br /><br />
-        Contact: <b>{COMPANY_EMAIL}</b>. A postal address is available on request.
+        Contact: <ContactEmail />. A postal address is available on request.
       </S>
 
       <S title="2. What we collect">

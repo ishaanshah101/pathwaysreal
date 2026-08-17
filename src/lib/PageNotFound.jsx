@@ -1,75 +1,112 @@
-import { useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 
+/**
+ * Pathways is a client-rendered SPA, so the host returns HTTP 200 for every
+ * URL including ones that do not exist. Google calls that a "soft 404" and the
+ * documented fix for a SPA is to mark the not-found view noindex, which is what
+ * the effect below does. It also flips the canonical to the requested URL so a
+ * missing page can never inherit the homepage's canonical and get folded into
+ * it in the index.
+ *
+ * Everything is reverted on unmount, so navigating away from a 404 restores the
+ * real <head> for the next page.
+ */
+function useNoIndex() {
+  useEffect(() => {
+    const robots = document.querySelector('meta[name="robots"]');
+    const previous = robots?.getAttribute('content') ?? null;
 
-export default function PageNotFound({}) {
-    const location = useLocation();
-    const pageName = location.pathname.substring(1);
+    if (robots) {
+      robots.setAttribute('content', 'noindex, follow');
+    }
 
-    const { data: authData, isFetched } = useQuery({
-        queryKey: ['user'],
-        queryFn: async () => {
-            try {
-                const user = await base44.auth.me();
-                return { user, isAuthenticated: true };
-            } catch (error) {
-                return { user: null, isAuthenticated: false };
-            }
-        }
-    });
-    
-    return (
-        <div className="min-h-screen flex items-center justify-center p-6 bg-slate-50">
-            <div className="max-w-md w-full">
-                <div className="text-center space-y-6">
-                    {/* 404 Error Code */}
-                    <div className="space-y-2">
-                        <h1 className="text-7xl font-light text-slate-300">404</h1>
-                        <div className="h-0.5 w-16 bg-slate-200 mx-auto"></div>
-                    </div>
-                    
-                    {/* Main Message */}
-                    <div className="space-y-3">
-                        <h2 className="text-2xl font-medium text-slate-800">
-                            Page Not Found
-                        </h2>
-                        <p className="text-slate-600 leading-relaxed">
-                            The page <span className="font-medium text-slate-700">"{pageName}"</span> could not be found in this application.
-                        </p>
-                    </div>
-                    
-                    {/* Admin Note */}
-                    {isFetched && authData.isAuthenticated && authData.user?.role === 'admin' && (
-                        <div className="mt-8 p-4 bg-slate-100 rounded-lg border border-slate-200">
-                            <div className="flex items-start space-x-3">
-                                <div className="flex-shrink-0 w-5 h-5 rounded-full bg-orange-100 flex items-center justify-center mt-0.5">
-                                    <div className="w-2 h-2 rounded-full bg-orange-400"></div>
-                                </div>
-                                <div className="text-left space-y-1">
-                                    <p className="text-sm font-medium text-slate-700">Admin Note</p>
-                                    <p className="text-sm text-slate-600 leading-relaxed">
-                                        This could mean that the AI hasn't implemented this page yet. Ask it to implement it in the chat.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-                    
-                    {/* Action Button */}
-                    <div className="pt-6">
-                        <button 
-                            onClick={() => window.location.href = '/'} 
-                            className="inline-flex items-center px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 hover:border-slate-300 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500"
-                        >
-                            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                            </svg>
-                            Go Home
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    )
+    const previousTitle = document.title;
+    document.title = 'Page not found — Pathways';
+
+    return () => {
+      if (robots && previous !== null) robots.setAttribute('content', previous);
+      document.title = previousTitle;
+    };
+  }, []);
+}
+
+const LINKS = [
+  ['/', 'Home'],
+  ['/how-it-works', 'How it works'],
+  ['/sage', 'Sage'],
+  ['/faq', 'FAQ'],
+  ['/join', 'Join free'],
+  ['/safety', 'Safety'],
+];
+
+export default function PageNotFound() {
+  const location = useLocation();
+  const pageName = location.pathname.substring(1);
+  useNoIndex();
+
+  const { data: authData, isFetched } = useQuery({
+    queryKey: ['user'],
+    queryFn: async () => {
+      try {
+        const user = await base44.auth.me();
+        return { user, isAuthenticated: true };
+      } catch {
+        return { user: null, isAuthenticated: false };
+      }
+    },
+  });
+
+  return (
+    <main
+      className="flex items-center justify-center"
+      style={{ minHeight: '100vh', padding: 24, background: 'var(--color-bg)', color: 'var(--color-text)' }}
+    >
+      <div className="flex flex-col" style={{ maxWidth: 460, width: '100%', gap: 20, textAlign: 'center' }}>
+        <p style={{ fontFamily: 'var(--font-heading)', fontSize: 56, lineHeight: 1, color: 'var(--color-accent-700)', margin: 0 }}>
+          404
+        </p>
+
+        <h1 style={{ fontSize: 'var(--text-2xl)', margin: 0 }}>This page isn't here</h1>
+
+        <p style={{ fontSize: 'var(--text-base)', lineHeight: 'var(--leading-normal)', color: 'var(--color-neutral-700)', margin: 0 }}>
+          {pageName
+            ? <>We couldn't find <b style={{ color: 'var(--color-text)' }}>/{pageName}</b>. It may have moved, or the link may be mistyped.</>
+            : <>We couldn't find that page. It may have moved, or the link may be mistyped.</>}
+        </p>
+
+        <nav className="flex flex-wrap justify-center" style={{ gap: 8, marginTop: 4 }} aria-label="Site">
+          {LINKS.map(([to, label]) => (
+            <Link
+              key={to}
+              to={to}
+              className="btn btn-secondary no-underline"
+              style={{ fontSize: 'var(--text-sm)' }}
+            >
+              {label}
+            </Link>
+          ))}
+        </nav>
+
+        <Link to="/" className="btn btn-primary btn-lg no-underline self-center" style={{ marginTop: 4 }}>
+          Back to Pathways
+        </Link>
+
+        {isFetched && authData?.isAuthenticated && authData.user?.role === 'admin' && (
+          <p
+            className="card"
+            style={{
+              fontSize: 'var(--text-sm)', lineHeight: 'var(--leading-normal)',
+              color: 'var(--color-neutral-700)', textAlign: 'left', padding: '12px 16px',
+              borderRadius: 'var(--radius-md)', marginTop: 12,
+            }}
+          >
+            <b>Admin note.</b> This route has no page yet, or you are not allowed to see it.
+          </p>
+        )}
+      </div>
+    </main>
+  );
 }

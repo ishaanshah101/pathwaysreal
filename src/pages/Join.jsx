@@ -83,7 +83,7 @@ export default function Join() {
             </span>
 
             <span style={{ fontSize: 11.5, color: 'var(--color-neutral-600)', textAlign: 'center', lineHeight: 1.55 }}>
-              14+ · COPPA and FERPA aligned · We never sell student data
+              13+ · COPPA and FERPA aligned · We never sell student data
               <br />
               By joining you agree to our{' '}
               <Link to="/terms" style={{ color: 'var(--color-accent-700)' }}>Terms</Link> and{' '}

@@ -6,7 +6,7 @@ import { SAMPLE_SAGE_EXCHANGES } from '@/data/sampleContent';
 const points = [
   'Personalized to your profile, grade, and goals',
   'Saved conversations you can come back to',
-  'Turns off college ads across the whole app',
+  'Attach an essay draft or transcript and ask about it',
   'Funds free access for every other student',
 ];
 

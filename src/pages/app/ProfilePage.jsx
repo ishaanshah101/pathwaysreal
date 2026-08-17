@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
-import { useProfile, ROLE_LABELS } from '@/lib/useProfile';
+import { useProfile } from '@/lib/useProfile';
 import { useSubscription, openBillingPortal, SAGE_PRICES } from '@/lib/useSubscription';
 import Seo from '@/components/Seo';
 import { SkeletonLine, SkeletonTitle } from '@/components/ui/Skeletons';

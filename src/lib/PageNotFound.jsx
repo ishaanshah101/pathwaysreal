@@ -1,37 +1,21 @@
-import { useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
+import Seo from '@/components/Seo';
 
 /**
  * Pathways is a client-rendered SPA, so the host returns HTTP 200 for every
- * URL including ones that do not exist. Google calls that a "soft 404" and the
- * documented fix for a SPA is to mark the not-found view noindex, which is what
- * the effect below does. It also flips the canonical to the requested URL so a
- * missing page can never inherit the homepage's canonical and get folded into
- * it in the index.
+ * URL, including ones that do not exist. Google calls that a "soft 404", and
+ * the documented fix when you cannot control the status code is to mark the
+ * not-found view noindex. <Seo noindex> does that, and also points the
+ * canonical at the requested URL so a missing page can never inherit the
+ * homepage's canonical and get folded into it in the index.
  *
- * Everything is reverted on unmount, so navigating away from a 404 restores the
- * real <head> for the next page.
+ * The page itself used to be Base44's stock scaffold: white-and-slate, off
+ * brand, with no way back into the site except a Go Home button. A 404 is a
+ * page real visitors land on from stale links, so it now looks like Pathways
+ * and offers somewhere to go.
  */
-function useNoIndex() {
-  useEffect(() => {
-    const robots = document.querySelector('meta[name="robots"]');
-    const previous = robots?.getAttribute('content') ?? null;
-
-    if (robots) {
-      robots.setAttribute('content', 'noindex, follow');
-    }
-
-    const previousTitle = document.title;
-    document.title = 'Page not found — Pathways';
-
-    return () => {
-      if (robots && previous !== null) robots.setAttribute('content', previous);
-      document.title = previousTitle;
-    };
-  }, []);
-}
 
 const LINKS = [
   ['/', 'Home'],
@@ -45,7 +29,6 @@ const LINKS = [
 export default function PageNotFound() {
   const location = useLocation();
   const pageName = location.pathname.substring(1);
-  useNoIndex();
 
   const { data: authData, isFetched } = useQuery({
     queryKey: ['user'],
@@ -64,6 +47,7 @@ export default function PageNotFound() {
       className="flex items-center justify-center"
       style={{ minHeight: '100vh', padding: 24, background: 'var(--color-bg)', color: 'var(--color-text)' }}
     >
+      <Seo title="Page not found | Pathways" noindex />
       <div className="flex flex-col" style={{ maxWidth: 460, width: '100%', gap: 20, textAlign: 'center' }}>
         <p style={{ fontFamily: 'var(--font-heading)', fontSize: 56, lineHeight: 1, color: 'var(--color-accent-700)', margin: 0 }}>
           404

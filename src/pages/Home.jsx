@@ -9,10 +9,10 @@ import FinalCta from '@/components/home/FinalCta';
 export default function Home() {
   return (
     <>
+      {/* Meta descriptions stay under 160 characters. Google truncates past
+          roughly that, and this one was 186 and cut mid-sentence. */}
       <Seo
         title="Pathways — Free College & Career Guidance for High School Students"
-        /* Keep under 160 characters; the previous 186-character version was
-           truncated mid-sentence in search results. */
         description="Free college and career guidance for high school students, from real college students, professors, and admissions counselors who have been there."
         path="/"
       />

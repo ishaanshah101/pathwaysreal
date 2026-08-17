@@ -93,10 +93,16 @@ export default function Hero() {
         </div>
         <div className="card elev-md anim-drift-slow" style={{ position: 'absolute', right: -8, top: 26, padding: '10px 16px', gap: 2 }}>
           <span style={{ fontFamily: 'var(--font-heading)', fontSize: 20 }}>
-            4.8 <span style={{ fontSize: 12, color: 'var(--color-accent-700)' }}>★</span>
+            $0 <span style={{ fontSize: 12, color: 'var(--color-accent-700)' }}>forever</span>
           </span>
-          <span style={{ fontSize: 11, color: 'var(--color-neutral-700)' }}>avg. mentor rating</span>
+          <span style={{ fontSize: 11, color: 'var(--color-neutral-700)' }}>every student, every feature</span>
         </div>
+        {/* Same standard as the quote and story sections below: the cards
+            floating on the photo are a preview of the product, not a record of
+            something that happened, so they say so. */}
+        <p style={{ fontSize: 11.5, color: 'var(--color-neutral-600)', margin: '12px 4px 0' }}>
+          Illustrative preview of a Pathways connection.
+        </p>
       </div>
     </header>
   );

@@ -215,7 +215,7 @@ export default function Explore() {
             className="btn"
             style={{
               fontFamily: 'var(--font-body)', fontSize: 13, padding: '6px 13px',
-              background: followingOnly ? 'var(--color-accent)' : 'transparent',
+              background: followingOnly ? 'var(--color-action)' : 'transparent',
               color: followingOnly ? 'var(--color-bg)' : 'var(--color-text)',
               borderColor: followingOnly ? 'transparent' : 'var(--color-divider)',
             }}
@@ -240,7 +240,7 @@ export default function Explore() {
               className="btn"
               style={{
                 fontFamily: 'var(--font-body)', fontSize: 13, padding: '6px 13px',
-                background: roleFilter === v ? 'var(--color-accent-2-600)' : 'transparent',
+                background: roleFilter === v ? 'var(--color-action-2)' : 'transparent',
                 color: roleFilter === v ? 'var(--color-bg)' : 'var(--color-text)',
                 borderColor: roleFilter === v ? 'transparent' : 'var(--color-divider)',
               }}
@@ -259,7 +259,7 @@ export default function Explore() {
               className="btn"
               style={{
                 fontFamily: 'var(--font-body)', fontSize: 12.5, padding: '5px 12px',
-                background: topicFilter === v ? 'var(--color-accent)' : 'transparent',
+                background: topicFilter === v ? 'var(--color-action)' : 'transparent',
                 color: topicFilter === v ? 'var(--color-bg)' : 'var(--color-text)',
                 borderColor: topicFilter === v ? 'transparent' : 'var(--color-divider)',
               }}

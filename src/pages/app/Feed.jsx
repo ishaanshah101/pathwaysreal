@@ -393,7 +393,7 @@ export default function Feed() {
             className="btn"
             style={{
               fontFamily: 'var(--font-body)', fontSize: 13, padding: '6px 13px',
-              background: filter === v ? 'var(--color-accent-2-600)' : 'transparent',
+              background: filter === v ? 'var(--color-action-2)' : 'transparent',
               color: filter === v ? 'var(--color-bg)' : 'var(--color-text)',
               borderColor: filter === v ? 'transparent' : 'var(--color-divider)',
             }}

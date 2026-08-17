@@ -2,6 +2,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 import { screenContent, classifyRisk, logModerationEvent, excerptOf, MODERATION_BLOCK_REASON } from '../../shared/moderation.ts';
 import { consumeRateLimit } from '../../shared/rateLimit.ts';
 import { validateAttachments, screenAttachments, screenImage, IMAGE_BLOCK_REASON } from '../../shared/attachments.ts';
+import { getProfile, isSuspended, SUSPENDED_MESSAGE } from '../../shared/accounts.ts';
 
 const CATEGORIES = [
   'general', 'applications', 'essays', 'scholarships', 'majors',
@@ -21,6 +22,16 @@ export default async function (req: Request): Promise<Response> {
     const title = String(payload?.title || '').trim();
     const body = String(payload?.body || '').trim();
     const category = CATEGORIES.includes(payload?.category) ? payload.category : 'general';
+
+    // The author's profile is loaded once, up here, because two things need it:
+    // suspension, which has to stop a post before any work is done on it, and
+    // the byline further down. Suspending an account from the moderation queue
+    // means it stops publishing, and the session outlives the suspension, so
+    // the check belongs on the server on every post.
+    const profile = await getProfile(base44, authorEmail);
+    if (isSuspended(profile)) {
+      return Response.json({ code: 'suspended', error: SUSPENDED_MESSAGE }, { status: 403 });
+    }
 
     if (!title || !body) {
       return Response.json({ error: 'A title and a post are both required.' }, { status: 400 });
@@ -105,11 +116,8 @@ export default async function (req: Request): Promise<Response> {
       return Response.json({ blocked: true, reason: IMAGE_BLOCK_REASON });
     }
 
-    // Author identity is taken from the profile on the server, never from the
-    // browser, so nobody can publish as a verified professor.
-    const profiles = await base44.asServiceRole.entities.Profile.filter({ user_email: authorEmail });
-    const profile = Array.isArray(profiles) && profiles.length > 0 ? profiles[0] : null;
-
+    // Author identity is taken from the profile loaded above on the server,
+    // never from the browser, so nobody can publish as a verified professor.
     const created = await base44.asServiceRole.entities.Post.create({
       title,
       body,

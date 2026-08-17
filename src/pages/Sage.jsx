@@ -16,7 +16,7 @@ export default function Sage() {
     <>
       <Seo
         title="Sage — An AI College Advisor for $5 a Month | Pathways"
-        description="Sage is the AI college and career advisor built into Pathways. Personalized to your grade, school, and goals, $5 a month or $40 a year. Everything else on Pathways stays free."
+        description="Sage is the AI college and career advisor built into Pathways, personalized to your grade, school, and goals. $5 a month. Everything else stays free."
         path="/sage"
       />
 

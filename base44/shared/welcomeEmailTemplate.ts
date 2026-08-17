@@ -12,7 +12,10 @@ import { escapeHtml } from './gmail.ts';
 const SITE = 'https://pathways.uno';
 
 export function welcomeEmail(fullName: string) {
-  const firstName = (String(fullName || '').split(' ')[0] || '').trim();
+  // The name arrives from the signup request body and ends up in the subject
+  // line, so it is capped here as well as scrubbed in sendGmail. Belt and
+  // braces: this file should never be the reason a header is unreasonable.
+  const firstName = (String(fullName || '').split(' ')[0] || '').trim().slice(0, 60);
   const greeting = firstName ? `Hi ${firstName},` : 'Hi,';
   const subject = firstName
     ? `Welcome to Pathways, ${firstName}!`

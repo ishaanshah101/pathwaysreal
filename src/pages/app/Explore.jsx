@@ -212,6 +212,7 @@ export default function Explore() {
 
       <div className="flex flex-col" style={{ gap: 10 }}>
         <input
+          aria-label="Search by name, school, or topic"
           className="input"
           style={{ maxWidth: 420 }}
           placeholder="Search by name, school, or topic…"

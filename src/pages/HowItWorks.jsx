@@ -8,7 +8,7 @@ export default function HowItWorks() {
     <>
       <Seo
         title="How Pathways Works — Free College Guidance from People Who've Been There"
-        description="Pathways is a free platform connecting high school students with students, professors, and admissions counselors. A long-form feed, verified mentors, a safer inbox, and search built for education."
+        description="How Pathways works: a long-form feed, verified mentors, a safer one-on-one inbox, and search built for high school students. Free, with no counselor needed."
         path="/how-it-works"
       />
 

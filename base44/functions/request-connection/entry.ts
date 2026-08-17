@@ -1,6 +1,10 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 import { consumeRateLimit } from '../../shared/rateLimit.ts';
 import { notify, displayName } from '../../shared/notify.ts';
+import {
+  screenContent, classifyRisk, logModerationEvent, excerptOf, MODERATION_BLOCK_REASON,
+} from '../../shared/moderation.ts';
+import { isSuspended } from '../../shared/accounts.ts';
 
 // The only place a Connection is created.
 //
@@ -38,7 +42,7 @@ export default async function (req: Request): Promise<Response> {
       return Response.json({ error: 'We could not find that person.' }, { status: 404 });
     }
 
-    if (me?.suspended) {
+    if (isSuspended(me)) {
       return Response.json(
         { code: 'suspended', error: 'Your account is under review, so you cannot send connection requests right now.' },
         { status: 403 },
@@ -90,6 +94,55 @@ export default async function (req: Request): Promise<Response> {
     const limit = await consumeRateLimit(base44, fromEmail, 'connection_request', { day: 50 });
     if (!limit.ok) {
       return Response.json({ code: 'rate_limited', error: limit.message }, { status: 429 });
+    }
+
+    // The note is the one piece of free text that reaches a person before any
+    // connection exists, which makes it the first thing a stranger can type at
+    // a student. It gets exactly what a message body gets: the deterministic
+    // rules, then the classifier, each logged to the moderation queue the way
+    // send-message logs them.
+    //
+    // Two deliberate differences from send-message. The event is recorded with
+    // surface 'message' because that is what the ModerationEvent schema allows,
+    // so the surface is named in detail instead. And a refusal is a real 4xx
+    // carrying `error`, not a 200 carrying `reason`, because useConnections only
+    // reads a response body when the request fails; a 200 would look like the
+    // request went through when nothing was created.
+    if (note) {
+      const screened = screenContent(note);
+      if (screened.blocked) {
+        await logModerationEvent(base44, {
+          sender_email: fromEmail,
+          recipient_email: toEmail,
+          surface: 'message',
+          rule: screened.rule,
+          severity: screened.severity,
+          excerpt: excerptOf(note),
+          detail: 'Connection request note',
+        });
+        return Response.json(
+          { code: 'blocked_content', blocked: true, error: MODERATION_BLOCK_REASON, reason: MODERATION_BLOCK_REASON },
+          { status: 403 },
+        );
+      }
+
+      const verdict = await classifyRisk(base44, note);
+      if (verdict.risk === 'high') {
+        await logModerationEvent(base44, {
+          sender_email: fromEmail,
+          recipient_email: toEmail,
+          surface: 'message',
+          rule: 'classifier',
+          severity: 'high',
+          excerpt: excerptOf(note),
+          detail: ['Connection request note', verdict.category, verdict.reason].filter(Boolean).join(': '),
+        });
+        const held = 'This request was held back because the note looked unsafe for a student conversation. A moderator has been notified.';
+        return Response.json(
+          { code: 'blocked_content', blocked: true, error: held, reason: held },
+          { status: 403 },
+        );
+      }
     }
 
     const fromName = me?.full_name || user.full_name || '';

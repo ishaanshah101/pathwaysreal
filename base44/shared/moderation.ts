@@ -19,15 +19,20 @@ const RULES = [
   {
     rule: 'phone_number',
     // 7+ digits with any spacing/punctuation, or a run of spelled-out digits.
+    // The repeat is {6,} plus one trailing digit, so a plain 7-digit local
+    // number is caught: eight digits was never the floor for reaching someone.
     re: new RegExp(
-      '(?:\\+?\\d[\\s().-]{0,3}){7,}\\d'
+      '(?:\\+?\\d[\\s().-]{0,3}){6,}\\d'
       + '|(?:\\b(?:' + NUMBER_WORDS + ')\\b[\\s,.-]*){7,}',
       'i',
     ),
   },
   {
     rule: 'social_handoff',
-    re: /\b(?:add me on|dm me on|my (?:snap|insta|ig|discord|telegram|handle|username)\b|(?:snap(?:chat)?|insta(?:gram)?|discord|telegram|whatsapp|signal|kik|tiktok)\s*(?:is|:|@|handle|username|me)|(?:find|follow|message|text) me on (?:snap(?:chat)?|insta(?:gram)?|ig|discord|telegram|whatsapp|signal|kik|tiktok))/i,
+    // "ig" belongs in the platform list as much as "insta" does; it is written
+    // with \b so it only fires as a whole word and "dig:" or "big:" cannot
+    // trip it. "snap" on its own is already covered by snap(?:chat)?.
+    re: /\b(?:add me on|dm me on|my (?:snap|insta|ig|discord|telegram|handle|username)\b|(?:snap(?:chat)?|insta(?:gram)?|ig\b|discord|telegram|whatsapp|signal|kik|tiktok)\s*(?:is|:|@|handle|username|me)|(?:find|follow|message|text) me on (?:snap(?:chat)?|insta(?:gram)?|ig|discord|telegram|whatsapp|signal|kik|tiktok))/i,
   },
   {
     rule: 'social_handle',
@@ -36,7 +41,11 @@ const RULES = [
   },
   {
     rule: 'off_platform',
-    re: /\b(?:text me|call me|facetime|hit me up|let'?s meet|meet up|meet in person|come over|my address|where do you live|what'?s your address|pick you up|see you in person)\b/i,
+    // Everything here has to be an unambiguous move off Pathways or an offer to
+    // meet in person. A counselor and a student talk about deadlines and campus
+    // visits all day, so anything that could plausibly be ordinary advice stays
+    // out of this list.
+    re: /\b(?:text me|call me|facetime|hit me up|let'?s meet|meet up|meet in person|come over|come (?:see|visit) me|my address|where do you live|what'?s your address|what'?s your (?:phone )?(?:number|cell)|pick you up|see you in person|(?:let'?s|lets|wanna|want to|we should|we could) (?:grab|get|have) (?:a |some )?(?:coffee|lunch|dinner|drinks?)|(?:let'?s|lets|wanna|want to|we should|we could) hang ?out|hang ?out (?:sometime|in person|irl))\b/i,
   },
   {
     rule: 'photo_request',
@@ -72,9 +81,23 @@ export function excerptOf(text: string) {
   return String(text || '').slice(0, 280);
 }
 
+// Full-width digits and letters read exactly like ASCII ones to a student, so
+// "５５５１２３４５６７" has to be treated as the phone number it is. NFKC folds
+// those and the other compatibility forms down to ASCII before any rule runs,
+// which is why it happens here rather than inside one rule: a normalisation
+// that only covered the phone check would just move the hole somewhere else.
+function normalizeForMatching(text: string): string {
+  const value = String(text || '');
+  try {
+    return value.normalize('NFKC');
+  } catch {
+    return value;
+  }
+}
+
 // Deterministic checks. Fast, free, and the same on every surface.
 export function screenContent(text: string) {
-  const value = String(text || '');
+  const value = normalizeForMatching(text);
   for (const { rule, re } of RULES) {
     if (re.test(value)) {
       return { blocked: true, rule, severity: FAIL_CLOSED_RULES.has(rule) ? 'high' : 'low', reason: BLOCK_REASON };

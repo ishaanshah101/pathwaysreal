@@ -7,8 +7,8 @@ const faqs = [
   { q: 'How is Pathways different from a college counselor?', a: 'Private college counselors can cost $200 an hour. Pathways gives students the same kind of guidance for free, through real students who recently applied, verified professors, and admissions counselors, plus an optional AI advisor at $5 a month.' },
   { q: 'Who can use Pathways?', a: 'Any student 13 or older, from 9th grade up. College students use it for peer mentorship, and educators, professors, and admissions counselors join as verified mentors using their institutional email.' },
   { q: 'How does Pathways help low-income students?', a: 'Everything that matters is free: mentorship from people who have been there, college search, application advice, and scholarship posts. Students without private counselors or alumni networks get the same access as everyone else. Pathways never sells student data.' },
-  { q: 'What is Sage on Pathways?', a: 'Sage is the AI college and career advisor built into Pathways. It is personalized to your grade, school, and goals, saves your conversations, and costs $5 per month or $40 per year, which also turns off college ads.' },
-  { q: 'How much does Pathways cost?', a: 'The core app is free forever. Sage, the optional AI advisor, costs $5 per month or $40 per year. Colleges pay for clearly labeled ad placements, which keeps the platform free for students.' },
+  { q: 'What is Sage on Pathways?', a: 'Sage is the AI college and career advisor built into Pathways. It is personalized to your grade, school, and goals, saves your conversations, and costs $5 per month or $40 per year. You can also attach an essay draft or a transcript and ask Sage about it.' },
+  { q: 'How much does Pathways cost?', a: 'The core app is free forever, with no premium tier. Sage, the optional AI advisor, costs $5 per month or $40 per year, and it is the only thing on Pathways that ever costs money. Sage subscriptions are what keep everything else free.' },
 ];
 
 export default function Faq() {

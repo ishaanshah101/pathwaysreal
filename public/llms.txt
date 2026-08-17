@@ -8,7 +8,7 @@
 - The only paid feature is Sage, an optional AI college and career advisor, at $5 per month or $40 per year. Sage subscriptions are what keep everything else free.
 - There is no advertising on Pathways.
 - Open to anyone 13 or older, from 9th grade up.
-- Educators, professors, and admissions counselors join as verified mentors using their institutional email.
+- Educators, professors, and admissions counselors apply to be verified mentors. A person checks each application against the institution's public directory before the badge is granted.
 - Pathways never sells student data. Handling of student information is aligned with COPPA and FERPA expectations.
 - A private college counselor can cost about $200 an hour, and most families never have one. Roughly 16 million US high schoolers face these decisions with unequal support. Closing that gap is the reason Pathways exists.
 
@@ -16,7 +16,7 @@
 
 - A long-form feed only. No short-form video loops, no reposts, no infinite scroll.
 - Mutual connections before direct messaging. One-on-one conversations only, never group chats, with contact-sharing and meetup arranging blocked automatically.
-- Educators, professors, and admissions counselors are verified by institutional email, so students know who is answering them.
+- Mentor verification is done by a human reviewing public institutional evidence, not by an automated email-domain check, so students know who is answering them.
 - Search across people, high schools, colleges with public/private and in-state filters, summer programs, and majors.
 
 ## Pages

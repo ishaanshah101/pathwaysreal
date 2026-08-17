@@ -17,7 +17,7 @@ export default function Safety() {
     <div className="flex flex-col" style={{ gap: 16, paddingBottom: 40 }}>
       <Seo
         title="Safety on Pathways | How to report someone and get help"
-        description="How Pathways keeps student conversations safe: automatic filtering of contact details and meetup requests, one-on-one only messaging, reporting, blocking, and how to reach a human."
+        description="How Pathways keeps student conversations safe: one-on-one messaging only, contact details and meetup requests filtered out, plus reporting and blocking."
         path="/safety"
       />
 

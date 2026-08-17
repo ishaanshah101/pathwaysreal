@@ -6,7 +6,7 @@ import ThreadRow from '@/components/sage/ThreadRow';
 // filed inside it. Deleting a folder keeps its chats, they just come unfiled.
 export default function FolderSection({
   folder, threads, folders, activeId,
-  onSelect, onRename, onDelete, onMove, onRenameFolder, onDeleteFolder,
+  onSelect, onRename, onDelete, onMove, onArchive, onRenameFolder, onDeleteFolder,
 }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState('');
@@ -82,6 +82,7 @@ export default function FolderSection({
             onRename={onRename}
             onDelete={onDelete}
             onMove={onMove}
+            onArchive={onArchive}
           />
         ))
       )}

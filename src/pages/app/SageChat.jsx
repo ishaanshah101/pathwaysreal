@@ -123,6 +123,7 @@ export default function SageChat() {
           onNew={chat.newChat}
           onRename={chat.renameThread}
           onDelete={chat.deleteThread}
+          onArchive={chat.archiveThread}
           onMove={chat.moveThread}
           onCreateFolder={chat.createFolder}
           onRenameFolder={chat.renameFolder}

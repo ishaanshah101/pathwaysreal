@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { MoreHorizontal, Pencil, Trash2, Folder, FolderMinus, Check, X } from 'lucide-react';
+import { MoreHorizontal, Pencil, Trash2, Folder, FolderMinus, Archive, ArchiveRestore, Check, X } from 'lucide-react';
 import {
   DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 
 // One chat in the sidebar. Rename stays inline; move and delete live behind a
 // small menu so the row does not carry three separate icon buttons.
-export default function ThreadRow({ thread, active, folders, onSelect, onRename, onDelete, onMove }) {
+export default function ThreadRow({ thread, active, folders, onSelect, onRename, onDelete, onMove, onArchive }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState('');
   const commit = () => { onRename(thread.id, draft); setEditing(false); };
@@ -79,6 +79,11 @@ export default function ThreadRow({ thread, active, folders, onSelect, onRename,
               <FolderMinus size={13} style={{ marginRight: 6 }} /> Remove from folder
             </DropdownMenuItem>
           )}
+          <DropdownMenuItem onClick={() => onArchive(thread.id, !thread.archived)}>
+            {thread.archived
+              ? <><ArchiveRestore size={13} style={{ marginRight: 6 }} /> Unarchive</>
+              : <><Archive size={13} style={{ marginRight: 6 }} /> Archive</>}
+          </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={() => onDelete(thread.id)} style={{ color: 'var(--color-danger)' }}>
             <Trash2 size={13} style={{ marginRight: 6 }} /> Delete

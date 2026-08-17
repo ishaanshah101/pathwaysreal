@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, FolderPlus, Check, X } from 'lucide-react';
+import { Plus, FolderPlus, Archive, ChevronDown, ChevronRight, Check, X } from 'lucide-react';
 import ThreadRow from '@/components/sage/ThreadRow';
 import FolderSection from '@/components/sage/FolderSection';
 
@@ -7,11 +7,12 @@ import FolderSection from '@/components/sage/FolderSection';
 // in place, delete it, and organise chats into folders so an essay project and
 // a college list do not live in one undifferentiated pile.
 export default function ThreadList({
-  threads, folders, activeId, onSelect, onNew, onRename, onDelete, onMove,
+  threads, folders, activeId, onSelect, onNew, onRename, onDelete, onMove, onArchive,
   onCreateFolder, onRenameFolder, onDeleteFolder, loading,
 }) {
   const [addingFolder, setAddingFolder] = useState(false);
   const [folderDraft, setFolderDraft] = useState('');
+  const [showArchived, setShowArchived] = useState(false);
 
   const commitFolder = () => {
     const name = folderDraft.trim();
@@ -20,7 +21,9 @@ export default function ThreadList({
     setAddingFolder(false);
   };
 
-  const unfiled = threads.filter((t) => !t.folder_id || !folders.some((f) => f.id === t.folder_id));
+  const live = threads.filter((t) => !t.archived);
+  const archived = threads.filter((t) => t.archived);
+  const unfiled = live.filter((t) => !t.folder_id || !folders.some((f) => f.id === t.folder_id));
 
   return (
     <aside
@@ -82,12 +85,13 @@ export default function ThreadList({
               key={f.id}
               folder={f}
               folders={folders}
-              threads={threads.filter((t) => t.folder_id === f.id)}
+              threads={live.filter((t) => t.folder_id === f.id)}
               activeId={activeId}
               onSelect={onSelect}
               onRename={onRename}
               onDelete={onDelete}
               onMove={onMove}
+              onArchive={onArchive}
               onRenameFolder={onRenameFolder}
               onDeleteFolder={onDeleteFolder}
             />
@@ -105,6 +109,39 @@ export default function ThreadList({
                   onRename={onRename}
                   onDelete={onDelete}
                   onMove={onMove}
+                  onArchive={onArchive}
+                />
+              ))}
+            </div>
+          )}
+
+          {archived.length > 0 && (
+            <div className="flex flex-col" style={{ gap: 2 }}>
+              <button
+                type="button"
+                onClick={() => setShowArchived((s) => !s)}
+                aria-expanded={showArchived}
+                className="flex items-center gap-[6px]"
+                style={{
+                  background: 'none', border: 0, cursor: 'pointer', font: 'inherit',
+                  fontSize: 11.5, fontWeight: 600, letterSpacing: '.04em', textTransform: 'uppercase',
+                  color: 'var(--text-subtle)', padding: '4px 2px', textAlign: 'left',
+                }}
+              >
+                {showArchived ? <ChevronDown size={12} aria-hidden="true" /> : <ChevronRight size={12} aria-hidden="true" />}
+                <Archive size={12} aria-hidden="true" /> Archived ({archived.length})
+              </button>
+              {showArchived && archived.map((t) => (
+                <ThreadRow
+                  key={t.id}
+                  thread={t}
+                  active={t.id === activeId}
+                  folders={folders}
+                  onSelect={onSelect}
+                  onRename={onRename}
+                  onDelete={onDelete}
+                  onMove={onMove}
+                  onArchive={onArchive}
                 />
               ))}
             </div>

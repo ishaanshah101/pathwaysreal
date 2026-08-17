@@ -132,6 +132,15 @@ export function useSageChat(enabled) {
     }
   }, [activeId, loadThreads]);
 
+  // Archiving hides a chat from the main list without deleting anything. If
+  // the open chat is the one being archived, close it so the main pane does
+  // not sit on a conversation the list no longer shows.
+  const archiveThread = useCallback(async (id, archived) => {
+    setThreads((t) => t.map((x) => (x.id === id ? { ...x, archived } : x)));
+    if (archived && id === activeId) { setActiveId(null); setMessages([]); }
+    await base44.entities.SageThread.update(id, { archived }).catch(() => loadThreads());
+  }, [activeId, loadThreads]);
+
   const moveThread = useCallback(async (id, folderId) => {
     setThreads((t) => t.map((x) => (x.id === id ? { ...x, folder_id: folderId || '' } : x)));
     await base44.entities.SageThread.update(id, { folder_id: folderId || '' }).catch(() => loadThreads());
@@ -171,7 +180,7 @@ export function useSageChat(enabled) {
   return {
     threads, folders, activeId, setActiveId, messages, thinking,
     loadingThreads, loadingMessages,
-    ask, newChat, renameThread, deleteThread,
+    ask, newChat, renameThread, deleteThread, archiveThread,
     moveThread, createFolder, renameFolder, deleteFolder,
   };
 }

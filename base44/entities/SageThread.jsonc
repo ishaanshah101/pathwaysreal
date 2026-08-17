@@ -16,6 +16,11 @@
       "type": "string",
       "description": "The SageFolder this chat is filed under, empty when unfiled. Set by the owner from the chat list."
     },
+    "archived": {
+      "type": "boolean",
+      "default": false,
+      "description": "Hidden from the main chat list but kept, so a finished project can be tucked away without deleting it. Set by the owner and reversible."
+    },
     "last_message_at": {
       "type": "string",
       "description": "ISO timestamp of the most recent message, used to order the list"

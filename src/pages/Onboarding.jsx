@@ -368,7 +368,7 @@ export default function Onboarding() {
           {saving ? 'Setting up your account…' : 'Enter Pathways'}
         </button>
         <span style={{ fontSize: 11.5, color: 'var(--color-neutral-600)', textAlign: 'center' }}>
-          14+ · COPPA and FERPA aligned · We never sell student data
+          13+ · COPPA and FERPA aligned · We never sell student data
         </span>
       </form>
     </div>

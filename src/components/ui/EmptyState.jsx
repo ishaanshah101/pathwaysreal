@@ -10,7 +10,7 @@ export default function EmptyState({ icon: Icon, title, body, action, tone = 'ne
       style={{ gap: 'var(--space-3)', padding: 'var(--space-7) var(--space-4)' }}
     >
       {Icon && <Icon size={26} strokeWidth={1.6} style={{ color: toneColor }} aria-hidden="true" />}
-      <p style={{ fontFamily: 'var(--font-heading)', fontSize: 'var(--text-lg)', margin: 0 }}>{title}</p>
+      <p style={{ fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 'var(--text-lg)', margin: 0 }}>{title}</p>
       {body && (
         <p
           style={{

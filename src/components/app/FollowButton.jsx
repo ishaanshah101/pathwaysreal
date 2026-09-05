@@ -16,11 +16,12 @@ export default function FollowButton({
   return (
     <button
       type="button"
-      className={following ? 'btn btn-secondary' : 'btn btn-secondary'}
+      className="btn btn-secondary btn-sm"
       style={{
         fontSize: size,
-        background: following ? 'var(--color-accent-2-200)' : 'transparent',
-        borderColor: following ? 'transparent' : 'var(--color-divider)',
+        background: following ? 'var(--color-accent-2-200)' : undefined,
+        borderColor: following ? 'var(--color-accent-2-300)' : undefined,
+        color: following ? 'var(--color-accent-2-900)' : undefined,
       }}
       disabled={busy}
       aria-pressed={following}

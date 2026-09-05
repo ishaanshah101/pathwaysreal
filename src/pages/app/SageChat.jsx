@@ -112,7 +112,7 @@ export default function SageChat() {
 
       <div
         className="grid app-split"
-        style={{ gridTemplateColumns: 'minmax(0,250px) minmax(0,1fr)', gap: 16, alignItems: 'start' }}
+        style={{ gridTemplateColumns: 'minmax(0,260px) minmax(0,1fr)', gap: 16, alignItems: 'start' }}
       >
         <ThreadList
           threads={chat.threads}
@@ -130,7 +130,7 @@ export default function SageChat() {
           onDeleteFolder={chat.deleteFolder}
         />
 
-        <div className="card elev-sm" style={{ padding: 20, gap: 14, borderRadius: 26, minHeight: 460 }}>
+        <div className="card elev-sm" style={{ padding: 20, gap: 14, borderRadius: 16, minHeight: 540 }}>
           <span className="card-kicker">{activeThread?.title || 'New chat'}</span>
           <SageMessages
             messages={chat.messages}

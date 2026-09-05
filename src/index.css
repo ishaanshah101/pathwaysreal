@@ -1,41 +1,56 @@
-@import url('https://fonts.googleapis.com/css2?family=Caprasimo&family=Figtree:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Caprasimo&family=Figtree:wght@400;500;600;700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* ---------------------------------------------------------------------------
+   Design tokens.
+
+   The visual system is: a warm cream page, near-white cards that visibly lift
+   off it, ink for anything you can press, and the brand orange used sparingly
+   as an accent rather than as the colour of every surface. Caprasimo, the
+   display face, is reserved for large headlines. Everything you interact with
+   is set in Figtree.
+   --------------------------------------------------------------------------- */
 :root {
+  /* Surfaces. The page is cream. Cards are near-white so they read as objects
+     sitting on the page instead of slightly darker patches of it. surface-2 is
+     an inset tone for secondary panels and read-only fields. */
   --color-bg: #f5ead8;
-  --color-surface: #ebddc5;
+  --color-surface: #fffdf9;
+  --color-surface-2: #f9f3e8;
   --color-text: #201e1d;
+
+  /* Ink is the action colour. It is the highest-contrast thing on the page,
+     so a primary button is never in doubt, and it lets the orange be an
+     accent instead of a muddy brown that has to carry cream text. */
+  --color-ink: #201e1d;
+  --color-ink-hover: #33302c;
+  --color-ink-active: #141312;
+
+  /* The brand orange. Decorative and for links; text in this hue uses the
+     700 step so it clears AA on both page and card. */
   --color-accent: #c67139;
   --color-accent-2: #7a8a5e;
-  --color-divider: rgba(32, 30, 29, 0.16);
 
-  /* Action colours. --color-accent is the brand hue and is used decoratively
-     (borders, gradients, icon washes), where contrast rules do not apply. The
-     moment a surface carries cream text on top of it, it must use --color-action
-     instead: #c67139 with #f5ead8 text is only 3.03:1, which fails WCAG AA for
-     small text. These are the same brand hue, darkened until they pass.
-       --color-action         5.22:1 on cream
-       --color-action-hover   6.37:1
-       --color-action-active  8.72:1
-       --color-action-2       5.43:1  (the sage-green equivalent) */
-  --color-action: #8f5129;
-  --color-action-hover: #7d461f;
-  --color-action-active: #643312;
+  /* Kept for the few callers that reference them directly. Both now resolve
+     to ink, so nothing that was a brown button is left behind. */
+  --color-action: var(--color-ink);
+  --color-action-hover: var(--color-ink-hover);
+  --color-action-active: var(--color-ink-active);
   --color-action-2: #56633f;
+
+  /* Hairlines. --color-border is for card edges and inputs. --color-divider
+     is for rules between rows and sections. */
+  --color-border: rgba(32, 30, 29, 0.10);
+  --color-border-strong: rgba(32, 30, 29, 0.20);
+  --color-divider: rgba(32, 30, 29, 0.12);
 
   --color-neutral-100: #f9f4ed;
   --color-neutral-200: #eee7db;
   --color-neutral-300: #dcd3c4;
   --color-neutral-400: #c0b6a5;
   --color-neutral-500: #a19786;
-  /* Darkened from #82796a. Every single use of this token in the app is a text
-     colour (never a border, background, or stroke), and at #82796a it computed
-     3.61:1 on the cream page background and 3.21:1 on a card, both below the
-     4.5:1 WCAG AA floor for small text — and it is used almost exclusively at
-     11.5px to 13px. It now clears AA on both surfaces: 5.14:1 on cream,
-     4.57:1 on a card. */
   --color-neutral-600: #686155;
   --color-neutral-700: #645c50;
   --color-neutral-800: #474238;
@@ -61,11 +76,9 @@
   --color-accent-2-800: #3d472b;
   --color-accent-2-900: #272e1b;
 
-  --font-heading: "Caprasimo", system-ui, sans-serif;
-  --font-body: "Figtree", system-ui, sans-serif;
+  --font-heading: "Caprasimo", Georgia, serif;
+  --font-body: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
 
-  /* Type scale. One ramp for the whole product, so a "small label" is the same
-     size on every page instead of being re-guessed per file. */
   --text-xs: 11.5px;
   --text-sm: 12.5px;
   --text-base: 14px;
@@ -81,7 +94,6 @@
   --leading-normal: 1.55;
   --leading-relaxed: 1.7;
 
-  /* Spacing scale, 4px based. */
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
@@ -93,22 +105,23 @@
   --space-9: 60px;
   --space-10: 80px;
 
+  /* Radius. Controls are 10px, cards 16px, and the pill is reserved for
+     chips, avatars and badges. Everything used to be a pill, including text
+     inputs, which is the single fastest way to make software look like a toy. */
   --radius-sm: 10px;
-  --radius-md: 16px;
-  --radius-lg: 24px;
-  --radius-xl: 32px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
   --radius-pill: 999px;
 
-  --shadow-sm: 0 1px 2px rgba(46, 43, 37, 0.14);
-  --shadow-md: 0 3px 10px rgba(46, 43, 37, 0.16);
-  --shadow-lg: 0 12px 32px rgba(46, 43, 37, 0.22);
+  --shadow-sm: 0 1px 2px rgba(46, 43, 37, 0.05), 0 1px 3px rgba(46, 43, 37, 0.07);
+  --shadow-md: 0 4px 14px rgba(46, 43, 37, 0.10);
+  --shadow-lg: 0 16px 40px rgba(46, 43, 37, 0.16);
 
   --transition-fast: .12s ease;
   --transition: .18s ease;
   --transition-slow: .32s ease;
 
-  /* Feedback colours. These were being invented ad hoc per page, which is why
-     a "saved" message was olive in one place and orange in another. */
   --color-success: #4f6b3a;
   --color-success-bg: #eaf3dc;
   --color-warning: #8a5b12;
@@ -118,27 +131,48 @@
   --color-info: #2f5468;
   --color-info-bg: #e0eef4;
 
-  /* Text roles, so contrast is decided once. Orange is never a body-text
-     colour on cream: it is an accent and action colour only. */
   --text-strong: var(--color-text);
   --text-default: var(--color-neutral-900);
   --text-muted: var(--color-neutral-700);
   --text-subtle: var(--color-neutral-600);
   --text-on-accent: var(--color-neutral-100);
+
+  /* shadcn/ui tokens. The ui/ primitives (Button, Input, Dialog, Toast) read
+     these through tailwind.config.js as hsl(var(--x)). They were never defined,
+     so every primitive fell back to browser defaults: invisible primary
+     buttons, black borders, white dialogs on a cream site. Mapping them here
+     puts the login, register and password pages, and every modal, in the
+     house palette without touching the primitives. */
+  --background: 37 59% 90%;
+  --foreground: 20 5% 12%;
+  --card: 40 100% 99%;
+  --card-foreground: 20 5% 12%;
+  --popover: 40 100% 99%;
+  --popover-foreground: 20 5% 12%;
+  --primary: 20 5% 12%;
+  --primary-foreground: 37 59% 90%;
+  --secondary: 39 49% 91%;
+  --secondary-foreground: 20 5% 12%;
+  --muted: 38 44% 89%;
+  --muted-foreground: 36 11% 35%;
+  --accent: 22 100% 91%;
+  --accent-foreground: 24 69% 23%;
+  --destructive: 15 79% 34%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 37 34% 83%;
+  --input: 37 34% 83%;
+  --ring: 24 60% 44%;
+  --radius: 10px;
 }
 
 html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
 
-/* Keyboard users could not see where they were. Buttons and links had no
-   visible focus state at all, which is a straight WCAG 2.4.7 failure. */
 :focus-visible {
   outline: 2.5px solid var(--color-accent-600);
   outline-offset: 2px;
   border-radius: 4px;
 }
 
-/* The floating hero cards animate forever. Respect people who have asked their
-   system for less motion (WCAG 2.3.3). */
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, *::before, *::after {
@@ -148,10 +182,9 @@ html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
   }
 }
 
-/* Skip link for keyboard and screen-reader users. */
 .skip-link {
   position: absolute; left: -9999px; top: 0; z-index: 999;
-  background: var(--color-action); color: var(--color-bg);
+  background: var(--color-ink); color: var(--color-bg);
   padding: 10px 18px; border-radius: 0 0 12px 0; font-size: 14px;
 }
 .skip-link:focus { left: 0; }
@@ -163,50 +196,87 @@ body {
   font-family: var(--font-body);
   font-size: 15px;
   line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-h1, h2, h3, h4, h5, h6 {
+/* Only the two largest heading levels use the display face. It is a chunky
+   novelty face that looks superb at 40px and clogs at 17px, and it was on every
+   card title, button and tab in the app. Smaller headings use Figtree 700. */
+h1, h2 {
   font-family: var(--font-heading);
   font-weight: 400;
-  line-height: 1.12;
+  line-height: 1.1;
   letter-spacing: -0.015em;
-  margin: 0 0 8.8px;
+  margin: 0 0 8px;
 }
+h3, h4, h5, h6 {
+  font-family: var(--font-body);
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  margin: 0 0 6px;
+}
+/* For an h2 that is small (a FAQ question, a card section title): sans. */
+.h-sans { font-family: var(--font-body) !important; font-weight: 700 !important; letter-spacing: -0.01em !important; line-height: 1.25 !important; }
+/* For a non-heading element that should carry the display face on purpose. */
+.h-display { font-family: var(--font-heading); font-weight: 400; letter-spacing: -0.015em; }
 
-/* Was rgba(32,30,29,.55) on cream, which fails AA for small text. */
+a { color: var(--color-accent-700); }
+a.no-underline { text-decoration: none; }
+
 .text-muted { color: var(--text-subtle); }
 .text-quiet { color: var(--text-muted); }
 
+/* ---------------------------------------------------------------------------
+   Buttons. Figtree 600, 10px radius, 40px tall by default. Primary is ink.
+   --------------------------------------------------------------------------- */
 .btn {
-  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-  cursor: pointer; text-decoration: none;
-  font-family: var(--font-heading); font-weight: 400;
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+  cursor: pointer; text-decoration: none; white-space: nowrap;
+  font-family: var(--font-body); font-weight: 600;
   font-size: 14px; line-height: 1.2; color: var(--color-text);
   background: transparent; border: 1px solid transparent;
-  padding: 8.8px 15.8px; border-radius: 999px;
-  transition: background .18s ease, transform .18s ease;
+  min-height: 40px; padding: 9px 16px; border-radius: var(--radius-sm);
+  transition: background var(--transition), color var(--transition), border-color var(--transition), box-shadow var(--transition), transform var(--transition);
 }
-.btn:disabled { opacity: .45; cursor: not-allowed; }
-.btn-primary { background: var(--color-action); color: var(--color-bg); }
-.btn-primary:hover { background: var(--color-action-hover); }
-.btn-primary:active { background: var(--color-action-active); transform: scale(0.97); }
-.btn-secondary { border-color: var(--color-divider); }
-.btn-secondary:hover { background: rgba(32, 30, 29, 0.07); }
-.btn-ghost { color: var(--color-accent-700); padding-inline: 6px; }
-.btn-ghost:hover { background: rgba(198, 113, 57, 0.1); }
-/* Destructive actions must read as destructive, not as another secondary. */
-.btn-danger { background: var(--color-danger); color: var(--color-neutral-100); }
-.btn-danger:hover { filter: brightness(1.08); }
-.btn-quiet { color: var(--text-muted); }
-.btn-quiet:hover { background: rgba(32, 30, 29, 0.07); }
-.btn-block { width: 100%; }
-/* Sizes. Every touch target stays at least 44px tall at -lg, and -sm is only
-   for genuinely secondary inline actions. */
-.btn-sm { font-size: var(--text-sm); padding: 6px 12px; }
-.btn-lg { font-size: var(--text-md); padding: 13px 24px; }
-.btn:active { transform: scale(0.98); }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.btn:active:not(:disabled) { transform: translateY(1px); }
 
-/* Feedback text and pills, used for form results and inline status. */
+.btn-primary { background: var(--color-ink); color: var(--color-bg); border-color: var(--color-ink); }
+.btn-primary:hover:not(:disabled) { background: var(--color-ink-hover); border-color: var(--color-ink-hover); }
+.btn-primary:active:not(:disabled) { background: var(--color-ink-active); }
+
+.btn-secondary { background: var(--color-surface); border-color: var(--color-border-strong); color: var(--color-text); }
+.btn-secondary:hover:not(:disabled) { background: var(--color-surface-2); border-color: rgba(32, 30, 29, 0.32); }
+
+.btn-ghost { color: var(--color-accent-700); padding-inline: 8px; }
+.btn-ghost:hover:not(:disabled) { background: rgba(198, 113, 57, 0.10); }
+
+.btn-danger { background: var(--color-danger); color: #fff; border-color: var(--color-danger); }
+.btn-danger:hover:not(:disabled) { filter: brightness(1.08); }
+
+.btn-quiet { color: var(--text-muted); }
+.btn-quiet:hover:not(:disabled) { background: rgba(32, 30, 29, 0.06); color: var(--color-text); }
+
+.btn-block { width: 100%; }
+.btn-sm { font-size: var(--text-sm); min-height: 32px; padding: 5px 12px; }
+.btn-lg { font-size: var(--text-md); min-height: 48px; padding: 12px 24px; border-radius: var(--radius-md); }
+
+/* Chips: the one place a pill still belongs. Used for filters and multi-select
+   options. The "on" state is ink, so it reads as selected and not as another
+   primary button. */
+.btn-chip {
+  border-radius: var(--radius-pill); font-weight: 500; font-size: 13px;
+  min-height: 34px; padding: 6px 13px;
+  background: var(--color-surface); border-color: var(--color-border-strong);
+}
+.btn-chip:hover:not(:disabled) { border-color: rgba(32, 30, 29, 0.35); }
+.btn-chip[aria-pressed="true"], .btn-chip[data-on="true"] {
+  background: var(--color-ink); color: var(--color-bg); border-color: var(--color-ink); font-weight: 600;
+}
+
+/* Feedback text and pills. */
 .msg { display: inline-flex; align-items: center; gap: 6px; font-size: var(--text-sm); line-height: var(--leading-snug); }
 .msg-success { color: var(--color-success); }
 .msg-warning { color: var(--color-warning); }
@@ -217,31 +287,29 @@ h1, h2, h3, h4, h5, h6 {
 .notice-error { background: var(--color-danger-bg); color: var(--color-danger); }
 .notice-info { background: var(--color-info-bg); color: var(--color-info); }
 
-/* Skeletons. Shaped placeholders that hold the same space as the real content,
-   so nothing jumps when it arrives. */
 .skeleton {
-  background: linear-gradient(90deg, rgba(32,30,29,.07) 25%, rgba(32,30,29,.12) 37%, rgba(32,30,29,.07) 63%);
+  background: linear-gradient(90deg, rgba(32,30,29,.06) 25%, rgba(32,30,29,.11) 37%, rgba(32,30,29,.06) 63%);
   background-size: 400% 100%;
   animation: shimmer 1.4s ease-in-out infinite;
-  border-radius: var(--radius-sm);
+  border-radius: 6px;
 }
 .skeleton-line { height: 12px; }
-.skeleton-title { height: 20px; border-radius: 8px; }
+.skeleton-title { height: 20px; border-radius: 6px; }
 .skeleton-avatar { width: 38px; height: 38px; border-radius: var(--radius-pill); }
 @keyframes shimmer { from { background-position: 100% 0; } to { background-position: 0 0; } }
 
-/* Avatars, one size ramp instead of hand-set widths per page. */
+/* Avatars set in Figtree 700. Initials in the display face looked like a
+   different product's logo on every card. */
 .avatar {
   display: inline-flex; align-items: center; justify-content: center; flex: none;
-  border-radius: var(--radius-pill); font-family: var(--font-heading); overflow: hidden;
+  border-radius: var(--radius-pill); font-family: var(--font-body); font-weight: 700;
+  letter-spacing: .02em; overflow: hidden;
 }
-.avatar-sm { width: 30px; height: 30px; font-size: 12px; }
-.avatar-md { width: 38px; height: 38px; font-size: 14px; }
-.avatar-lg { width: 56px; height: 56px; font-size: 19px; }
-.avatar-xl { width: 84px; height: 84px; font-size: 28px; }
+.avatar-sm { width: 30px; height: 30px; font-size: 11px; }
+.avatar-md { width: 38px; height: 38px; font-size: 13px; }
+.avatar-lg { width: 56px; height: 56px; font-size: 18px; }
+.avatar-xl { width: 84px; height: 84px; font-size: 26px; }
 
-/* Badges. tag is decorative; badge carries meaning, so it always pairs colour
-   with a label or icon rather than relying on colour alone. */
 .badge {
   display: inline-flex; align-items: center; gap: 4px;
   font-size: var(--text-xs); font-weight: 600; letter-spacing: .01em;
@@ -253,83 +321,177 @@ h1, h2, h3, h4, h5, h6 {
 .badge-success { background: var(--color-success-bg); color: var(--color-success); }
 .badge-warning { background: var(--color-warning-bg); color: var(--color-warning); }
 
-/* Interactive cards should look interactive; static ones must not. */
-.card-interactive { transition: box-shadow var(--transition), transform var(--transition); cursor: pointer; }
-.card-interactive:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+.card-interactive { transition: box-shadow var(--transition), transform var(--transition), border-color var(--transition); cursor: pointer; }
+.card-interactive:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); border-color: var(--color-border-strong); }
 
 .divider { height: 1px; background: var(--color-divider); border: 0; margin: 0; }
 
+/* ---------------------------------------------------------------------------
+   Cards. Near-white, 1px hairline, 16px radius, soft shadow. This is the
+   change that makes the app pages look like software: a card is now clearly a
+   thing on the page, and a compose box is clearly a box.
+   --------------------------------------------------------------------------- */
 .card {
-  display: flex; flex-direction: column; gap: 8.8px;
-  padding: 13.2px; border-radius: 32px; background: var(--color-surface);
+  display: flex; flex-direction: column; gap: 10px;
+  padding: 20px; border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
 }
-/* 10px uppercase on a cream card, so it needs the darker end of the ramp:
-   --color-accent here was 2.69:1 against --color-surface. */
-.card-kicker { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-accent-700); }
+.card-inset { background: var(--color-surface-2); border-color: transparent; }
+.card-kicker {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--color-accent-700);
+}
 .elev-sm { box-shadow: var(--shadow-sm); }
 .elev-md { box-shadow: var(--shadow-md); }
 .elev-lg { box-shadow: var(--shadow-lg); }
 
 .tag {
-  display: inline-flex; align-items: center; font-size: 11px;
-  letter-spacing: 0.02em; padding: 3px 10px; border-radius: 999px;
+  display: inline-flex; align-items: center; font-size: 11.5px; font-weight: 600;
+  letter-spacing: 0.01em; padding: 3px 10px; border-radius: var(--radius-pill);
 }
 .tag-accent { background: var(--color-accent-100); color: var(--color-accent-800); }
 .tag-accent-2 { background: var(--color-accent-2-100); color: var(--color-accent-2-800); }
 
-.field > label { display: block; font-size: 12px; margin-bottom: 5px; color: rgba(32,30,29,.7); }
-.input {
-  width: 100%; min-height: 36px; padding: 6px 14px; font: inherit; font-size: 14px;
-  color: var(--color-text); caret-color: var(--color-accent);
-  background: var(--color-surface);
-  border: 1px solid var(--color-divider); border-radius: 999px;
+/* ---------------------------------------------------------------------------
+   Forms. White fields, 10px radius, a real border, ink on focus.
+   --------------------------------------------------------------------------- */
+.field > label {
+  display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px;
+  color: var(--text-muted);
 }
-textarea.input { min-height: 90px; resize: vertical; border-radius: 20px; }
-.input:hover { border-color: rgba(32,30,29,.45); }
+.input {
+  width: 100%; min-height: 42px; padding: 9px 13px; font: inherit; font-size: 14.5px;
+  color: var(--color-text); caret-color: var(--color-accent-700);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-strong); border-radius: var(--radius-sm);
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+textarea.input { min-height: 96px; resize: vertical; line-height: 1.55; border-radius: var(--radius-md); }
+select.input { appearance: none; -webkit-appearance: none; padding-right: 36px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23645c50' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 12px center; }
+.input:hover { border-color: rgba(32,30,29,.36); }
 .input:focus-visible {
-  outline: 2.5px solid var(--color-accent-600);
-  outline-offset: 1px;
-  border-color: var(--color-accent);
+  outline: none;
+  border-color: var(--color-ink);
+  box-shadow: 0 0 0 3px rgba(32, 30, 29, 0.12);
 }
 .input:disabled, .input[aria-disabled="true"] {
-  opacity: .6; cursor: not-allowed; background: var(--color-neutral-200);
+  cursor: not-allowed; background: var(--color-surface-2); color: var(--text-muted); border-color: var(--color-border);
 }
-.input::placeholder { color: var(--text-subtle); }
-/* An invalid field is outlined AND described by its error text, never colour
-   alone. */
+.input::placeholder { color: var(--color-neutral-500); }
 .input[aria-invalid="true"] { border-color: var(--color-danger); }
 .field-error { display: block; font-size: var(--text-sm); color: var(--color-danger); margin-top: 4px; }
-.field-hint { display: block; font-size: var(--text-sm); color: var(--text-subtle); margin-top: 4px; line-height: var(--leading-normal); }
-.field > label { font-weight: 600; color: var(--text-muted); }
+.field-hint { display: block; font-size: var(--text-sm); color: var(--text-subtle); margin-top: 5px; line-height: var(--leading-normal); }
 
-.seg { display: inline-flex; overflow: hidden; border: 1px solid var(--color-divider); border-radius: 999px; }
-.seg-opt { display: inline-flex; align-items: center; padding: 7px 14px; font-size: 13px; cursor: pointer; background: transparent; border: 0; font: inherit; }
-.seg-opt + .seg-opt { border-left: 1px solid var(--color-divider); }
-.seg-opt[data-on="true"] { background: var(--color-action); color: var(--color-bg); }
-.seg-opt[data-on="false"]:hover { background: rgba(32,30,29,.07); }
+/* Segmented control. */
+.seg {
+  display: inline-flex; padding: 3px; gap: 2px;
+  border: 1px solid var(--color-border); border-radius: var(--radius-sm);
+  background: var(--color-surface-2);
+}
+.seg-opt {
+  display: inline-flex; align-items: center; padding: 6px 13px; font-size: 13px; font-weight: 500;
+  cursor: pointer; background: transparent; border: 0; font-family: inherit; border-radius: 7px;
+  color: var(--text-muted); transition: background var(--transition), color var(--transition);
+}
+.seg-opt[data-on="true"] { background: var(--color-surface); color: var(--color-text); font-weight: 600; box-shadow: var(--shadow-sm); }
+.seg-opt[data-on="false"]:hover { color: var(--color-text); }
 
+/* Tables. */
 .table { width: 100%; border-collapse: collapse; font-size: 14px; }
 .table th {
-  text-align: left; font-size: 11px; letter-spacing: .08em; text-transform: uppercase;
-  color: rgba(32,30,29,.6); padding: 8.8px; border-bottom: 1px solid var(--color-divider);
+  text-align: left; font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--text-muted); padding: 10px 12px; border-bottom: 1px solid var(--color-border-strong);
 }
-.table td { padding: 8.8px; border-bottom: 1px solid rgba(32,30,29,.08); }
-.table tbody tr:hover { background: rgba(32,30,29,.04); }
+.table td { padding: 12px; border-bottom: 1px solid var(--color-divider); vertical-align: top; }
+.table tbody tr:last-child td { border-bottom: 0; }
+.table tbody tr:hover { background: rgba(32,30,29,.03); }
+
+/* ---------------------------------------------------------------------------
+   Page structure helpers for the marketing pages, so every page header sits
+   in the same place at the same size.
+   --------------------------------------------------------------------------- */
+.page-hero { padding: clamp(36px, 6vh, 64px) 0 clamp(20px, 3vh, 32px); }
+.page-section { padding: clamp(32px, 5vh, 56px) 0; }
+.prose-narrow { max-width: 62ch; }
+
+/* Empty states. A quiet card with an icon, a sentence, and a way forward. */
+.empty {
+  display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px;
+  padding: 40px 24px; border-radius: var(--radius-lg);
+  border: 1px dashed var(--color-border-strong); background: transparent;
+}
+.empty-icon {
+  width: 44px; height: 44px; border-radius: var(--radius-pill);
+  display: grid; place-items: center; background: var(--color-accent-100); color: var(--color-accent-700);
+}
+.empty-title { font-weight: 700; font-size: 15px; margin: 0; }
+.empty-body { font-size: 13.5px; color: var(--text-muted); max-width: 40ch; margin: 0; line-height: 1.55; }
 
 .washed { filter: saturate(0.6) contrast(0.85) brightness(1.1) opacity(0.94); }
 
-@keyframes fadeUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
-@keyframes fadeSwap { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
-@keyframes drift { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-.anim-fade-up { animation: fadeUp .6s ease both; }
-.anim-fade-swap { animation: fadeSwap .35s ease both; }
-.anim-drift { animation: drift 6s ease-in-out infinite; }
-.anim-drift-slow { animation: drift 7s 1s ease-in-out infinite; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+@keyframes fadeSwap { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@keyframes drift { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+.anim-fade-up { animation: fadeUp .5s ease both; }
+.anim-fade-swap { animation: fadeSwap .3s ease both; }
+.anim-drift { animation: drift 7s ease-in-out infinite; }
+.anim-drift-slow { animation: drift 8s 1s ease-in-out infinite; }
+
+/* A stylised product window used on the marketing pages. Not a screenshot, so
+   it never goes stale, but it gives the copy something real to sit beside. */
+.frame {
+  border-radius: var(--radius-lg); background: var(--color-surface);
+  border: 1px solid var(--color-border); box-shadow: var(--shadow-lg); overflow: hidden;
+}
+.frame-bar {
+  display: flex; align-items: center; gap: 6px; padding: 10px 14px;
+  border-bottom: 1px solid var(--color-border); background: var(--color-surface-2);
+}
+.frame-dot { width: 9px; height: 9px; border-radius: 999px; background: var(--color-neutral-300); }
 
 @media (max-width: 860px) {
   header.grid, section.card > .grid, .card > .grid { grid-template-columns: minmax(0, 1fr) !important; }
   .app-split { grid-template-columns: minmax(0, 1fr) !important; }
-  [style*="grid-template-columns:repeat(6,1fr)"],
-  .bento-grid { grid-template-columns: repeat(2, 1fr) !important; }
-  .bento-grid > * { grid-column: span 2 !important; }
+  .bento-grid { grid-template-columns: minmax(0, 1fr) !important; }
+  .bento-grid > * { grid-column: auto !important; }
+  .hide-mobile { display: none !important; }
+  .show-mobile { display: inline-flex !important; }
+  .split-aside { position: static !important; order: -1; }
+  .msg-split[data-active="false"] .msg-pane { display: none; }
+  .msg-split[data-active="true"] .msg-list { display: none; }
+}
+@media (min-width: 641px) {
+  .compare-card { overflow-x: auto; }
+  .compare-table { min-width: 560px; }
+  .compare-name { white-space: nowrap; }
+}
+@media (max-width: 760px) {
+  .app-nav .app-tabs { order: 5; width: 100%; flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; padding: 6px 0 2px; margin: 0; }
+  .app-nav .app-tabs::-webkit-scrollbar { display: none; }
+  .app-nav .app-tabs a { flex: none; }
+  .app-nav .app-tabs a > span { padding: 7px 12px !important; font-size: 13.5px !important; }
+}
+@media (max-width: 640px) {
+  .compare-table, .compare-table tbody, .compare-table tr, .compare-table td { display: block; width: 100%; }
+  .compare-table thead { display: none; }
+  .compare-table tr { padding: 12px 4px; border-bottom: 1px solid var(--color-divider); }
+  .compare-table tr:last-child { border-bottom: 0; }
+  .compare-table td { padding: 4px 0 !important; border: 0 !important; }
+  .compare-table .compare-name { font-size: 15px; padding-bottom: 6px !important; }
+  .compare-table td[data-label]::before { content: attr(data-label); display: block; font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--color-accent-700); margin-bottom: 2px; }
+  .compare-table td[data-label] { font-size: 14px; color: var(--text-muted); padding-bottom: 8px !important; }
+  .hero-float-left { left: 12px !important; bottom: 12px !important; width: min(236px, calc(100% - 24px)) !important; }
+  .hero-float-right { right: 12px !important; top: 12px !important; }
+  .site-nav .nav-links { order: 3; width: 100%; gap: 18px !important; padding-top: 2px; }
+  .site-nav .nav-links a { font-size: 14px !important; }
+  .site-nav .nav-actions .btn { min-height: 36px; padding-left: 12px; padding-right: 12px; font-size: 13.5px; }
+}
+@media (min-width: 861px) {
+  .show-mobile { display: none !important; }
+}
+@media (min-width: 861px) and (max-width: 1100px) {
+  .bento-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
 }

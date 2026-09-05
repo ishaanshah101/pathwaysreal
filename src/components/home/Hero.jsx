@@ -19,14 +19,15 @@ export default function Hero() {
       style={{
         gridTemplateColumns: 'minmax(0,7fr) minmax(0,5fr)',
         gap: 'clamp(24px,4vw,64px)',
-        padding: 'clamp(28px,6vh,72px) 0 clamp(28px,5vh,56px)',
+        padding: 'clamp(32px,7vh,80px) 0 clamp(28px,5vh,56px)',
       }}
     >
       <div className="anim-fade-up">
         {/* One headline, one paragraph, one primary action. The "free forever"
             promise lives inside the sentence that earns it, not as a separate
             badge competing with the headline for attention. */}
-        <h1 style={{ fontSize: 'clamp(38px,5.2vw,62px)', lineHeight: 1.06, margin: '0 0 20px', textWrap: 'balance' }}>
+        <span className="card-kicker" style={{ display: 'block', marginBottom: 16 }}>Free college and career guidance</span>
+        <h1 style={{ fontSize: 'clamp(38px,5.2vw,62px)', lineHeight: 1.05, margin: '0 0 20px', textWrap: 'balance' }}>
           Every student deserves someone who's been there.
         </h1>
         <p style={{ fontSize: 'clamp(16px,1.4vw,18.5px)', maxWidth: '50ch', color: 'var(--color-neutral-800)', margin: '0 0 28px', lineHeight: 1.6 }}>
@@ -35,10 +36,10 @@ export default function Hero() {
         </p>
 
         <div className="flex gap-3 items-center flex-wrap">
-          <Link to="/join" className="btn btn-primary" style={{ fontSize: 16, padding: '14px 30px' }}>
+          <Link to="/join" className="btn btn-primary btn-lg" style={{ fontSize: 15.5, padding: '13px 26px' }}>
             Start your path, it's free
           </Link>
-          <Link to="/how-it-works" className="btn btn-ghost" style={{ fontSize: 15 }}>
+          <Link to="/how-it-works" className="btn btn-secondary btn-lg" style={{ fontSize: 15 }}>
             See how it works
           </Link>
         </div>
@@ -68,8 +69,9 @@ export default function Hero() {
             className="relative overflow-hidden"
             style={{
               aspectRatio: '4 / 4.6',
-              borderRadius: '44% 56% 52% 48% / 52% 46% 54% 48%',
+              borderRadius: 24,
               background: 'linear-gradient(150deg, var(--color-accent-2-400), var(--color-accent-300) 55%, var(--color-accent-400))',
+              boxShadow: 'var(--shadow-lg)',
             }}
           >
             <img
@@ -89,23 +91,23 @@ export default function Hero() {
               style={{ background: 'linear-gradient(150deg, rgba(174,191,146,0.18), rgba(255,198,165,0.08) 55%, rgba(246,160,107,0.22))', mixBlendMode: 'soft-light' }}
             />
           </div>
-          <div className="card elev-lg anim-drift" style={{ position: 'absolute', left: -14, bottom: 34, width: 230, padding: '14px 16px', gap: 6 }}>
+          <div className="card elev-lg hero-float-left" style={{ position: 'absolute', left: -18, bottom: 30, width: 236, padding: '14px 16px', gap: 6 }}>
             <span className="card-kicker">Connected</span>
             <span style={{ fontSize: 13, lineHeight: 1.45 }}>
               <b>Sofia, CMU first-year</b> accepted your connect request. Ask her anything.
             </span>
           </div>
-          <div className="card elev-md anim-drift-slow" style={{ position: 'absolute', right: -8, top: 26, padding: '10px 16px', gap: 2 }}>
-            <span style={{ fontFamily: 'var(--font-heading)', fontSize: 20 }}>
-              $0 <span style={{ fontSize: 12, color: 'var(--color-accent-700)' }}>forever</span>
+          <div className="card elev-md hero-float-right" style={{ position: 'absolute', right: -12, top: 22, padding: '10px 16px', gap: 2 }}>
+            <span style={{ fontFamily: 'var(--font-heading)', fontSize: 22, lineHeight: 1 }}>
+              $0 <span style={{ fontFamily: 'var(--font-body)', fontWeight: 600, fontSize: 12, color: 'var(--color-accent-700)' }}>forever</span>
             </span>
-            <span style={{ fontSize: 11, color: 'var(--color-neutral-700)' }}>the core app, for every student</span>
+            <span style={{ fontSize: 11.5, color: 'var(--text-muted)' }}>the core app, for every student</span>
           </div>
         </div>
         {/* Same standard as the quote and story sections below: the cards
             floating on the photo show what the product looks like, not
             something that happened, so they say so. */}
-        <p style={{ fontSize: 11.5, color: 'var(--color-neutral-600)', margin: '12px 4px 0' }}>
+        <p style={{ fontSize: 11.5, color: 'var(--text-subtle)', margin: '12px 4px 0' }}>
           Illustrative preview of a Pathways connection.
         </p>
       </div>

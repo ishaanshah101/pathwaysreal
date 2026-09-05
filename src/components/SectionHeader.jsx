@@ -4,15 +4,15 @@ import React from 'react';
 // intro land in the same place at the same size every time.
 export default function SectionHeader({ eyebrow, title, intro, titleMaxWidth = '24ch', as: Tag = 'h2' }) {
   return (
-    <div style={{ marginBottom: 30 }}>
+    <div style={{ marginBottom: 28 }}>
       {eyebrow && (
-        <span className="card-kicker" style={{ display: 'block', marginBottom: 10 }}>{eyebrow}</span>
+        <span className="card-kicker" style={{ display: 'block', marginBottom: 12 }}>{eyebrow}</span>
       )}
       <Tag style={{ fontSize: 'clamp(26px,3.2vw,38px)', maxWidth: titleMaxWidth, margin: 0, textWrap: 'balance' }}>
         {title}
       </Tag>
       {intro && (
-        <p style={{ maxWidth: '58ch', fontSize: 15.5, lineHeight: 1.6, color: 'var(--color-neutral-800)', margin: '12px 0 0' }}>
+        <p style={{ maxWidth: '58ch', fontSize: 16, lineHeight: 1.6, color: 'var(--color-neutral-800)', margin: '12px 0 0' }}>
           {intro}
         </p>
       )}

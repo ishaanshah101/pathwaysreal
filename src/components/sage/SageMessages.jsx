@@ -45,10 +45,10 @@ export default function SageMessages({ messages, thinking, loading, onStarter })
               style={{
                 alignSelf: mine ? 'flex-end' : 'flex-start',
                 maxWidth: mine ? '78%' : '92%',
-                background: mine ? 'var(--color-action)' : 'var(--color-bg)',
+                background: mine ? 'var(--color-ink)' : 'var(--color-surface-2)',
                 color: mine ? 'var(--color-bg)' : 'var(--color-text)',
                 padding: '11px 16px',
-                borderRadius: 22,
+                borderRadius: mine ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
                 fontSize: 14.5,
                 lineHeight: 1.6,
                 whiteSpace: 'pre-wrap',

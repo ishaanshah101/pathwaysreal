@@ -6,16 +6,16 @@ import ContactEmail from '@/components/ContactEmail';
 
 function Section({ title, children }) {
   return (
-    <section className="card elev-sm" style={{ padding: 24, gap: 10, borderRadius: 26 }}>
-      <h2 style={{ fontSize: 21, margin: 0 }}>{title}</h2>
-      <div style={{ fontSize: 14.5, lineHeight: 1.7, color: 'var(--color-neutral-800)' }}>{children}</div>
+    <section className="card elev-sm" style={{ padding: 24, gap: 8 }}>
+      <h2 className="h-sans" style={{ fontSize: 18, margin: 0 }}>{title}</h2>
+      <div style={{ fontSize: 15, lineHeight: 1.7, color: 'var(--text-muted)' }}>{children}</div>
     </section>
   );
 }
 
 export default function Safety() {
   return (
-    <div className="flex flex-col" style={{ gap: 16, paddingBottom: 40 }}>
+    <div className="flex flex-col page-hero" style={{ gap: 14, paddingBottom: 'clamp(40px,6vh,72px)' }}>
       <Seo
         title="Safety on Pathways | How to report someone and get help"
         description="How Pathways keeps student conversations safe: one-on-one messaging only, contact details and meetup requests filtered out, plus reporting and blocking."
@@ -77,7 +77,7 @@ export default function Safety() {
         things, please report it, even if you are not sure.
       </Section>
 
-      <p style={{ fontSize: 13.5, color: 'var(--color-neutral-700)', margin: '4px 0 0' }}>
+      <p style={{ fontSize: 13.5, color: 'var(--text-muted)', margin: '4px 0 0' }}>
         See also our <Link to="/privacy" style={{ color: 'var(--color-accent-700)' }}>Privacy policy</Link>
         {' '}and <Link to="/terms" style={{ color: 'var(--color-accent-700)' }}>Terms</Link>.
       </p>

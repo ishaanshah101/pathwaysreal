@@ -29,9 +29,9 @@ export default function BlockModal({ open, onOpenChange, blockedEmail, blockedNa
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent style={{ background: 'var(--color-surface)', borderRadius: 24, maxWidth: 440 }}>
+      <DialogContent style={{ background: 'var(--color-surface)', borderRadius: 16, maxWidth: 440 }}>
         <DialogHeader>
-          <DialogTitle style={{ fontFamily: 'var(--font-heading)', fontSize: 21 }}>
+          <DialogTitle style={{ fontFamily: 'var(--font-heading)', fontWeight: 400, fontSize: 24 }}>
             Block {blockedName || blockedEmail}?
           </DialogTitle>
         </DialogHeader>
@@ -41,7 +41,7 @@ export default function BlockModal({ open, onOpenChange, blockedEmail, blockedNa
             They will no longer be able to message you, and they will disappear from your feed and
             from Explore. They are not told that you blocked them.
           </p>
-          <p style={{ fontSize: 13, lineHeight: 1.6, margin: 0, color: 'var(--color-neutral-700)' }}>
+          <p style={{ fontSize: 13, lineHeight: 1.6, margin: 0, color: 'var(--text-muted)' }}>
             Blocking is not the same as reporting. If they did something wrong, please report them
             too so the safety team can look into it.
           </p>

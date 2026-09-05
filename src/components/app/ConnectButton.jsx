@@ -42,7 +42,7 @@ export default function ConnectButton({
     return (
       <Link
         to={`/app/messages?to=${encodeURIComponent(targetEmail)}`}
-        className="btn btn-secondary"
+        className="btn btn-secondary btn-sm no-underline"
         style={{ fontSize: size }}
       >
         Message {first}
@@ -54,7 +54,7 @@ export default function ConnectButton({
   // and the accept and decline controls sit together.
   if (status === 'pending' && incoming) {
     return (
-      <Link to="/app/requests" className="btn btn-primary" style={{ fontSize: size }}>
+      <Link to="/app/requests" className="btn btn-primary btn-sm no-underline" style={{ fontSize: size }}>
         Answer their request
       </Link>
     );
@@ -62,7 +62,7 @@ export default function ConnectButton({
 
   if (status === 'pending') {
     return (
-      <span className="btn btn-secondary" style={{ fontSize: size, opacity: 0.75, cursor: 'default' }}>
+      <span className="badge badge-neutral" style={{ minHeight: 32, padding: '0 12px', fontSize: size }}>
         Request sent
       </span>
     );
@@ -70,7 +70,7 @@ export default function ConnectButton({
 
   if (status === 'declined') {
     return (
-      <span style={{ fontSize: 12.5, color: 'var(--color-neutral-600)' }}>
+      <span style={{ fontSize: 12.5, color: 'var(--text-subtle)' }}>
         Not connected
       </span>
     );
@@ -80,7 +80,7 @@ export default function ConnectButton({
     <>
       <button
         type="button"
-        className="btn btn-primary"
+        className="btn btn-primary btn-sm"
         style={{ fontSize: size }}
         disabled={busy}
         onClick={() => { setError(''); setConfirming(true); }}
@@ -89,9 +89,9 @@ export default function ConnectButton({
       </button>
 
       <Dialog open={confirming} onOpenChange={(o) => { if (!o) { setConfirming(false); setError(''); } }}>
-        <DialogContent style={{ background: 'var(--color-surface)', borderRadius: 24, maxWidth: 440 }}>
+        <DialogContent style={{ background: 'var(--color-surface)', borderRadius: 16, maxWidth: 440 }}>
           <DialogHeader>
-            <DialogTitle style={{ fontFamily: 'var(--font-heading)', fontSize: 21 }}>
+            <DialogTitle style={{ fontFamily: 'var(--font-heading)', fontWeight: 400, fontSize: 24 }}>
               Connect with {targetName || 'them'}?
             </DialogTitle>
           </DialogHeader>
@@ -102,12 +102,12 @@ export default function ConnectButton({
               first. You will be able to message each other once they accept, and you will get a
               notification when they do.
             </p>
-            <p style={{ fontSize: 13, lineHeight: 1.6, margin: 0, color: 'var(--color-neutral-700)' }}>
+            <p style={{ fontSize: 13, lineHeight: 1.6, margin: 0, color: 'var(--text-muted)' }}>
               They are not told anything about you beyond what is already on your profile.
             </p>
 
             {error && (
-              <span style={{ fontSize: 13, lineHeight: 1.55, color: 'var(--color-accent-700)' }}>{error}</span>
+              <span role="alert" className="msg msg-error">{error}</span>
             )}
 
             <div className="flex gap-2">

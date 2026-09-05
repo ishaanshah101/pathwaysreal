@@ -10,6 +10,7 @@ import { useBlocks } from '@/lib/useBlocks';
 import { useConnections } from '@/lib/useConnections';
 import { useDirectory } from '@/lib/usePeople';
 import Seo from '@/components/Seo';
+import { Search, UserSearch } from 'lucide-react';
 
 const PAGE_SIZE = 12;
 
@@ -18,46 +19,45 @@ function MentorCard({ m, onConnect, connection, busy, onBlocked, following, foll
   const isSample = Boolean(m.is_sample_profile);
 
   return (
-    <div className="card elev-sm" style={{ padding: 22, gap: 12, borderRadius: 26 }}>
+    <div className="card elev-sm" style={{ padding: 22, gap: 12 }}>
       <div className="flex items-center gap-3">
-        <span
-          className="flex items-center justify-center"
-          style={{
-            width: 46, height: 46, borderRadius: 999, flex: 'none',
-            background: bg, color: fg, fontFamily: 'var(--font-heading)', fontSize: 17,
-          }}
-        >
+        <span className="avatar" style={{ width: 46, height: 46, fontSize: 15, background: bg, color: fg }}>
           {initialsOf(m.full_name)}
         </span>
-        <div className="flex flex-col" style={{ minWidth: 0 }}>
-          <span style={{ fontSize: 15, fontWeight: 600 }}>{m.full_name}</span>
-          <span style={{ fontSize: 12.5, color: 'var(--color-neutral-600)', lineHeight: 1.35 }}>
-            {m.headline || [m.grade, m.school].filter(Boolean).join(' · ') || ROLE_LABELS[m.role]}
+        <div className="flex flex-col" style={{ minWidth: 0, gap: 1 }}>
+          <span className="flex items-center gap-[7px]" style={{ minWidth: 0 }}>
+            <h2 className="h-sans" style={{ fontSize: 15.5, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.full_name}</h2>
+            {m.verified && <span className="badge badge-verified">Verified</span>}
+          </span>
+          <span style={{ fontSize: 12.5, color: 'var(--text-subtle)', lineHeight: 1.35 }}>
+            {m.headline || [m.job_title, m.institution].filter(Boolean).join(', ') || [m.grade, m.school].filter(Boolean).join(' · ') || ROLE_LABELS[m.role]}
           </span>
         </div>
       </div>
 
-      {m.bio && (
-        <p style={{ fontSize: 14, lineHeight: 1.55, color: 'var(--color-neutral-800)', margin: 0 }}>{m.bio}</p>
+      {(m.bio || m.help_with) && (
+        <p style={{ fontSize: 14, lineHeight: 1.55, color: 'var(--text-muted)', margin: 0 }}>{m.bio || m.help_with}</p>
       )}
 
-      {Array.isArray(m.interests) && m.interests.length > 0 && (
-        <div className="flex gap-[6px] flex-wrap">
-          {m.interests.slice(0, 4).map((t) => (
-            <span key={t} className="tag tag-accent-2">{t}</span>
-          ))}
-        </div>
-      )}
+      {(() => {
+        const topics = [...(Array.isArray(m.expertise) ? m.expertise : []), ...(Array.isArray(m.interests) ? m.interests : [])]
+          .filter((t, i, a) => a.indexOf(t) === i).slice(0, 4);
+        return topics.length > 0 ? (
+          <div className="flex gap-[6px] flex-wrap">
+            {topics.map((t) => <span key={t} className="tag tag-accent-2">{t}</span>)}
+          </div>
+        ) : null;
+      })()}
 
       <div className="flex gap-2 flex-wrap items-center" style={{ marginTop: 2 }}>
         {isSample ? (
           <>
             {m.post_count > 0 && (
-              <span style={{ fontSize: 12.5, color: 'var(--color-neutral-700)' }}>
+              <span style={{ fontSize: 12.5, color: 'var(--text-muted)' }}>
                 {m.post_count} post{m.post_count === 1 ? '' : 's'} in the feed
               </span>
             )}
-            <span style={{ fontSize: 11.5, color: 'var(--color-neutral-600)', marginLeft: 'auto' }}>
+            <span style={{ fontSize: 11.5, color: 'var(--text-subtle)', marginLeft: 'auto' }}>
               Sample profile
             </span>
           </>
@@ -90,7 +90,7 @@ function MentorCard({ m, onConnect, connection, busy, onBlocked, following, foll
       {/* Reporting and blocking are available on every real profile, not just
           once a conversation has already gone wrong. */}
       {!isSample && (
-        <div className="flex gap-4 items-center" style={{ borderTop: '1px solid var(--color-divider)', paddingTop: 10 }}>
+        <div className="flex gap-4 items-center" style={{ borderTop: '1px solid var(--color-divider)', paddingTop: 10, marginTop: 'auto' }}>
           <SafetyActions
             targetEmail={m.user_email}
             targetName={m.full_name}
@@ -174,8 +174,8 @@ export default function Explore() {
       <Seo title="Find a Mentor | Pathways" description="Search and connect with students, professors, and counselors on Pathways. Connecting is always free." path="/app/explore" noindex />
       <div>
         <h1 style={{ fontSize: 'clamp(26px,3.2vw,36px)', margin: '0 0 6px' }}>Find someone who's been there.</h1>
-        <p style={{ color: 'var(--color-neutral-800)', margin: 0 }} aria-live="polite">
-          {list.length} students, professors, and counselors. Connecting is always free.
+        <p style={{ color: 'var(--text-muted)', margin: 0, fontSize: 15 }} aria-live="polite">
+          {list.length} {list.length === 1 ? 'person' : 'people'} you can learn from. Connecting is always free.
         </p>
       </div>
 
@@ -183,22 +183,16 @@ export default function Explore() {
           error resolved to an empty array and the page cheerfully announced
           "0 students, professors, and counselors". */}
       {directoryError && (
-        <div className="card" role="alert" style={{ padding: 16, borderRadius: 20 }}>
-          <span style={{ fontSize: 13.5, lineHeight: 1.55 }}>{directoryError}</span>
-          <button type="button" className="btn btn-secondary self-start" style={{ fontSize: 13 }} onClick={load}>
+        <div className="notice notice-error flex items-center gap-3" role="alert" style={{ flexDirection: 'row' }}>
+          <span style={{ flex: 1 }}>{directoryError}</span>
+          <button type="button" className="btn btn-secondary btn-sm" onClick={load}>
             Try again
           </button>
         </div>
       )}
 
       {connectionError && (
-        <div
-          className="card flex items-start gap-3"
-          style={{
-            padding: '12px 16px', fontSize: 14, lineHeight: 1.55,
-            background: 'var(--color-accent-100)', color: 'var(--color-accent-800)',
-          }}
-        >
+        <div role="alert" className="notice notice-warning flex items-start gap-3" style={{ flexDirection: 'row' }}>
           <span style={{ flex: 1 }}>{connectionError}</span>
           <button
             type="button"
@@ -210,84 +204,68 @@ export default function Explore() {
         </div>
       )}
 
-      <div className="flex flex-col" style={{ gap: 10 }}>
-        <input
-          aria-label="Search by name, school, or topic"
-          className="input"
-          style={{ maxWidth: 420 }}
-          placeholder="Search by name, school, or topic…"
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-        />
+      <div className="card elev-sm" style={{ padding: 16, gap: 12 }}>
+        <div style={{ position: 'relative' }}>
+          <Search size={16} aria-hidden="true" style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: 'var(--color-neutral-500)' }} />
+          <input
+            aria-label="Search by name, school, or topic"
+            className="input"
+            style={{ paddingLeft: 38 }}
+            placeholder="Search by name, school, or topic…"
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+          />
+        </div>
 
-        {/* Where you keep track of who you follow, without leaving the
-            directory. Following is one-way, so this list is yours alone. */}
         <div className="flex gap-2 flex-wrap items-center">
+          <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-subtle)', marginRight: 2, minWidth: 44 }}>Who</span>
+          {[['all', 'Everyone'], ...Object.entries(ROLE_LABELS)].map(([v, l]) => (
+            <button key={v} type="button" onClick={() => setRoleFilter(v)} className="btn btn-chip" aria-pressed={roleFilter === v}>
+              {l}
+            </button>
+          ))}
+          {/* Following is one-way, so this list is yours alone. */}
           <button
             type="button"
             onClick={() => setFollowingOnly((v) => !v)}
-            className="btn"
-            style={{
-              fontFamily: 'var(--font-body)', fontSize: 13, padding: '6px 13px',
-              background: followingOnly ? 'var(--color-action)' : 'transparent',
-              color: followingOnly ? 'var(--color-bg)' : 'var(--color-text)',
-              borderColor: followingOnly ? 'transparent' : 'var(--color-divider)',
-            }}
+            className="btn btn-chip"
             aria-pressed={followingOnly}
           >
             Following
-            <span style={{ opacity: 0.7, marginLeft: 5, fontSize: 12 }}>{followingCount}</span>
+            <span style={{ opacity: 0.6, marginLeft: 2, fontSize: 12 }}>{followingCount}</span>
           </button>
           {followerCount > 0 && (
-            <span style={{ fontSize: 12.5, color: 'var(--color-neutral-600)' }}>
+            <span style={{ fontSize: 12.5, color: 'var(--text-subtle)', marginLeft: 4 }}>
               {followerCount} {followerCount === 1 ? 'person follows' : 'people follow'} you
             </span>
           )}
         </div>
 
-        <div className="flex gap-2 flex-wrap items-center">
-          {[['all', 'Everyone'], ...Object.entries(ROLE_LABELS)].map(([v, l]) => (
-            <button
-              key={v}
-              type="button"
-              onClick={() => setRoleFilter(v)}
-              className="btn"
-              style={{
-                fontFamily: 'var(--font-body)', fontSize: 13, padding: '6px 13px',
-                background: roleFilter === v ? 'var(--color-action-2)' : 'transparent',
-                color: roleFilter === v ? 'var(--color-bg)' : 'var(--color-text)',
-                borderColor: roleFilter === v ? 'transparent' : 'var(--color-divider)',
-              }}
-            >
-              {l}
-            </button>
-          ))}
-        </div>
-
-        <div className="flex gap-2 flex-wrap items-center">
-          {[['all', 'All topics'], ...allTopics.map((t) => [t, t])].map(([v, l]) => (
-            <button
-              key={v}
-              type="button"
-              onClick={() => setTopicFilter(v)}
-              className="btn"
-              style={{
-                fontFamily: 'var(--font-body)', fontSize: 12.5, padding: '5px 12px',
-                background: topicFilter === v ? 'var(--color-action)' : 'transparent',
-                color: topicFilter === v ? 'var(--color-bg)' : 'var(--color-text)',
-                borderColor: topicFilter === v ? 'transparent' : 'var(--color-divider)',
-              }}
-            >
-              {l}
-            </button>
-          ))}
-        </div>
+        {allTopics.length > 0 && (
+          <div className="flex gap-2 flex-wrap items-center">
+            <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-subtle)', marginRight: 2, minWidth: 44 }}>Topic</span>
+            {[['all', 'All topics'], ...allTopics.map((t) => [t, t])].map(([v, l]) => (
+              <button key={v} type="button" onClick={() => setTopicFilter(v)} className="btn btn-chip" aria-pressed={topicFilter === v}>
+                {l}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {loading ? (
-        <p style={{ color: 'var(--color-neutral-600)' }}>Finding people…</p>
+        <p role="status" style={{ color: 'var(--text-subtle)' }}>Finding people…</p>
       ) : list.length === 0 ? (
-        <p style={{ color: 'var(--color-neutral-600)' }}>Nobody matches that search yet.</p>
+        <div className="empty">
+          <span className="empty-icon"><UserSearch size={20} aria-hidden="true" /></span>
+          <p className="empty-title">Nobody matches that search yet</p>
+          <p className="empty-body">Try a broader topic or clear the filters. New students and mentors join every week.</p>
+          {(q || roleFilter !== 'all' || topicFilter !== 'all' || followingOnly) && (
+            <button type="button" className="btn btn-secondary" style={{ marginTop: 6 }} onClick={() => { setQ(''); setRoleFilter('all'); setTopicFilter('all'); setFollowingOnly(false); }}>
+              Clear filters
+            </button>
+          )}
+        </div>
       ) : (
         <>
           <div className="grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 16 }}>
@@ -310,7 +288,6 @@ export default function Explore() {
             <button
               type="button"
               className="btn btn-secondary self-center"
-              style={{ fontSize: 14, padding: '11px 26px' }}
               onClick={() => setVisible((n) => n + PAGE_SIZE)}
             >
               Show more ({list.length - visible} left)

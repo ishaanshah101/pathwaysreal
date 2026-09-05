@@ -64,13 +64,13 @@ export default function VerificationCard({ profile, email }) {
   return (
     <div className="field">
       <label>Verification</label>
-      <div style={{ background: 'var(--color-bg)', borderRadius: 18, padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div style={{ background: 'var(--color-surface-2)', borderRadius: 18, padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
         {profile?.verified ? (
           <>
             <span className="badge badge-verified self-start">
               <BadgeCheck size={12} aria-hidden="true" /> Verified
             </span>
-            <span style={{ fontSize: 12.5, color: 'var(--color-neutral-700)', lineHeight: 1.5 }}>
+            <span style={{ fontSize: 12.5, color: 'var(--text-muted)', lineHeight: 1.5 }}>
               Someone here has checked your role. Students see this on your profile.
             </span>
           </>
@@ -79,7 +79,7 @@ export default function VerificationCard({ profile, email }) {
             <span className="badge badge-warning self-start">
               <Clock size={12} aria-hidden="true" /> Under review
             </span>
-            <span style={{ fontSize: 12.5, color: 'var(--color-neutral-700)', lineHeight: 1.5 }}>
+            <span style={{ fontSize: 12.5, color: 'var(--text-muted)', lineHeight: 1.5 }}>
               We have your request. A person checks these by hand, so it can take a few days.
             </span>
           </>
@@ -124,7 +124,7 @@ export default function VerificationCard({ profile, email }) {
             <span style={{ fontSize: 14 }}>
               <b>{request?.status === 'rejected' ? 'Not verified' : 'Unverified'}</b>
             </span>
-            <span style={{ fontSize: 12.5, color: 'var(--color-neutral-700)', lineHeight: 1.5 }}>
+            <span style={{ fontSize: 12.5, color: 'var(--text-muted)', lineHeight: 1.5 }}>
               Your role shows as unverified until a person here has checked it. Verified members are
               easier for students to trust.
             </span>

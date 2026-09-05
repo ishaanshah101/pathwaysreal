@@ -55,7 +55,7 @@ export default function PageNotFound() {
 
         <h1 style={{ fontSize: 'var(--text-2xl)', margin: 0 }}>This page isn't here</h1>
 
-        <p style={{ fontSize: 'var(--text-base)', lineHeight: 'var(--leading-normal)', color: 'var(--color-neutral-700)', margin: 0 }}>
+        <p style={{ fontSize: 'var(--text-base)', lineHeight: 'var(--leading-normal)', color: 'var(--text-muted)', margin: 0 }}>
           {pageName
             ? <>We couldn't find <b style={{ color: 'var(--color-text)' }}>/{pageName}</b>. It may have moved, or the link may be mistyped.</>
             : <>We couldn't find that page. It may have moved, or the link may be mistyped.</>}
@@ -83,7 +83,7 @@ export default function PageNotFound() {
             className="card"
             style={{
               fontSize: 'var(--text-sm)', lineHeight: 'var(--leading-normal)',
-              color: 'var(--color-neutral-700)', textAlign: 'left', padding: '12px 16px',
+              color: 'var(--text-muted)', textAlign: 'left', padding: '12px 16px',
               borderRadius: 'var(--radius-md)', marginTop: 12,
             }}
           >

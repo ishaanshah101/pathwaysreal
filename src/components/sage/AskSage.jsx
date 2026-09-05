@@ -45,9 +45,10 @@ export default function AskSage() {
   };
 
   return (
-    <section style={{ padding: 'clamp(20px,4vh,44px) 0' }}>
-      <h2 style={{ fontSize: 'clamp(22px,2.6vw,28px)', margin: '0 0 8px' }}>Try Sage on one question, free</h2>
-      <p style={{ maxWidth: '52ch', color: 'var(--color-neutral-800)', marginBottom: 20, fontSize: 15, lineHeight: 1.6 }}>
+    <section className="page-section" style={{ paddingBottom: 'clamp(40px,6vh,72px)' }}>
+      <span className="card-kicker" style={{ display: 'block', marginBottom: 12 }}>Try it</span>
+      <h2 style={{ fontSize: 'clamp(24px,2.8vw,32px)', margin: '0 0 10px' }}>Ask Sage one question, free</h2>
+      <p style={{ maxWidth: '52ch', color: 'var(--color-neutral-800)', marginBottom: 20, fontSize: 15.5, lineHeight: 1.6 }}>
         Ask anything about applications, majors, essays, or scholarships. No account needed. One question per day,
         then it is $5 a month for as many as you like.
       </p>
@@ -90,20 +91,22 @@ export default function AskSage() {
         )}
 
         {error && (
-          <p style={{ color: 'var(--color-danger-700, #b42318)', fontSize: 14, margin: 0 }}>{error}</p>
+          <p role="alert" className="msg msg-error" style={{ margin: 0 }}>{error}</p>
         )}
 
         {answer && (
           <div
             className="anim-fade-swap"
-            style={{ background: 'var(--color-bg)', borderRadius: 22, padding: 18, fontSize: 14, lineHeight: 1.6, whiteSpace: 'pre-wrap' }}
+            role="status"
+            aria-live="polite"
+            style={{ background: 'var(--color-surface-2)', borderRadius: 12, padding: 18, fontSize: 14.5, lineHeight: 1.65, whiteSpace: 'pre-wrap' }}
           >
             {answer}
           </div>
         )}
 
         {spent && (
-          <div style={{ borderTop: '1px solid var(--color-neutral-200)', paddingTop: 14, display: 'grid', gap: 10 }}>
+          <div style={{ borderTop: '1px solid var(--color-divider)', paddingTop: 14, display: 'grid', gap: 10 }}>
             <p style={{ margin: 0, fontSize: 14, lineHeight: 1.6, color: 'var(--color-neutral-800)' }}>
               That was your free question. Sage remembers your grade, your school, and your goals, and you can ask it
               anything, as often as you want, for $5 a month.

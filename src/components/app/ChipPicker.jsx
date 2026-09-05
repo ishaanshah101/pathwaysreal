@@ -13,13 +13,7 @@ export default function ChipPicker({ options, selected = [], onToggle }) {
             type="button"
             aria-pressed={on}
             onClick={() => onToggle(label)}
-            className="btn"
-            style={{
-              fontFamily: 'var(--font-body)', fontSize: 13, padding: '7px 14px',
-              background: on ? 'var(--color-action)' : 'transparent',
-              color: on ? 'var(--color-bg)' : 'var(--color-text)',
-              borderColor: on ? 'transparent' : 'var(--color-divider)',
-            }}
+            className="btn btn-chip"
           >
             {label}
           </button>

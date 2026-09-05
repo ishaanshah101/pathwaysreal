@@ -149,7 +149,7 @@ export default function ProfilePage() {
 
   if (!form) {
     return (
-      <div className="card elev-sm" style={{ padding: 26, gap: 14, borderRadius: 26, maxWidth: 620 }} aria-busy="true">
+      <div className="card elev-sm" style={{ padding: 26, gap: 14, maxWidth: 620 }} aria-busy="true">
         <span className="sr-only">Loading your profile</span>
         <SkeletonTitle width="40%" />
         <SkeletonLine width="70%" />
@@ -167,13 +167,13 @@ export default function ProfilePage() {
       <Seo title="Your Profile | Pathways" description="Edit your Pathways profile, topics, and Sage subscription." path="/app/profile" noindex />
       <div>
         <h1 style={{ fontSize: 'clamp(26px,3.2vw,36px)', margin: '0 0 6px' }}>Your profile</h1>
-        <p style={{ color: 'var(--color-neutral-800)', margin: 0 }}>
+        <p style={{ color: 'var(--text-muted)', margin: 0, fontSize: 15 }}>
           Signed in as {user?.email}. This is what other members see when they find you.
         </p>
       </div>
 
       {requests.length > 0 && (
-        <div className="card elev-sm" style={{ padding: 20, gap: 12, borderRadius: 24, background: 'var(--color-accent-2-100)' }}>
+        <div className="card elev-sm" style={{ padding: 20, gap: 12, borderLeft: '3px solid var(--color-accent)' }}>
           <span className="card-kicker">Connection requests</span>
           {requests.map((c) => (
             <div key={c.id} className="flex items-center gap-3 flex-wrap">
@@ -181,23 +181,24 @@ export default function ProfilePage() {
                 <b>{c.from_name || c.from_email}</b> wants to connect.
               </span>
               <div className="flex gap-2" style={{ marginLeft: 'auto' }}>
-                <button type="button" className="btn btn-primary" style={{ fontSize: 13 }} onClick={() => respond(c, 'accepted')}>
+                <button type="button" className="btn btn-primary btn-sm" onClick={() => respond(c, 'accepted')}>
                   Accept
                 </button>
-                <button type="button" className="btn btn-secondary" style={{ fontSize: 13 }} onClick={() => respond(c, 'declined')}>
+                <button type="button" className="btn btn-secondary btn-sm" onClick={() => respond(c, 'declined')}>
                   Decline
                 </button>
               </div>
             </div>
           ))}
           {respondError && (
-            <span role="alert" style={{ fontSize: 13, color: 'var(--color-accent-700)' }}>{respondError}</span>
+            <span role="alert" className="msg msg-error">{respondError}</span>
           )}
         </div>
       )}
 
-      <form onSubmit={submit} className="grid app-split" style={{ gridTemplateColumns: 'minmax(0,7fr) minmax(0,5fr)', gap: 16, alignItems: 'start' }}>
-        <div className="card elev-sm" style={{ padding: 26, gap: 16, borderRadius: 26 }}>
+      <form onSubmit={submit} className="flex flex-col" style={{ gap: 16 }}>
+      <div className="grid app-split" style={{ gridTemplateColumns: 'minmax(0,7fr) minmax(0,5fr)', gap: 16, alignItems: 'start' }}>
+        <div className="card elev-sm" style={{ padding: 26, gap: 16 }}>
         <div className="field">
           <label htmlFor="pf-name">Full name</label>
           <input id="pf-name" className="input" required value={form.full_name} onChange={set('full_name')} />
@@ -360,7 +361,7 @@ export default function ProfilePage() {
         </div>
         </div>
 
-        <div className="card elev-sm" style={{ padding: 26, gap: 16, borderRadius: 26 }}>
+        <div className="card elev-sm" style={{ padding: 26, gap: 16 }}>
         <div className="field">
           {form.account_type === 'student' ? (
             <>
@@ -379,14 +380,14 @@ export default function ProfilePage() {
             connections and are shown separately. */}
         <div className="field">
           <label>Follows</label>
-          <div style={{ background: 'var(--color-bg)', borderRadius: 18, padding: '14px 16px', display: 'flex', gap: 26 }}>
+          <div style={{ background: 'var(--color-surface-2)', borderRadius: 12, padding: '14px 16px', display: 'flex', gap: 32 }}>
             <Link to="/app/explore" className="no-underline" style={{ color: 'inherit' }}>
-              <span style={{ display: 'block', fontFamily: 'var(--font-heading)', fontSize: 21 }}>{followingCount}</span>
-              <span style={{ fontSize: 12.5, color: 'var(--color-neutral-700)' }}>Following</span>
+              <span style={{ display: 'block', fontSize: 22, fontWeight: 700, letterSpacing: '-0.02em', lineHeight: 1.1 }}>{followingCount}</span>
+              <span style={{ fontSize: 12.5, color: 'var(--text-muted)' }}>Following</span>
             </Link>
             <span>
-              <span style={{ display: 'block', fontFamily: 'var(--font-heading)', fontSize: 21 }}>{followerCount}</span>
-              <span style={{ fontSize: 12.5, color: 'var(--color-neutral-700)' }}>Followers</span>
+              <span style={{ display: 'block', fontSize: 22, fontWeight: 700, letterSpacing: '-0.02em', lineHeight: 1.1 }}>{followerCount}</span>
+              <span style={{ fontSize: 12.5, color: 'var(--text-muted)' }}>Followers</span>
             </span>
           </div>
         </div>
@@ -400,7 +401,7 @@ export default function ProfilePage() {
           <label>Sage subscription</label>
           <div
             style={{
-              background: 'var(--color-bg)', borderRadius: 18, padding: '14px 16px',
+              background: 'var(--color-surface-2)', borderRadius: 12, padding: '14px 16px',
               display: 'flex', flexDirection: 'column', gap: 8,
             }}
           >
@@ -411,15 +412,14 @@ export default function ProfilePage() {
                   {subscription?.plan ? ` · ${SAGE_PRICES[subscription.plan]?.amount} ${SAGE_PRICES[subscription.plan]?.cadence}` : ''}
                 </span>
                 {subscription?.current_period_end && (
-                  <span style={{ fontSize: 12.5, color: 'var(--color-neutral-600)' }}>
+                  <span style={{ fontSize: 12.5, color: 'var(--text-subtle)' }}>
                     {isCanceling ? 'Ends' : 'Renews'}{' '}
                     {new Date(subscription.current_period_end).toLocaleDateString()}
                   </span>
                 )}
                 <button
                   type="button"
-                  className="btn btn-secondary self-start"
-                  style={{ fontSize: 13 }}
+                  className="btn btn-secondary btn-sm self-start"
                   onClick={async () => {
                     setBillingError('');
                     try { await openBillingPortal(); } catch (err) { setBillingError(err.message); }
@@ -433,12 +433,12 @@ export default function ProfilePage() {
                 <span style={{ fontSize: 14 }}>
                   <b>{isPastDue ? 'Payment failed' : 'Free plan'}</b>
                 </span>
-                <span style={{ fontSize: 12.5, color: 'var(--color-neutral-600)', lineHeight: 1.5 }}>
+                <span style={{ fontSize: 12.5, color: 'var(--text-subtle)', lineHeight: 1.5 }}>
                   {isPastDue
                     ? 'Sage is paused until a payment goes through.'
                     : 'Everything on Pathways is free. Sage is the one optional add-on.'}
                 </span>
-                <Link to="/app/sage" className="btn btn-primary self-start no-underline" style={{ fontSize: 13 }}>
+                <Link to="/app/sage" className="btn btn-primary btn-sm self-start no-underline">
                   {isPastDue ? 'Fix payment' : 'Get Sage'}
                 </Link>
               </>
@@ -449,22 +449,29 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {error && <span className="msg msg-error" role="alert">{error}</span>}
+        </div>
+      </div>
 
-        <div className="flex gap-3 items-center flex-wrap">
+        {/* The save action sits under the whole form it saves, not tucked at
+            the bottom of the sidebar. Sign out stays reachable but quiet: it
+            is also in the account menu in the header. */}
+        <div
+          className="card elev-md flex items-center gap-3 flex-wrap"
+          style={{ flexDirection: 'row', padding: '14px 18px', position: 'sticky', bottom: 16, zIndex: 5 }}
+        >
           <button type="submit" className="btn btn-primary" disabled={saving}>
             {saving ? 'Saving…' : 'Save changes'}
           </button>
           {saved && <span className="msg msg-success" role="status">Saved.</span>}
+          {error && <span className="msg msg-error" role="alert">{error}</span>}
           <button
             type="button"
-            className="btn btn-ghost"
+            className="btn btn-quiet"
             style={{ marginLeft: 'auto' }}
             onClick={() => logout(true)}
           >
             Sign out
           </button>
-        </div>
         </div>
       </form>
     </div>

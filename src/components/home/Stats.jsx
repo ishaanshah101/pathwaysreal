@@ -19,11 +19,11 @@ export default function Stats() {
       style={{ gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))', padding: '4px 0 30px' }}
     >
       {stats.map((s) => (
-        <div key={s.num} className="card elev-sm" style={{ gap: 6, padding: '22px 24px' }}>
-          <span style={{ fontFamily: 'var(--font-heading)', fontSize: 32, color: 'var(--color-accent-700)', lineHeight: 1 }}>
+        <div key={s.num} className="card elev-sm" style={{ gap: 8, padding: '22px 24px' }}>
+          <span style={{ fontFamily: 'var(--font-heading)', fontSize: 34, color: 'var(--color-text)', lineHeight: 1 }}>
             {s.num}
           </span>
-          <span style={{ fontSize: 13.5, lineHeight: 1.5, color: 'var(--color-neutral-800)' }}>{s.label}</span>
+          <span style={{ fontSize: 14, lineHeight: 1.5, color: 'var(--text-muted)' }}>{s.label}</span>
         </div>
       ))}
     </Reveal>

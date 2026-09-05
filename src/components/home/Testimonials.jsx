@@ -53,17 +53,17 @@ export default function Testimonials() {
           <figure key={s.name} className="card elev-sm" style={{ gap: 14, padding: 24, margin: 0 }}>
             <span
               className="tag tag-accent"
-              style={{ alignSelf: 'flex-start', fontFamily: 'var(--font-heading)', fontSize: 12.5 }}
+              style={{ alignSelf: 'flex-start' }}
             >
               {s.result}
             </span>
-            <span style={{ fontSize: 14.5, lineHeight: 1.6, fontStyle: 'italic' }}>
+            <span style={{ fontSize: 15, lineHeight: 1.6 }}>
               "{s.text}"
             </span>
-            <figcaption className="flex items-center gap-[10px]" style={{ fontSize: 12, color: 'var(--color-neutral-700)' }}>
+            <figcaption className="flex items-center gap-[10px]" style={{ fontSize: 12, color: 'var(--text-muted)' }}>
               <span
                 className="grid place-items-center"
-                style={{ width: 32, height: 32, flex: 'none', borderRadius: '50%', background: s.av[0], fontFamily: 'var(--font-heading)', fontSize: 11, color: s.av[1] }}
+                style={{ width: 32, height: 32, flex: 'none', borderRadius: '50%', background: s.av[0], fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 11, color: s.av[1] }}
               >
                 {s.initials}
               </span>
@@ -76,7 +76,7 @@ export default function Testimonials() {
           </figure>
         ))}
       </div>
-      <p style={{ fontSize: 11.5, color: 'var(--color-neutral-600)', margin: '12px 4px 0' }}>
+      <p style={{ fontSize: 11.5, color: 'var(--text-subtle)', margin: '12px 4px 0' }}>
         Illustrative stories, shown to represent the outcomes Pathways is built for.
       </p>
     </Reveal>

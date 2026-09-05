@@ -52,7 +52,7 @@ function Card({ option, selected, onSelect }) {
         >
           <Icon size={17} strokeWidth={2.2} aria-hidden="true" />
         </span>
-        <span style={{ fontFamily: 'var(--font-heading)', fontSize: 'var(--text-lg)' }}>{title}</span>
+        <span style={{ fontWeight: 700, fontSize: 'var(--text-lg)', letterSpacing: '-0.01em' }}>{title}</span>
         {selected && (
           <span className="badge badge-accent" style={{ marginLeft: 'auto' }}>
             <Check size={11} aria-hidden="true" /> Selected

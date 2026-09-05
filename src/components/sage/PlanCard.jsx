@@ -32,8 +32,8 @@ export default function PlanCard() {
   };
 
   return (
-    <div className="card elev-md" style={{ background: 'var(--color-bg)', padding: 28, gap: 16 }}>
-      <div className="seg self-start" style={{ background: 'var(--color-surface)' }}>
+    <div className="card elev-md" style={{ padding: 28, gap: 16 }}>
+      <div className="seg self-start">
         {['monthly', 'yearly'].map((p) => (
           <button
             key={p}
@@ -49,22 +49,22 @@ export default function PlanCard() {
 
       <div key={plan} className="anim-fade-swap">
         <div className="flex items-baseline gap-2">
-          <span style={{ fontFamily: 'var(--font-heading)', fontSize: 52 }}>{yearly ? '$40' : '$5'}</span>
-          <span style={{ fontSize: 14, color: 'var(--color-neutral-700)' }}>{yearly ? 'per year' : 'per month'}</span>
+          <span style={{ fontFamily: 'var(--font-heading)', fontSize: 52, lineHeight: 1 }}>{yearly ? '$40' : '$5'}</span>
+          <span style={{ fontSize: 14, fontWeight: 500, color: 'var(--text-muted)' }}>{yearly ? 'per year' : 'per month'}</span>
           {yearly && <span className="tag tag-accent" style={{ marginLeft: 'auto' }}>Save 33%</span>}
         </div>
-        <table className="table" style={{ marginTop: 14, fontSize: 13 }}>
+        <table className="table" style={{ marginTop: 14, fontSize: 13.5 }}>
           <tbody>
-            <tr><td style={{ opacity: 0.65 }}>Billed</td><td style={{ textAlign: 'right', fontWeight: 700 }}>{yearly ? '$40 once a year' : '$5 every month'}</td></tr>
-            <tr><td style={{ opacity: 0.65 }}>Per week</td><td style={{ textAlign: 'right', fontWeight: 700 }}>{yearly ? '$0.77' : '$1.15'}</td></tr>
-            <tr><td style={{ opacity: 0.65 }}>File attachments</td><td style={{ textAlign: 'right', fontWeight: 700 }}>Included</td></tr>
-            <tr><td style={{ opacity: 0.65 }}>Cancel anytime</td><td style={{ textAlign: 'right', fontWeight: 700 }}>Yes</td></tr>
+            <tr><td style={{ color: 'var(--text-muted)', paddingLeft: 0 }}>Billed</td><td style={{ textAlign: 'right', fontWeight: 600, paddingRight: 0 }}>{yearly ? '$40 once a year' : '$5 every month'}</td></tr>
+            <tr><td style={{ color: 'var(--text-muted)', paddingLeft: 0 }}>Per week</td><td style={{ textAlign: 'right', fontWeight: 600, paddingRight: 0 }}>{yearly ? '$0.77' : '$1.15'}</td></tr>
+            <tr><td style={{ color: 'var(--text-muted)', paddingLeft: 0 }}>File attachments</td><td style={{ textAlign: 'right', fontWeight: 600, paddingRight: 0 }}>Included</td></tr>
+            <tr><td style={{ color: 'var(--text-muted)', paddingLeft: 0 }}>Cancel anytime</td><td style={{ textAlign: 'right', fontWeight: 600, paddingRight: 0 }}>Yes</td></tr>
           </tbody>
         </table>
       </div>
 
       {error && (
-        <span style={{ fontSize: 13, color: 'var(--color-accent-700)', lineHeight: 1.5 }}>{error}</span>
+        <span role="alert" className="msg msg-error">{error}</span>
       )}
 
       {hasSage ? (
@@ -91,7 +91,7 @@ export default function PlanCard() {
         </Link>
       )}
 
-      <span style={{ fontSize: 11.5, color: 'var(--color-neutral-600)', textAlign: 'center', lineHeight: 1.5 }}>
+      <span style={{ fontSize: 12, color: 'var(--text-subtle)', textAlign: 'center', lineHeight: 1.5 }}>
         The core app never has a paid tier. That would defeat the point.
       </span>
     </div>

@@ -38,9 +38,9 @@ export default function EditPostModal({ open, onOpenChange, post, onSaved }) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent style={{ background: 'var(--color-surface)', borderRadius: 24, maxWidth: 560 }}>
+      <DialogContent style={{ background: 'var(--color-surface)', borderRadius: 16, maxWidth: 560 }}>
         <DialogHeader>
-          <DialogTitle style={{ fontFamily: 'var(--font-heading)', fontSize: 21 }}>Edit post</DialogTitle>
+          <DialogTitle style={{ fontFamily: 'var(--font-heading)', fontWeight: 400, fontSize: 24 }}>Edit post</DialogTitle>
         </DialogHeader>
         <form onSubmit={submit} className="flex flex-col" style={{ gap: 14 }}>
           <div className="field">

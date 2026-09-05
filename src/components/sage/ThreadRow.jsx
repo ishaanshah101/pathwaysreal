@@ -42,8 +42,9 @@ export default function ThreadRow({ thread, active, folders, onSelect, onRename,
     <div
       className="flex items-center gap-1"
       style={{
-        borderRadius: 14,
-        background: active ? 'var(--color-accent-200)' : 'transparent',
+        borderRadius: 10,
+        background: active ? 'var(--color-surface-2)' : 'transparent',
+        boxShadow: active ? 'inset 3px 0 0 var(--color-accent)' : 'none',
         padding: '2px 4px 2px 2px',
       }}
     >
@@ -53,7 +54,7 @@ export default function ThreadRow({ thread, active, folders, onSelect, onRename,
         aria-current={active ? 'true' : undefined}
         style={{
           flex: 1, textAlign: 'left', background: 'none', border: 0, cursor: 'pointer',
-          font: 'inherit', fontSize: 13.5, padding: '8px 10px', borderRadius: 12,
+          font: 'inherit', fontSize: 13.5, fontWeight: active ? 600 : 500, padding: '8px 10px', borderRadius: 8,
           color: 'var(--color-text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
         }}
       >

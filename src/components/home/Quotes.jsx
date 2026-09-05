@@ -19,11 +19,11 @@ export default function Quotes() {
       <div className="grid gap-[14px]" style={{ gridTemplateColumns: 'repeat(auto-fit,minmax(260px,1fr))' }}>
         {quotes.map((qt) => (
           <figure key={qt.name} className="card elev-sm" style={{ gap: 12, padding: 24, margin: 0 }}>
-            <span style={{ fontSize: 14.5, lineHeight: 1.6, fontStyle: 'italic' }}>"{qt.text}"</span>
-            <figcaption className="flex items-center gap-[10px]" style={{ fontSize: 12, color: 'var(--color-neutral-700)' }}>
+            <span style={{ fontSize: 15, lineHeight: 1.6 }}>"{qt.text}"</span>
+            <figcaption className="flex items-center gap-[10px]" style={{ fontSize: 12, color: 'var(--text-muted)' }}>
               <span
                 className="grid place-items-center"
-                style={{ width: 32, height: 32, flex: 'none', borderRadius: '50%', background: qt.av[0], fontFamily: 'var(--font-heading)', fontSize: 11, color: qt.av[1] }}
+                style={{ width: 32, height: 32, flex: 'none', borderRadius: '50%', background: qt.av[0], fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 11, color: qt.av[1] }}
               >
                 {qt.initials}
               </span>
@@ -36,7 +36,7 @@ export default function Quotes() {
           </figure>
         ))}
       </div>
-      <p style={{ fontSize: 11.5, color: 'var(--color-neutral-600)', margin: '12px 4px 0' }}>
+      <p style={{ fontSize: 11.5, color: 'var(--text-subtle)', margin: '12px 4px 0' }}>
         Example advice, shown to illustrate the kind of answers Pathways is built for.
       </p>
     </Reveal>

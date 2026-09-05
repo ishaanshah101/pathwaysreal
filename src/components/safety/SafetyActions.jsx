@@ -24,7 +24,7 @@ export default function SafetyActions({
   // secondary links; only the hit area grew.
   const linkStyle = {
     background: 'none', border: 0, font: 'inherit', cursor: 'pointer',
-    fontSize: 12, color: 'var(--color-neutral-600)', display: 'inline-flex',
+    fontSize: 12, color: 'var(--text-subtle)', display: 'inline-flex',
     alignItems: 'center', gap: 4,
     minHeight: 44, padding: '11px 8px', marginInline: -8,
   };

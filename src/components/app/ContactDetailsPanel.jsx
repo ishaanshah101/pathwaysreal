@@ -47,15 +47,15 @@ export default function ContactDetailsPanel({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent style={{ background: 'var(--color-surface)', borderRadius: 24, maxWidth: 480 }}>
+      <DialogContent style={{ background: 'var(--color-surface)', borderRadius: 16, maxWidth: 480 }}>
         <DialogHeader>
-          <DialogTitle style={{ fontFamily: 'var(--font-heading)', fontSize: 21 }}>
+          <DialogTitle style={{ fontFamily: 'var(--font-heading)', fontWeight: 400, fontSize: 24 }}>
             Your notes on {realName || otherEmail}
           </DialogTitle>
         </DialogHeader>
 
         <div className="flex flex-col" style={{ gap: 14 }}>
-          <p style={{ fontSize: 13, lineHeight: 1.6, margin: 0, color: 'var(--color-neutral-700)' }}>
+          <p style={{ fontSize: 13, lineHeight: 1.6, margin: 0, color: 'var(--text-muted)' }}>
             Only you can see this. {realName || 'They'} is never told you added a nickname or a note,
             and nobody else on Pathways can read it.
           </p>
@@ -70,7 +70,7 @@ export default function ContactDetailsPanel({
               onChange={(e) => setNickname(e.target.value)}
               placeholder={realName ? `e.g. ${String(realName).split(' ')[0]} from Berkeley` : 'A name you will recognise'}
             />
-            <span style={{ fontSize: 12, color: 'var(--color-neutral-600)', marginTop: 4, display: 'block', lineHeight: 1.5 }}>
+            <span style={{ fontSize: 12, color: 'var(--text-subtle)', marginTop: 4, display: 'block', lineHeight: 1.5 }}>
               Shown instead of their name in your messages list. Their real name is still on their
               profile.
             </span>
@@ -87,7 +87,7 @@ export default function ContactDetailsPanel({
               onChange={(e) => setNotes(e.target.value)}
               placeholder="What you talked about, what to ask next time, anything you want to remember."
             />
-            <span style={{ fontSize: 12, color: 'var(--color-neutral-600)', marginTop: 4, display: 'block' }}>
+            <span style={{ fontSize: 12, color: 'var(--text-subtle)', marginTop: 4, display: 'block' }}>
               {notes.length} / 4000
             </span>
           </div>

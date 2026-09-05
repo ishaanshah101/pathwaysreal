@@ -8,21 +8,21 @@ import {
 
 const S = ({ title, children }) => (
   <section style={{ marginBottom: 26 }}>
-    <h2 style={{ fontSize: 20, margin: '0 0 8px' }}>{title}</h2>
-    <div style={{ fontSize: 14.5, lineHeight: 1.65, color: 'var(--color-neutral-800)' }}>{children}</div>
+    <h2 className="h-sans" style={{ fontSize: 18, margin: '0 0 8px' }}>{title}</h2>
+    <div style={{ fontSize: 15, lineHeight: 1.7, color: 'var(--text-muted)' }}>{children}</div>
   </section>
 );
 
 export default function Terms() {
   return (
-    <section style={{ padding: 'clamp(28px,6vh,64px) 0 clamp(36px,6vh,64px)', maxWidth: '68ch' }}>
+    <section className="page-hero" style={{ paddingBottom: 'clamp(40px,6vh,72px)', maxWidth: '68ch' }}>
       <Seo
         title="Terms of Service | Pathways"
         description="The terms for using Pathways: who operates it, who can join, how members must behave, and how the free core app and optional Sage subscription work."
         path="/terms"
       />
       <h1 style={{ fontSize: 'clamp(30px,4.2vw,46px)', margin: '0 0 8px' }}>Terms of Service</h1>
-      <p style={{ color: 'var(--color-neutral-600)', fontSize: 13, marginBottom: 28 }}>
+      <p style={{ color: 'var(--text-subtle)', fontSize: 13, marginBottom: 32 }}>
         Last updated August 2026
       </p>
 

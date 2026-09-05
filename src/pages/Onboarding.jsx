@@ -185,7 +185,7 @@ export default function Onboarding() {
       <Seo title="Set Up Your Profile | Pathways" description="Tell Pathways your grade, school, and goals so we can match you with mentors who've been where you are." path="/onboarding" noindex />
       <div className="flex items-center gap-[9px] py-[22px]">
         <BrandMark size={38} />
-        <span style={{ fontFamily: 'var(--font-heading)', fontSize: 21 }}>Pathways</span>
+        <span style={{ fontFamily: 'var(--font-heading)', fontWeight: 400, fontSize: 24 }}>Pathways</span>
         <button
           type="button"
           className="btn btn-ghost ml-auto"
@@ -249,7 +249,7 @@ export default function Onboarding() {
             value={form.birth_year}
             onChange={set('birth_year')}
           />
-          <span style={{ fontSize: 12, color: 'var(--color-neutral-600)', marginTop: 4, display: 'block', lineHeight: 1.5 }}>
+          <span style={{ fontSize: 12, color: 'var(--text-subtle)', marginTop: 4, display: 'block', lineHeight: 1.5 }}>
             Pathways is for people 13 and older. We use this to keep younger kids off the platform and to
             protect members who are under 18. It is never shown on your profile.
           </span>
@@ -367,7 +367,7 @@ export default function Onboarding() {
         >
           {saving ? 'Setting up your account…' : 'Enter Pathways'}
         </button>
-        <span style={{ fontSize: 11.5, color: 'var(--color-neutral-600)', textAlign: 'center' }}>
+        <span style={{ fontSize: 11.5, color: 'var(--text-subtle)', textAlign: 'center' }}>
           13+ · COPPA and FERPA aligned · We never sell student data
         </span>
       </form>

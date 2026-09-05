@@ -34,7 +34,7 @@ export default function ThreadList({
   return (
     <aside
       className="card elev-sm"
-      style={{ padding: 14, gap: 10, borderRadius: 24, alignSelf: 'start', position: 'sticky', top: 14 }}
+      style={{ padding: 14, gap: 10, borderRadius: 16, alignSelf: 'start', position: 'sticky', top: 14 }}
     >
       <button type="button" className="btn btn-primary btn-block" style={{ fontSize: 13.5 }} onClick={onNew}>
         <Plus size={15} aria-hidden="true" /> New chat

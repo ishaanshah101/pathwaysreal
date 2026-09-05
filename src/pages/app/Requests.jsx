@@ -7,6 +7,7 @@ import { useBlocks } from '@/lib/useBlocks';
 import { authorAvatar, initialsOf } from '@/lib/avatar';
 import SafetyActions from '@/components/safety/SafetyActions';
 import Seo from '@/components/Seo';
+import { Inbox } from 'lucide-react';
 
 // Where connection requests are answered.
 //
@@ -34,24 +35,18 @@ function PersonCard({ conn, who, profile, busy, onAccept, onDecline, onBlocked, 
   const name = profile?.full_name || (outgoing ? conn.to_name : conn.from_name) || who;
 
   return (
-    <div className="card elev-sm" style={{ padding: 20, gap: 12, borderRadius: 24 }}>
+    <div className="card elev-sm" style={{ padding: 20, gap: 12 }}>
       <div className="flex items-start gap-3">
-        <span
-          className="flex items-center justify-center"
-          style={{
-            width: 46, height: 46, borderRadius: 999, flex: 'none',
-            background: bg, color: fg, fontFamily: 'var(--font-heading)', fontSize: 17,
-          }}
-        >
+        <span className="avatar" style={{ width: 46, height: 46, fontSize: 15, background: bg, color: fg }}>
           {initialsOf(name)}
         </span>
-        <div className="flex flex-col" style={{ minWidth: 0, flex: 1 }}>
+        <div className="flex flex-col" style={{ minWidth: 0, flex: 1, gap: 2 }}>
           <span style={{ fontSize: 15, fontWeight: 600 }}>
             {outgoing
-              ? `You requested to connect with ${name}`
-              : `${name} requested to connect with you`}
+              ? <>You asked to connect with <b>{name}</b></>
+              : <><b>{name}</b> wants to connect with you</>}
           </span>
-          <span style={{ fontSize: 12.5, color: 'var(--color-neutral-600)', lineHeight: 1.4 }}>
+          <span style={{ fontSize: 12.5, color: 'var(--text-subtle)', lineHeight: 1.4 }}>
             {profile?.headline
               || [profile?.grade, profile?.school].filter(Boolean).join(' · ')
               || [profile?.job_title, profile?.institution].filter(Boolean).join(' · ')
@@ -66,7 +61,8 @@ function PersonCard({ conn, who, profile, busy, onAccept, onDecline, onBlocked, 
         <p
           style={{
             fontSize: 14, lineHeight: 1.55, margin: 0, padding: '10px 14px',
-            borderRadius: 14, background: 'var(--color-bg)', color: 'var(--color-neutral-800)',
+            borderRadius: 12, background: 'var(--color-surface-2)', color: 'var(--color-neutral-800)',
+            borderLeft: '3px solid var(--color-accent)',
           }}
         >
           {conn.note}
@@ -76,7 +72,7 @@ function PersonCard({ conn, who, profile, busy, onAccept, onDecline, onBlocked, 
       {showProfile && (
         <div
           className="flex flex-col"
-          style={{ gap: 8, padding: '12px 14px', borderRadius: 16, background: 'var(--color-bg)' }}
+          style={{ gap: 8, padding: '12px 14px', borderRadius: 12, background: 'var(--color-surface-2)' }}
         >
           {profile?.bio && (
             <p style={{ fontSize: 14, lineHeight: 1.55, margin: 0 }}>{profile.bio}</p>
@@ -102,7 +98,7 @@ function PersonCard({ conn, who, profile, busy, onAccept, onDecline, onBlocked, 
             </div>
           )}
           {!profile && (
-            <span style={{ fontSize: 13, color: 'var(--color-neutral-600)' }}>
+            <span style={{ fontSize: 13, color: 'var(--text-subtle)' }}>
               They have not filled in a profile yet.
             </span>
           )}
@@ -111,15 +107,12 @@ function PersonCard({ conn, who, profile, busy, onAccept, onDecline, onBlocked, 
 
       <div className="flex gap-2 flex-wrap items-center">
         {outgoing ? (
-          <span style={{ fontSize: 13, color: 'var(--color-neutral-700)' }}>
-            Waiting for them to answer. We will tell you as soon as they do.
-          </span>
+          <span className="badge badge-neutral">Waiting for their answer</span>
         ) : (
           <>
             <button
               type="button"
               className="btn btn-primary"
-              style={{ fontSize: 13 }}
               disabled={busy}
               onClick={() => onAccept(conn)}
             >
@@ -128,7 +121,6 @@ function PersonCard({ conn, who, profile, busy, onAccept, onDecline, onBlocked, 
             <button
               type="button"
               className="btn btn-secondary"
-              style={{ fontSize: 13 }}
               disabled={busy}
               onClick={() => onDecline(conn)}
             >
@@ -138,8 +130,8 @@ function PersonCard({ conn, who, profile, busy, onAccept, onDecline, onBlocked, 
         )}
         <button
           type="button"
-          className="btn btn-secondary"
-          style={{ fontSize: 13 }}
+          className="btn btn-quiet"
+          aria-expanded={showProfile}
           onClick={() => setShowProfile((s) => !s)}
         >
           {showProfile ? 'Hide profile' : 'View profile'}
@@ -205,36 +197,30 @@ export default function Requests() {
 
       <div>
         <h1 style={{ fontSize: 'clamp(26px,3.2vw,36px)', margin: '0 0 6px' }}>Requests</h1>
-        <p style={{ color: 'var(--color-neutral-800)', margin: 0 }}>
+        <p style={{ color: 'var(--text-muted)', margin: 0, fontSize: 15 }}>
           People who want to connect with you. Nobody can message you until you accept.
         </p>
       </div>
 
       {connectionError && (
-        <div
-          className="card"
-          style={{
-            padding: '12px 16px', fontSize: 14, lineHeight: 1.55,
-            background: 'var(--color-accent-100)', color: 'var(--color-accent-800)',
-          }}
-        >
-          {connectionError}
-        </div>
+        <div role="alert" className="notice notice-warning">{connectionError}</div>
       )}
 
       {loadingConnections ? (
-        <p style={{ color: 'var(--color-neutral-600)' }}>Loading your requests…</p>
+        <p role="status" style={{ color: 'var(--text-subtle)' }}>Loading your requests…</p>
       ) : (
         <>
           <section className="flex flex-col" style={{ gap: 12 }}>
-            <h2 style={{ fontSize: 17, margin: 0 }}>
+            <h2 className="h-sans" style={{ fontSize: 16, margin: 0, color: 'var(--text-muted)' }}>
               Waiting on you{incoming.length > 0 ? ` (${incoming.length})` : ''}
             </h2>
             {incoming.length === 0 ? (
-              <p style={{ color: 'var(--color-neutral-600)', fontSize: 14, margin: 0 }}>
-                No requests right now. When someone asks to connect, it appears here and you get a
-                notification.
-              </p>
+              <div className="empty">
+                <span className="empty-icon"><Inbox size={20} aria-hidden="true" /></span>
+                <p className="empty-title">No requests right now</p>
+                <p className="empty-body">When someone asks to connect, it appears here and you get a notification.</p>
+                <Link to="/app/explore" className="btn btn-secondary no-underline" style={{ marginTop: 6 }}>Find people in Explore</Link>
+              </div>
             ) : (
               incoming.map((c) => (
                 <PersonCard
@@ -253,7 +239,7 @@ export default function Requests() {
 
           {outgoingPending.length > 0 && (
             <section className="flex flex-col" style={{ gap: 12 }}>
-              <h2 style={{ fontSize: 17, margin: '10px 0 0' }}>
+              <h2 className="h-sans" style={{ fontSize: 16, margin: '10px 0 0', color: 'var(--text-muted)' }}>
                 Sent by you ({outgoingPending.length})
               </h2>
               {outgoingPending.map((c) => (
@@ -272,9 +258,11 @@ export default function Requests() {
             </section>
           )}
 
-          <p style={{ fontSize: 13, color: 'var(--color-neutral-600)', margin: 0 }}>
-            Looking for someone new? <Link to="/app/explore">Find people in Explore</Link>.
-          </p>
+          {incoming.length > 0 && (
+            <p style={{ fontSize: 13.5, color: 'var(--text-subtle)', margin: 0 }}>
+              Looking for someone new? <Link to="/app/explore">Find people in Explore</Link>.
+            </p>
+          )}
         </>
       )}
     </div>

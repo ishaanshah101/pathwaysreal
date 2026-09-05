@@ -165,7 +165,7 @@ export default function AdminModeration() {
       <Seo title="Moderation | Pathways" description="Admin moderation queue." path="/app/admin/moderation" noindex />
 
       <h1 style={{ fontSize: 'clamp(24px,3vw,32px)', margin: '0 0 4px' }}>Moderation</h1>
-      <p style={{ color: 'var(--color-neutral-700)', fontSize: 14, marginBottom: 18 }}>
+      <p style={{ color: 'var(--text-muted)', fontSize: 14, marginBottom: 18 }}>
         {openReports.length} open report{openReports.length === 1 ? '' : 's'} · {highEvents.length} high-severity
         blocked message{highEvents.length === 1 ? '' : 's'}
       </p>
@@ -199,7 +199,7 @@ export default function AdminModeration() {
         openReports.length === 0 ? (
           // Only claim the queue is clear when we know it loaded. Otherwise
           // this reassuring line is exactly what a moderator should not see.
-          <p style={{ color: 'var(--color-neutral-700)', fontSize: 14 }}>
+          <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>
             {error
               ? 'The queue could not be loaded, so we cannot say whether anything is open.'
               : 'Nothing open. That is the good outcome.'}
@@ -211,7 +211,7 @@ export default function AdminModeration() {
                 <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
                   <Pill tone={r.status}>{r.status}</Pill>
                   <b style={{ fontSize: 15 }}>{REASON_LABEL[r.reason] || r.reason}</b>
-                  <span style={{ fontSize: 12.5, color: 'var(--color-neutral-600)' }}>
+                  <span style={{ fontSize: 12.5, color: 'var(--text-subtle)' }}>
                     {r.context_type} · {when(r.created_date)}
                   </span>
                 </div>
@@ -220,14 +220,14 @@ export default function AdminModeration() {
                   <div><b>Reported:</b> {r.reported_email}</div>
                   <div><b>Reporter:</b> {r.reporter_email}</div>
                   {r.details && (
-                    <div style={{ marginTop: 8, background: 'var(--color-bg)', borderRadius: 14, padding: 12 }}>
+                    <div style={{ marginTop: 8, background: 'var(--color-surface-2)', borderRadius: 14, padding: 12 }}>
                       {r.details}
                     </div>
                   )}
                 </div>
 
                 {context[r.id] && context[r.id] !== 'none' && (
-                  <div style={{ background: 'var(--color-bg)', borderRadius: 14, padding: 12, display: 'grid', gap: 8 }}>
+                  <div style={{ background: 'var(--color-surface-2)', borderRadius: 14, padding: 12, display: 'grid', gap: 8 }}>
                     {context[r.id].map((m) => (
                       <div key={m.id} style={{ fontSize: 13.5, lineHeight: 1.55 }}>
                         <b>{m.from_email === r.reported_email ? 'Reported user' : 'Reporter'}:</b> {m.body}
@@ -236,7 +236,7 @@ export default function AdminModeration() {
                   </div>
                 )}
                 {context[r.id] === 'none' && (
-                  <p style={{ fontSize: 13, color: 'var(--color-neutral-600)', margin: 0 }}>
+                  <p style={{ fontSize: 13, color: 'var(--text-subtle)', margin: 0 }}>
                     No messages found between these two.
                   </p>
                 )}
@@ -273,7 +273,7 @@ export default function AdminModeration() {
 
       {tab === 'blocked' && (
         highEvents.length === 0 ? (
-          <p style={{ color: 'var(--color-neutral-700)', fontSize: 14 }}>
+          <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>
             No high-severity blocks recorded.
           </p>
         ) : (
@@ -283,16 +283,16 @@ export default function AdminModeration() {
                 <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
                   <Pill tone="open">{e.severity}</Pill>
                   <b style={{ fontSize: 15 }}>{e.rule}</b>
-                  <span style={{ fontSize: 12.5, color: 'var(--color-neutral-600)' }}>
+                  <span style={{ fontSize: 12.5, color: 'var(--text-subtle)' }}>
                     {e.surface} · {when(e.occurred_at || e.created_date)}
                   </span>
                 </div>
                 <div style={{ fontSize: 14, lineHeight: 1.6 }}>
                   <div><b>From:</b> {e.sender_email}</div>
                   {e.recipient_email && <div><b>To:</b> {e.recipient_email}</div>}
-                  {e.detail && <div style={{ color: 'var(--color-neutral-700)' }}>{e.detail}</div>}
+                  {e.detail && <div style={{ color: 'var(--text-muted)' }}>{e.detail}</div>}
                   {e.excerpt && (
-                    <div style={{ marginTop: 8, background: 'var(--color-bg)', borderRadius: 14, padding: 12, fontStyle: 'italic' }}>
+                    <div style={{ marginTop: 8, background: 'var(--color-surface-2)', borderRadius: 14, padding: 12, fontStyle: 'italic' }}>
                       {e.excerpt}
                     </div>
                   )}
@@ -305,7 +305,7 @@ export default function AdminModeration() {
 
       {tab === 'closed' && (
         closedReports.length === 0 ? (
-          <p style={{ color: 'var(--color-neutral-700)', fontSize: 14 }}>Nothing closed yet.</p>
+          <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>Nothing closed yet.</p>
         ) : (
           <div style={{ display: 'grid', gap: 10 }}>
             {closedReports.map((r) => (
@@ -313,7 +313,7 @@ export default function AdminModeration() {
                 <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
                   <Pill tone={r.status}>{r.status}</Pill>
                   <b style={{ fontSize: 14 }}>{REASON_LABEL[r.reason] || r.reason}</b>
-                  <span style={{ fontSize: 12.5, color: 'var(--color-neutral-600)' }}>{when(r.created_date)}</span>
+                  <span style={{ fontSize: 12.5, color: 'var(--text-subtle)' }}>{when(r.created_date)}</span>
                 </div>
                 <div style={{ fontSize: 13.5 }}>
                   {r.reported_email}

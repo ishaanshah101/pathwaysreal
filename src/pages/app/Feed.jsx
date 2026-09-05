@@ -12,6 +12,7 @@ import { useFollows } from '@/lib/useFollows';
 import { useBlocks } from '@/lib/useBlocks';
 import { useConnections } from '@/lib/useConnections';
 import Seo from '@/components/Seo';
+import { PenLine, Users } from 'lucide-react';
 
 const PAGE_SIZE = 12;
 
@@ -38,7 +39,7 @@ function Avatar({ name, authorKey, size = 40 }) {
       style={{
         width: size, height: size, borderRadius: 999, flex: 'none',
         background: bg, color: fg,
-        fontFamily: 'var(--font-heading)', fontSize: size * 0.4,
+        fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: size * 0.36, letterSpacing: '.02em',
       }}
     >
       {initialsOf(name)}
@@ -56,12 +57,12 @@ function PostCard({
   const [editing, setEditing] = useState(false);
 
   return (
-    <article className="card elev-sm" style={{ padding: 22, gap: 13, borderRadius: 26 }}>
+    <article className="card elev-sm" style={{ padding: 22, gap: 12 }}>
       <div className="flex items-center gap-3">
         <Avatar name={post.author_name} authorKey={post.author_key} />
         <div className="flex flex-col" style={{ minWidth: 0 }}>
           <span style={{ fontSize: 14, fontWeight: 600 }}>{post.author_name || 'A Pathways member'}</span>
-          <span style={{ fontSize: 12, color: 'var(--color-neutral-600)' }}>
+          <span style={{ fontSize: 12.5, color: 'var(--text-subtle)' }}>
             {post.author_headline || ROLE_LABELS[post.author_role] || 'Member'}
             {post.created_date ? ` · ${timeAgo(post.created_date)}` : ''}
           </span>
@@ -73,15 +74,15 @@ function PostCard({
 
       {v === 'cover' && <CoverArt postId={post.id} category={post.category} />}
 
-      <h3 style={{ fontSize: 19.5, margin: 0, textWrap: 'balance', lineHeight: 1.25 }}>{post.title}</h3>
+      <h2 className="h-sans" style={{ fontSize: 19, margin: '2px 0 0', textWrap: 'balance' }}>{post.title}</h2>
 
       {v === 'quote' && post.quote && (
         <blockquote
           style={{
-            margin: 0, padding: '14px 18px', borderRadius: 16,
-            borderLeft: '4px solid var(--color-accent)',
-            background: 'var(--color-bg)',
-            fontSize: 15.5, lineHeight: 1.5, fontStyle: 'italic',
+            margin: 0, padding: '14px 18px', borderRadius: 12,
+            borderLeft: '3px solid var(--color-accent)',
+            background: 'var(--color-surface-2)',
+            fontSize: 15.5, lineHeight: 1.5,
           }}
         >
           {post.quote}
@@ -91,11 +92,11 @@ function PostCard({
       {v === 'stats' && Array.isArray(post.stats) && (
         <div className="grid" style={{ gridTemplateColumns: `repeat(${Math.min(post.stats.length, 3)}, 1fr)`, gap: 10 }}>
           {post.stats.map((s) => (
-            <div key={s.label} style={{ background: 'var(--color-bg)', borderRadius: 16, padding: '12px 14px' }}>
-              <div style={{ fontFamily: 'var(--font-heading)', fontSize: 24, color: 'var(--color-accent-700)', lineHeight: 1.1 }}>
+            <div key={s.label} style={{ background: 'var(--color-surface-2)', borderRadius: 12, padding: '12px 14px' }}>
+              <div style={{ fontFamily: 'var(--font-heading)', fontSize: 24, color: 'var(--color-text)', lineHeight: 1.1 }}>
                 {s.n}
               </div>
-              <div style={{ fontSize: 11.5, color: 'var(--color-neutral-700)', lineHeight: 1.35, marginTop: 2 }}>
+              <div style={{ fontSize: 11.5, color: 'var(--text-muted)', lineHeight: 1.35, marginTop: 2 }}>
                 {s.label}
               </div>
             </div>
@@ -105,7 +106,7 @@ function PostCard({
 
       <p
         style={{
-          fontSize: 14.5, lineHeight: 1.65, color: 'var(--color-neutral-800)', margin: 0,
+          fontSize: 15, lineHeight: 1.65, color: 'var(--color-neutral-800)', margin: 0,
           whiteSpace: 'pre-wrap',
           display: isLong && !open ? '-webkit-box' : 'block',
           WebkitLineClamp: isLong && !open ? 6 : 'unset',
@@ -158,11 +159,11 @@ function PostCard({
 
       <div className="flex items-center gap-3 flex-wrap" style={{ marginTop: 2 }}>
         {post.is_sample ? (
-          <span style={{ fontSize: 11.5, color: 'var(--color-neutral-600)' }}>
-            Sample post — real members' posts appear here as they join.
+          <span style={{ fontSize: 12, color: 'var(--text-subtle)' }}>
+            Sample post. Real members' posts appear here as they join.
           </span>
         ) : isMine ? (
-          <span style={{ fontSize: 11.5, color: 'var(--color-neutral-600)' }}>Your post</span>
+          <span className="badge badge-neutral">Your post</span>
         ) : post.author_email ? (
           // Messaging is unlocked by an accepted Connection. ConnectButton shows
           // the right control for wherever this pair currently stands, and asks
@@ -194,8 +195,7 @@ function PostCard({
           <>
             <button
               type="button"
-              className="btn btn-secondary"
-              style={{ fontSize: 13 }}
+              className="btn btn-secondary btn-sm"
               onClick={() => setEditing(true)}
             >
               Edit
@@ -312,7 +312,7 @@ export default function Feed() {
         <h1 style={{ fontSize: 'clamp(26px,3.2vw,36px)', margin: '0 0 6px' }}>
           Welcome back{profile?.full_name ? `, ${profile.full_name.split(' ')[0]}` : ''}.
         </h1>
-        <p style={{ color: 'var(--color-neutral-800)', margin: 0 }}>
+        <p style={{ color: 'var(--text-muted)', margin: 0, fontSize: 15 }}>
           {combined.length === 0
             ? 'Nothing here yet. Be the first to write something someone else needs to read.'
             : `${combined.length} post${combined.length === 1 ? '' : 's'} from students, professors, and counselors who've been where you are.`}
@@ -321,11 +321,9 @@ export default function Feed() {
 
       {connectionError && (
         <div
-          className="card flex items-start gap-3"
-          style={{
-            padding: '12px 16px', fontSize: 14, lineHeight: 1.55,
-            background: 'var(--color-accent-100)', color: 'var(--color-accent-800)',
-          }}
+          role="alert"
+          className="notice notice-warning flex items-start gap-3"
+          style={{ flexDirection: 'row' }}
         >
           <span style={{ flex: 1 }}>{connectionError}</span>
           <button
@@ -339,7 +337,7 @@ export default function Feed() {
       )}
 
       {composing ? (
-        <form onSubmit={publish} className="card elev-sm" style={{ padding: 22, gap: 14, borderRadius: 26 }}>
+        <form onSubmit={publish} className="card elev-md" style={{ padding: 22, gap: 14 }}>
           <div className="field">
             <label htmlFor="p-title">Title</label>
             <input
@@ -365,7 +363,7 @@ export default function Feed() {
               placeholder="Be specific and honest. What actually worked?"
             />
           </div>
-          {error && <span style={{ fontSize: 13, color: 'var(--color-accent-700)' }}>{error}</span>}
+          {error && <span role="alert" className="msg msg-error">{error}</span>}
           <div className="flex gap-2">
             <button type="submit" className="btn btn-primary" disabled={posting}>
               {posting ? 'Posting…' : 'Post to the feed'}
@@ -374,14 +372,23 @@ export default function Feed() {
           </div>
         </form>
       ) : (
-        <button
-          type="button"
-          onClick={() => setComposing(true)}
-          className="card elev-sm text-left"
-          style={{ padding: '18px 22px', borderRadius: 26, cursor: 'pointer', border: 0, font: 'inherit', color: 'var(--color-neutral-600)' }}
-        >
-          Share something you learned…
-        </button>
+        /* The composer entry point looks like a composer: your avatar, a
+           field, and a button. It used to be a bare cream pill with a line of
+           grey placeholder text, which read as a disabled input. */
+        <div className="card elev-sm flex items-center gap-3" style={{ flexDirection: 'row', padding: '14px 16px' }}>
+          <Avatar name={profile?.full_name} authorKey={email} size={38} />
+          <button
+            type="button"
+            onClick={() => setComposing(true)}
+            className="input text-left"
+            style={{ flex: 1, minWidth: 0, cursor: 'text', color: 'var(--color-neutral-500)', background: 'var(--color-surface-2)', borderColor: 'transparent', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+          >
+            Share something you learned…
+          </button>
+          <button type="button" className="btn btn-primary" onClick={() => setComposing(true)}>
+            <PenLine size={15} aria-hidden="true" /> <span className="hide-mobile">Write a post</span><span className="show-mobile">Post</span>
+          </button>
+        </div>
       )}
 
       <div className="flex gap-2 flex-wrap">
@@ -390,30 +397,32 @@ export default function Feed() {
             key={v}
             type="button"
             onClick={() => setFilter(v)}
-            className="btn"
-            style={{
-              fontFamily: 'var(--font-body)', fontSize: 13, padding: '6px 13px',
-              background: filter === v ? 'var(--color-action-2)' : 'transparent',
-              color: filter === v ? 'var(--color-bg)' : 'var(--color-text)',
-              borderColor: filter === v ? 'transparent' : 'var(--color-divider)',
-            }}
+            className="btn btn-chip"
+            aria-pressed={filter === v}
           >
             {l}
             {v !== 'all' && counts[v] ? (
-              <span style={{ opacity: 0.65, marginLeft: 5, fontSize: 12 }}>{counts[v]}</span>
+              <span style={{ opacity: 0.6, marginLeft: 2, fontSize: 12 }}>{counts[v]}</span>
             ) : null}
           </button>
         ))}
       </div>
 
       {loading ? (
-        <p style={{ color: 'var(--color-neutral-600)' }}>Loading the feed…</p>
+        <p role="status" style={{ color: 'var(--text-subtle)' }}>Loading the feed…</p>
       ) : filtered.length === 0 ? (
-        <p style={{ color: 'var(--color-neutral-600)' }}>
+        <div className="empty">
+          <span className="empty-icon"><Users size={20} aria-hidden="true" /></span>
+          <p className="empty-title">{filter === 'following' ? 'Nothing from people you follow yet' : 'Nothing here yet'}</p>
+          <p className="empty-body">
+            {filter === 'following'
+              ? 'Follow students and mentors from Explore and their posts will show up here.'
+              : 'Be the first to write something someone else needs to read.'}
+          </p>
           {filter === 'following'
-            ? "You're not following anyone who has posted yet. Follow people from Explore to see their posts here."
-            : 'Nothing here yet under this topic. Be the first to post.'}
-        </p>
+            ? <a href="/app/explore" className="btn btn-secondary no-underline" style={{ marginTop: 6 }}>Find people to follow</a>
+            : <button type="button" className="btn btn-primary" style={{ marginTop: 6 }} onClick={() => setComposing(true)}>Write the first post</button>}
+        </div>
       ) : (
         <>
           <div className="flex flex-col" style={{ gap: 16 }}>
@@ -439,7 +448,6 @@ export default function Feed() {
             <button
               type="button"
               className="btn btn-secondary self-center"
-              style={{ fontSize: 14, padding: '11px 26px' }}
               onClick={() => setVisible((n) => n + PAGE_SIZE)}
             >
               Show more ({filtered.length - visible} left)

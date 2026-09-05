@@ -19,7 +19,7 @@ export default function Faq() {
         description="Straight answers about Pathways: what it is, what it costs, who can join, how it differs from a private college counselor, and what Sage the AI advisor does."
         path="/faq"
       />
-      <section id="faq" style={{ padding: 'clamp(28px,6vh,64px) 0 clamp(40px,6vh,64px)' }}>
+      <section id="faq" className="page-hero" style={{ paddingBottom: 'clamp(40px,6vh,72px)' }}>
         <span className="card-kicker" style={{ display: 'block', marginBottom: 12 }}>Frequently asked questions</span>
         <h1 style={{ fontSize: 'clamp(32px,4.4vw,52px)', margin: '0 0 14px', textWrap: 'balance' }}>
           Questions, answered plainly
@@ -30,9 +30,9 @@ export default function Faq() {
 
         <div className="grid gap-[14px]" style={{ gridTemplateColumns: 'repeat(auto-fit,minmax(320px,1fr))' }}>
           {faqs.map((f) => (
-            <div key={f.q} className="card elev-sm" style={{ gap: 9, padding: '24px 26px' }}>
-              <h2 style={{ fontSize: 17, margin: 0, lineHeight: 1.3 }}>{f.q}</h2>
-              <p style={{ margin: 0, fontSize: 14, lineHeight: 1.62, color: 'var(--color-neutral-800)' }}>{f.a}</p>
+            <div key={f.q} className="card elev-sm" style={{ gap: 8, padding: '22px 24px' }}>
+              <h2 className="h-sans" style={{ fontSize: 16.5, margin: 0 }}>{f.q}</h2>
+              <p style={{ margin: 0, fontSize: 14.5, lineHeight: 1.62, color: 'var(--text-muted)' }}>{f.a}</p>
             </div>
           ))}
         </div>

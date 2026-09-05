@@ -13,14 +13,14 @@ const rows = [
 
 export default function CompareTable() {
   return (
-    <section id="compare" style={{ padding: 'clamp(28px,5vh,48px) 0 clamp(40px,6vh,64px)' }}>
+    <section id="compare" className="page-section" style={{ paddingBottom: 'clamp(40px,6vh,72px)' }}>
       <SectionHeader
         eyebrow="The comparison"
         title="Where students look today, and what Pathways adds"
         intro="These are all places students already go, and each is good at what it was built for. None of them was built for choosing a college."
       />
-      <div style={{ overflowX: 'auto' }}>
-        <table className="table" style={{ minWidth: 560 }}>
+      <div className="card elev-sm compare-card" style={{ padding: '4px 8px' }}>
+        <table className="table compare-table">
           <thead>
             <tr>
               <th>Where students look today</th>
@@ -31,9 +31,9 @@ export default function CompareTable() {
           <tbody>
             {rows.map(([a, b, c]) => (
               <tr key={a}>
-                <td><b>{a}</b></td>
-                <td>{b}</td>
-                <td>{c}</td>
+                <td className="compare-name" style={{ fontWeight: 700 }}>{a}</td>
+                <td data-label="What it was built for">{b}</td>
+                <td data-label="What Pathways adds">{c}</td>
               </tr>
             ))}
           </tbody>

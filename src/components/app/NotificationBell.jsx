@@ -54,7 +54,7 @@ export default function NotificationBell() {
         className="flex items-center justify-center"
         style={{
           width: 34, height: 34, borderRadius: 999, cursor: 'pointer', position: 'relative',
-          border: '1px solid var(--color-divider)', background: 'transparent',
+          border: '1px solid var(--color-border-strong)', background: 'var(--color-surface)',
         }}
       >
         <Bell size={16} strokeWidth={2.2} />
@@ -63,8 +63,8 @@ export default function NotificationBell() {
             className="flex items-center justify-center"
             style={{
               position: 'absolute', top: -4, right: -4, minWidth: 17, height: 17,
-              padding: '0 4px', borderRadius: 999, background: 'var(--color-action)',
-              color: 'var(--color-bg)', fontSize: 10.5, fontWeight: 700, lineHeight: 1,
+              padding: '0 4px', borderRadius: 999, background: '#e5484d', boxShadow: '0 0 0 2px var(--color-bg)',
+              color: '#fff', fontSize: 10.5, fontWeight: 700, lineHeight: 1,
             }}
           >
             {unreadCount > 9 ? '9+' : unreadCount}
@@ -77,7 +77,7 @@ export default function NotificationBell() {
           className="card elev-lg anim-fade-swap"
           style={{
             position: 'absolute', right: 0, top: 42, width: 320, maxHeight: 400,
-            overflowY: 'auto', padding: 8, gap: 2, borderRadius: 20, zIndex: 40,
+            overflowY: 'auto', padding: 8, gap: 2, borderRadius: 16, zIndex: 40,
           }}
         >
           <div className="flex items-center gap-2" style={{ padding: '6px 10px 8px' }}>
@@ -97,7 +97,7 @@ export default function NotificationBell() {
           </div>
 
           {notifications.length === 0 ? (
-            <span style={{ fontSize: 13, color: 'var(--color-neutral-600)', padding: '8px 10px 12px', lineHeight: 1.55 }}>
+            <span style={{ fontSize: 13, color: 'var(--text-subtle)', padding: '8px 10px 12px', lineHeight: 1.55 }}>
               Nothing yet. Connection requests and acceptances show up here.
             </span>
           ) : (
@@ -128,7 +128,7 @@ export default function NotificationBell() {
                     <span style={{ fontSize: 13.5, lineHeight: 1.45, fontWeight: n.read ? 400 : 600 }}>
                       {n.body}
                     </span>
-                    <span style={{ fontSize: 11.5, color: 'var(--color-neutral-600)' }}>
+                    <span style={{ fontSize: 11.5, color: 'var(--text-subtle)' }}>
                       {timeAgo(n.occurred_at || n.created_date)}
                     </span>
                   </span>

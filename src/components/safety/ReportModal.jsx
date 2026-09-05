@@ -59,9 +59,9 @@ export default function ReportModal({ open, onOpenChange, reportedEmail, reporte
 
   return (
     <Dialog open={open} onOpenChange={(v) => (v ? onOpenChange(true) : close())}>
-      <DialogContent style={{ background: 'var(--color-surface)', borderRadius: 24, maxWidth: 460 }}>
+      <DialogContent style={{ background: 'var(--color-surface)', borderRadius: 16, maxWidth: 460 }}>
         <DialogHeader>
-          <DialogTitle style={{ fontFamily: 'var(--font-heading)', fontSize: 21 }}>
+          <DialogTitle style={{ fontFamily: 'var(--font-heading)', fontWeight: 400, fontSize: 24 }}>
             {state === 'done' ? 'Report received' : `Report ${reportedName || reportedEmail}`}
           </DialogTitle>
         </DialogHeader>
@@ -106,7 +106,7 @@ export default function ReportModal({ open, onOpenChange, reportedEmail, reporte
               />
             </div>
 
-            <p style={{ fontSize: 12.5, lineHeight: 1.55, margin: 0, color: 'var(--color-neutral-700)' }}>
+            <p style={{ fontSize: 12.5, lineHeight: 1.55, margin: 0, color: 'var(--text-muted)' }}>
               A human on the safety team reads this. Reports are private, the person you report is
               never told who reported them.
             </p>

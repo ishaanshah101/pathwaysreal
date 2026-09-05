@@ -27,11 +27,13 @@ function TabLink({ to, end, label, Icon, badge = 0 }) {
           style={{
             position: 'relative',
             fontSize: 14,
-            padding: '9px 15px',
-            borderRadius: 999,
-            color: isActive ? 'var(--color-bg)' : 'var(--color-text)',
-            background: isActive ? 'var(--color-action)' : 'transparent',
-            fontWeight: isActive || badge > 0 ? 600 : 400,
+            padding: '8px 14px',
+            borderRadius: 10,
+            color: isActive ? 'var(--color-text)' : 'var(--text-muted)',
+            background: isActive ? 'var(--color-surface)' : 'transparent',
+            border: isActive ? '1px solid var(--color-border)' : '1px solid transparent',
+            boxShadow: isActive ? 'var(--shadow-sm)' : 'none',
+            fontWeight: isActive || badge > 0 ? 600 : 500,
           }}
         >
           <Icon size={16} strokeWidth={2.2} />
@@ -98,15 +100,15 @@ export default function AppShell() {
         }}
       >
         <div
-          className="flex items-center gap-2 flex-wrap"
+          className="app-nav flex items-center gap-2 flex-wrap"
           style={{ maxWidth: 1080, margin: '0 auto', padding: '12px clamp(16px,4vw,40px)' }}
         >
-          <Link to="/app" className="flex items-center gap-[9px] no-underline text-inherit" style={{ marginRight: 8 }}>
-            <BrandMark size={36} />
-            <span style={{ fontFamily: 'var(--font-heading)', fontSize: 18 }}>Pathways</span>
+          <Link to="/app" className="flex items-center gap-[9px] no-underline text-inherit" style={{ marginRight: 10 }}>
+            <BrandMark size={32} />
+            <span style={{ fontFamily: 'var(--font-heading)', fontSize: 18, letterSpacing: '-0.01em' }}>Pathways</span>
           </Link>
 
-          <nav className="flex items-center gap-1 flex-wrap">
+          <nav className="app-tabs flex items-center gap-1" aria-label="App sections">
             {TABS.map((t) => (
               <TabLink
                 key={t.to}
@@ -133,8 +135,8 @@ export default function AppShell() {
               aria-label="Account menu"
               style={{
                 width: 34, height: 34, borderRadius: 999, cursor: 'pointer',
-                border: '1px solid var(--color-divider)', background: 'var(--color-accent-2-200)',
-                fontFamily: 'var(--font-heading)', fontSize: 14,
+                border: '1px solid var(--color-accent-2-300)', background: 'var(--color-accent-2-200)',
+                color: 'var(--color-accent-2-900)', fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 13,
               }}
             >
               {first.charAt(0).toUpperCase()}
@@ -142,16 +144,16 @@ export default function AppShell() {
             {menuOpen && (
               <div
                 className="card elev-lg anim-fade-swap"
-                style={{ position: 'absolute', right: 0, top: 42, width: 210, padding: 10, gap: 4, borderRadius: 20 }}
+                style={{ position: 'absolute', right: 0, top: 42, width: 210, padding: 10, gap: 4, borderRadius: 16 }}
               >
-                <span style={{ fontSize: 12, color: 'var(--color-neutral-600)', padding: '4px 10px' }}>
+                <span style={{ fontSize: 12, color: 'var(--text-subtle)', padding: '6px 10px 8px', borderBottom: '1px solid var(--color-divider)', marginBottom: 4 }}>
                   Signed in as {first}
                 </span>
                 <Link
                   to="/app/profile"
                   className="no-underline text-inherit"
                   onClick={() => setMenuOpen(false)}
-                  style={{ fontSize: 14, padding: '8px 10px', borderRadius: 14 }}
+                  style={{ fontSize: 14, fontWeight: 500, padding: '8px 10px', borderRadius: 8 }}
                 >
                   Your profile
                 </Link>
@@ -160,8 +162,8 @@ export default function AppShell() {
                   onClick={() => logout(true)}
                   className="flex items-center gap-2 text-left"
                   style={{
-                    fontSize: 14, padding: '8px 10px', borderRadius: 14, cursor: 'pointer',
-                    background: 'transparent', border: 0, font: 'inherit', color: 'var(--color-accent-700)',
+                    fontSize: 14, fontWeight: 500, padding: '8px 10px', borderRadius: 8, cursor: 'pointer',
+                    background: 'transparent', border: 0, font: 'inherit', color: 'var(--color-danger)',
                   }}
                 >
                   <LogOut size={15} /> Sign out

@@ -36,7 +36,7 @@ export default function Join() {
         path="/join"
       />
 
-      <section style={{ padding: 'clamp(28px,6vh,64px) 0 clamp(36px,6vh,64px)' }}>
+      <section className="page-hero" style={{ paddingBottom: 'clamp(40px,6vh,72px)' }}>
         <h1 style={{ fontSize: 'clamp(32px,4.4vw,52px)', maxWidth: '18ch', margin: '0 0 14px', textWrap: 'balance' }}>
           Start your path, it's free.
         </h1>
@@ -49,7 +49,7 @@ export default function Join() {
           className="grid items-start app-split"
           style={{ gridTemplateColumns: 'minmax(0,6fr) minmax(0,5fr)', gap: 'clamp(24px,4vw,52px)', maxWidth: 900 }}
         >
-          <div className="card elev-sm" style={{ padding: 28, gap: 16 }}>
+          <div className="card elev-md" style={{ padding: 28, gap: 16 }}>
             {/* Google covers both cases: a returning member is signed straight
                 back in, a new one goes on to set up a profile. */}
             <GoogleButton label="Continue with Google" returnTo={returnTo} block />
@@ -59,8 +59,8 @@ export default function Join() {
               <span
                 style={{
                   position: 'absolute', top: -10, left: '50%', transform: 'translateX(-50%)',
-                  background: 'var(--color-surface)', padding: '0 12px', fontSize: 11,
-                  letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--color-neutral-600)',
+                  background: 'var(--color-surface)', padding: '0 12px', fontSize: 11, fontWeight: 600,
+                  letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--text-subtle)',
                 }}
               >
                 or
@@ -75,14 +75,14 @@ export default function Join() {
               Sign up with email
             </Link>
 
-            <span style={{ fontSize: 13.5, textAlign: 'center', color: 'var(--color-neutral-700)' }}>
+            <span style={{ fontSize: 13.5, textAlign: 'center', color: 'var(--text-muted)' }}>
               Already have an account?{' '}
               <Link to={`/login?returnTo=${encodeURIComponent('/')}`} style={{ color: 'var(--color-accent-700)', fontWeight: 600 }}>
                 Log in
               </Link>
             </span>
 
-            <span style={{ fontSize: 11.5, color: 'var(--color-neutral-600)', textAlign: 'center', lineHeight: 1.55 }}>
+            <span style={{ fontSize: 11.5, color: 'var(--text-subtle)', textAlign: 'center', lineHeight: 1.55 }}>
               13+ · COPPA and FERPA aligned · We never sell student data
               <br />
               By joining you agree to our{' '}
@@ -92,16 +92,14 @@ export default function Join() {
           </div>
 
           <div className="flex flex-col" style={{ gap: 13, paddingTop: 6 }}>
-            <h2 className="card-kicker" style={{ margin: 0 }}>What you get</h2>
+            <h2 className="card-kicker" style={{ margin: '0 0 4px', fontFamily: 'var(--font-body)' }}>What you get</h2>
             {perks.map((t) => (
-              <span key={t} className="flex gap-[10px] items-start" style={{ fontSize: 14.5, lineHeight: 1.5 }}>
-                <svg
-                  width="15" height="15" viewBox="0 0 24 24" fill="none"
-                  stroke="var(--color-accent-2-700)" strokeWidth="2.75" strokeLinecap="round" strokeLinejoin="round"
-                  style={{ flex: 'none', marginTop: 4 }} aria-hidden="true"
-                >
-                  <path d="M20 6 9 17l-5-5" />
-                </svg>
+              <span key={t} className="flex gap-[10px] items-start" style={{ fontSize: 15, lineHeight: 1.5 }}>
+                <span className="grid place-items-center" style={{ width: 20, height: 20, borderRadius: 999, background: 'var(--color-accent-2-200)', flex: 'none', marginTop: 1 }}>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent-2-800)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M20 6 9 17l-5-5" />
+                  </svg>
+                </span>
                 {t}
               </span>
             ))}

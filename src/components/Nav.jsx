@@ -21,14 +21,16 @@ export default function Nav() {
 
   return (
     <nav
-      className="flex items-center gap-4 sm:gap-[26px] flex-wrap"
-      style={{ paddingTop: 20, paddingBottom: 20 }}
+      className="site-nav flex items-center flex-wrap"
+      style={{ paddingTop: 18, paddingBottom: 18, gap: '10px 16px' }}
+      aria-label="Primary"
     >
       <Link to="/" className="flex items-center gap-[10px] mr-auto no-underline text-inherit">
-        <BrandMark size={42} />
-        <span style={{ fontFamily: 'var(--font-heading)', fontSize: 21 }}>Pathways</span>
+        <BrandMark size={34} />
+        <span style={{ fontFamily: 'var(--font-heading)', fontSize: 20, letterSpacing: '-0.01em' }}>Pathways</span>
       </Link>
 
+      <div className="nav-links flex items-center" style={{ gap: 24 }}>
       {tabs.map((t) => {
         const on = pathname === t.to;
         return (
@@ -36,18 +38,23 @@ export default function Nav() {
             key={t.to}
             to={t.to}
             aria-current={on ? 'page' : undefined}
-            className="no-underline hover:!text-[var(--color-accent-600)]"
+            className="no-underline"
             style={{
               fontSize: 14.5,
-              color: on ? 'var(--color-accent-700)' : 'var(--color-text)',
-              fontWeight: on ? 600 : 400,
+              fontWeight: 500,
+              color: on ? 'var(--color-text)' : 'var(--text-muted)',
+              paddingBottom: 2,
+              borderBottom: on ? '2px solid var(--color-accent)' : '2px solid transparent',
+              transition: 'color .18s ease',
             }}
           >
             {t.label}
           </Link>
         );
       })}
+      </div>
 
+      <div className="nav-actions flex items-center" style={{ gap: 10 }}>
       {checking ? (
         <span style={{ width: 150, height: 38 }} aria-hidden="true" />
       ) : isAuthenticated ? (
@@ -63,6 +70,7 @@ export default function Nav() {
           <Link to="/join" className="btn btn-primary">Join free</Link>
         </>
       )}
+      </div>
     </nav>
   );
 }

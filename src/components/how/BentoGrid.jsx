@@ -13,29 +13,30 @@ const bento = [
 
 export default function BentoGrid() {
   return (
-    <section id="how" style={{ padding: 'clamp(28px,5vh,48px) 0' }}>
+    <section id="how" className="page-section">
       <SectionHeader
         eyebrow="The features"
         title="One focused place, built for students, by students."
         intro="Everything below exists because students told us it was missing when they went looking for answers."
         titleMaxWidth="22ch"
       />
-      <div className="grid gap-[14px] bento-grid" style={{ gridTemplateColumns: 'repeat(6,1fr)', gridAutoRows: 'minmax(150px,auto)' }}>
-        {bento.map((b, i) => (
+      {/* Six features, three columns, two rows. The previous 4/2/2/2/2/4 span
+          layout left an empty slot in the bottom right corner. */}
+      <div className="grid gap-[14px] bento-grid" style={{ gridTemplateColumns: 'repeat(3, minmax(0,1fr))' }}>
+        {bento.map((b) => (
           <Reveal
             key={b.title}
-            className="card elev-sm hover:shadow-[var(--shadow-md)]"
-            from={i % 2 === 0 ? '-36px' : '36px'}
-            style={{ gridColumn: `span ${b.span}`, gap: 8, padding: 24 }}
+            className="card elev-sm card-interactive"
+            style={{ gap: 10, padding: 24 }}
           >
-            <span className="grid place-items-center" style={{ width: 38, height: 38, borderRadius: '50%', background: b.iconBg, color: b.iconFg }}>
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.75" strokeLinecap="round" strokeLinejoin="round">
+            <span className="grid place-items-center" style={{ width: 40, height: 40, borderRadius: 12, background: b.iconBg, color: b.iconFg }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <path d={b.d} />
                 {b.d2 ? <path d={b.d2} /> : null}
               </svg>
             </span>
-            <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: 19, margin: 0, fontWeight: 400 }}>{b.title}</h3>
-            <span style={{ fontSize: 13.5, lineHeight: 1.55, color: 'var(--color-neutral-800)' }}>{b.body}</span>
+            <h3 style={{ fontSize: 17, margin: '4px 0 0' }}>{b.title}</h3>
+            <span style={{ fontSize: 14, lineHeight: 1.55, color: 'var(--text-muted)' }}>{b.body}</span>
           </Reveal>
         ))}
       </div>

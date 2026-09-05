@@ -14,6 +14,7 @@ import { useContactNotes } from '@/lib/useContactNotes';
 import { usePeopleByEmail } from '@/lib/usePeople';
 import Seo from '@/components/Seo';
 import { SkeletonRows } from '@/components/ui/Skeletons';
+import { ArrowLeft, MessageCircle, Search, Send } from 'lucide-react';
 
 function clockTime(iso) {
   if (!iso) return '';
@@ -27,12 +28,12 @@ function Bubble({ mine, children, meta }) {
     <div
       style={{
         alignSelf: mine ? 'flex-end' : 'flex-start',
-        maxWidth: '80%',
-        background: mine ? 'var(--color-action)' : 'var(--color-bg)',
+        maxWidth: '78%',
+        background: mine ? 'var(--color-ink)' : 'var(--color-surface-2)',
         color: mine ? 'var(--color-bg)' : 'var(--color-text)',
         padding: '9px 14px 6px',
-        borderRadius: 20,
-        fontSize: 14,
+        borderRadius: mine ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
+        fontSize: 14.5,
         lineHeight: 1.55,
         whiteSpace: 'pre-wrap',
       }}
@@ -272,38 +273,38 @@ export default function Messages() {
       <Seo title="Messages | Pathways" description="One-on-one mentoring conversations on Pathways with students, professors, and counselors." path="/app/messages" noindex />
       <div>
         <h1 style={{ fontSize: 'clamp(26px,3.2vw,36px)', margin: '0 0 6px' }}>Messages</h1>
-        <p style={{ color: 'var(--color-neutral-800)', margin: 0 }}>
+        <p style={{ color: 'var(--text-muted)', margin: 0, fontSize: 15 }}>
           One-on-one only, never group chats. Messages arrive instantly, no refresh needed.
         </p>
       </div>
 
       <div
-        className="grid app-split"
-        style={{ gridTemplateColumns: 'minmax(0,4fr) minmax(0,8fr)', gap: 16, alignItems: 'start' }}
+        className="grid app-split msg-split"
+        data-active={String(Boolean(activeWith))}
+        style={{ gridTemplateColumns: 'minmax(0,4fr) minmax(0,8fr)', gap: 16, alignItems: 'stretch' }}
       >
-        <div className="card elev-sm" style={{ padding: 12, gap: 4, borderRadius: 24, maxHeight: 560, overflowY: 'auto' }}>
-          <div className="flex gap-2" style={{ padding: '2px 4px 8px' }}>
+        <div className="card elev-sm msg-list" style={{ padding: 12, gap: 4, maxHeight: 640, overflowY: 'auto', alignSelf: 'stretch' }}>
+          <div className="seg" style={{ alignSelf: 'flex-start', marginBottom: 6 }} role="tablist" aria-label="Inbox or archived">
             {[[false, 'Inbox'], [true, `Archived${archivedEmails.length ? ` (${archivedEmails.length})` : ''}`]].map(([val, label]) => (
               <button
                 key={label}
                 type="button"
+                role="tab"
+                aria-selected={showArchived === val}
+                className="seg-opt"
+                data-on={String(showArchived === val)}
                 onClick={() => setShowArchived(val)}
-                style={{
-                  border: 0, cursor: 'pointer', font: 'inherit', fontSize: 12.5, fontWeight: 600,
-                  padding: '5px 12px', borderRadius: 999,
-                  background: showArchived === val ? 'var(--color-accent-200)' : 'transparent',
-                  color: showArchived === val ? 'var(--color-accent-800)' : 'var(--color-neutral-700)',
-                }}
               >
                 {label}
               </button>
             ))}
           </div>
 
-          <div style={{ padding: '0 4px 8px' }}>
+          <div style={{ padding: '0 0 8px', position: 'relative' }}>
+            <Search size={15} aria-hidden="true" style={{ position: 'absolute', left: 12, top: 13, color: 'var(--color-neutral-500)' }} />
             <input
               className="input"
-              style={{ fontSize: 13, padding: '8px 12px' }}
+              style={{ fontSize: 13.5, minHeight: 38, paddingLeft: 34 }}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search messages and people…"
@@ -312,7 +313,8 @@ export default function Messages() {
             {search.trim() && (
               <span
                 className="flex items-center gap-2"
-                style={{ fontSize: 11.5, color: 'var(--color-neutral-600)', padding: '6px 2px 0' }}
+                style={{ fontSize: 12, color: 'var(--text-subtle)', padding: '6px 2px 0' }}
+                aria-live="polite"
               >
                 {threads.length} match{threads.length === 1 ? '' : 'es'}
                 <button
@@ -329,12 +331,12 @@ export default function Messages() {
           {loading ? (
             <SkeletonRows count={4} />
           ) : threads.length === 0 ? (
-            <span className="field-hint" style={{ padding: 10 }}>
+            <span className="field-hint" style={{ padding: '8px 4px 4px' }}>
               {search.trim()
                 ? 'Nothing matches that search. Try a name, or a word from the conversation.'
                 : showArchived
                   ? 'Nothing archived yet. Conversations you archive move here and stay searchable.'
-                  : 'No conversations yet. Connect with someone in Explore and the conversation opens here.'}
+                  : 'No conversations yet. Once a connection is accepted, it opens here.'}
             </span>
           ) : (
             threads.map((t) => {
@@ -346,18 +348,14 @@ export default function Messages() {
                   type="button"
                   onClick={() => setParams({ to: t.other })}
                   className="flex items-start gap-[10px] text-left"
+                  aria-current={on ? 'true' : undefined}
                   style={{
-                    padding: '10px 12px', borderRadius: 18, cursor: 'pointer', border: 0, font: 'inherit',
-                    background: on ? 'var(--color-accent-200)' : 'transparent',
+                    padding: '10px 12px', borderRadius: 10, cursor: 'pointer', border: 0, font: 'inherit',
+                    background: on ? 'var(--color-surface-2)' : 'transparent',
+                    boxShadow: on ? 'inset 3px 0 0 var(--color-accent)' : 'none',
                   }}
                 >
-                  <span
-                    className="flex items-center justify-center"
-                    style={{
-                      width: 34, height: 34, borderRadius: 999, flex: 'none',
-                      background: bg, color: fg, fontFamily: 'var(--font-heading)', fontSize: 13,
-                    }}
-                  >
+                  <span className="avatar avatar-md" style={{ background: bg, color: fg }}>
                     {initialsOf(t.name)}
                   </span>
                   <span className="flex flex-col" style={{ minWidth: 0, gap: 1, flex: 1 }}>
@@ -375,7 +373,7 @@ export default function Messages() {
                     <span
                       style={{
                         fontSize: 12,
-                        color: t.unread ? 'var(--color-text)' : 'var(--color-neutral-600)',
+                        color: t.unread ? 'var(--color-text)' : 'var(--text-subtle)',
                         fontWeight: t.unread ? 600 : 400,
                         overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '100%',
                       }}
@@ -389,33 +387,49 @@ export default function Messages() {
           )}
         </div>
 
-        <div className="card elev-sm" style={{ padding: 18, gap: 12, borderRadius: 24, minHeight: 440 }}>
+        <div className="card elev-sm msg-pane" style={{ padding: 18, gap: 12, minHeight: 540 }}>
           {!activeWith ? (
-            <div className="flex items-center justify-center text-center" style={{ flex: 1, color: 'var(--color-neutral-600)', fontSize: 14, padding: 20, lineHeight: 1.6 }}>
-              {showArchived
-                ? 'Nothing archived. Conversations you archive move here and stay searchable.'
-                : 'Pick a conversation on the left. To start a new one, find someone in Explore and send a connection request first.'}
+            <div className="empty" style={{ flex: 1, justifyContent: 'center', border: 0 }}>
+              <span className="empty-icon"><MessageCircle size={20} aria-hidden="true" /></span>
+              <p className="empty-title">{showArchived ? 'Nothing archived' : 'Pick a conversation'}</p>
+              <p className="empty-body">
+                {showArchived
+                  ? 'Conversations you archive move here and stay searchable.'
+                  : 'Choose one on the left. To start a new one, find someone in Explore and send a connection request first.'}
+              </p>
+              {!showArchived && (
+                <a href="/app/explore" className="btn btn-secondary no-underline" style={{ marginTop: 6 }}>Go to Explore</a>
+              )}
             </div>
           ) : (
             <>
               <div
-                className="flex items-start gap-3 flex-wrap"
-                style={{ borderBottom: '1px solid var(--color-divider)', paddingBottom: 10 }}
+                className="flex items-center gap-3 flex-wrap"
+                style={{ borderBottom: '1px solid var(--color-divider)', paddingBottom: 10, minHeight: 44 }}
               >
+                <button
+                  type="button"
+                  className="btn btn-quiet btn-sm show-mobile"
+                  onClick={() => setParams({})}
+                  aria-label="Back to conversations"
+                  style={{ paddingLeft: 6, paddingRight: 8 }}
+                >
+                  <ArrowLeft size={16} aria-hidden="true" /> Inbox
+                </button>
                 <div style={{ minWidth: 0 }}>
-                  <span style={{ fontSize: 15, fontWeight: 600 }}>{activeMeta?.name || activeWith}</span>
+                  <span style={{ fontSize: 16, fontWeight: 700 }}>{activeMeta?.name || activeWith}</span>
                   {/* If a nickname is in use, their real name still shows here so
                       it is never possible to forget who you are actually
                       talking to. */}
                   {activeMeta?.realName && activeMeta.realName !== activeMeta.name && (
-                    <div style={{ fontSize: 12, color: 'var(--color-neutral-600)' }}>
+                    <div style={{ fontSize: 12, color: 'var(--text-subtle)' }}>
                       {activeMeta.realName}
                     </div>
                   )}
                   {noteFor(activeWith)?.notes && (
                     <div
                       style={{
-                        fontSize: 12, color: 'var(--color-neutral-700)', marginTop: 4,
+                        fontSize: 12, color: 'var(--text-muted)', marginTop: 4,
                         maxWidth: 420, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                       }}
                       title={noteFor(activeWith).notes}
@@ -425,26 +439,20 @@ export default function Messages() {
                   )}
                 </div>
                 {!activeSample && (
-                  <span className="flex gap-4 items-center" style={{ marginLeft: 'auto' }}>
+                  <span className="flex gap-2 items-center flex-wrap" style={{ marginLeft: 'auto' }}>
                     <button
                       type="button"
+                      className="btn btn-secondary btn-sm"
                       onClick={() => setEditingContact(true)}
-                      style={{
-                        border: 0, background: 'transparent', cursor: 'pointer', font: 'inherit',
-                        fontSize: 13, color: 'var(--color-neutral-700)', padding: 0,
-                      }}
                       title="Add a private nickname and notes about this person. Only you can see them."
                     >
                       {noteFor(activeWith) ? 'Edit notes' : 'Add notes'}
                     </button>
                     <button
                       type="button"
+                      className="btn btn-secondary btn-sm"
                       onClick={toggleArchive}
                       disabled={archiveBusy}
-                      style={{
-                        border: 0, background: 'transparent', cursor: 'pointer', font: 'inherit',
-                        fontSize: 13, color: 'var(--color-neutral-700)', padding: 0,
-                      }}
                       title={isArchived
                         ? 'Move this conversation back to your inbox'
                         : 'Hide this from your inbox. The other person is not told, and nothing is deleted.'}
@@ -485,7 +493,7 @@ export default function Messages() {
                     </Bubble>
                   ))
                 ) : thread.length === 0 ? (
-                  <span style={{ fontSize: 13.5, color: 'var(--color-neutral-600)' }}>
+                  <span style={{ fontSize: 13.5, color: 'var(--text-subtle)' }}>
                     No messages yet. Be direct about what you need help with, people respond to that.
                   </span>
                 ) : (
@@ -518,8 +526,8 @@ export default function Messages() {
               {activeSample ? (
                 <div
                   style={{
-                    background: 'var(--color-bg)', borderRadius: 18, padding: '12px 16px',
-                    fontSize: 12.5, color: 'var(--color-neutral-700)', lineHeight: 1.5,
+                    background: 'var(--color-surface-2)', borderRadius: 18, padding: '12px 16px',
+                    fontSize: 12.5, color: 'var(--text-muted)', lineHeight: 1.5,
                   }}
                 >
                   This is a sample conversation showing how mentoring works on Pathways. Find a real
@@ -539,8 +547,8 @@ export default function Messages() {
                       if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(e); }
                     }}
                   />
-                  <button type="submit" className="btn btn-primary" disabled={sending || !draft.trim()}>
-                    Send
+                  <button type="submit" className="btn btn-primary" disabled={sending || !draft.trim()} style={{ minHeight: 44 }}>
+                    <Send size={15} aria-hidden="true" /> Send
                   </button>
                 </form>
               )}

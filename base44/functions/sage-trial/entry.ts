@@ -59,14 +59,9 @@ function clientIp(req: Request) {
 }
 
 // This function serves signed-out visitors, so the request carries no user
-// context. Prefer the service-role client for the model call and fall back to
-// the request-scoped one if this SDK build does not expose it there.
+// context. The model call always runs as service role.
 async function invokeModel(base44: any, prompt: string) {
-  const viaServiceRole = base44?.asServiceRole?.integrations?.Core?.InvokeLLM;
-  if (typeof viaServiceRole === "function") {
-    return await base44.asServiceRole.integrations.Core.InvokeLLM({ prompt });
-  }
-  return await base44.integrations.Core.InvokeLLM({ prompt });
+  return await base44.asServiceRole.integrations.Core.InvokeLLM({ prompt });
 }
 
 async function sha256(text: string) {

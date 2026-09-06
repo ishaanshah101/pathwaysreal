@@ -200,7 +200,7 @@ Deno.serve(async (req) => {
       : "";
 
     // 6. Ask the model.
-    const res = await base44.integrations.Core.InvokeLLM({
+    const res = await base44.asServiceRole.integrations.Core.InvokeLLM({
       prompt: buildPrompt(who, history, question, fileNote),
       ...(attachments.length ? { file_urls: attachments.map((f: any) => f.url) } : {}),
     });

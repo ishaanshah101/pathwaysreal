@@ -144,7 +144,7 @@ Allow ordinary things students share: screenshots of essays and applications, wh
 Respond with JSON only.`;
 
   try {
-    const res = await base44.integrations.Core.InvokeLLM({
+    const res = await base44.asServiceRole.integrations.Core.InvokeLLM({
       prompt,
       file_urls: [url],
       response_json_schema: {

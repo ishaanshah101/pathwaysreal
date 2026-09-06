@@ -19,8 +19,8 @@ import { useMemo } from 'react';
  * into the bundle and defeat the point. If the address ever changes, both
  * places have to change together.
  */
-const LOCAL = ['pathways', 'admins'];
-const DOMAIN = ['gmail', 'com'];
+const LOCAL = ['ishaan'];
+const DOMAIN = ['pathways', 'uno'];
 
 export default function ContactEmail({ className, style, bold = true }) {
   const address = useMemo(

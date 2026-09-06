@@ -381,7 +381,7 @@ export default function Feed() {
             type="button"
             onClick={() => setComposing(true)}
             className="input text-left"
-            style={{ flex: 1, minWidth: 0, cursor: 'text', color: 'var(--color-neutral-500)', background: 'var(--color-surface-2)', borderColor: 'transparent', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+            style={{ flex: 1, minWidth: 0, cursor: 'text', color: 'var(--text-subtle)', background: 'var(--color-surface-2)', borderColor: 'transparent', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
           >
             Share something you learned…
           </button>

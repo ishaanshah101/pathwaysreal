@@ -208,8 +208,9 @@ export default function ProfilePage() {
             relabel themselves as a student, the rule that students always send
             the first message would be trivial to get around. */}
         <div className="field">
-          <label>Account type</label>
+          <label htmlFor="pf-account-type">Account type</label>
           <input
+            id="pf-account-type"
             className="input"
             value={form.account_type === 'adult' ? 'Adult' : 'Student'}
             readOnly
@@ -234,8 +235,8 @@ export default function ProfilePage() {
             shown at all, so people could not tell we had it. */}
         {profile?.birth_year ? (
           <div className="field">
-            <label>Year you were born</label>
-            <input className="input" value={profile.birth_year} readOnly aria-disabled="true" />
+            <label htmlFor="pf-birth-year">Year you were born</label>
+            <input id="pf-birth-year" className="input" value={profile.birth_year} readOnly aria-disabled="true" />
             <span className="field-hint">
               Never shown on your profile. It cannot be changed here, because it decides which safety
               rules apply to your account.

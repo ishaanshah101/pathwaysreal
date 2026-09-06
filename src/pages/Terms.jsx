@@ -9,7 +9,7 @@ import {
 const S = ({ title, children }) => (
   <section style={{ marginBottom: 26 }}>
     <h2 className="h-sans" style={{ fontSize: 18, margin: '0 0 8px' }}>{title}</h2>
-    <div style={{ fontSize: 15, lineHeight: 1.7, color: 'var(--text-muted)' }}>{children}</div>
+    <div className="prose" style={{ fontSize: 15, lineHeight: 1.7, color: 'var(--text-muted)' }}>{children}</div>
   </section>
 );
 

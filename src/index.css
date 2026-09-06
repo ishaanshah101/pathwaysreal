@@ -223,6 +223,9 @@ h3, h4, h5, h6 {
 .h-display { font-family: var(--font-heading); font-weight: 400; letter-spacing: -0.015em; }
 
 a { color: var(--color-accent-700); }
+/* Links that sit inside running text are underlined so they never rely on
+   colour alone. Buttons and nav links opt out with .btn or .no-underline. */
+p a:not(.btn), li a:not(.btn), span a:not(.btn), td a:not(.btn), .prose a { text-decoration: underline; text-underline-offset: 2px; text-decoration-thickness: 1px; }
 a.no-underline { text-decoration: none; }
 
 .text-muted { color: var(--text-subtle); }
@@ -380,7 +383,7 @@ select.input { appearance: none; -webkit-appearance: none; padding-right: 36px;
 .input:disabled, .input[aria-disabled="true"] {
   cursor: not-allowed; background: var(--color-surface-2); color: var(--text-muted); border-color: var(--color-border);
 }
-.input::placeholder { color: var(--color-neutral-500); }
+.input::placeholder { color: var(--text-subtle); opacity: .85; }
 .input[aria-invalid="true"] { border-color: var(--color-danger); }
 .field-error { display: block; font-size: var(--text-sm); color: var(--color-danger); margin-top: 4px; }
 .field-hint { display: block; font-size: var(--text-sm); color: var(--text-subtle); margin-top: 5px; line-height: var(--leading-normal); }

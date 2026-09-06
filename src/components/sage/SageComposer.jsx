@@ -81,6 +81,8 @@ export default function SageComposer({ onSend, thinking }) {
           type="file"
           multiple
           className="sr-only"
+          aria-label="Choose files to attach"
+          tabIndex={-1}
           accept=".pdf,.doc,.docx,.txt,.rtf,.png,.jpg,.jpeg,.csv,.xlsx"
           onChange={pick}
         />

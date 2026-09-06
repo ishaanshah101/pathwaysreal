@@ -29,6 +29,10 @@
 - [Privacy Policy](https://pathways.uno/privacy)
 - [Terms of Service](https://pathways.uno/terms)
 
+## Who operates Pathways
+
+Pathways is operated by iPathways, based in San Ramon, California, United States. iPathways is the party legally responsible for the service and is named as the operator and data controller in the Terms of Service and the Privacy Policy.
+
 ## Contact
 
 ishaan@pathways.uno

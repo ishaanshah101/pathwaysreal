@@ -7,7 +7,7 @@ export const MIN_AGE = 13;
 export const ADULT_ROLES = ['educator', 'counselor', 'college_student'];
 
 export const SUSPENDED_MESSAGE =
-  'Your account is under review, so it cannot send messages, posts, or connection requests right now. Email pathways.admins@gmail.com if you think this is a mistake.';
+  'Your account is under review, so it cannot send messages, posts, or connection requests right now. Email ishaan@pathways.uno if you think this is a mistake.';
 
 export function normalizeEmail(value: any): string {
   return String(value || '').trim().toLowerCase();

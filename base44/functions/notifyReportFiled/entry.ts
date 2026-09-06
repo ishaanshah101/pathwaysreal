@@ -2,7 +2,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 import { sendGmail, escapeHtml } from '../../shared/gmail.ts';
 import { consumeRateLimit } from '../../shared/rateLimit.ts';
 
-const ALERT_TO = 'pathways.admins@gmail.com';
+const ALERT_TO = 'ishaan@pathways.uno';
 const QUEUE_URL = 'https://pathways.uno/app/admin/moderation';
 
 const REASON_LABELS: Record<string, string> = {

@@ -50,7 +50,7 @@ export default async function (req: Request): Promise<Response> {
 
     if (existing?.suspended) {
       return Response.json(
-        { code: 'suspended', error: 'Your account is under review. Email pathways.admins@gmail.com if you think that is a mistake.' },
+        { code: 'suspended', error: 'Your account is under review. Email ishaan@pathways.uno if you think that is a mistake.' },
         { status: 403 },
       );
     }

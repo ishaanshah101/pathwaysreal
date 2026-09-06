@@ -193,4 +193,4 @@ export async function screenAttachments(base44: any, files: any[]) {
 }
 
 export const IMAGE_BLOCK_REASON =
-  'One of those images was held back by our safety check. If you think that was a mistake, email pathways.admins@gmail.com.';
+  'One of those images was held back by our safety check. If you think that was a mistake, email ishaan@pathways.uno.';

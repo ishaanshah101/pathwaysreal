@@ -17,7 +17,7 @@ export const COMPANY_NAME = 'iPathways';
 export const COMPANY_LOCATION = 'San Ramon, California, United States';
 
 // The public contact address for anything legal, privacy, or safety related.
-export const COMPANY_EMAIL = 'pathways.admins@gmail.com';
+export const COMPANY_EMAIL = 'ishaan@pathways.uno';
 
 // The product itself, kept separate from the company that runs it. Pathways is
 // the service a member uses; iPathways is the business behind it.

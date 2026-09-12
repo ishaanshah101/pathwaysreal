@@ -1,4 +1,4 @@
-import { createClientFromRequest } from "npm:@base44/sdk";
+import { createClientFromRequest } from "npm:@base44/sdk@0.8.44";
 
 // The free sample on the public /sage page. One question, then it stops.
 //
@@ -48,6 +48,31 @@ function answerLooksWrong(a: string) {
   return false;
 }
 
+// This endpoint is deliberately open to signed-out visitors: the whole point of
+// the free sample is that no account is needed. So the caller is identified by
+// where the request comes from rather than by who they are. Only the Pathways
+// site itself may spend a model call, which stops the public function URL from
+// being used as a free LLM proxy by anything that is not this app.
+const ALLOWED_HOSTS = [
+  'pathways.uno',
+  'www.pathways.uno',
+  'cac-pathways-d94b0ec7.base44.app',
+];
+
+function isAllowedOrigin(req: Request) {
+  const source = req.headers.get('origin') || req.headers.get('referer') || '';
+  if (!source) return false;
+  try {
+    const { hostname, protocol } = new URL(source);
+    if (protocol !== 'https:' && hostname !== 'localhost') return false;
+    return ALLOWED_HOSTS.includes(hostname)
+      || hostname === 'localhost'
+      || hostname.endsWith('.base44.app');
+  } catch {
+    return false;
+  }
+}
+
 function utcDay() {
   return new Date().toISOString().slice(0, 10);
 }
@@ -88,8 +113,17 @@ async function bumpBucket(db: any, bucket: string, day: string, row: any, count:
   }
 }
 
-Deno.serve(async (req) => {
+export default async function (req: Request): Promise<Response> {
   try {
+    // Checked before anything else, so a stranger hitting the raw URL never
+    // reaches the counters, let alone the model.
+    if (!isAllowedOrigin(req)) {
+      return Response.json(
+        { error: 'Ask Sage from the Pathways site.', code: 'bad_origin' },
+        { status: 403 },
+      );
+    }
+
     const base44 = createClientFromRequest(req);
     const db = base44.asServiceRole.entities.SageTrialUsage;
 
@@ -181,4 +215,4 @@ Sage:`;
   } catch (error) {
     return Response.json({ error: (error as Error).message }, { status: 500 });
   }
-});
+}

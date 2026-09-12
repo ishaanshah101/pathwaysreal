@@ -1,0 +1,61 @@
+{
+  "name": "Attachment",
+  "type": "object",
+  "description": "Private uploaded file metadata. Registered server-side after checking caller-scoped storage access; only owners and admins can read the storage URI. Posts and Sage store references, not signed URLs.",
+  "properties": {
+    "user_email": {
+      "type": "string"
+    },
+    "file_uri": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string",
+      "maxLength": 200
+    },
+    "mime": {
+      "type": "string"
+    },
+    "size": {
+      "type": "number"
+    },
+    "kind": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "user_email",
+    "file_uri",
+    "name",
+    "size"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "$or": [
+        {
+          "data.user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

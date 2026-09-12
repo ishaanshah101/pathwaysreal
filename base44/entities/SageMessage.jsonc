@@ -23,14 +23,27 @@
     },
     "attachments": {
       "type": "array",
-      "description": "Files the student attached to this question, e.g. an essay draft or a transcript",
+      "maxItems": 10,
+      "description": "Private attachment references; legacy public URLs remain readable.",
       "items": {
         "type": "object",
         "properties": {
+          "id": {
+            "type": "string"
+          },
           "name": {
             "type": "string"
           },
           "url": {
+            "type": "string"
+          },
+          "mime": {
+            "type": "string"
+          },
+          "size": {
+            "type": "number"
+          },
+          "kind": {
             "type": "string"
           }
         }

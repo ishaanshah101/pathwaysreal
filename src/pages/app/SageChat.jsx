@@ -64,6 +64,7 @@ export default function SageChat() {
     // The subscription lapsed mid-session. Re-read it so the paywall comes back
     // up instead of leaving them typing into a dead box.
     if (res && !res.ok && res.code === 'sage_not_subscribed') refetchSubscription();
+    return res;
   };
 
   const renewalDate = subscription?.current_period_end

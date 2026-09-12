@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { FileText } from 'lucide-react';
+import AttachmentList from '@/components/attachments/AttachmentList';
 
 const STARTERS = [
   'How do I build a college list that actually fits me?',
@@ -55,25 +55,7 @@ export default function SageMessages({ messages, thinking, loading, onStarter })
               }}
             >
               {m.content}
-              {Array.isArray(m.attachments) && m.attachments.length > 0 && (
-                <span className="flex flex-wrap gap-2" style={{ marginTop: 8 }}>
-                  {m.attachments.map((f) => (
-                    <a
-                      key={f.url}
-                      href={f.url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="flex items-center gap-1 no-underline"
-                      style={{
-                        fontSize: 12, padding: '4px 9px', borderRadius: 999,
-                        background: 'rgba(255,255,255,.22)', color: 'inherit',
-                      }}
-                    >
-                      <FileText size={12} aria-hidden="true" /> {f.name}
-                    </a>
-                  ))}
-                </span>
-              )}
+              <AttachmentList files={m.attachments} />
             </div>
           );
         })

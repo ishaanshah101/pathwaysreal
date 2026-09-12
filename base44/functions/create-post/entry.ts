@@ -1,7 +1,8 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 import { screenContent, classifyRisk, logModerationEvent, excerptOf, MODERATION_BLOCK_REASON } from '../../shared/moderation.ts';
 import { consumeRateLimit } from '../../shared/rateLimit.ts';
-import { validateAttachments, screenAttachments, screenImage, IMAGE_BLOCK_REASON } from '../../shared/attachments.ts';
+import { screenAttachments, screenImage, IMAGE_BLOCK_REASON } from '../../shared/attachments.ts';
+import { resolveOwnedAttachments, attachmentMetadata } from '../../shared/storedAttachments.ts';
 import { getProfile, isSuspended, SUSPENDED_MESSAGE } from '../../shared/accounts.ts';
 
 const CATEGORIES = [
@@ -51,7 +52,7 @@ export default async function (req: Request): Promise<Response> {
     // Attachment shape and type checks happen before anything expensive.
     const heroUrl = String(payload?.hero_image || '').trim();
     const footerUrl = String(payload?.footer_image || '').trim();
-    const valid = validateAttachments(payload?.attachments);
+    const valid = await resolveOwnedAttachments(base44, user, payload?.attachments);
     if (!valid.ok) {
       return Response.json({ error: valid.error, code: valid.code }, { status: 400 });
     }
@@ -128,7 +129,7 @@ export default async function (req: Request): Promise<Response> {
       author_headline: profile?.headline || [profile?.grade, profile?.school].filter(Boolean).join(' · '),
       hero_image: heroUrl || undefined,
       footer_image: footerUrl || undefined,
-      attachments: screenedFiles.files,
+      attachments: screenedFiles.files.map(attachmentMetadata),
     });
 
     return Response.json({ post: created });

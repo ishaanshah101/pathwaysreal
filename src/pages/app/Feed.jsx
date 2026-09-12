@@ -3,6 +3,9 @@ import { base44 } from '@/api/base44Client';
 import { useProfile, ROLE_LABELS, CATEGORY_LABELS } from '@/lib/useProfile';
 import { useAuth } from '@/lib/AuthContext';
 import EditPostModal from '@/components/app/EditPostModal';
+import AttachmentList from '@/components/attachments/AttachmentList';
+import AttachmentDropzone from '@/components/attachments/AttachmentDropzone';
+import useAttachmentQueue from '@/components/attachments/useAttachmentQueue';
 import { authorAvatar, initialsOf } from '@/lib/avatar';
 import CoverArt from '@/components/app/CoverArt';
 import SafetyActions from '@/components/safety/SafetyActions';
@@ -116,6 +119,7 @@ function PostCard({
       >
         {post.body}
       </p>
+      <AttachmentList files={post.attachments} postId={post.id} />
 
       {isLong && (
         <button
@@ -239,6 +243,7 @@ export default function Feed() {
   const [draft, setDraft] = useState({ title: '', body: '', category: 'general' });
   const [posting, setPosting] = useState(false);
   const [error, setError] = useState('');
+  const queue = useAttachmentQueue();
 
   const load = async () => {
     try {
@@ -256,18 +261,19 @@ export default function Feed() {
 
   const publish = async (e) => {
     e.preventDefault();
-    if (!draft.title.trim() || !draft.body.trim()) return;
+    if (posting || queue.blocked || !draft.title.trim() || !draft.body.trim()) return;
     setPosting(true);
     setError('');
     try {
       // Publishing runs through create-post, which sets the author from the
       // session and screens the content, so the draft is kept on screen if the
       // post is held back.
-      const res = await base44.functions.invoke('create-post', draft);
+      const res = await base44.functions.invoke('create-post', { ...draft, attachments: queue.attachments });
       if (res?.data?.blocked) {
         setError(res.data.reason);
       } else {
         setDraft({ title: '', body: '', category: 'general' });
+        queue.clear();
         setComposing(false);
         await load();
       }
@@ -363,12 +369,14 @@ export default function Feed() {
               placeholder="Be specific and honest. What actually worked?"
             />
           </div>
+          <AttachmentDropzone queue={queue} disabled={posting} />
+          <p className="field-hint">Post attachments are shared with signed-in members. Non-image files are not content-scanned; do not share confidential student records.</p>
           {error && <span role="alert" className="msg msg-error">{error}</span>}
           <div className="flex gap-2">
-            <button type="submit" className="btn btn-primary" disabled={posting}>
+            <button type="submit" className="btn btn-primary" disabled={posting || queue.blocked}>
               {posting ? 'Posting…' : 'Post to the feed'}
             </button>
-            <button type="button" className="btn btn-secondary" onClick={() => setComposing(false)}>Cancel</button>
+            <button type="button" className="btn btn-secondary" disabled={posting} onClick={() => setComposing(false)}>Cancel</button>
           </div>
         </form>
       ) : (

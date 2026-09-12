@@ -48,6 +48,37 @@
       "items": {
         "type": "string"
       }
+    },
+    "attachments": {
+      "type": "array",
+      "maxItems": 10,
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "mime": {
+            "type": "string"
+          },
+          "size": {
+            "type": "number"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "scanned": {
+            "type": "boolean"
+          },
+          "url": {
+            "type": "string",
+            "description": "Legacy public attachments only"
+          }
+        }
+      }
     }
   },
   "required": [

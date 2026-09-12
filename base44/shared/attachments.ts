@@ -21,15 +21,14 @@ export const MAX_TOTAL_BYTES = 100 * 1024 * 1024;    // 100 MB per post or messa
 // alone is trivially spoofed.
 const BLOCKED_EXTENSIONS = [
   'exe', 'msi', 'bat', 'cmd', 'com', 'scr', 'pif', 'cpl', 'hta',
-  'sh', 'bash', 'zsh', 'ps1', 'vbs', 'vbe', 'js', 'jse', 'wsf', 'wsh',
+  'vbs', 'vbe', 'jse', 'wsf', 'wsh',
   'apk', 'ipa', 'dmg', 'pkg', 'deb', 'rpm', 'appimage',
   'jar', 'app', 'gadget', 'reg', 'dll', 'so', 'bin', 'run',
 ];
 
 const BLOCKED_MIMES = [
   'application/x-msdownload', 'application/x-executable', 'application/x-dosexec',
-  'application/vnd.microsoft.portable-executable', 'application/x-sh',
-  'application/x-shellscript', 'application/vnd.android.package-archive',
+  'application/vnd.microsoft.portable-executable', 'application/vnd.android.package-archive',
   'application/x-apple-diskimage', 'application/java-archive',
 ];
 
@@ -48,6 +47,9 @@ export function kindOf(name: string, mime: string) {
   if (IMAGE_MIMES.includes(m) || ['png', 'jpg', 'jpeg', 'webp', 'heic', 'heif', 'gif'].includes(e)) return 'image';
   if (m === 'application/pdf' || e === 'pdf') return 'pdf';
   if (ARCHIVE_EXT.includes(e)) return 'archive';
+  if (m.startsWith('video/') || ['mp4', 'webm', 'mov', 'm4v', 'avi', 'mkv'].includes(e)) return 'video';
+  if (m.startsWith('audio/') || ['mp3', 'wav', 'ogg', 'm4a', 'flac', 'aac'].includes(e)) return 'audio';
+  if (['js', 'jsx', 'ts', 'tsx', 'py', 'java', 'c', 'cpp', 'h', 'css', 'html', 'json', 'xml', 'yaml', 'yml', 'sql', 'sh', 'bash', 'zsh', 'ps1', 'rs', 'go', 'rb', 'swift'].includes(e)) return 'code';
   if (DOC_EXT.includes(e)) return 'document';
   return 'other';
 }

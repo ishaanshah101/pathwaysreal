@@ -17,32 +17,27 @@ export default async function(req) {
 
     const base44 = createClientFromRequest(req);
 
-    // The endpoint has a public URL, so the caller is never trusted. A request
-    // is only honoured when it is one of the two legitimate cases:
-    //   1. the signup workflow, right after a real signup, or
-    //   2. a signed-in user asking for their own welcome email again.
-    // Anything else is refused, which is what stops a stranger from using this
-    // as a free mailer pointed at arbitrary addresses.
+    // The endpoint has a public URL, so the caller must prove who they are.
+    // The ONLY accepted case is a signed-in member asking for the welcome email
+    // for their own address, which is what the app does once, at the end of
+    // onboarding. "The account was created recently" used to be accepted too,
+    // but that was not proof of anything: a stranger could hit this URL during
+    // the same window as a real signup and use it as a mailer.
+    const caller = await base44.auth.me().catch(() => null);
+    if (!caller?.email) {
+      return Response.json({ ok: false, reason: 'not_signed_in' }, { status: 401 });
+    }
+    if (caller.email.toLowerCase() !== toEmail.toLowerCase()) {
+      return Response.json({ ok: false, reason: 'not_your_address' }, { status: 403 });
+    }
+
     const users = await base44.asServiceRole.entities.User.filter({ email: toEmail });
     const target = Array.isArray(users) ? users[0] : null;
     if (!target) {
       return Response.json({ ok: false, reason: 'not_a_registered_user' }, { status: 403 });
     }
 
-    const caller = await base44.auth.me().catch(() => null);
-    const isOwnAddress = Boolean(caller?.email) && caller.email.toLowerCase() === toEmail.toLowerCase();
-
-    // Case 1: the account was created moments ago, which only the signup
-    // workflow can be reacting to. The window is deliberately short so an
-    // address stops being a valid target almost immediately after signup.
-    const createdAt = target.created_date ? new Date(target.created_date).getTime() : 0;
-    const isFreshSignup = createdAt > 0 && Date.now() - createdAt < 15 * 60 * 1000;
-
-    if (!isOwnAddress && !isFreshSignup) {
-      return Response.json({ ok: false, reason: 'not_authorized' }, { status: 403 });
-    }
-
-    // And even an allowed caller only gets one welcome email per address per day.
+    // Even the rightful owner only gets one welcome email per day.
     const limit = await consumeRateLimit(base44, toEmail.toLowerCase(), 'welcome_email', { day: 1 });
     if (!limit.ok) {
       return Response.json({ ok: false, reason: 'already_sent_today' }, { status: 429 });

@@ -167,6 +167,13 @@ export default function Onboarding() {
           help_with: form.help_with,
         };
       await saveProfile(payload);
+      // The welcome email is sent from here, while the member is signed in, so
+      // the endpoint can insist on a real session. It is once per address per
+      // day on the server, and a mail failure must never block entry.
+      base44.functions.invoke('sendWelcomeEmail', {
+        email: user?.email,
+        full_name: form.full_name,
+      }).catch(() => {});
       // Someone who came in from a Sage pricing link lands on the Sage page so
       // they can finish the purchase they started, not on a feed they did not
       // ask for.

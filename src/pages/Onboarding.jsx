@@ -167,6 +167,10 @@ export default function Onboarding() {
           help_with: form.help_with,
         };
       await saveProfile(payload);
+      base44.analytics.track({
+        eventName: 'user_signup_completed',
+        properties: { account_type: form.account_type, plan: form.plan },
+      });
       // The welcome email is sent from here, while the member is signed in, so
       // the endpoint can insist on a real session. It is once per address per
       // day on the server, and a mail failure must never block entry.

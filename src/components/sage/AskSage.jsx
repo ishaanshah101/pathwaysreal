@@ -32,6 +32,9 @@ export default function AskSage() {
     setError('');
     try {
       const res = await base44.functions.invoke('sage-trial', { question, grade });
+      if (!res?.data?.refused) {
+        base44.analytics.track({ eventName: 'sage_trial_started', properties: { grade } });
+      }
       setAnswer(cleanSage(res?.data?.answer || ''));
       // A refusal does not burn the free question, so only lock the form when
       // the backend actually spent it.

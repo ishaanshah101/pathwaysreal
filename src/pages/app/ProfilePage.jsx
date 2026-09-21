@@ -8,6 +8,7 @@ import Seo from '@/components/Seo';
 import { SkeletonLine, SkeletonTitle } from '@/components/ui/Skeletons';
 import ChipPicker from '@/components/app/ChipPicker';
 import VerificationCard from '@/components/app/VerificationCard';
+import DeleteAccountCard from '@/components/app/DeleteAccountCard';
 import { useFollows } from '@/lib/useFollows';
 import { useConnections } from '@/lib/useConnections';
 import { INTEREST_OPTIONS, EXPERTISE_OPTIONS, ADULT_ROLES } from '@/components/app/profileFields';
@@ -475,6 +476,8 @@ export default function ProfilePage() {
           </button>
         </div>
       </form>
+
+      <DeleteAccountCard />
     </div>
   );
 }

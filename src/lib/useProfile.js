@@ -43,6 +43,14 @@ export function useProfile() {
     }
   };
 
+  // Permanent removal of this member's own profile and private Sage history.
+  // The server decides whose data is deleted, from the session.
+  const deleteProfile = async () => {
+    const res = await base44.functions.invoke('delete-account', {});
+    await queryClient.invalidateQueries({ queryKey: ['profile', email] });
+    return res?.data ?? null;
+  };
+
   return {
     profile: query.data ?? null,
     email,
@@ -53,6 +61,7 @@ export function useProfile() {
     profileError: query.error || null,
     refetchProfile: query.refetch,
     saveProfile,
+    deleteProfile,
   };
 }
 

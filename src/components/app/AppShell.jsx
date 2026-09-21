@@ -5,6 +5,7 @@ import Seo from '@/components/Seo';
 import BrandMark from '@/components/BrandMark';
 import UnreadBadge from '@/components/app/UnreadBadge';
 import NotificationBell from '@/components/app/NotificationBell';
+import BottomTabBar from '@/components/app/BottomTabBar';
 import { useAuth } from '@/lib/AuthContext';
 import { useProfile } from '@/lib/useProfile';
 import { useMessages } from '@/lib/MessagesContext';
@@ -80,7 +81,7 @@ export default function AppShell() {
   }, [unreadTotal]);
 
   return (
-    <div style={{ minHeight: '100vh' }}>
+    <div className="app-scroll-root" style={{ minHeight: '100vh' }}>
       {/* Signed-in screens hold nothing a search engine should index. */}
       <Seo title="Pathways" noindex />
 
@@ -97,6 +98,7 @@ export default function AppShell() {
           zIndex: 30,
           background: 'var(--color-bg)',
           borderBottom: '1px solid var(--color-divider)',
+          paddingTop: 'env(safe-area-inset-top)',
         }}
       >
         <div
@@ -174,9 +176,14 @@ export default function AppShell() {
         </div>
       </div>
 
-      <main id="main" style={{ maxWidth: 1080, margin: '0 auto', padding: '24px clamp(16px,4vw,40px) 80px' }}>
+      <main id="main" className="app-main" style={{ maxWidth: 1080, margin: '0 auto', padding: '24px clamp(16px,4vw,40px) 80px' }}>
         <Outlet />
       </main>
+
+      <BottomTabBar
+        tabs={TABS}
+        badgeFor={(to) => (to === '/app/messages' ? unreadTotal : to === '/app/requests' ? pendingCount : 0)}
+      />
     </div>
   );
 }

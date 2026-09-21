@@ -495,6 +495,144 @@ select.input { appearance: none; -webkit-appearance: none; padding-right: 36px;
 @media (min-width: 861px) {
   .show-mobile { display: none !important; }
 }
+
+/* ---------------------------------------------------------------------------
+   Native-like behaviour in an iOS WebView. None of this changes the desktop
+   layout: the bottom tab bar only exists under 768px.
+   --------------------------------------------------------------------------- */
+.app-scroll-root { overscroll-behavior: none; }
+
+button, .btn, .btn-chip, .seg-opt, .badge, .tag, .bottom-tab, .app-tabs a {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.bottom-tabs { display: none; }
+
+@media (max-width: 767px) {
+  /* The header tabs give way to a real tab bar. */
+  .app-nav .app-tabs { display: none !important; }
+
+  .bottom-tabs {
+    display: flex;
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    z-index: 40;
+    align-items: stretch;
+    background: var(--color-surface);
+    border-top: 1px solid var(--color-divider);
+    padding-bottom: env(safe-area-inset-bottom);
+    box-shadow: 0 -2px 12px rgba(46, 43, 37, 0.06);
+  }
+  .bottom-tab { flex: 1; display: flex; text-decoration: none; }
+  .bottom-tab-inner {
+    flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 3px; padding: 8px 2px 7px; min-height: 52px;
+    color: var(--text-muted); transition: color var(--transition-fast);
+  }
+  .bottom-tab-inner[data-on="true"] { color: var(--color-text); }
+  .bottom-tab-label { font-size: 11px; font-weight: 600; letter-spacing: .01em; }
+
+  /* Room for the bar, so the last row of content is never under it. */
+  .app-main { padding-bottom: calc(76px + env(safe-area-inset-bottom)) !important; }
+}
+
+/* ---------------------------------------------------------------------------
+   System dark mode. Same token names, darker values, so every component
+   follows without changes.
+   --------------------------------------------------------------------------- */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #191715;
+    --color-surface: #221f1d;
+    --color-surface-2: #2b2724;
+    --color-text: #f3ece1;
+
+    --color-ink: #f3ece1;
+    --color-ink-hover: #e3d9cb;
+    --color-ink-active: #fffaf3;
+
+    --color-accent: #e79457;
+    --color-accent-2: #a3b585;
+
+    --color-border: rgba(243, 236, 225, 0.12);
+    --color-border-strong: rgba(243, 236, 225, 0.24);
+    --color-divider: rgba(243, 236, 225, 0.14);
+
+    --color-neutral-100: #211e1c;
+    --color-neutral-200: #2c2825;
+    --color-neutral-300: #3a3531;
+    --color-neutral-400: #564f48;
+    --color-neutral-500: #7d7568;
+    --color-neutral-600: #b0a698;
+    --color-neutral-700: #c3b9aa;
+    --color-neutral-800: #ddd4c6;
+    --color-neutral-900: #f3ece1;
+
+    --color-accent-100: #2e211a;
+    --color-accent-200: #3d2a1f;
+    --color-accent-300: #5a3a25;
+    --color-accent-400: #8a5630;
+    --color-accent-500: #c07d46;
+    --color-accent-600: #e09257;
+    --color-accent-700: #f0a970;
+    --color-accent-800: #f7c69b;
+    --color-accent-900: #fce0c6;
+
+    --color-accent-2-100: #212619;
+    --color-accent-2-200: #2c3321;
+    --color-accent-2-300: #3d472b;
+    --color-accent-2-400: #56633f;
+    --color-accent-2-500: #8fa073;
+    --color-accent-2-600: #a3b585;
+    --color-accent-2-700: #bccba3;
+    --color-accent-2-800: #d4dec3;
+    --color-accent-2-900: #eaf0de;
+
+    --color-success: #a8c98a;
+    --color-success-bg: #25301c;
+    --color-warning: #e0b877;
+    --color-warning-bg: #332711;
+    --color-danger: #f0a184;
+    --color-danger-bg: #3a1f16;
+    --color-info: #9fc4d6;
+    --color-info-bg: #1c2c34;
+
+    --text-strong: var(--color-text);
+    --text-default: var(--color-neutral-900);
+    --text-muted: var(--color-neutral-700);
+    --text-subtle: var(--color-neutral-600);
+    --text-on-accent: #191715;
+
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35), 0 1px 3px rgba(0, 0, 0, 0.30);
+    --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.42);
+    --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.52);
+
+    /* shadcn/ui primitives, same mapping in the dark palette. */
+    --background: 30 8% 9%;
+    --foreground: 33 38% 92%;
+    --card: 30 8% 13%;
+    --card-foreground: 33 38% 92%;
+    --popover: 30 8% 13%;
+    --popover-foreground: 33 38% 92%;
+    --primary: 33 38% 92%;
+    --primary-foreground: 30 8% 9%;
+    --secondary: 27 8% 16%;
+    --secondary-foreground: 33 38% 92%;
+    --muted: 27 8% 16%;
+    --muted-foreground: 33 16% 68%;
+    --accent: 25 20% 18%;
+    --accent-foreground: 29 74% 78%;
+    --destructive: 15 72% 48%;
+    --destructive-foreground: 33 38% 92%;
+    --border: 33 10% 24%;
+    --input: 33 10% 24%;
+    --ring: 27 72% 62%;
+  }
+
+  html { color-scheme: dark; }
+}
 @media (min-width: 861px) and (max-width: 1100px) {
   .bento-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
 }

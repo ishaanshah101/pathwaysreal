@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { NavLink, Outlet, Link } from 'react-router-dom';
-import { Home, Compass, MessageCircle, Sparkles, LogOut, UserPlus } from 'lucide-react';
+import { Home, Compass, MessageCircle, Sparkles, LogOut, UserPlus, Bookmark } from 'lucide-react';
 import Seo from '@/components/Seo';
 import BrandMark from '@/components/BrandMark';
 import UnreadBadge from '@/components/app/UnreadBadge';
@@ -17,7 +17,12 @@ const TABS = [
   { to: '/app/messages', label: 'Messages', Icon: MessageCircle },
   { to: '/app/requests', label: 'Requests', Icon: UserPlus },
   { to: '/app/sage', label: 'Sage', Icon: Sparkles },
+  { to: '/app/saved', label: 'Saved', Icon: Bookmark },
 ];
+
+// The phone tab bar stays at five. Saved posts live in the header tabs and in
+// the account menu instead of making the bar too tight to tap.
+const PHONE_TABS = TABS.filter((t) => t.to !== '/app/saved');
 
 function TabLink({ to, end, label, Icon, badge = 0 }) {
   return (
@@ -159,6 +164,14 @@ export default function AppShell() {
                 >
                   Your profile
                 </Link>
+                <Link
+                  to="/app/saved"
+                  className="no-underline text-inherit"
+                  onClick={() => setMenuOpen(false)}
+                  style={{ fontSize: 14, fontWeight: 500, padding: '8px 10px', borderRadius: 8 }}
+                >
+                  Saved posts
+                </Link>
                 <button
                   type="button"
                   onClick={() => logout(true)}
@@ -181,7 +194,7 @@ export default function AppShell() {
       </main>
 
       <BottomTabBar
-        tabs={TABS}
+        tabs={PHONE_TABS}
         badgeFor={(to) => (to === '/app/messages' ? unreadTotal : to === '/app/requests' ? pendingCount : 0)}
       />
     </div>

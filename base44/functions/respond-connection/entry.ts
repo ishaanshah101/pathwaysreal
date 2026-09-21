@@ -1,5 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 import { notify, displayName } from '../../shared/notify.ts';
+import { pushToUser } from '../../shared/webPush.ts';
 
 // Accepting or declining a connection request.
 //
@@ -97,6 +98,12 @@ export default async function (req: Request): Promise<Response> {
         link: `/app/messages?to=${encodeURIComponent(myEmail)}`,
         connectionId,
       });
+      await pushToUser(base44, fromEmail, {
+        title: 'Connection accepted',
+        body: `${displayName(myName, myEmail)} accepted your connection request. You can message them now.`,
+        url: `/app/messages?to=${encodeURIComponent(myEmail)}`,
+        tag: `conn-${connectionId}`,
+      }).catch(() => {});
     }
 
     return Response.json({ connection: updated });

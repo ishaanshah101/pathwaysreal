@@ -3,6 +3,7 @@ import { screenContent, classifyRisk, logModerationEvent, excerptOf, MODERATION_
 import { consumeRateLimit } from '../../shared/rateLimit.ts';
 import { validateAttachments, screenAttachments, IMAGE_BLOCK_REASON } from '../../shared/attachments.ts';
 import { getProfile, isSuspended, SUSPENDED_MESSAGE } from '../../shared/accounts.ts';
+import { pushToUser } from '../../shared/webPush.ts';
 
 // The ONLY writer of Message rows. The Message entity's create rule is locked to
 // a service-only role, so a browser console can no longer insert a message to an
@@ -163,6 +164,15 @@ export default async function (req: Request): Promise<Response> {
       body,
       attachments: screenedFiles.files,
     });
+
+    // Best-effort push to the recipient, only if they opted in. A failure here
+    // must never affect a message that was already delivered.
+    await pushToUser(base44, toEmail, {
+      title: `New message from ${String(payload?.fromName || user.full_name || 'a member')}`,
+      body: body.slice(0, 140) || 'Sent you an attachment.',
+      url: `/app/messages?to=${encodeURIComponent(fromEmail)}`,
+      tag: `msg-${threadKey}`,
+    }).catch(() => {});
 
     return Response.json({ message: created });
   } catch (error: any) {

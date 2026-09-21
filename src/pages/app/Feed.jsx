@@ -15,9 +15,26 @@ import { useFollows } from '@/lib/useFollows';
 import { useBlocks } from '@/lib/useBlocks';
 import { useConnections } from '@/lib/useConnections';
 import Seo from '@/components/Seo';
+import SharePostButton from '@/components/app/SharePostButton';
+import SavePostButton from '@/components/app/SavePostButton';
+import OfflineBanner from '@/components/app/OfflineBanner';
+import PushOptInCard from '@/components/app/PushOptInCard';
+import { useSavedPosts } from '@/lib/useSavedPosts';
+import { useOnline } from '@/lib/useOnline';
 import { PenLine, Users } from 'lucide-react';
 
 const PAGE_SIZE = 12;
+// Posts already read are kept here so the feed still has something to show with
+// no connection, instead of an empty state that looks like a bug.
+const FEED_CACHE_KEY = 'pathways.feedCache';
+
+function readFeedCache() {
+  try { return JSON.parse(localStorage.getItem(FEED_CACHE_KEY) || '[]'); } catch { return []; }
+}
+
+function writeFeedCache(rows) {
+  try { localStorage.setItem(FEED_CACHE_KEY, JSON.stringify(rows.slice(0, 40))); } catch { /* quota */ }
+}
 
 function timeAgo(iso) {
   if (!iso) return '';
@@ -52,7 +69,7 @@ function Avatar({ name, authorKey, size = 40 }) {
 
 function PostCard({
   post, connection, busy, onConnect, isMine, onBlocked, canEdit, onSaved,
-  following, followBusy, onToggleFollow,
+  following, followBusy, onToggleFollow, saved, saveBusy, onToggleSave,
 }) {
   const v = post.variant || 'plain';
   const isLong = (post.body || '').length > 620;
@@ -192,6 +209,14 @@ function PostCard({
           </>
         ) : null}
 
+        {/* Save for later, and share out to any other app on the device. */}
+        {!post.is_sample && (
+          <>
+            <SavePostButton postId={post.id} saved={saved} busy={saveBusy} onToggle={onToggleSave} />
+            <SharePostButton post={post} />
+          </>
+        )}
+
         {/* Only the app admin sees this. The server's rules on Post already
             restrict editing to admins, so this button is convenience, not the
             protection. */}
@@ -235,6 +260,9 @@ export default function Feed() {
     connectionWith, requestConnection, busyEmail, connectionError, clearConnectionError,
   } = useConnections();
   const { isFollowing, toggleFollow, followBusyEmail, followingEmails } = useFollows();
+  const { isSaved, toggleSave, busyPostId } = useSavedPosts();
+  const online = useOnline();
+  const [offlineCached, setOfflineCached] = useState(false);
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
@@ -248,9 +276,16 @@ export default function Feed() {
   const load = async () => {
     try {
       const rows = await base44.entities.Post.list('-created_date', 100);
-      setPosts(Array.isArray(rows) ? rows : []);
+      const list = Array.isArray(rows) ? rows : [];
+      setPosts(list);
+      setOfflineCached(false);
+      writeFeedCache(list);
     } catch {
-      setPosts([]);
+      // Offline, or the request failed: fall back to what was read last rather
+      // than showing an empty feed.
+      const cached = readFeedCache();
+      setPosts(cached);
+      setOfflineCached(cached.length > 0);
     }
     setLoading(false);
   };
@@ -324,6 +359,12 @@ export default function Feed() {
             : `${combined.length} post${combined.length === 1 ? '' : 's'} from students, professors, and counselors who've been where you are.`}
         </p>
       </div>
+
+      {(!online || offlineCached) && <OfflineBanner cached={posts.length} />}
+
+      {/* Asked here, inside the app, after onboarding, and only when the member
+          presses the button. Never a permission prompt on first load. */}
+      <PushOptInCard />
 
       {connectionError && (
         <div
@@ -448,6 +489,9 @@ export default function Feed() {
                 following={p.author_email ? isFollowing(p.author_email) : false}
                 followBusy={followBusyEmail === String(p.author_email || '').toLowerCase()}
                 onToggleFollow={toggleFollow}
+                saved={isSaved(p.id)}
+                saveBusy={busyPostId === p.id}
+                onToggleSave={toggleSave}
               />
             ))}
           </div>

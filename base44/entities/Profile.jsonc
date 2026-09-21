@@ -106,6 +106,31 @@
     "help_with": {
       "type": "string",
       "description": "Adult profiles: what they are happy for students to ask them about"
+    },
+    "push_enabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "Off unless the member explicitly turned notifications on. Written only by the push-subscribe function."
+    },
+    "push_subscription": {
+      "type": "object",
+      "description": "The browser's web push subscription for this member's device. Written only by the push-subscribe function, and cleared when the browser discards it.",
+      "properties": {
+        "endpoint": {
+          "type": "string"
+        },
+        "keys": {
+          "type": "object",
+          "properties": {
+            "p256dh": {
+              "type": "string"
+            },
+            "auth": {
+              "type": "string"
+            }
+          }
+        }
+      }
     }
   },
   "required": [

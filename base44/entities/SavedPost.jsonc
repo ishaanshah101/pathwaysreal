@@ -1,0 +1,74 @@
+{
+  "name": "SavedPost",
+  "type": "object",
+  "description": "A post a member saved to read later, including offline. Written ONLY by the save-post backend function, which sets the owner from the session and copies a snapshot of the post so it stays readable with no connection. Strictly private: nobody but the owner (and an admin) can see what someone saved.",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "Owner. Only they may read this row."
+    },
+    "post_id": {
+      "type": "string",
+      "description": "The Post this refers to"
+    },
+    "title": {
+      "type": "string"
+    },
+    "body": {
+      "type": "string",
+      "description": "Snapshot of the post text at the time it was saved, so it reads offline"
+    },
+    "author_name": {
+      "type": "string"
+    },
+    "author_headline": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string"
+    },
+    "saved_at": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "user_email",
+    "post_id"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "saved_post_service_only"
+      }
+    },
+    "read": {
+      "$or": [
+        {
+          "data.user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "saved_post_service_only"
+      }
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

@@ -38,6 +38,7 @@ import Requests from '@/pages/app/Requests';
 import SageChat from '@/pages/app/SageChat';
 import AdminModeration from '@/pages/app/AdminModeration';
 import ProfilePage from '@/pages/app/ProfilePage';
+import SavedPosts from '@/pages/app/SavedPosts';
 
 // The root decides Phase 1 vs Phase 2 from REAL auth state, not a hardcoded
 // assumption. A logged-out visitor gets the landing page; a signed-in user is
@@ -105,6 +106,7 @@ const AuthenticatedApp = () => {
         <Route path="requests" element={<Requests />} />
         <Route path="sage" element={<SageChat />} />
         <Route path="profile" element={<ProfilePage />} />
+        <Route path="saved" element={<SavedPosts />} />
         {/* Admin only. The page itself renders the 404 for everyone else, so
             the route never advertises that it exists. */}
         <Route path="admin/moderation" element={<AdminModeration />} />

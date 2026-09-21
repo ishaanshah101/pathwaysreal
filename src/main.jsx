@@ -2,6 +2,7 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from '@/App.jsx'
 import '@/index.css'
+import { registerServiceWorker } from '@/lib/registerServiceWorker'
 
 // Redirect legacy Base44 subdomain visitors to the canonical domain before
 // React mounts. Preserves path, query, and hash; uses replace() so there's no
@@ -20,6 +21,9 @@ try {
 } catch (e) {
   // Swallow — let the app render normally.
 }
+
+// Makes Pathways installable and keeps already-read posts available offline.
+registerServiceWorker()
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <App />

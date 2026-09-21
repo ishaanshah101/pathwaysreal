@@ -2,6 +2,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Sparkles, Check, Loader2 } from 'lucide-react';
 import { startSageCheckout, SAGE_PRICES } from '@/lib/useSubscription';
 import { SAMPLE_SAGE_EXCHANGES } from '@/data/sampleContent';
+import { isNativeApp } from '@/lib/platform';
+import SageComingSoonCard from '@/components/app/SageComingSoonCard';
 
 const points = [
   'Personalized to your profile, grade, and goals',
@@ -15,7 +17,10 @@ export default function SagePaywall({ notice }) {
   // ?plan= in the URL right after onboarding. Preselect it and send them
   // straight to checkout so they finish the purchase they already started.
   const urlPlan = new URLSearchParams(window.location.search).get('plan');
-  const validUrlPlan = ['sage_monthly', 'sage_yearly'].includes(urlPlan) ? urlPlan : null;
+  // Inside a native wrapper nothing may open an external checkout, not even a
+  // ?plan= link carried over from the web.
+  const native = isNativeApp();
+  const validUrlPlan = !native && ['sage_monthly', 'sage_yearly'].includes(urlPlan) ? urlPlan : null;
 
   const [plan, setPlan] = useState(validUrlPlan || 'sage_monthly');
   const [busy, setBusy] = useState(false);
@@ -46,7 +51,7 @@ export default function SagePaywall({ notice }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const pricing = (
+  const pricing = native ? <SageComingSoonCard /> : (
     <div className="card elev-md" style={{ padding: 'clamp(22px,3vw,28px)', gap: 18 }}>
       <span className="card-kicker">Sage subscription</span>
       <div className="seg self-start">

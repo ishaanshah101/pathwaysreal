@@ -2,9 +2,11 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
 
-// Entitlement comes from the Subscription entity, which only the Stripe
-// webhook can write. Reading it here is safe: a user editing their own profile
-// cannot fake any of this.
+// Entitlement comes from the Subscription entity and from nothing else: only a
+// server-side webhook can write that table, so reading it here is safe. It is
+// deliberately store-agnostic. A row written by Apple's webhook with status
+// "active" unlocks Sage exactly like a Stripe one, so no gate anywhere may look
+// at stripe_subscription_id or any other Stripe-specific field.
 const ENTITLED = new Set(['active', 'trialing']);
 
 export const SAGE_PRICES = {
@@ -35,6 +37,9 @@ export function useSubscription() {
     hasSage: ENTITLED.has(subscription?.status),
     isPastDue: subscription?.status === 'past_due' || subscription?.status === 'unpaid',
     isCanceling: Boolean(subscription?.cancel_at_period_end),
+    // Which store owns this row. Used only to decide which billing controls to
+    // offer, never to decide whether Sage is unlocked.
+    source: subscription?.source || 'stripe',
     isLoadingSubscription: isLoadingAuth || (Boolean(isAuthenticated && email) && query.isLoading),
     refetchSubscription: query.refetch,
     invalidateSubscription: () =>

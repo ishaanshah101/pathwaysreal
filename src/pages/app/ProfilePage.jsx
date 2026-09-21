@@ -4,6 +4,7 @@ import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
 import { useProfile } from '@/lib/useProfile';
 import { useSubscription, openBillingPortal, SAGE_PRICES } from '@/lib/useSubscription';
+import { isNativeApp } from '@/lib/platform';
 import Seo from '@/components/Seo';
 import { SkeletonLine, SkeletonTitle } from '@/components/ui/Skeletons';
 import ChipPicker from '@/components/app/ChipPicker';
@@ -17,7 +18,8 @@ import { INTEREST_OPTIONS, EXPERTISE_OPTIONS, ADULT_ROLES } from '@/components/a
 export default function ProfilePage() {
   const { user, logout } = useAuth();
   const { profile, email, saveProfile } = useProfile();
-  const { subscription, hasSage, isPastDue, isCanceling } = useSubscription();
+  const { subscription, hasSage, isPastDue, isCanceling, source } = useSubscription();
+  const native = isNativeApp();
   const { followingCount, followerCount } = useFollows();
   const { respondToConnection } = useConnections();
   const [billingError, setBillingError] = useState('');
@@ -420,16 +422,27 @@ export default function ProfilePage() {
                     {new Date(subscription.current_period_end).toLocaleDateString()}
                   </span>
                 )}
-                <button
-                  type="button"
-                  className="btn btn-secondary btn-sm self-start"
-                  onClick={async () => {
-                    setBillingError('');
-                    try { await openBillingPortal(); } catch (err) { setBillingError(err.message); }
-                  }}
-                >
-                  Manage or cancel
-                </button>
+                {/* Inside a native wrapper we must not open an external
+                    billing page, and an Apple-sourced subscription is managed
+                    in the device's own settings, not by us. */}
+                {native || source === 'apple' ? (
+                  <span style={{ fontSize: 12.5, color: 'var(--text-subtle)', lineHeight: 1.5 }}>
+                    {source === 'apple'
+                      ? 'Manage or cancel this subscription in your device settings.'
+                      : 'To manage or cancel this subscription, open Pathways in a web browser.'}
+                  </span>
+                ) : (
+                  <button
+                    type="button"
+                    className="btn btn-secondary btn-sm self-start"
+                    onClick={async () => {
+                      setBillingError('');
+                      try { await openBillingPortal(); } catch (err) { setBillingError(err.message); }
+                    }}
+                  >
+                    Manage or cancel
+                  </button>
+                )}
               </>
             ) : (
               <>

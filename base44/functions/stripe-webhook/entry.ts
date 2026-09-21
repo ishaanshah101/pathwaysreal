@@ -155,6 +155,11 @@ Deno.serve(async (req) => {
     const priceId = sub.items?.data?.[0]?.price?.id;
     const patch = {
       user_email: userEmail,
+      // Every row this function writes is a Stripe row. An Apple webhook will
+      // write source "apple" into the same table later, and entitlement reads
+      // the status field either way.
+      source: "stripe",
+      external_id: sub.id,
       status: sub.status,
       plan: PRICE_TO_PLAN(priceId) || sub.metadata?.plan || undefined,
       stripe_customer_id: customerId,

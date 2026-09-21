@@ -1,11 +1,24 @@
 {
   "name": "Subscription",
   "type": "object",
-  "description": "Sage subscription state. Written ONLY by the Stripe webhook running as service role. Users can read their own row but can never create or modify one, so nobody can grant themselves Sage by editing their profile.",
+  "description": "Sage subscription state, whatever the store. Written ONLY by a server-side webhook running as service role (Stripe today, Apple later). Users can read their own row but can never create or modify one, so nobody can grant themselves Sage from the client.",
   "properties": {
     "user_email": {
       "type": "string",
       "description": "The subscriber's email, matched to the signed-in user"
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "stripe",
+        "apple"
+      ],
+      "default": "stripe",
+      "description": "Which store the subscription was bought from. Entitlement does not depend on this: it only decides which billing controls to show and which webhook owns the row."
+    },
+    "external_id": {
+      "type": "string",
+      "description": "The store's own identifier for this subscription: the Stripe subscription id, or later the Apple original transaction id."
     },
     "status": {
       "type": "string",
@@ -18,7 +31,7 @@
         "unpaid"
       ],
       "default": "incomplete",
-      "description": "Mirrors the Stripe subscription status"
+      "description": "Normalised status. Stripe statuses map to these directly; Apple states will be mapped onto the same set."
     },
     "plan": {
       "type": "string",
@@ -47,7 +60,7 @@
     },
     "last_event_at": {
       "type": "string",
-      "description": "ISO timestamp of the last Stripe event applied to this row"
+      "description": "ISO timestamp of the last store event applied to this row"
     },
     "description": {
       "type": "string",

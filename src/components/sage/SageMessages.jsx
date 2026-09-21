@@ -16,7 +16,7 @@ export default function SageMessages({ messages, thinking, loading, onStarter })
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages.length, thinking]);
 
   return (
-    <div className="flex flex-col" style={{ gap: 12, flex: 1, overflowY: 'auto', minHeight: 340, maxHeight: '58vh', paddingRight: 4 }}>
+    <div className="flex flex-col" style={{ gap: 12, flex: 1, minHeight: 0, overflowY: 'auto', paddingRight: 4 }}>
       {loading ? (
         <span className="text-quiet" style={{ fontSize: 13.5 }}>Loading this conversation…</span>
       ) : messages.length === 0 ? (

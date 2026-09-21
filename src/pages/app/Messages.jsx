@@ -281,9 +281,19 @@ export default function Messages() {
       <div
         className="grid app-split msg-split"
         data-active={String(Boolean(activeWith))}
-        style={{ gridTemplateColumns: 'minmax(0,4fr) minmax(0,8fr)', gap: 16, alignItems: 'stretch' }}
+        style={{
+          gridTemplateColumns: 'minmax(0,4fr) minmax(0,8fr)', gap: 16, alignItems: 'stretch',
+          // One scroll region per pane, sized off the viewport rather than a
+          // fixed pixel height. On a phone this stops the page and the pane
+          // both scrolling at once, which is what produced two scrollbars and
+          // a rubber-banding mess inside a WebView.
+          height: 'calc(100dvh - 250px)', minHeight: 420,
+        }}
       >
-        <div className="card elev-sm msg-list" style={{ padding: 12, gap: 4, maxHeight: 640, overflowY: 'auto', alignSelf: 'stretch' }}>
+        <div
+          className="card elev-sm msg-list"
+          style={{ padding: 12, gap: 4, overflowY: 'auto', minHeight: 0, alignSelf: 'stretch' }}
+        >
           <div className="seg" style={{ alignSelf: 'flex-start', marginBottom: 6 }} role="tablist" aria-label="Inbox or archived">
             {[[false, 'Inbox'], [true, `Archived${archivedEmails.length ? ` (${archivedEmails.length})` : ''}`]].map(([val, label]) => (
               <button
@@ -387,7 +397,7 @@ export default function Messages() {
           )}
         </div>
 
-        <div className="card elev-sm msg-pane" style={{ padding: 18, gap: 12, minHeight: 540 }}>
+        <div className="card elev-sm msg-pane" style={{ padding: 18, gap: 12, minHeight: 0, overflow: 'hidden' }}>
           {!activeWith ? (
             <div className="empty" style={{ flex: 1, justifyContent: 'center', border: 0 }}>
               <span className="empty-icon"><MessageCircle size={20} aria-hidden="true" /></span>
@@ -480,7 +490,7 @@ export default function Messages() {
                 aria-relevant="additions"
                 aria-label="Conversation"
                 className="flex flex-col"
-                style={{ gap: 9, flex: 1, overflowY: 'auto', maxHeight: 420, paddingRight: 4 }}
+                style={{ gap: 9, flex: 1, minHeight: 0, overflowY: 'auto', paddingRight: 4 }}
               >
                 {activeSample ? (
                   activeSample.messages.map((m, i) => (

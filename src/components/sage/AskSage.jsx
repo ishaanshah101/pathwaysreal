@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Link } from 'react-router-dom';
+import FieldSelect from '@/components/ui/FieldSelect';
 
 // The free sample. The model call itself lives in the sage-trial backend
 // function, which enforces the one-question limit and the topic rules. This
@@ -58,17 +59,13 @@ export default function AskSage() {
       <div className="card elev-sm" style={{ padding: 24, gap: 14, maxWidth: 720 }}>
         <div className="field">
           <label htmlFor="sage-grade">Your grade</label>
-          <select
+          <FieldSelect
             id="sage-grade"
-            className="input"
             value={grade}
             disabled={spent}
-            onChange={(e) => setGrade(e.target.value)}
-          >
-            {['9th grade', '10th grade', '11th grade', '12th grade', 'College student'].map((g) => (
-              <option key={g} value={g}>{g}</option>
-            ))}
-          </select>
+            onValueChange={setGrade}
+            options={['9th grade', '10th grade', '11th grade', '12th grade', 'College student'].map((g) => [g, g])}
+          />
         </div>
         <div className="field">
           <label htmlFor="sage-q">Your question</label>

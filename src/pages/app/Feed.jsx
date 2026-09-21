@@ -18,7 +18,9 @@ import Seo from '@/components/Seo';
 import SharePostButton from '@/components/app/SharePostButton';
 import SavePostButton from '@/components/app/SavePostButton';
 import OfflineBanner from '@/components/app/OfflineBanner';
+import PullToRefresh from '@/components/app/PullToRefresh';
 import PushOptInCard from '@/components/app/PushOptInCard';
+import FieldSelect from '@/components/ui/FieldSelect';
 import { useSavedPosts } from '@/lib/useSavedPosts';
 import { useOnline } from '@/lib/useOnline';
 import { PenLine, Users } from 'lucide-react';
@@ -347,166 +349,168 @@ export default function Feed() {
   }, [combined]);
 
   return (
-    <div className="flex flex-col" style={{ gap: 20 }}>
-      <Seo title="Your Feed | Pathways" description="Long-form, firsthand college and career advice from students, professors, and counselors on Pathways." path="/app" noindex />
-      <div>
-        <h1 style={{ fontSize: 'clamp(26px,3.2vw,36px)', margin: '0 0 6px' }}>
-          Welcome back{profile?.full_name ? `, ${profile.full_name.split(' ')[0]}` : ''}.
-        </h1>
-        <p style={{ color: 'var(--text-muted)', margin: 0, fontSize: 15 }}>
-          {combined.length === 0
-            ? 'Nothing here yet. Be the first to write something someone else needs to read.'
-            : `${combined.length} post${combined.length === 1 ? '' : 's'} from students, professors, and counselors who've been where you are.`}
-        </p>
-      </div>
-
-      {(!online || offlineCached) && <OfflineBanner cached={posts.length} />}
-
-      {/* Asked here, inside the app, after onboarding, and only when the member
-          presses the button. Never a permission prompt on first load. */}
-      <PushOptInCard />
-
-      {connectionError && (
-        <div
-          role="alert"
-          className="notice notice-warning flex items-start gap-3"
-          style={{ flexDirection: 'row' }}
-        >
-          <span style={{ flex: 1 }}>{connectionError}</span>
-          <button
-            type="button"
-            onClick={clearConnectionError}
-            style={{ background: 'none', border: 0, cursor: 'pointer', font: 'inherit', color: 'inherit', opacity: 0.7 }}
-          >
-            Dismiss
-          </button>
-        </div>
-      )}
-
-      {composing ? (
-        <form onSubmit={publish} className="card elev-md" style={{ padding: 22, gap: 14 }}>
-          <div className="field">
-            <label htmlFor="p-title">Title</label>
-            <input
-              id="p-title" className="input" autoFocus value={draft.title}
-              onChange={(e) => setDraft({ ...draft, title: e.target.value })}
-              placeholder="What did you learn?"
-            />
-          </div>
-          <div className="field">
-            <label htmlFor="p-cat">Topic</label>
-            <select
-              id="p-cat" className="input" value={draft.category}
-              onChange={(e) => setDraft({ ...draft, category: e.target.value })}
-            >
-              {Object.entries(CATEGORY_LABELS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-            </select>
-          </div>
-          <div className="field">
-            <label htmlFor="p-body">Your post</label>
-            <textarea
-              id="p-body" className="input" style={{ minHeight: 150 }} value={draft.body}
-              onChange={(e) => setDraft({ ...draft, body: e.target.value })}
-              placeholder="Be specific and honest. What actually worked?"
-            />
-          </div>
-          <AttachmentDropzone queue={queue} disabled={posting} />
-          <p className="field-hint">Post attachments are shared with signed-in members. Non-image files are not content-scanned; do not share confidential student records.</p>
-          {error && <span role="alert" className="msg msg-error">{error}</span>}
-          <div className="flex gap-2">
-            <button type="submit" className="btn btn-primary" disabled={posting || queue.blocked}>
-              {posting ? 'Posting…' : 'Post to the feed'}
-            </button>
-            <button type="button" className="btn btn-secondary" disabled={posting} onClick={() => setComposing(false)}>Cancel</button>
-          </div>
-        </form>
-      ) : (
-        /* The composer entry point looks like a composer: your avatar, a
-           field, and a button. It used to be a bare cream pill with a line of
-           grey placeholder text, which read as a disabled input. */
-        <div className="card elev-sm flex items-center gap-3" style={{ flexDirection: 'row', padding: '14px 16px' }}>
-          <Avatar name={profile?.full_name} authorKey={email} size={38} />
-          <button
-            type="button"
-            onClick={() => setComposing(true)}
-            className="input text-left"
-            style={{ flex: 1, minWidth: 0, cursor: 'text', color: 'var(--text-subtle)', background: 'var(--color-surface-2)', borderColor: 'transparent', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
-          >
-            Share something you learned…
-          </button>
-          <button type="button" className="btn btn-primary" onClick={() => setComposing(true)}>
-            <PenLine size={15} aria-hidden="true" /> <span className="hide-mobile">Write a post</span><span className="show-mobile">Post</span>
-          </button>
-        </div>
-      )}
-
-      <div className="flex gap-2 flex-wrap">
-        {[['all', 'All'], ['following', 'Following'], ...Object.entries(CATEGORY_LABELS)].map(([v, l]) => (
-          <button
-            key={v}
-            type="button"
-            onClick={() => setFilter(v)}
-            className="btn btn-chip"
-            aria-pressed={filter === v}
-          >
-            {l}
-            {v !== 'all' && counts[v] ? (
-              <span style={{ opacity: 0.6, marginLeft: 2, fontSize: 12 }}>{counts[v]}</span>
-            ) : null}
-          </button>
-        ))}
-      </div>
-
-      {loading ? (
-        <p role="status" style={{ color: 'var(--text-subtle)' }}>Loading the feed…</p>
-      ) : filtered.length === 0 ? (
-        <div className="empty">
-          <span className="empty-icon"><Users size={20} aria-hidden="true" /></span>
-          <p className="empty-title">{filter === 'following' ? 'Nothing from people you follow yet' : 'Nothing here yet'}</p>
-          <p className="empty-body">
-            {filter === 'following'
-              ? 'Follow students and mentors from Explore and their posts will show up here.'
-              : 'Be the first to write something someone else needs to read.'}
+    // Swipe down at the top of the feed to reload it, the way a native app does.
+    <PullToRefresh onRefresh={load}>
+      <div className="flex flex-col" style={{ gap: 20 }}>
+        <Seo title="Your Feed | Pathways" description="Long-form, firsthand college and career advice from students, professors, and counselors on Pathways." path="/app" noindex />
+        <div>
+          <h1 style={{ fontSize: 'clamp(26px,3.2vw,36px)', margin: '0 0 6px' }}>
+            Welcome back{profile?.full_name ? `, ${profile.full_name.split(' ')[0]}` : ''}.
+          </h1>
+          <p style={{ color: 'var(--text-muted)', margin: 0, fontSize: 15 }}>
+            {combined.length === 0
+              ? 'Nothing here yet. Be the first to write something someone else needs to read.'
+              : `${combined.length} post${combined.length === 1 ? '' : 's'} from students, professors, and counselors who've been where you are.`}
           </p>
-          {filter === 'following'
-            ? <a href="/app/explore" className="btn btn-secondary no-underline" style={{ marginTop: 6 }}>Find people to follow</a>
-            : <button type="button" className="btn btn-primary" style={{ marginTop: 6 }} onClick={() => setComposing(true)}>Write the first post</button>}
         </div>
-      ) : (
-        <>
-          <div className="flex flex-col" style={{ gap: 16 }}>
-            {filtered.slice(0, visible).map((p) => (
-              <PostCard
-                key={p.id}
-                post={p}
-                connection={p.author_email ? connectionWith(p.author_email) : null}
-                busy={busyEmail === p.author_email}
-                onConnect={requestConnection}
-                isMine={Boolean(email && p.author_email === email)}
-                onBlocked={reloadBlocks}
-                canEdit={isAdmin}
-                onSaved={load}
-                following={p.author_email ? isFollowing(p.author_email) : false}
-                followBusy={followBusyEmail === String(p.author_email || '').toLowerCase()}
-                onToggleFollow={toggleFollow}
-                saved={isSaved(p.id)}
-                saveBusy={busyPostId === p.id}
-                onToggleSave={toggleSave}
-              />
-            ))}
-          </div>
 
-          {visible < filtered.length && (
+        {(!online || offlineCached) && <OfflineBanner cached={posts.length} />}
+
+        {/* Asked here, inside the app, after onboarding, and only when the member
+            presses the button. Never a permission prompt on first load. */}
+        <PushOptInCard />
+
+        {connectionError && (
+          <div
+            role="alert"
+            className="notice notice-warning flex items-start gap-3"
+            style={{ flexDirection: 'row' }}
+          >
+            <span style={{ flex: 1 }}>{connectionError}</span>
             <button
               type="button"
-              className="btn btn-secondary self-center"
-              onClick={() => setVisible((n) => n + PAGE_SIZE)}
+              onClick={clearConnectionError}
+              style={{ background: 'none', border: 0, cursor: 'pointer', font: 'inherit', color: 'inherit', opacity: 0.7 }}
             >
-              Show more ({filtered.length - visible} left)
+              Dismiss
             </button>
-          )}
-        </>
-      )}
-    </div>
+          </div>
+        )}
+
+        {composing ? (
+          <form onSubmit={publish} className="card elev-md" style={{ padding: 22, gap: 14 }}>
+            <div className="field">
+              <label htmlFor="p-title">Title</label>
+              <input
+                id="p-title" className="input" autoFocus value={draft.title}
+                onChange={(e) => setDraft({ ...draft, title: e.target.value })}
+                placeholder="What did you learn?"
+              />
+            </div>
+            <div className="field">
+              <label htmlFor="p-cat">Topic</label>
+              <FieldSelect
+                id="p-cat"
+                value={draft.category}
+                onValueChange={(category) => setDraft({ ...draft, category })}
+                options={Object.entries(CATEGORY_LABELS)}
+              />
+            </div>
+            <div className="field">
+              <label htmlFor="p-body">Your post</label>
+              <textarea
+                id="p-body" className="input" style={{ minHeight: 150 }} value={draft.body}
+                onChange={(e) => setDraft({ ...draft, body: e.target.value })}
+                placeholder="Be specific and honest. What actually worked?"
+              />
+            </div>
+            <AttachmentDropzone queue={queue} disabled={posting} />
+            <p className="field-hint">Post attachments are shared with signed-in members. Non-image files are not content-scanned; do not share confidential student records.</p>
+            {error && <span role="alert" className="msg msg-error">{error}</span>}
+            <div className="flex gap-2">
+              <button type="submit" className="btn btn-primary" disabled={posting || queue.blocked}>
+                {posting ? 'Posting…' : 'Post to the feed'}
+              </button>
+              <button type="button" className="btn btn-secondary" disabled={posting} onClick={() => setComposing(false)}>Cancel</button>
+            </div>
+          </form>
+        ) : (
+          /* The composer entry point looks like a composer: your avatar, a
+             field, and a button. */
+          <div className="card elev-sm flex items-center gap-3" style={{ flexDirection: 'row', padding: '14px 16px' }}>
+            <Avatar name={profile?.full_name} authorKey={email} size={38} />
+            <button
+              type="button"
+              onClick={() => setComposing(true)}
+              className="input text-left"
+              style={{ flex: 1, minWidth: 0, cursor: 'text', color: 'var(--text-subtle)', background: 'var(--color-surface-2)', borderColor: 'transparent', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+            >
+              Share something you learned…
+            </button>
+            <button type="button" className="btn btn-primary" onClick={() => setComposing(true)}>
+              <PenLine size={15} aria-hidden="true" /> <span className="hide-mobile">Write a post</span><span className="show-mobile">Post</span>
+            </button>
+          </div>
+        )}
+
+        <div className="flex gap-2 flex-wrap">
+          {[['all', 'All'], ['following', 'Following'], ...Object.entries(CATEGORY_LABELS)].map(([v, l]) => (
+            <button
+              key={v}
+              type="button"
+              onClick={() => setFilter(v)}
+              className="btn btn-chip"
+              aria-pressed={filter === v}
+            >
+              {l}
+              {v !== 'all' && counts[v] ? (
+                <span style={{ opacity: 0.6, marginLeft: 2, fontSize: 12 }}>{counts[v]}</span>
+              ) : null}
+            </button>
+          ))}
+        </div>
+
+        {loading ? (
+          <p role="status" style={{ color: 'var(--text-subtle)' }}>Loading the feed…</p>
+        ) : filtered.length === 0 ? (
+          <div className="empty">
+            <span className="empty-icon"><Users size={20} aria-hidden="true" /></span>
+            <p className="empty-title">{filter === 'following' ? 'Nothing from people you follow yet' : 'Nothing here yet'}</p>
+            <p className="empty-body">
+              {filter === 'following'
+                ? 'Follow students and mentors from Explore and their posts will show up here.'
+                : 'Be the first to write something someone else needs to read.'}
+            </p>
+            {filter === 'following'
+              ? <a href="/app/explore" className="btn btn-secondary no-underline" style={{ marginTop: 6 }}>Find people to follow</a>
+              : <button type="button" className="btn btn-primary" style={{ marginTop: 6 }} onClick={() => setComposing(true)}>Write the first post</button>}
+          </div>
+        ) : (
+          <>
+            <div className="flex flex-col" style={{ gap: 16 }}>
+              {filtered.slice(0, visible).map((p) => (
+                <PostCard
+                  key={p.id}
+                  post={p}
+                  connection={p.author_email ? connectionWith(p.author_email) : null}
+                  busy={busyEmail === p.author_email}
+                  onConnect={requestConnection}
+                  isMine={Boolean(email && p.author_email === email)}
+                  onBlocked={reloadBlocks}
+                  canEdit={isAdmin}
+                  onSaved={load}
+                  following={p.author_email ? isFollowing(p.author_email) : false}
+                  followBusy={followBusyEmail === String(p.author_email || '').toLowerCase()}
+                  onToggleFollow={toggleFollow}
+                  saved={isSaved(p.id)}
+                  saveBusy={busyPostId === p.id}
+                  onToggleSave={toggleSave}
+                />
+              ))}
+            </div>
+
+            {visible < filtered.length && (
+              <button
+                type="button"
+                className="btn btn-secondary self-center"
+                onClick={() => setVisible((n) => n + PAGE_SIZE)}
+              >
+                Show more ({filtered.length - visible} left)
+              </button>
+            )}
+          </>
+        )}
+      </div>
+    </PullToRefresh>
   );
 }

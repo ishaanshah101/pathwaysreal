@@ -6,6 +6,7 @@ import { useProfile } from '@/lib/useProfile';
 import BrandMark from '@/components/BrandMark';
 import Seo from '@/components/Seo';
 import AccountTypeChoice from '@/components/onboarding/AccountTypeChoice';
+import FieldSelect from '@/components/ui/FieldSelect';
 import { INTEREST_OPTIONS, EXPERTISE_OPTIONS, ADULT_ROLES } from '@/components/app/profileFields';
 
 export default function Onboarding() {
@@ -239,11 +240,12 @@ export default function Onboarding() {
         {isAdult && (
           <div className="field">
             <label htmlFor="ob-role">Which best describes you?</label>
-            <select id="ob-role" className="input" value={form.role} onChange={set('role')}>
-              {ADULT_ROLES.map(([v, l]) => (
-                <option key={v} value={v}>{l}</option>
-              ))}
-            </select>
+            <FieldSelect
+              id="ob-role"
+              value={form.role}
+              onValueChange={(role) => setForm((f) => ({ ...f, role }))}
+              options={ADULT_ROLES}
+            />
           </div>
         )}
 

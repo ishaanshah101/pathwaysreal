@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { CATEGORY_LABELS } from '@/lib/useProfile';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import FieldSelect from '@/components/ui/FieldSelect';
 
 // Admin-only editing of any post. The Post entity's update rule already lets
 // an admin write any row, so this saves directly.
@@ -52,12 +53,12 @@ export default function EditPostModal({ open, onOpenChange, post, onSaved }) {
           </div>
           <div className="field">
             <label htmlFor="ep-cat">Topic</label>
-            <select
-              id="ep-cat" className="input" value={form.category}
-              onChange={(e) => setForm({ ...form, category: e.target.value })}
-            >
-              {Object.entries(CATEGORY_LABELS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-            </select>
+            <FieldSelect
+              id="ep-cat"
+              value={form.category}
+              onValueChange={(category) => setForm({ ...form, category })}
+              options={Object.entries(CATEGORY_LABELS)}
+            />
           </div>
           <div className="field">
             <label htmlFor="ep-body">Post</label>

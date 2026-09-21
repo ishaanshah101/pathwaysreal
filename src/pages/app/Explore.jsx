@@ -9,6 +9,7 @@ import { useBlocks } from '@/lib/useBlocks';
 import { useConnections } from '@/lib/useConnections';
 import { useDirectory } from '@/lib/usePeople';
 import Seo from '@/components/Seo';
+import PullToRefresh from '@/components/app/PullToRefresh';
 import { Search, UserSearch } from 'lucide-react';
 
 const PAGE_SIZE = 12;
@@ -168,7 +169,7 @@ export default function Explore() {
 
   useEffect(() => { setVisible(PAGE_SIZE); }, [q, roleFilter, topicFilter, followingOnly]);
 
-  return (
+  const page = (
     <div className="flex flex-col" style={{ gap: 20 }}>
       <Seo title="Find a Mentor | Pathways" description="Search and connect with students, professors, and counselors on Pathways. Connecting is always free." path="/app/explore" noindex />
       <div>
@@ -296,4 +297,7 @@ export default function Explore() {
       )}
     </div>
   );
+
+  // Swipe down at the top of the directory to reload it.
+  return <PullToRefresh onRefresh={load}>{page}</PullToRefresh>;
 }

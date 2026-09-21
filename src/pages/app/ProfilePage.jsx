@@ -8,6 +8,7 @@ import { isNativeApp } from '@/lib/platform';
 import Seo from '@/components/Seo';
 import { SkeletonLine, SkeletonTitle } from '@/components/ui/Skeletons';
 import ChipPicker from '@/components/app/ChipPicker';
+import FieldSelect from '@/components/ui/FieldSelect';
 import VerificationCard from '@/components/app/VerificationCard';
 import DeleteAccountCard from '@/components/app/DeleteAccountCard';
 import NotificationSettingsCard from '@/components/app/NotificationSettingsCard';
@@ -229,9 +230,12 @@ export default function ProfilePage() {
         {form.account_type === 'adult' && (
           <div className="field">
             <label htmlFor="pf-role">Which best describes you?</label>
-            <select id="pf-role" className="input" value={form.role} onChange={set('role')}>
-              {ADULT_ROLES.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-            </select>
+            <FieldSelect
+              id="pf-role"
+              value={form.role}
+              onValueChange={(role) => { setForm((f) => ({ ...f, role })); setSaved(false); }}
+              options={ADULT_ROLES}
+            />
           </div>
         )}
 

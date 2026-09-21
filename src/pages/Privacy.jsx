@@ -107,6 +107,45 @@ export default function Privacy() {
         kept as long as tax and accounting law requires.
       </S>
 
+      <S title="7b. Deleting your account">
+        You can delete your account yourself, at any time, from the bottom of your Profile page. It is
+        immediate and permanent: there is no grace period, no soft delete, and no way for us to restore it
+        afterwards.
+        <br /><br />
+        <b>What is deleted:</b> your profile, every post you wrote, your Sage conversations, folders and
+        free-sample counters, all your connections and pending requests, the blocks you placed on other
+        people, your rate-limit counters, any verification request you submitted, and your sign-in itself,
+        so the account can no longer be used to log in.
+        <br /><br />
+        <b>If you subscribe to Sage:</b> we cancel your subscription with Stripe before anything is
+        deleted. If that cancellation fails, we stop and delete nothing, so you are never left paying for
+        an account that no longer exists.
+        <br /><br />
+        <b>What we keep, and why:</b>
+        <ul style={{ margin: '10px 0 0', paddingLeft: 20 }}>
+          <li>
+            <b>Messages you sent</b> stay in the recipient's inbox, with your name and email address
+            removed and shown as "Deleted account". Their side of a conversation is their own record, and
+            deleting it for them is not ours to do.
+          </li>
+          <li>
+            <b>Blocks other people placed on you</b> stay in force, so nobody loses a protection they chose
+            because you closed your account.
+          </li>
+          <li>
+            <b>Safety reports and blocked-content records</b> are kept with your identifiers removed.
+            Pathways is used by minors, and these records are how we recognise a pattern of behaviour that
+            reappears under a new account.
+          </li>
+          <li>
+            <b>Payment records</b> stay with Stripe for as long as tax and accounting law requires.
+          </li>
+        </ul>
+        <br />
+        We also write one line to our own audit log noting that a deletion happened. It contains no name,
+        email address, or other identifier.
+      </S>
+
       <S title="8. Students under 18">
         Pathways is for people <b>13 and older</b>. We do not knowingly collect information from anyone under 13. If
         you believe a child under 13 has created an account, email us and we will delete it promptly.

@@ -46,9 +46,16 @@ export function useProfile() {
   // Permanent removal of this member's own profile and private Sage history.
   // The server decides whose data is deleted, from the session.
   const deleteProfile = async () => {
-    const res = await base44.functions.invoke('delete-account', {});
-    await queryClient.invalidateQueries({ queryKey: ['profile', email] });
-    return res?.data ?? null;
+    try {
+      const res = await base44.functions.invoke('delete-account', {});
+      await queryClient.invalidateQueries({ queryKey: ['profile', email] });
+      return res?.data ?? null;
+    } catch (err) {
+      const data = err?.response?.data;
+      const e = new Error(data?.error || 'Could not delete your account. Please try again.');
+      e.code = data?.code;
+      throw e;
+    }
   };
 
   return {

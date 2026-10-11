@@ -6,7 +6,7 @@ import Reveal from '@/components/Reveal';
 // whether to sign up, so it is gone.
 const stats = [
   { num: '$200/hr', label: 'What a private college counselor can cost. Most families never have one.' },
-  { num: '16M', label: 'US high schoolers making these decisions right now, with wildly unequal support.' },
+  { num: '16 million', label: 'US high schoolers making these decisions right now, with wildly unequal support.' },
   { num: '$0', label: 'What Pathways costs a student. Forever, not as a trial.' },
 ];
 

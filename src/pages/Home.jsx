@@ -2,8 +2,7 @@ import React from 'react';
 import Seo from '@/components/Seo';
 import Hero from '@/components/home/Hero';
 import Stats from '@/components/home/Stats';
-import Quotes from '@/components/home/Quotes';
-import Testimonials from '@/components/home/Testimonials';
+import WhoIsBehind from '@/components/home/WhoIsBehind';
 import FinalCta from '@/components/home/FinalCta';
 
 export default function Home() {
@@ -18,8 +17,7 @@ export default function Home() {
       />
       <Hero />
       <Stats />
-      <Quotes />
-      <Testimonials />
+      <WhoIsBehind />
       <FinalCta />
     </>
   );

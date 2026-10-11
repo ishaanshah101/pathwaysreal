@@ -8,7 +8,7 @@
  *   3. Show web push notifications for new messages and accepted connections.
  */
 
-const VERSION = 'pathways-v1';
+const VERSION = 'pathways-v2';
 const SHELL = `${VERSION}-shell`;
 const DATA = `${VERSION}-data`;
 const SHELL_URLS = ['/', '/app', '/manifest.json', '/icon.svg'];
@@ -84,7 +84,9 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(handleData(request));
     return;
   }
-  if (/\.(js|css|svg|png|jpg|jpeg|webp|woff2?)$/.test(url.pathname)) {
+  // Never cache code: stale JS or CSS chunks break the app after an update.
+  if (/^\/(src|node_modules|@vite|@react-refresh|@id|@fs)\//.test(url.pathname)) return;
+  if (/\.(svg|png|jpg|jpeg|webp|woff2?)$/.test(url.pathname)) {
     event.respondWith(handleAsset(request));
   }
 });

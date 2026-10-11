@@ -1,7 +1,8 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 import { screenContent, classifyRisk, logModerationEvent, excerptOf, MODERATION_BLOCK_REASON } from '../../shared/moderation.ts';
 import { consumeRateLimit } from '../../shared/rateLimit.ts';
-import { validateAttachments, screenAttachments, IMAGE_BLOCK_REASON } from '../../shared/attachments.ts';
+import { screenAttachments, IMAGE_BLOCK_REASON } from '../../shared/attachments.ts';
+import { resolveOwnedAttachments, attachmentMetadata } from '../../shared/storedAttachments.ts';
 import { getProfile, isSuspended, SUSPENDED_MESSAGE } from '../../shared/accounts.ts';
 import { pushToUser } from '../../shared/webPush.ts';
 
@@ -29,7 +30,9 @@ export default async function (req: Request): Promise<Response> {
       return Response.json({ code: 'suspended', error: SUSPENDED_MESSAGE }, { status: 403 });
     }
 
-    const valid = validateAttachments(payload?.attachments);
+    // Only files registered by registerAttachment and owned by the sender are
+    // accepted. Client-supplied URLs are never stored or shown to a recipient.
+    const valid = await resolveOwnedAttachments(base44, user, payload?.attachments);
     if (!valid.ok) {
       return Response.json({ error: valid.error, code: valid.code }, { status: 400 });
     }
@@ -133,7 +136,7 @@ export default async function (req: Request): Promise<Response> {
         surface: 'message',
         rule: `image_${screenedFiles.verdict.category || 'unsafe'}`,
         severity: screenedFiles.verdict.severity === 'high' ? 'high' : 'low',
-        excerpt: `${screenedFiles.file.name}: ${screenedFiles.file.url}`,
+        excerpt: String(screenedFiles.file.name || ''),
         detail: screenedFiles.verdict.reason,
       });
       return Response.json({ blocked: true, reason: IMAGE_BLOCK_REASON });
@@ -156,19 +159,21 @@ export default async function (req: Request): Promise<Response> {
     }
 
     const threadKey = [fromEmail, toEmail].sort().join('|');
+    // The display name comes from the session's own profile, never the request.
+    const fromName = String(senderProfile?.full_name || user.full_name || '');
     const created = await base44.asServiceRole.entities.Message.create({
       thread_key: threadKey,
       from_email: fromEmail,
-      from_name: String(payload?.fromName || user.full_name || ''),
+      from_name: fromName,
       to_email: toEmail,
       body,
-      attachments: screenedFiles.files,
+      attachments: screenedFiles.files.map(attachmentMetadata),
     });
 
     // Best-effort push to the recipient, only if they opted in. A failure here
     // must never affect a message that was already delivered.
     await pushToUser(base44, toEmail, {
-      title: `New message from ${String(payload?.fromName || user.full_name || 'a member')}`,
+      title: `New message from ${fromName || 'a member'}`,
       body: body.slice(0, 140) || 'Sent you an attachment.',
       url: `/app/messages?to=${encodeURIComponent(fromEmail)}`,
       tag: `msg-${threadKey}`,
@@ -176,6 +181,7 @@ export default async function (req: Request): Promise<Response> {
 
     return Response.json({ message: created });
   } catch (error: any) {
-    return Response.json({ error: error?.message || 'Could not send that message.' }, { status: 500 });
+    console.error('send-message failed', error?.message || error);
+    return Response.json({ error: 'Could not send that message.' }, { status: 500 });
   }
 }

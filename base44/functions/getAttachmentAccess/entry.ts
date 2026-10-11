@@ -23,6 +23,7 @@ export default async function(req) {
     const { signed_url } = await base44.asServiceRole.integrations.Core.CreateFileSignedUrl({ file_uri: file.file_uri, expires_in: 300 });
     return Response.json({ url: signed_url, expires_in: 300 });
   } catch (error) {
-    return Response.json({ error: error?.message || 'Could not open that attachment.' }, { status: 400 });
+    console.error('getAttachmentAccess failed', error?.message || error);
+    return Response.json({ error: 'Could not open that attachment.' }, { status: 400 });
   }
 }

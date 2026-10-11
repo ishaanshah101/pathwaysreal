@@ -134,6 +134,7 @@ export default async function (req: Request): Promise<Response> {
 
     return Response.json({ post: created });
   } catch (error: any) {
-    return Response.json({ error: error?.message || 'Could not publish that post.' }, { status: 500 });
+    console.error('create-post failed', error?.message || error);
+    return Response.json({ error: 'Could not publish that post.' }, { status: 500 });
   }
 }

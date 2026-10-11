@@ -33,6 +33,7 @@ export default async function(req) {
     const attachment = await base44.asServiceRole.entities.Attachment.create({ user_email: user.email, file_uri: uri, name, mime, size, kind: kindOf(name, mime) });
     return Response.json({ attachment: attachmentMetadata(attachment) });
   } catch (error) {
-    return Response.json({ error: error?.message || 'Could not register this upload. Remove it and try again.' }, { status: 400 });
+    console.error('registerAttachment failed', error?.message || error);
+    return Response.json({ error: 'Could not register this upload. Remove it and try again.' }, { status: 400 });
   }
 }

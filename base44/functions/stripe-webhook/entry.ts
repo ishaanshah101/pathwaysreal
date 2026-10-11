@@ -186,6 +186,7 @@ Deno.serve(async (req) => {
     return Response.json({ received: true, type: event.type, status: sub.status });
   } catch (error) {
     // A 500 tells Stripe to retry, which is what we want on a transient failure.
-    return Response.json({ error: (error as Error).message }, { status: 500 });
+    console.error('stripe-webhook failed', (error as Error)?.message || error);
+    return Response.json({ error: 'Webhook processing failed.' }, { status: 500 });
   }
 });

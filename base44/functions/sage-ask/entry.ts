@@ -237,6 +237,7 @@ export default async function(req) {
 
     return Response.json({ answer, threadId, title: thread.title, messageId: savedAnswer?.id });
   } catch (error) {
-    return Response.json({ error: (error as Error).message }, { status: 500 });
+    console.error('sage-ask failed', (error as Error)?.message || error);
+    return Response.json({ error: 'Sage could not answer right now. Please try again.' }, { status: 500 });
   }
 }

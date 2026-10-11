@@ -20,7 +20,7 @@ const FREE_QUESTIONS_PER_IP_PER_DAY = 1;
 
 // Circuit breaker on total spend. If the page gets scraped or goes viral, the
 // bill stops here instead of running all night.
-const GLOBAL_FREE_QUESTIONS_PER_DAY = 300;
+const GLOBAL_FREE_QUESTIONS_PER_DAY = 150;
 // ---------------------------------------------------------------------------
 
 const SCOPE = `college admissions, college applications, application essays and personal statements, building a college list, majors and academic paths, scholarships and financial aid, standardized tests such as the SAT and ACT, high school course planning, extracurriculars and summer plans, recommendation letters, internships, early career and job-search questions, and what college life is actually like`;
@@ -48,11 +48,11 @@ function answerLooksWrong(a: string) {
   return false;
 }
 
-// This endpoint is deliberately open to signed-out visitors: the whole point of
-// the free sample is that no account is needed. So the caller is identified by
-// where the request comes from rather than by who they are. Only the Pathways
-// site itself may spend a model call, which stops the public function URL from
-// being used as a free LLM proxy by anything that is not this app.
+// This endpoint is deliberately open to signed-out visitors. The origin check
+// below only filters casual cross-site browser use: Origin/Referer are
+// client-controlled, so it is NOT an access control. Real protection is the
+// per-IP counter (keyed on the proxy-set IP), the global daily cap, and the
+// lower global cap for anonymous traffic.
 const ALLOWED_HOSTS = [
   'pathways.uno',
   'www.pathways.uno',
@@ -77,10 +77,18 @@ function utcDay() {
   return new Date().toISOString().slice(0, 10);
 }
 
+// The connection-level IP set by the edge proxy. The FIRST x-forwarded-for
+// entry is client-supplied, so only the LAST hop (appended by our proxy) is
+// used as a fallback. All callers without a trustworthy IP share one bucket.
 function clientIp(req: Request) {
+  const cf = req.headers.get("cf-connecting-ip");
+  if (cf) return cf.trim();
   const fwd = req.headers.get("x-forwarded-for");
-  if (fwd) return fwd.split(",")[0].trim();
-  return req.headers.get("x-real-ip") || req.headers.get("cf-connecting-ip") || "unknown";
+  if (fwd) {
+    const hops = fwd.split(",").map((s) => s.trim()).filter(Boolean);
+    if (hops.length) return hops[hops.length - 1];
+  }
+  return "unknown";
 }
 
 // This function serves signed-out visitors, so the request carries no user
@@ -213,6 +221,7 @@ Sage:`;
 
     return Response.json({ answer: raw, remaining: 0 });
   } catch (error) {
-    return Response.json({ error: (error as Error).message }, { status: 500 });
+    console.error('sage-trial failed', (error as Error)?.message || error);
+    return Response.json({ error: 'Sage could not answer right now. Please try again.' }, { status: 500 });
   }
 }

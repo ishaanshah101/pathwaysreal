@@ -30,6 +30,25 @@ import {
 const MAX_EMAILS = 200;
 const MAX_DIRECTORY = 500;
 
+// Of the requested emails, keep only those tied to the caller by a connection
+// (any status), a follow, a message, or a post they authored.
+async function relatedEmails(base44: any, me: string, requested: string[]): Promise<Set<string>> {
+  const db = base44.asServiceRole.entities;
+  const asList = (r: any) => (Array.isArray(r) ? r : (r?.items || []));
+  const [conns, follows, msgs, posts] = await Promise.all([
+    db.Connection.filter({ $or: [{ from_email: me }, { to_email: me }] }).catch(() => []),
+    db.Follow.filter({ $or: [{ follower_email: me }, { followed_email: me }] }).catch(() => []),
+    db.Message.filter({ $or: [{ from_email: me }, { to_email: me }] }, '-created_date', 1000).catch(() => []),
+    db.Post.filter({ author_email: { $in: requested } }, '-created_date', 1000).catch(() => []),
+  ]);
+  const ok = new Set<string>();
+  for (const c of asList(conns)) { ok.add(normalizeEmail(c.from_email)); ok.add(normalizeEmail(c.to_email)); }
+  for (const f of asList(follows)) { ok.add(normalizeEmail(f.follower_email)); ok.add(normalizeEmail(f.followed_email)); }
+  for (const m of asList(msgs)) { ok.add(normalizeEmail(m.from_email)); ok.add(normalizeEmail(m.to_email)); }
+  for (const p of asList(posts)) ok.add(normalizeEmail(p.author_email));
+  return new Set(requested.filter((e) => ok.has(e)));
+}
+
 export default async function (req: Request): Promise<Response> {
   try {
     const base44 = createClientFromRequest(req);
@@ -58,7 +77,10 @@ export default async function (req: Request): Promise<Response> {
     ]);
 
     const all = Array.isArray(rawProfiles) ? rawProfiles : [];
-    const wanted = requested.length ? new Set(requested) : null;
+    // Email lookups only resolve people the caller already has a relationship
+    // with, so this mode cannot be used to enumerate the membership past the
+    // directory cap.
+    const wanted = requested.length ? await relatedEmails(base44, myEmail, requested) : null;
 
     const rows = [];
     for (const p of all) {

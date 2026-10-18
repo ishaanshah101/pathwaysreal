@@ -1,23 +1,11 @@
-import { createClientFromRequest } from "npm:@base44/sdk@0.8.44";
+import { createClientFromRequest } from "npm:@base44/sdk@0.8.54";
 import { consumeAtomicLimits } from '../../shared/atomicRateLimit.ts';
+import { requirePost, readJsonObject, RequestError, safeFailure } from '../../shared/requestSafety.ts';
 
-// The free sample on the public /sage page. One question, then it stops.
-//
-// The limit is counted atomically in Redis against a hash of the visitor's IP,
-// using server-only credentials. Clearing cookies, opening an incognito
-// window, or registering a new account does not reset it, because none of
-// those change the IP and none of them are what the counter keys on.
-//
-// Signing up does not unlock more free questions either. A registered user who
-// has not paid gets the paywall from sage-ask, same as everyone else.
-
-// --- knobs -----------------------------------------------------------------
-// One free question per IP per UTC day.
-//
-// Trade-off worth knowing: a whole school behind one shared network address
-// looks like a single visitor, so the first student to try it uses up the
-// school's question for the day. If that starts costing sign-ups, raise this.
-const FREE_QUESTIONS_PER_IP_PER_DAY = 1;
+// The /sage page stays public, but every model request requires a real session.
+// The daily allowance belongs to the authenticated account, not a caller-supplied
+// IP or browser header. Changing networks cannot reset it.
+const FREE_QUESTIONS_PER_USER_PER_DAY = 1;
 
 // Circuit breaker on total spend. If the page gets scraped or goes viral, the
 // bill stops here instead of running all night.
@@ -29,7 +17,7 @@ const SCOPE = `college admissions, college applications, application essays and 
 const REFUSAL =
   "I only help with college and career questions. Ask me about applications, essays, majors, scholarships, tests, extracurriculars, or career paths and I am all yours.";
 
-const OFF_TOPIC_PATTERNS: RegExp[] = [
+const OFF_TOPIC_PATTERNS = [
   /\b(write|generate|debug|fix|refactor|explain)\s+(me\s+)?(some\s+|a\s+|the\s+)?(python|javascript|java|c\+\+|c#|rust|go|sql|html|css|php|ruby|swift|kotlin|typescript|bash|shell)\b/i,
   /\b(write|give|show)\s+(me\s+)?(a\s+)?(script|program|function|code|algorithm|regex|query)\b/i,
   /```/,
@@ -39,90 +27,35 @@ const OFF_TOPIC_PATTERNS: RegExp[] = [
   /\b(recipe|lyrics|poem about|translate this|homework answers|essay for me to submit)\b/i,
 ];
 
-function looksOffTopic(q: string) {
+function looksOffTopic(q) {
   return OFF_TOPIC_PATTERNS.some((re) => re.test(q));
 }
 
-function answerLooksWrong(a: string) {
+function answerLooksWrong(a) {
   if (/```/.test(a)) return true;
   if (/\b(def |function |import |console\.log|public static void|#include|SELECT .* FROM)\b/.test(a)) return true;
   return false;
-}
-
-// This endpoint is deliberately open to signed-out visitors. The origin check
-// below only filters casual cross-site browser use: Origin/Referer are
-// client-controlled, so it is NOT an access control. Real protection is the
-// per-IP counter (keyed on the proxy-set IP), the global daily cap, and the
-// lower global cap for anonymous traffic.
-const ALLOWED_HOSTS = [
-  'pathways.uno',
-  'www.pathways.uno',
-  'cac-pathways-d94b0ec7.base44.app',
-];
-
-function isAllowedOrigin(req: Request) {
-  const source = req.headers.get('origin') || req.headers.get('referer') || '';
-  if (!source) return false;
-  try {
-    const { hostname, protocol } = new URL(source);
-    if (protocol !== 'https:' && hostname !== 'localhost') return false;
-    return ALLOWED_HOSTS.includes(hostname)
-      || hostname === 'localhost'
-      || hostname.endsWith('.base44.app');
-  } catch {
-    return false;
-  }
 }
 
 function utcDay() {
   return new Date().toISOString().slice(0, 10);
 }
 
-// The connection-level IP set by the edge proxy. The FIRST x-forwarded-for
-// entry is client-supplied, so only the LAST hop (appended by our proxy) is
-// used as a fallback. All callers without a trustworthy IP share one bucket.
-function clientIp(req: Request) {
-  const cf = req.headers.get("cf-connecting-ip");
-  if (cf) return cf.trim();
-  const fwd = req.headers.get("x-forwarded-for");
-  if (fwd) {
-    const hops = fwd.split(",").map((s) => s.trim()).filter(Boolean);
-    if (hops.length) return hops[hops.length - 1];
-  }
-  return "unknown";
-}
-
-// This function serves signed-out visitors, so the request carries no user
-// context. The model call always runs as service role.
-async function invokeModel(base44: any, prompt: string) {
-  return await base44.asServiceRole.integrations.Core.InvokeLLM({ prompt });
-}
-
-async function sha256(text: string) {
-  const data = new TextEncoder().encode(text);
-  const digest = await crypto.subtle.digest("SHA-256", data);
-  return Array.from(new Uint8Array(digest))
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
-}
-
-
-export default async function (req: Request): Promise<Response> {
+export default async function(req) {
   try {
-    // Checked before anything else, so a stranger hitting the raw URL never
-    // reaches the counters, let alone the model.
-    if (!isAllowedOrigin(req)) {
-      return Response.json(
-        { error: 'Ask Sage from the Pathways site.', code: 'bad_origin' },
-        { status: 403 },
-      );
+    requirePost(req);
+    const base44 = createClientFromRequest(req);
+    const user = await base44.auth.me();
+    if (!user?.id || !user?.email) {
+      return Response.json({ error: 'Sign in to ask your free Sage question.', code: 'sign_in_required' }, { status: 401 });
     }
 
-    const base44 = createClientFromRequest(req);
-
-    const body = await req.json().catch(() => ({}));
-    const question = String(body?.question ?? "").trim();
-    const grade = String(body?.grade ?? "").trim().slice(0, 40);
+    const body = await readJsonObject(req);
+    if (typeof body.question !== 'string' || (body.grade != null && typeof body.grade !== 'string')) {
+      throw new RequestError('Enter a question and a valid grade.');
+    }
+    const question = body.question.trim();
+    const grade = (body.grade || '').trim().slice(0, 40);
 
     if (!question) {
       return Response.json({ error: "Ask a question first." }, { status: 400 });
@@ -136,7 +69,6 @@ export default async function (req: Request): Promise<Response> {
 
     const day = utcDay();
     const expiresAt = Date.parse(`${day}T00:00:00.000Z`) / 1000 + 86400;
-    const ipHash = await sha256(clientIp(req));
     const offTopic = looksOffTopic(question);
 
     // Both budgets are reserved in ONE atomic operation before invoking AI.
@@ -144,7 +76,7 @@ export default async function (req: Request): Promise<Response> {
     // Errors propagate to the outer handler: never proceed without a reservation.
     const limit = await consumeAtomicLimits([
       { key: `trial:GLOBAL:${day}`, limit: GLOBAL_FREE_QUESTIONS_PER_DAY, expiresAt },
-      { key: `trial:${ipHash}:${day}`, limit: FREE_QUESTIONS_PER_IP_PER_DAY, expiresAt },
+      { key: `trial:USER:${user.id}:${day}`, limit: FREE_QUESTIONS_PER_USER_PER_DAY, expiresAt },
     ], !offTopic);
     if (!limit.ok) {
       const global = limit.deniedIndex === 0;
@@ -156,7 +88,7 @@ export default async function (req: Request): Promise<Response> {
       }, { status: 429 });
     }
     if (offTopic) {
-      return Response.json({ answer: REFUSAL, refused: true, remaining: FREE_QUESTIONS_PER_IP_PER_DAY - limit.counts[1] });
+      return Response.json({ answer: REFUSAL, refused: true, remaining: FREE_QUESTIONS_PER_USER_PER_DAY - limit.counts[1] });
     }
     // Reservations are not refunded if the model fails, matching the existing
     // fail-closed policy and preventing retries from becoming free model calls.
@@ -181,7 +113,7 @@ ${question}
 
 Sage:`;
 
-    const res = await invokeModel(base44, prompt);
+    const res = await base44.asServiceRole.integrations.Core.InvokeLLM({ prompt });
     const raw = typeof res === "string" ? res : JSON.stringify(res);
 
     if (answerLooksWrong(raw)) {
@@ -190,7 +122,6 @@ Sage:`;
 
     return Response.json({ answer: raw, remaining: 0 });
   } catch (error) {
-    console.error('sage-trial failed', (error as Error)?.message || error);
-    return Response.json({ error: 'Sage could not answer right now. Please try again.' }, { status: 500 });
+    return safeFailure('sage-trial', error, 'Sage could not answer right now. Please try again.');
   }
 }

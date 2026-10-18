@@ -3,6 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { Link } from 'react-router-dom';
 import FieldSelect from '@/components/ui/FieldSelect';
 import { isNativeApp } from '@/lib/platform';
+import { useAuth } from '@/lib/AuthContext';
 
 // The free sample. The model call itself lives in the sage-trial backend
 // function, which enforces the one-question limit and the topic rules. This
@@ -21,6 +22,7 @@ function cleanSage(text) {
 
 export default function AskSage() {
   const native = isNativeApp();
+  const { isAuthenticated, isLoadingAuth } = useAuth();
   const [grade, setGrade] = useState('11th grade');
   const [question, setQuestion] = useState('');
   const [answer, setAnswer] = useState('');
@@ -29,7 +31,11 @@ export default function AskSage() {
   const [error, setError] = useState('');
 
   const ask = async () => {
-    if (!question.trim() || loading || spent) return;
+    if (!question.trim() || loading || spent || isLoadingAuth) return;
+    if (!isAuthenticated) {
+      window.location.href = '/login?returnTo=%2Fsage';
+      return;
+    }
     setLoading(true);
     setAnswer('');
     setError('');
@@ -44,6 +50,9 @@ export default function AskSage() {
       if (!res?.data?.refused) setSpent(true);
     } catch (err) {
       const data = err?.response?.data;
+      if ((err?.response?.status ?? err?.status) === 401) {
+        window.location.href = '/login?returnTo=%2Fsage';
+      }
       setError(data?.error || err?.message || 'Sage could not answer just now. Try again in a moment.');
       if (data?.code === 'trial_used' || data?.code === 'trial_closed') setSpent(true);
     }
@@ -56,8 +65,8 @@ export default function AskSage() {
       <h2 style={{ fontSize: 'clamp(24px,2.8vw,32px)', margin: '0 0 10px' }}>Ask Sage one question, free</h2>
       <p style={{ maxWidth: '52ch', color: 'var(--color-neutral-800)', marginBottom: 20, fontSize: 15.5, lineHeight: 1.6 }}>
         {native
-          ? 'Ask anything about applications, majors, essays, or scholarships. No account needed. One free question per day.'
-          : 'Ask anything about applications, majors, essays, or scholarships. No account needed. One question per day, then it is $5 a month for as many as you like.'}
+          ? 'Ask anything about applications, majors, essays, or scholarships. Sign in for one free question per account each day.'
+          : 'Ask anything about applications, majors, essays, or scholarships. Sign in for one free question per account each day, then it is $5 a month for as many as you like.'}
       </p>
       <div className="card elev-sm" style={{ padding: 24, gap: 14, maxWidth: 720 }}>
         <div className="field">
@@ -65,7 +74,7 @@ export default function AskSage() {
           <FieldSelect
             id="sage-grade"
             value={grade}
-            disabled={spent}
+            disabled={spent || isLoadingAuth || !isAuthenticated}
             onValueChange={setGrade}
             options={['9th grade', '10th grade', '11th grade', '12th grade', 'College student'].map((g) => [g, g])}
           />
@@ -76,22 +85,26 @@ export default function AskSage() {
             id="sage-q"
             className="input"
             value={question}
-            disabled={spent}
+            disabled={spent || isLoadingAuth || !isAuthenticated}
             onChange={(e) => setQuestion(e.target.value)}
             placeholder="How do I pick which colleges to apply to?"
           />
         </div>
 
-        {!spent && (
+        {!spent && (!isLoadingAuth && !isAuthenticated ? (
+          <Link to="/login?returnTo=%2Fsage" className="btn btn-primary self-start no-underline">
+            Sign in to ask Sage
+          </Link>
+        ) : (
           <button
             type="button"
             className="btn btn-primary self-start"
             onClick={ask}
-            disabled={loading || !question.trim()}
+            disabled={isLoadingAuth || loading || !question.trim()}
           >
-            {loading ? 'Sage is thinking…' : 'Ask Sage'}
+            {isLoadingAuth ? 'Checking sign-in…' : loading ? 'Sage is thinking…' : 'Ask Sage'}
           </button>
-        )}
+        ))}
 
         {error && (
           <p role="alert" className="msg msg-error" style={{ margin: 0 }}>{error}</p>

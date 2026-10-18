@@ -9,23 +9,25 @@ export default async function(req) {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
     if (!user?.email) return Response.json({ error: 'Please sign in to upload files.' }, { status: 401 });
-    const body = await req.json();
-    const uri = typeof body.file_uri === 'string' ? body.file_uri : '';
-    const name = String(body.name || '').split(/[\\/]/).pop().replace(/[\x00-\x1f]/g, '').slice(0, 200);
-    if (!/^(mp\/)?private\//.test(uri) || uri.includes('..') || !name) return Response.json({ error: 'Choose an uploaded private file with a name.' }, { status: 400 });
+    // A storage key, even one that exists, is not proof of upload ownership.
+    // Accept file bytes only; upload and record the owner in this same request.
+    if (!/^multipart\/form-data(?:;|$)/i.test(req.headers.get('content-type') || '')) {
+      return Response.json({ error: 'Choose a file to upload. Existing storage references are not accepted.' }, { status: 400 });
+    }
     if (isSuspended(await getProfile(base44, user.email))) return Response.json({ error: SUSPENDED_MESSAGE }, { status: 403 });
-    if (isBlockedType(name, String(body.mime || ''))) return Response.json({ error: 'Executable files cannot be shared on Pathways.' }, { status: 400 });
+    const form = await req.formData();
+    const file = form.get('file');
+    if (!(file instanceof File)) return Response.json({ error: 'Choose a file to upload.' }, { status: 400 });
+    const name = file.name.split(/[\\/]/).pop().replace(/[\x00-\x1f]/g, '').slice(0, 200);
+    if (!name || !file.size || file.size > MAX_FILE_BYTES) return Response.json({ error: 'Choose a named, nonempty file no larger than 25 MB.' }, { status: 400 });
+    if (isBlockedType(name, file.type)) return Response.json({ error: 'Executable files cannot be shared on Pathways.' }, { status: 400 });
     const limit = await consumeRateLimit(base44, user.email, 'register_attachment', { hour: 60, day: 200 });
     if (!limit.ok) return Response.json({ error: limit.message }, { status: 429 });
-    // Only register an attachment for this member; never expose a generic signer.
-    const canonicalUri = uri.replace(/^mp\//, '');
-    const registered = await base44.asServiceRole.entities.Attachment.filter({ file_uri: { $in: [canonicalUri, `mp/${canonicalUri}`] } });
-    if (registered.some((file) => file.user_email !== user.email)) {
-      return Response.json({ error: 'This file is not available in your uploads.' }, { status: 403 });
-    }
-    if (registered.length) return Response.json({ attachment: attachmentMetadata(registered[0]) });
+    // The URI comes exclusively from this server-performed private upload,
+    // never from form fields or from the absence of another Attachment row.
+    const { file_uri: uri } = await base44.integrations.Core.UploadPrivateFile({ file });
     const { signed_url } = await base44.asServiceRole.integrations.Core.CreateFileSignedUrl({ file_uri: uri, expires_in: 300 });
-    const response = await fetch(signed_url, { method: 'HEAD' });
+    const response = await fetch(signed_url, { method: 'HEAD', signal: AbortSignal.timeout(10000), redirect: 'error' });
     const size = Number(response.headers.get('content-length'));
     if (!response.ok || !Number.isSafeInteger(size) || size <= 0 || size > MAX_FILE_BYTES) return Response.json({ error: 'The stored file could not be verified or exceeds 25 MB.' }, { status: 400 });
     const mime = (response.headers.get('content-type') || 'application/octet-stream').split(';')[0];

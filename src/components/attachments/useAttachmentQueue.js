@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react';
-import { base44 } from '@/api/base44Client';
 import { registerAttachment } from '@/functions/registerAttachment';
 
 const MB = 1024 * 1024;
@@ -30,9 +29,8 @@ export default function useAttachmentQueue() {
     update((list) => [...list, ...entries]);
     await Promise.all(entries.map(async (entry) => {
       try {
-        const { file_uri } = await base44.integrations.Core.UploadPrivateFile({ file: entry.localFile });
+        const { data } = await registerAttachment({ file: entry.localFile });
         if (!current.current.some((f) => f.key === entry.key)) return;
-        const { data } = await registerAttachment({ file_uri, name: entry.name, mime: entry.mime });
         if (!data?.attachment) throw new Error('The upload could not be registered.');
         update((list) => list.map((f) => f.key === entry.key ? { ...f, ...data.attachment, status: 'ready' } : f));
       } catch (err) {

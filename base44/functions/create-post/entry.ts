@@ -1,7 +1,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 import { screenContent, classifyRisk, logModerationEvent, excerptOf, MODERATION_BLOCK_REASON } from '../../shared/moderation.ts';
 import { consumeRateLimit } from '../../shared/rateLimit.ts';
-import { screenAttachments, screenImage, IMAGE_BLOCK_REASON } from '../../shared/attachments.ts';
+import { screenAttachments, IMAGE_BLOCK_REASON } from '../../shared/attachments.ts';
 import { resolveOwnedAttachments, attachmentMetadata } from '../../shared/storedAttachments.ts';
 import { getProfile, isSuspended, SUSPENDED_MESSAGE } from '../../shared/accounts.ts';
 
@@ -23,6 +23,12 @@ export default async function (req: Request): Promise<Response> {
     const title = String(payload?.title || '').trim();
     const body = String(payload?.body || '').trim();
     const category = CATEGORIES.includes(payload?.category) ? payload.category : 'general';
+
+    // These legacy fields have no supported editor or renderer. Post images
+    // must use the owned attachment path, never arbitrary remote image URLs.
+    if (payload?.hero_image || payload?.footer_image) {
+      return Response.json({ error: 'Add post images as uploaded attachments.' }, { status: 400 });
+    }
 
     // The author's profile is loaded once, up here, because two things need it:
     // suspension, which has to stop a post before any work is done on it, and
@@ -50,8 +56,6 @@ export default async function (req: Request): Promise<Response> {
     }
 
     // Attachment shape and type checks happen before anything expensive.
-    const heroUrl = String(payload?.hero_image || '').trim();
-    const footerUrl = String(payload?.footer_image || '').trim();
     const valid = await resolveOwnedAttachments(base44, user, payload?.attachments);
     if (!valid.ok) {
       return Response.json({ error: valid.error, code: valid.code }, { status: 400 });
@@ -86,24 +90,7 @@ export default async function (req: Request): Promise<Response> {
       });
     }
 
-    // Every image is looked at by a vision model before it can be published.
-    // This fails closed: an image that cannot be checked does not go up.
-    for (const [label, url] of [['hero_image', heroUrl], ['footer_image', footerUrl]] as const) {
-      if (!url) continue;
-      const verdict = await screenImage(base44, url);
-      if (!verdict.safe) {
-        await logModerationEvent(base44, {
-          sender_email: authorEmail,
-          surface: 'post',
-          rule: `image_${verdict.category || label}`,
-          severity: verdict.severity === 'high' ? 'high' : 'low',
-          excerpt: `${label}: ${url}`,
-          detail: verdict.reason,
-        });
-        return Response.json({ blocked: true, reason: IMAGE_BLOCK_REASON });
-      }
-    }
-
+    // Owned attachment images still receive the existing safety screening.
     const screenedFiles = await screenAttachments(base44, valid.files);
     if (!screenedFiles.ok) {
       await logModerationEvent(base44, {
@@ -127,8 +114,6 @@ export default async function (req: Request): Promise<Response> {
       author_name: profile?.full_name || user.full_name || 'A Pathways member',
       author_role: profile?.role || 'student',
       author_headline: profile?.headline || [profile?.grade, profile?.school].filter(Boolean).join(' · '),
-      hero_image: heroUrl || undefined,
-      footer_image: footerUrl || undefined,
       attachments: screenedFiles.files.map(attachmentMetadata),
     });
 

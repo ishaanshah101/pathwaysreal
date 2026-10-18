@@ -26,7 +26,7 @@ export default function DeleteAccount() {
         </section>
         <section className="space-y-3">
           <h2 className="h-sans text-pw-lg text-ink">What happens to your data</h2>
-          <p>The following uses the wording in Privacy Policy section 7b.</p>
+          <p>Here is exactly what happens when an account is deleted.</p>
           <DeletionDetails />
           <p><Link to="/privacy">Read the full Privacy Policy</Link>.</p>
         </section>

@@ -435,9 +435,7 @@ export default function ProfilePage() {
                     in the device's own settings, not by us. */}
                 {native ? null : source === 'apple' ? (
                   <span style={{ fontSize: 12.5, color: 'var(--text-subtle)', lineHeight: 1.5 }}>
-                    {source === 'apple'
-                      ? 'Manage or cancel this subscription in your device settings.'
-                      : 'To manage or cancel this subscription, open Pathways in a web browser.'}
+                    Manage or cancel this subscription in your device settings.
                   </span>
                 ) : (
                   <button

@@ -155,9 +155,7 @@ export default function SageChat() {
                 wrapper: Apple does not allow it. */}
             {native ? null : source === 'apple' ? (
               <span style={{ fontSize: 11.5, color: 'var(--text-subtle)', maxWidth: 220, textAlign: 'right', lineHeight: 1.5 }}>
-                {source === 'apple'
-                  ? 'Manage this subscription in your device settings.'
-                  : 'To manage this subscription, open Pathways in a web browser.'}
+                Manage this subscription in your device settings.
               </span>
             ) : (
               <button type="button" className="btn btn-secondary" style={{ fontSize: 13 }} onClick={manageBilling}>

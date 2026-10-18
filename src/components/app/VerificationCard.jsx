@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Clock } from 'lucide-react';
 import VerifiedBadge from '@/components/app/VerifiedBadge';
+import FieldSelect from '@/components/ui/FieldSelect';
 
 // Onboarding tells adults they can ask to have their role verified "from your
 // profile once you are in", and until now there was nowhere to do it. A person
@@ -86,11 +87,16 @@ export default function VerificationCard({ profile, email }) {
           <>
             <div className="field">
               <label htmlFor="vr-role">What are you asking us to verify?</label>
-              <select id="vr-role" className="input" value={form.claimed_role} onChange={set('claimed_role')}>
-                <option value="college_student">College student</option>
-                <option value="educator">Educator / professor</option>
-                <option value="counselor">Admissions counselor</option>
-              </select>
+              <FieldSelect
+                id="vr-role"
+                value={form.claimed_role}
+                onValueChange={(claimed_role) => setForm((f) => ({ ...f, claimed_role }))}
+                options={[
+                  ['college_student', 'College student'],
+                  ['educator', 'Educator / professor'],
+                  ['counselor', 'Admissions counselor'],
+                ]}
+              />
             </div>
             <div className="field">
               <label htmlFor="vr-inst">Institution</label>

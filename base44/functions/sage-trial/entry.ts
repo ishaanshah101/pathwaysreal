@@ -1,4 +1,5 @@
 import { createClientFromRequest } from "npm:@base44/sdk@0.8.44";
+import { consumeAtomicLimits } from '../../shared/atomicRateLimit.ts';
 
 // The free sample on the public /sage page. One question, then it stops.
 //
@@ -105,21 +106,6 @@ async function sha256(text: string) {
     .join("");
 }
 
-// Read a counter row, or make one. Returns { row, count }.
-async function readBucket(db: any, bucket: string, day: string) {
-  const rows = await db.filter({ bucket }).catch(() => []);
-  const row = Array.isArray(rows) && rows.length > 0 ? rows[0] : null;
-  return { row, count: Number(row?.count ?? 0), day };
-}
-
-async function bumpBucket(db: any, bucket: string, day: string, row: any, count: number) {
-  const now = new Date().toISOString();
-  if (row?.id) {
-    await db.update(row.id, { count: count + 1, last_at: now }).catch(() => {});
-  } else {
-    await db.create({ bucket, day, count: 1, last_at: now }).catch(() => {});
-  }
-}
 
 export default async function (req: Request): Promise<Response> {
   try {
@@ -133,7 +119,6 @@ export default async function (req: Request): Promise<Response> {
     }
 
     const base44 = createClientFromRequest(req);
-    const db = base44.asServiceRole.entities.SageTrialUsage;
 
     const body = await req.json().catch(() => ({}));
     const question = String(body?.question ?? "").trim();
@@ -150,47 +135,31 @@ export default async function (req: Request): Promise<Response> {
     }
 
     const day = utcDay();
-
-    // Global spend guard first, so an abuse spike cannot run up a bill.
-    const globalBucket = `GLOBAL:${day}`;
-    const g = await readBucket(db, globalBucket, day);
-    if (g.count >= GLOBAL_FREE_QUESTIONS_PER_DAY) {
-      return Response.json(
-        {
-          error: "The free sample has hit its limit for today. Subscribe to Sage to ask anytime.",
-          code: "trial_closed",
-        },
-        { status: 429 },
-      );
-    }
-
-    // Per-visitor limit.
+    const expiresAt = Date.parse(`${day}T00:00:00.000Z`) / 1000 + 86400;
     const ipHash = await sha256(clientIp(req));
-    const bucket = `${ipHash}:${day}`;
-    const v = await readBucket(db, bucket, day);
+    const offTopic = looksOffTopic(question);
 
-    if (v.count >= FREE_QUESTIONS_PER_IP_PER_DAY) {
-      return Response.json(
-        {
-          error:
-            "That was your free question. Sage is $5 a month or $40 a year, and everything else on Pathways stays free.",
-          code: "trial_used",
-        },
-        { status: 429 },
-      );
+    // Both budgets are reserved in ONE atomic operation before invoking AI.
+    // Off-topic checks inspect the same limits without consuming a question.
+    // Errors propagate to the outer handler: never proceed without a reservation.
+    const limit = await consumeAtomicLimits([
+      { key: `trial:GLOBAL:${day}`, limit: GLOBAL_FREE_QUESTIONS_PER_DAY, expiresAt },
+      { key: `trial:${ipHash}:${day}`, limit: FREE_QUESTIONS_PER_IP_PER_DAY, expiresAt },
+    ], !offTopic);
+    if (!limit.ok) {
+      const global = limit.deniedIndex === 0;
+      return Response.json({
+        error: global
+          ? 'The free sample has hit its limit for today. Subscribe to Sage to ask anytime.'
+          : 'That was your free question. Sage is $5 a month or $40 a year, and everything else on Pathways stays free.',
+        code: global ? 'trial_closed' : 'trial_used',
+      }, { status: 429 });
     }
-
-    // Off-topic requests are refused without spending the free question, so a
-    // student who typos their way into a refusal is not punished for it.
-    if (looksOffTopic(question)) {
-      return Response.json({ answer: REFUSAL, refused: true, remaining: FREE_QUESTIONS_PER_IP_PER_DAY - v.count });
+    if (offTopic) {
+      return Response.json({ answer: REFUSAL, refused: true, remaining: FREE_QUESTIONS_PER_IP_PER_DAY - limit.counts[1] });
     }
-
-    // Count it before the model call. If the call fails they lose the question,
-    // which is the safe direction to fail: the alternative lets someone force
-    // errors and ask forever.
-    await bumpBucket(db, bucket, day, v.row, v.count);
-    await bumpBucket(db, globalBucket, day, g.row, g.count);
+    // Reservations are not refunded if the model fails, matching the existing
+    // fail-closed policy and preventing retries from becoming free model calls.
 
     const prompt = `You are Sage, a warm, concrete college and career advisor for high school students on Pathways. This is a free one-question sample on the public site.
 

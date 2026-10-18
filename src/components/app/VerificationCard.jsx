@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { base44 } from '@/api/base44Client';
-import { BadgeCheck, Clock } from 'lucide-react';
+import { Clock } from 'lucide-react';
+import VerifiedBadge from '@/components/app/VerifiedBadge';
 
 // Onboarding tells adults they can ask to have their role verified "from your
 // profile once you are in", and until now there was nowhere to do it. A person
@@ -67,11 +68,9 @@ export default function VerificationCard({ profile, email }) {
       <div style={{ background: 'var(--color-surface-2)', borderRadius: 18, padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
         {profile?.verified ? (
           <>
-            <span className="badge badge-verified self-start">
-              <BadgeCheck size={12} aria-hidden="true" /> Verified
-            </span>
+            <VerifiedBadge verified={profile?.verified} />
             <span style={{ fontSize: 12.5, color: 'var(--text-muted)', lineHeight: 1.5 }}>
-              Someone here has checked your role. Students see this on your profile.
+              A Pathways admin has confirmed your institutional email or role. Members see this badge on your profile.
             </span>
           </>
         ) : request?.status === 'pending' ? (

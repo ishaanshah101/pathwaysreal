@@ -10,6 +10,7 @@ import { SkeletonLine, SkeletonTitle } from '@/components/ui/Skeletons';
 import ChipPicker from '@/components/app/ChipPicker';
 import FieldSelect from '@/components/ui/FieldSelect';
 import VerificationCard from '@/components/app/VerificationCard';
+import VerifiedBadge from '@/components/app/VerifiedBadge';
 import DeleteAccountCard from '@/components/app/DeleteAccountCard';
 import NotificationSettingsCard from '@/components/app/NotificationSettingsCard';
 import { useFollows } from '@/lib/useFollows';
@@ -171,7 +172,10 @@ export default function ProfilePage() {
     <div className="flex flex-col" style={{ gap: 20, width: '100%' }}>
       <Seo title="Your Profile | Pathways" description="Edit your Pathways profile, topics, and Sage subscription." path="/app/profile" noindex />
       <div>
-        <h1 style={{ fontSize: 'clamp(26px,3.2vw,36px)', margin: '0 0 6px' }}>Your profile</h1>
+        <div className="flex items-center gap-3 flex-wrap mb-1.5">
+          <h1 style={{ fontSize: 'clamp(26px,3.2vw,36px)', margin: 0 }}>Your profile</h1>
+          <VerifiedBadge verified={profile?.verified} />
+        </div>
         <p style={{ color: 'var(--text-muted)', margin: 0, fontSize: 15 }}>
           Signed in as {user?.email}. This is what other members see when they find you.
         </p>

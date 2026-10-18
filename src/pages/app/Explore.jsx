@@ -4,6 +4,7 @@ import { authorAvatar, initialsOf } from '@/lib/avatar';
 import SafetyActions from '@/components/safety/SafetyActions';
 import ConnectButton from '@/components/app/ConnectButton';
 import FollowButton from '@/components/app/FollowButton';
+import VerifiedBadge from '@/components/app/VerifiedBadge';
 import { useFollows } from '@/lib/useFollows';
 import { useBlocks } from '@/lib/useBlocks';
 import { useConnections } from '@/lib/useConnections';
@@ -27,7 +28,7 @@ function MentorCard({ m, onConnect, connection, busy, onBlocked, following, foll
         <div className="flex flex-col" style={{ minWidth: 0, gap: 1 }}>
           <span className="flex items-center gap-[7px]" style={{ minWidth: 0 }}>
             <h2 className="h-sans" style={{ fontSize: 15.5, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.full_name}</h2>
-            {m.verified && <span className="badge badge-verified">Verified</span>}
+            <VerifiedBadge verified={!isSample && m.verified} />
           </span>
           <span style={{ fontSize: 12.5, color: 'var(--text-subtle)', lineHeight: 1.35 }}>
             {m.headline || [m.job_title, m.institution].filter(Boolean).join(', ') || [m.grade, m.school].filter(Boolean).join(' · ') || ROLE_LABELS[m.role]}

@@ -1,7 +1,7 @@
 {
   "name": "Report",
   "type": "object",
-  "description": "A user report about another user's message, post, or profile. Anyone can file one about someone else, but only admins can ever read them back: a reporter must not be able to audit their own reports, and a reported user must never learn a report exists.",
+  "description": "A private safety report. Members submit through memberActions, which verifies the reporter, context and request limits. Only admins can read or manage reports.",
   "properties": {
     "reporter_email": {
       "type": "string"
@@ -20,7 +20,7 @@
     },
     "context_id": {
       "type": "string",
-      "description": "Id of the reported message or post, or the reported user's email for a profile report"
+      "description": "The reported message, post or profile identifier"
     },
     "reason": {
       "type": "string",
@@ -63,7 +63,9 @@
   ],
   "rls": {
     "create": {
-      "data.reporter_email": "{{user.email}}"
+      "user_condition": {
+        "role": "admin"
+      }
     },
     "read": {
       "user_condition": {

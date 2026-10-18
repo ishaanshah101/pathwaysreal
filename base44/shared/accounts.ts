@@ -14,9 +14,10 @@ export function normalizeEmail(value: any): string {
 }
 
 export async function getProfile(base44: any, email: string) {
-  const { items } = await base44.asServiceRole.entities.Profile.filter({
+  const page = await base44.asServiceRole.entities.Profile.filter({
     user_email: normalizeEmail(email),
   }, { limit: 1 });
+  const items = Array.isArray(page) ? page : page.items;
   return items[0] || null;
 }
 

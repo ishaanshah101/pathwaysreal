@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
 import { requirePost, readJsonObject, safeFailure } from '../../shared/requestSafety.ts';
 import { sendGmail, escapeHtml } from '../../shared/gmail.ts';
 import { consumeRateLimit } from '../../shared/rateLimit.ts';

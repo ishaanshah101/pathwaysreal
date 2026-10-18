@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
+import { secrets } from 'base44:runtime';
 import { requirePost, readJsonObject, RequestError, safeFailure } from '../../shared/requestSafety.ts';
 import { consumeRateLimit } from '../../shared/rateLimit.ts';
 import { withActionLock } from '../../shared/actionLock.ts';
@@ -26,10 +27,10 @@ export default async function(req) {
         for (const sub of page.items) {
           if (sub.source === 'apple' || !sub.stripe_subscription_id || ['canceled', 'incomplete_expired'].includes(sub.status)) continue;
           if (!/^sub_[A-Za-z0-9]+$/.test(sub.stripe_subscription_id)) throw new Error('Invalid stored subscription');
-          const key = Deno.env.get('STRIPE_SECRET_KEY');
+          const key = secrets.get('STRIPE_SECRET_KEY');
           if (!key) throw new RequestError('Your subscription could not be cancelled, so no app data was deleted. Please try again later.', 503);
           const response = await fetch(`https://api.stripe.com/v1/subscriptions/${encodeURIComponent(sub.stripe_subscription_id)}`, {
-            method: 'DELETE', redirect: 'error', signal: AbortSignal.timeout(10000), headers: { Authorization: `Bearer ${key}` },
+            method: 'DELETE', redirect: 'manual', signal: AbortSignal.timeout(10000), headers: { Authorization: `Bearer ${key}` },
           });
           const result = await response.json();
           if (!response.ok && result.error?.code !== 'resource_missing') throw new RequestError('Your subscription could not be cancelled, so no app data was deleted. Please try again later.', 502);

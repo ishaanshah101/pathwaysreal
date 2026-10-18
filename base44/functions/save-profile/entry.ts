@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
 import { requirePost, readJsonObject, RequestError, safeFailure } from '../../shared/requestSafety.ts';
 import { consumeRateLimit } from '../../shared/rateLimit.ts';
 import { withActionLock } from '../../shared/actionLock.ts';

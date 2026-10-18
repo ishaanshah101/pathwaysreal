@@ -7,16 +7,17 @@ const CONSUME = `
 local now = tonumber(redis.call('TIME')[1])
 local counts = {}
 for i, key in ipairs(KEYS) do
-  local limit = tonumber(ARGV[i * 2])
-  local expires = tonumber(ARGV[i * 2 + 1])
+  local limit = tonumber(ARGV[i * 3 - 1])
+  local expires = tonumber(ARGV[i * 3])
+  local cost = tonumber(ARGV[i * 3 + 1])
   if expires <= now then return redis.error_reply('Rate limit window expired') end
   counts[i] = tonumber(redis.call('GET', key) or '0')
-  if counts[i] >= limit then return {0, i} end
+  if counts[i] + cost > limit then return {0, i} end
 end
 if ARGV[1] == '1' then
   for i, key in ipairs(KEYS) do
-    counts[i] = redis.call('INCR', key)
-    redis.call('EXPIREAT', key, ARGV[i * 2 + 1])
+    counts[i] = redis.call('INCRBY', key, ARGV[i * 3 + 1])
+    redis.call('EXPIREAT', key, ARGV[i * 3])
   end
 end
 return {1, 0, unpack(counts)}
@@ -31,7 +32,7 @@ export async function consumeAtomicLimits(buckets, consume = true) {
   if (url.protocol !== 'https:' || !url.hostname.endsWith('.upstash.io') || url.username || url.password) {
     throw new Error('Invalid rate limiter endpoint');
   }
-  if (!buckets.length || buckets.some((b) => !b.key || !Number.isSafeInteger(b.limit) || b.limit < 1 || !Number.isSafeInteger(b.expiresAt))) {
+  if (!buckets.length || buckets.some((b) => !b.key || !Number.isSafeInteger(b.limit) || b.limit < 1 || !Number.isSafeInteger(b.expiresAt) || !Number.isSafeInteger(b.cost ?? 1) || (b.cost ?? 1) < 1 || (b.cost ?? 1) > b.limit)) {
     throw new Error('Invalid rate limit configuration');
   }
   const keys = await Promise.all(buckets.map(async ({ key }) => {
@@ -44,7 +45,7 @@ export async function consumeAtomicLimits(buckets, consume = true) {
     method: 'POST', redirect: 'manual', signal: AbortSignal.timeout(10000),
     headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
     body: JSON.stringify(['EVAL', CONSUME, keys.length, ...keys, consume ? '1' : '0',
-      ...buckets.flatMap((b) => [String(b.limit), String(b.expiresAt)])]),
+      ...buckets.flatMap((b) => [String(b.limit), String(b.expiresAt), String(b.cost ?? 1)])]),
   });
   if (!response.ok) throw new Error('Rate limiter unavailable');
   const { result, error } = await response.json();

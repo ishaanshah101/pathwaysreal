@@ -7,7 +7,7 @@ async function command(args) {
   const url = new URL(endpoint);
   if (!token || url.protocol !== 'https:' || !url.hostname.endsWith('.upstash.io') || url.username || url.password) throw new Error('Action lock unavailable');
   const response = await fetch(url, {
-    method: 'POST', redirect: 'error', signal: AbortSignal.timeout(10000),
+    method: 'POST', redirect: 'manual', signal: AbortSignal.timeout(10000),
     headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify(args),
   });
   if (!response.ok) throw new Error('Action lock unavailable');

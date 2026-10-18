@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
+import { secrets } from 'base44:runtime';
 import { consumeRateLimit } from '../../shared/rateLimit.ts';
 import { withActionLock } from '../../shared/actionLock.ts';
 import { getProfile } from '../../shared/accounts.ts';
@@ -62,7 +63,7 @@ function form(params: Record<string, string | number | boolean | undefined>) {
 
 async function stripe(path, secretKey, params, method = 'POST', idempotencyKey) {
   const res = await fetch(`${STRIPE_API}${path}`, {
-    method, redirect: 'error', signal: AbortSignal.timeout(10000),
+    method, redirect: 'manual', signal: AbortSignal.timeout(10000),
     headers: { Authorization: `Bearer ${secretKey}`, 'Content-Type': 'application/x-www-form-urlencoded', ...(idempotencyKey ? { 'Idempotency-Key': idempotencyKey } : {}) },
     body: params ? form(params) : undefined,
   });
@@ -78,13 +79,13 @@ export default async function(req) {
     const user = await base44.auth.me();
     if (!user?.email) return Response.json({ error: 'You must be signed in.' }, { status: 401 });
     const { plan } = await readJsonObject(req);
-    if (!Object.prototype.hasOwnProperty.call(PLAN_TO_PRICE_ENV, plan)) throw new RequestError('Pick either the monthly or the yearly Sage plan.');
+    if (typeof plan !== 'string' || !Object.prototype.hasOwnProperty.call(PLAN_TO_PRICE_ENV, plan)) throw new RequestError('Pick either the monthly or the yearly Sage plan.');
     const limit = await consumeRateLimit(base44, user.email.toLowerCase(), 'start_checkout', { hour: 10, day: 20 });
     if (!limit.ok) return Response.json({ error: limit.message }, { status: 429 });
     const profile = await getProfile(base44, user.email);
     if (!profile?.onboarded || profile.suspended) throw new RequestError('Finish setting up your profile before subscribing.', 403);
-    const secretKey = Deno.env.get('STRIPE_SECRET_KEY');
-    const priceId = Deno.env.get(PLAN_TO_PRICE_ENV[plan]);
+    const secretKey = secrets.get('STRIPE_SECRET_KEY');
+    const priceId = plan === 'sage_yearly' ? secrets.get('STRIPE_PRICE_SAGE_YEARLY') : secrets.get('STRIPE_PRICE_SAGE_MONTHLY');
     if (!secretKey || !priceId) throw new RequestError('Billing is not configured yet.', 503);
     return await withActionLock(user.id, 'checkout', async () => {
       const db = base44.asServiceRole.entities.Subscription;
@@ -111,7 +112,7 @@ export default async function(req) {
         if (session.metadata?.plan === plan && session.url) return Response.json({ url: session.url, id: session.id });
         await stripe(`/checkout/sessions/${encodeURIComponent(session.id)}/expire`, secretKey);
       }
-      const appUrl = new URL(Deno.env.get('APP_PUBLIC_URL') || 'https://pathways.uno');
+      const appUrl = new URL('https://pathways.uno');
       if (appUrl.protocol !== 'https:' || appUrl.username || appUrl.password) throw new Error('Invalid billing return address');
       const session = await stripe('/checkout/sessions', secretKey, {
         mode: 'subscription', customer: customerId, 'line_items[0][price]': priceId, 'line_items[0][quantity]': 1,
@@ -119,7 +120,7 @@ export default async function(req) {
         'subscription_data[metadata][user_email]': user.email, 'subscription_data[metadata][plan]': plan, allow_promotion_codes: true,
         success_url: `${appUrl.origin}/app/sage?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${appUrl.origin}/app/sage?checkout=cancel`,
-      }, 'POST', `pathways-checkout-${user.id}-${plan}-${Math.floor(Date.now() / 1800000)}`);
+      }, 'POST', `pathways-checkout-${user.id}-${crypto.randomUUID()}`);
       return Response.json({ url: session.url, id: session.id });
     });
   } catch (error) {

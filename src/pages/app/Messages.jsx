@@ -153,7 +153,7 @@ export default function Messages() {
     }
 
     const real = [...map.entries()].map(([other, last]) => {
-      const realName = people.find((p) => p.user_email === other)?.full_name || last.from_name || other;
+      const realName = other.startsWith('deleted:') ? 'Deleted account' : people.find((p) => p.user_email === other)?.full_name || last.from_name || other;
       return {
         other,
         preview: last.body,
@@ -191,7 +191,7 @@ export default function Messages() {
     real.sort((a, b) => new Date(b.at) - new Date(a.at));
 
     if (activeWith && !real.some((r) => r.other === activeWith)) {
-      const realName = people.find((p) => p.user_email === activeWith)?.full_name || activeWith;
+      const realName = activeWith.startsWith('deleted:') ? 'Deleted account' : people.find((p) => p.user_email === activeWith)?.full_name || activeWith;
       real.unshift({
         other: activeWith,
         preview: 'Start the conversation',
@@ -545,6 +545,8 @@ export default function Messages() {
                   This is a sample conversation showing how mentoring works on Pathways. Find a real
                   member on Explore to start your own.
                 </div>
+              ) : activeWith.startsWith('deleted:') ? (
+                <p className="notice notice-info" role="status">This account has been deleted. You can still read this conversation.</p>
               ) : (
                 <form onSubmit={send} className="flex gap-2 items-end">
                   <textarea

@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { useProfile, ROLE_LABELS } from '@/lib/useProfile';
+import React, { useEffect, useState } from 'react';
+import { ROLE_LABELS } from '@/lib/useProfile';
 import { authorAvatar, initialsOf } from '@/lib/avatar';
 import SafetyActions from '@/components/safety/SafetyActions';
 import ConnectButton from '@/components/app/ConnectButton';
@@ -12,8 +12,6 @@ import { useDirectory } from '@/lib/usePeople';
 import Seo from '@/components/Seo';
 import PullToRefresh from '@/components/app/PullToRefresh';
 import { Search, UserSearch } from 'lucide-react';
-
-const PAGE_SIZE = 12;
 
 function MentorCard({ m, onConnect, connection, busy, onBlocked, following, followBusy, onToggleFollow }) {
   const [bg, fg] = authorAvatar(m.key || m.user_email || m.full_name || '?');
@@ -106,12 +104,15 @@ function MentorCard({ m, onConnect, connection, busy, onBlocked, following, foll
 }
 
 export default function Explore() {
-  const { email } = useProfile();
-  const { blockedEmails, reloadBlocks } = useBlocks();
+  const { reloadBlocks } = useBlocks();
   const [q, setQ] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
   const [topicFilter, setTopicFilter] = useState('all');
-  const [visible, setVisible] = useState(PAGE_SIZE);
+  const [search, setSearch] = useState('');
+  useEffect(() => {
+    const timer = setTimeout(() => setSearch(q.trim()), 300);
+    return () => clearTimeout(timer);
+  }, [q]);
   const [followingOnly, setFollowingOnly] = useState(false);
 
   // Follows are their own thing, entirely separate from connections: one-way,
@@ -136,40 +137,10 @@ export default function Explore() {
   // looked fine. get-profile reads as service role and shapes each row for the
   // person asking, so a student who is not connected to someone never receives
   // that person's school, grade or goals in the first place.
-  const { people, loading, error: directoryError, reload: load } = useDirectory();
-
-  // Topics come from the people who are actually here, so the filter never
-  // offers a topic that returns nobody.
-  const allTopics = useMemo(() => {
-    const set = new Set();
-    for (const p of people) (p.interests || []).forEach((t) => set.add(t));
-    return [...set].sort();
-  }, [people]);
-
-  const list = useMemo(() => {
-    // Blocks, suspended accounts and un-onboarded rows are already excluded
-    // server-side, and the server filters blocks in BOTH directions — the
-    // client only ever knew about people it had blocked itself, so anyone who
-    // had blocked this member still showed up here. The blockedEmails pass is
-    // kept as a belt-and-braces filter for rows already in state when a block
-    // is made, so the person disappears without waiting for a refetch.
-    const real = people.filter(
-      (p) => (p.user_email || p.member_ref) && p.user_email !== email && p.onboarded
-        && !blockedEmails.includes(p.user_email) && !blockedEmails.includes(p.member_ref),
-    );
-    const all = real;
-    const needle = q.trim().toLowerCase();
-    return all.filter((p) => {
-      if (followingOnly && !followingEmails.includes(String(p.member_ref || p.user_email).toLowerCase())) return false;
-      if (roleFilter !== 'all' && p.role !== roleFilter) return false;
-      if (topicFilter !== 'all' && !(p.interests || []).includes(topicFilter)) return false;
-      if (!needle) return true;
-      return [p.full_name, p.headline, p.school, p.bio, ...(p.interests || [])]
-        .filter(Boolean).join(' ').toLowerCase().includes(needle);
-    });
-  }, [people, q, roleFilter, topicFilter, email, blockedEmails, followingOnly, followingEmails]);
-
-  useEffect(() => { setVisible(PAGE_SIZE); }, [q, roleFilter, topicFilter, followingOnly]);
+  const {
+    people: list, loading, total, topics: allTopics, error: directoryError,
+    reload: load, hasMore, loadMore, loadingMore,
+  } = useDirectory({ search, role: roleFilter, topic: topicFilter, followingOnly, followingRefs: followingEmails });
 
   const page = (
     <div className="flex flex-col" style={{ gap: 20 }}>
@@ -177,7 +148,7 @@ export default function Explore() {
       <div>
         <h1 style={{ fontSize: 'clamp(26px,3.2vw,36px)', margin: '0 0 6px' }}>Find someone who's been there.</h1>
         <p style={{ color: 'var(--text-muted)', margin: 0, fontSize: 15 }} aria-live="polite">
-          {list.length} {list.length === 1 ? 'person' : 'people'} you can learn from. Connecting is always free.
+          {total} {total === 1 ? 'person' : 'people'} you can learn from. Connecting is always free.
         </p>
       </div>
 
@@ -211,6 +182,7 @@ export default function Explore() {
           <Search size={16} aria-hidden="true" style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: 'var(--color-neutral-500)' }} />
           <input
             aria-label="Search by name, school, or topic"
+            maxLength={100}
             className="input"
             style={{ paddingLeft: 38 }}
             placeholder="Search by name, school, or topic…"
@@ -271,7 +243,7 @@ export default function Explore() {
       ) : (
         <>
           <div className="grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 16 }}>
-            {list.slice(0, visible).map((m) => (
+            {list.map((m) => (
               <MentorCard
                 key={m.id}
                 m={m}
@@ -286,13 +258,14 @@ export default function Explore() {
             ))}
           </div>
 
-          {visible < list.length && (
+          {hasMore && (
             <button
               type="button"
               className="btn btn-secondary self-center"
-              onClick={() => setVisible((n) => n + PAGE_SIZE)}
+              disabled={loadingMore}
+              onClick={loadMore}
             >
-              Show more ({list.length - visible} left)
+              {loadingMore ? 'Loading…' : 'Show more'}
             </button>
           )}
         </>

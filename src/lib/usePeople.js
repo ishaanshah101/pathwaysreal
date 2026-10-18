@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 
 // Reading other members' profiles.
@@ -23,28 +24,29 @@ async function fetchProfiles(body) {
 /**
  * The member directory. Used by Explore.
  */
-export function useDirectory() {
-  const [people, setPeople] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-
-  const reload = useCallback(async () => {
-    setLoading(true);
-    try {
-      setPeople(await fetchProfiles({ directory: true }));
-      setError('');
-    } catch {
-      setPeople([]);
-      // A failed load must not render as an empty directory, or the page
-      // reports "0 members" for what is actually an outage.
-      setError('We could not load the directory. Check your connection and try again.');
-    }
-    setLoading(false);
-  }, []);
-
-  useEffect(() => { reload(); }, [reload]);
-
-  return { people, loading, error, reload };
+export function useDirectory(filters = {}) {
+  const query = useInfiniteQuery({
+    queryKey: ['member-directory', filters],
+    initialPageParam: undefined,
+    queryFn: async ({ pageParam }) => {
+      const response = await base44.functions.invoke('get-profile', { directory: true, ...filters, cursor: pageParam });
+      return response.data;
+    },
+    getNextPageParam: (page) => page.has_more ? page.next_cursor : undefined,
+    staleTime: 15000,
+    retry: 1,
+  });
+  return {
+    people: query.data?.pages.flatMap((page) => page.profiles) || [],
+    total: query.data?.pages[0]?.total || 0,
+    topics: query.data?.pages[0]?.topics || [],
+    loading: query.isPending,
+    loadingMore: query.isFetchingNextPage,
+    hasMore: Boolean(query.hasNextPage),
+    error: query.error ? 'We could not load the directory. Check your connection and try again.' : '',
+    reload: query.refetch,
+    loadMore: () => query.fetchNextPage(),
+  };
 }
 
 /**

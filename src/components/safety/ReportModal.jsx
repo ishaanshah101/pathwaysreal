@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useProfile } from '@/lib/useProfile';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import FieldSelect from '@/components/ui/FieldSelect';
 
 export const REPORT_REASONS = [
   ['inappropriate_contact', 'Asked for contact details or to meet up'],
@@ -86,14 +87,12 @@ export default function ReportModal({ open, onOpenChange, reportedEmail, reporte
           <form onSubmit={submit} className="flex flex-col" style={{ gap: 14 }}>
             <div className="field">
               <label htmlFor="report-reason">What happened?</label>
-              <select
+              <FieldSelect
                 id="report-reason"
-                className="input"
                 value={reason}
-                onChange={(e) => setReason(e.target.value)}
-              >
-                {REPORT_REASONS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-              </select>
+                onValueChange={setReason}
+                options={REPORT_REASONS}
+              />
             </div>
 
             <div className="field">

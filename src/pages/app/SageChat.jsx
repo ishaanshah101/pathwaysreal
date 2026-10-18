@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
+import TabActivityContext from '@/components/app/TabActivityContext';
 import { useSearchParams } from 'react-router-dom';
 import { useSubscription, openBillingPortal } from '@/lib/useSubscription';
 import { useSageChat } from '@/lib/useSageChat';
@@ -13,6 +14,7 @@ import Seo from '@/components/Seo';
 import { ArrowLeft } from 'lucide-react';
 
 export default function SageChat() {
+  const tabActive = useContext(TabActivityContext);
   const {
     subscription, hasSage, isPastDue, isCanceling, source,
     isLoadingSubscription, refetchSubscription,
@@ -28,6 +30,7 @@ export default function SageChat() {
   // closes the chat instead of leaving the app, and a chat can be linked to.
   // "new" is a real value: an empty chat that has no id yet.
   const threadParam = params.get('thread');
+  const previousThreadParam = useRef(threadParam);
 
   const openThread = (id) => {
     const next = new URLSearchParams(params);
@@ -52,13 +55,17 @@ export default function SageChat() {
   // State to URL, for the one case the hook moves on its own: the first question
   // in a new chat creates the thread and hands back its id.
   useEffect(() => {
+    const explicitThreadChange = previousThreadParam.current !== threadParam;
+    if (!tabActive || (native && explicitThreadChange)) return;
     if (threadParam && chat.activeId && threadParam !== chat.activeId) {
       const next = new URLSearchParams(params);
       next.set('thread', chat.activeId);
       setParams(next, { replace: true });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chat.activeId]);
+  }, [chat.activeId, tabActive, native ? threadParam : null]);
+
+  useEffect(() => { previousThreadParam.current = threadParam; }, [threadParam]);
 
   // Stripe redirects back here the instant payment succeeds, but the webhook
   // that actually grants access lands a moment later. Poll briefly so the user

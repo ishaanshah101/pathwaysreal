@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { NavLink, Link } from 'react-router-dom';
 import RouteTransition from '@/components/app/RouteTransition';
+import NativeTabOutlet from '@/components/app/NativeTabOutlet';
+import { isNativeApp } from '@/lib/platform';
 import { Home, Compass, MessageCircle, Sparkles, LogOut, UserPlus, Bookmark } from 'lucide-react';
 import Seo from '@/components/Seo';
 import BrandMark from '@/components/BrandMark';
@@ -191,7 +193,7 @@ export default function AppShell() {
       </div>
 
       <main id="main" className="app-main" style={{ maxWidth: 1080, margin: '0 auto', padding: '24px clamp(16px,4vw,40px) 80px' }}>
-        <RouteTransition />
+        {isNativeApp() ? <NativeTabOutlet tabs={PHONE_TABS} /> : <RouteTransition />}
       </main>
 
       <BottomTabBar

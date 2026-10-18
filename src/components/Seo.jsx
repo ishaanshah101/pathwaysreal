@@ -1,4 +1,5 @@
-import { useEffect } from 'react';
+import { useContext, useEffect } from 'react';
+import TabActivityContext from '@/components/app/TabActivityContext';
 
 const SITE = 'https://pathways.uno';
 
@@ -27,7 +28,9 @@ function upsertCanonical(href) {
 // it. Search and AI crawlers that do render JS read the updated head, and it
 // also fixes the browser tab and shared-link previews per page.
 export default function Seo({ title, description, path, noindex = false }) {
+  const active = useContext(TabActivityContext);
   useEffect(() => {
+    if (!active) return;
     if (title) {
       document.title = title;
       upsertMeta('meta[property="og:title"]', 'property', 'og:title', title);
@@ -45,7 +48,7 @@ export default function Seo({ title, description, path, noindex = false }) {
       'meta[name="robots"]', 'name', 'robots',
       noindex ? 'noindex, nofollow' : 'index, follow, max-snippet:-1, max-image-preview:large',
     );
-  }, [title, description, path, noindex]);
+  }, [title, description, path, noindex, active]);
 
   return null;
 }

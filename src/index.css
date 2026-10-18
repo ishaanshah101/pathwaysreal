@@ -511,6 +511,10 @@ button, .btn, .btn-chip, .seg-opt, .badge, .tag, .bottom-tab, .app-tabs a {
 .bottom-tabs { display: none; }
 
 @media (max-width: 767px) {
+  /* Override compact and inline sizes so every button remains tappable. */
+  .btn, .btn-chip { min-height: 44px !important; }
+  .btn-lg { min-height: 48px !important; }
+
   /* The header tabs give way to a real tab bar. */
   .app-nav .app-tabs { display: none !important; }
 

@@ -1,4 +1,5 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
+import TabActivityContext from '@/components/app/TabActivityContext';
 import { useSearchParams } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useProfile, threadKey } from '@/lib/useProfile';
@@ -52,6 +53,7 @@ function Bubble({ mine, children, meta }) {
 }
 
 export default function Messages() {
+  const tabActive = useContext(TabActivityContext);
   const { profile, email } = useProfile();
   const { blockedEmails, reloadBlocks } = useBlocks();
   const { connections } = useConnections();
@@ -132,14 +134,14 @@ export default function Messages() {
   // Tell the provider which conversation is open so an arriving message in
   // this thread is marked read instead of bumping the badge.
   useEffect(() => {
-    setActiveThread(activeWith);
+    setActiveThread(tabActive ? activeWith : null);
     return () => setActiveThread(null);
-  }, [activeWith, setActiveThread]);
+  }, [activeWith, setActiveThread, tabActive]);
 
   // Opening a conversation clears its unread count.
   useEffect(() => {
-    if (activeWith) markThreadRead(activeWith);
-  }, [activeWith, markThreadRead, messages.length]);
+    if (tabActive && activeWith) markThreadRead(activeWith);
+  }, [activeWith, markThreadRead, messages.length, tabActive]);
 
   const threads = useMemo(() => {
     const map = new Map();

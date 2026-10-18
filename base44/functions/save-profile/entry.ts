@@ -1,4 +1,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
+import { requirePost, readJsonObject, RequestError, safeFailure } from '../../shared/requestSafety.ts';
+import { consumeRateLimit } from '../../shared/rateLimit.ts';
+import { withActionLock } from '../../shared/actionLock.ts';
 
 // The only place a Profile should be written from the app.
 //
@@ -38,15 +41,26 @@ function ageFrom(birthYear: number, now = new Date()) {
 
 export default async function (req: Request): Promise<Response> {
   try {
+    requirePost(req);
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
     if (!user?.email) return Response.json({ error: 'Please sign in again.' }, { status: 401 });
 
     const email = String(user.email).toLowerCase();
-    const payload = await req.json().catch(() => ({}));
-
-    const existingRows = await base44.asServiceRole.entities.Profile.filter({ user_email: email });
-    const existing = Array.isArray(existingRows) && existingRows.length > 0 ? existingRows[0] : null;
+    const payload = await readJsonObject(req);
+    const sizes = { full_name: 120, grade: 120, school: 200, goals: 4000, bio: 4000, headline: 200, institution: 200, job_title: 200, help_with: 4000 };
+    for (const [field, max] of Object.entries(sizes)) {
+      if (payload[field] !== undefined && (typeof payload[field] !== 'string' || payload[field].length > max)) throw new RequestError(`Keep ${field.replaceAll('_', ' ')} under ${max} characters.`);
+    }
+    for (const field of ['interests', 'expertise']) {
+      if (payload[field] !== undefined && (!Array.isArray(payload[field]) || payload[field].length > 12 || payload[field].some((v) => typeof v !== 'string' || v.length > 60))) throw new RequestError('Choose up to 12 topics, with no more than 60 characters each.');
+    }
+    if (payload.onboarded !== undefined && typeof payload.onboarded !== 'boolean') throw new RequestError('Choose a valid profile setup state.');
+    const limit = await consumeRateLimit(base44, email, 'profile_update', { hour: 30, day: 100 });
+    if (!limit.ok) return Response.json({ error: limit.message }, { status: 429 });
+    return await withActionLock(user.id, 'account_write', async () => {
+    const { items: existingRows } = await base44.asServiceRole.entities.Profile.filter({ user_email: email }, { limit: 1 });
+    const existing = existingRows[0] || null;
 
     if (existing?.suspended) {
       return Response.json(
@@ -170,7 +184,8 @@ export default async function (req: Request): Promise<Response> {
     }
 
     return Response.json({ profile: saved });
-  } catch (error: any) {
-    return Response.json({ error: error?.message || 'Could not save your profile.' }, { status: 500 });
+    });
+  } catch (error) {
+    return safeFailure('save-profile', error, 'Could not save your profile.');
   }
 }

@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
+import { requirePost, readJsonObject, safeFailure } from '../../shared/requestSafety.ts';
 import { screenContent, classifyRisk, logModerationEvent, excerptOf, MODERATION_BLOCK_REASON } from '../../shared/moderation.ts';
 import { consumeRateLimit } from '../../shared/rateLimit.ts';
 import { screenAttachments, IMAGE_BLOCK_REASON } from '../../shared/attachments.ts';
@@ -11,11 +12,14 @@ import { pushToUser } from '../../shared/webPush.ts';
 // arbitrary address, and every message passes the safety checks below.
 export default async function (req: Request): Promise<Response> {
   try {
+    requirePost(req);
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
     if (!user?.email) return Response.json({ error: 'Please sign in again.' }, { status: 401 });
 
-    const payload = await req.json().catch(() => ({}));
+    const payload = await readJsonObject(req);
+    const attempt = await consumeRateLimit(base44, user.email.toLowerCase(), 'message_attempt', { hour: 120, day: 600 });
+    if (!attempt.ok) return Response.json({ error: attempt.message }, { status: 429 });
     // from_email in the request is ignored on purpose — identity comes from the
     // authenticated session only.
     const fromEmail = String(user.email).toLowerCase();
@@ -61,12 +65,9 @@ export default async function (req: Request): Promise<Response> {
 
     // A Connection is what unlocks messaging. Checked server side against the
     // real rows, so hiding the button was never the actual protection.
-    const conns = await base44.asServiceRole.entities.Connection.filter({ status: 'accepted' });
-    const connected = (Array.isArray(conns) ? conns : []).some((c: any) => {
-      const a = String(c.from_email || '').toLowerCase();
-      const b = String(c.to_email || '').toLowerCase();
-      return (a === fromEmail && b === toEmail) || (a === toEmail && b === fromEmail);
-    });
+    const connected = await base44.asServiceRole.entities.Connection.count({ status: 'accepted', $or: [
+      { from_email: fromEmail, to_email: toEmail }, { from_email: toEmail, to_email: fromEmail },
+    ] });
     if (!connected) {
       return Response.json(
         {
@@ -100,7 +101,8 @@ export default async function (req: Request): Promise<Response> {
     }
 
     // Then the classifier, for grooming patterns that use clean vocabulary.
-    const verdict = await classifyRisk(base44, body);
+    const verdict = await classifyRisk(base44, screenTarget);
+    if (!verdict.ok) return Response.json({ error: 'Safety checks are temporarily unavailable. Your message was not sent. Try again shortly.' }, { status: 503 });
     if (verdict.risk === 'high') {
       await logModerationEvent(base44, {
         sender_email: fromEmail,
@@ -174,7 +176,6 @@ export default async function (req: Request): Promise<Response> {
 
     return Response.json({ message: created });
   } catch (error: any) {
-    console.error('send-message failed', error?.message || error);
-    return Response.json({ error: 'Could not send that message.' }, { status: 500 });
+    return safeFailure('send-message', error, 'Could not send that message.');
   }
 }

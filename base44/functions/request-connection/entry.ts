@@ -1,4 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
+import { requirePost, readJsonObject, safeFailure } from '../../shared/requestSafety.ts';
+import { withActionLock } from '../../shared/actionLock.ts';
 import { consumeRateLimit } from '../../shared/rateLimit.ts';
 import { notify, displayName } from '../../shared/notify.ts';
 import {
@@ -18,16 +20,19 @@ import { resolveMember } from '../../shared/memberReferences.ts';
 
 export default async function (req: Request): Promise<Response> {
   try {
+    requirePost(req);
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
     if (!user?.email) return Response.json({ error: 'Please sign in again.' }, { status: 401 });
 
     const fromEmail = String(user.email).toLowerCase();
-    const payload = await req.json().catch(() => ({}));
+    const payload = await readJsonObject(req);
+    const attempt = await consumeRateLimit(base44, fromEmail, 'connection_attempt', { hour: 100, day: 300 });
+    if (!attempt.ok) return Response.json({ error: attempt.message }, { status: 429 });
     const target = payload?.targetProfileId ? `profile:${payload.targetProfileId}` : payload?.toEmail;
     const note = String(payload?.note || '').trim().slice(0, 500);
 
-    if (!target) return Response.json({ error: 'Who are you trying to connect with?' }, { status: 400 });
+    if (typeof target !== 'string' || !target || target.length > 330 || (payload.note != null && (typeof payload.note !== 'string' || payload.note.length > 500))) return Response.json({ error: 'Choose a member and keep the note under 500 characters.' }, { status: 400 });
     const [me, them] = await Promise.all([
       resolveMember(base44, fromEmail),
       resolveMember(base44, target),
@@ -41,8 +46,8 @@ export default async function (req: Request): Promise<Response> {
       return Response.json({ error: 'You cannot connect with yourself.' }, { status: 400 });
     }
 
-    if (!them) {
-      return Response.json({ error: 'We could not find that person.' }, { status: 404 });
+    if (!them?.onboarded || them.suspended) {
+      return Response.json({ error: 'That member is not available.' }, { status: 404 });
     }
 
     if (isSuspended(me)) {
@@ -73,12 +78,13 @@ export default async function (req: Request): Promise<Response> {
     }
 
     // Already connected, or a request already open in either direction.
-    const conns = await base44.asServiceRole.entities.Connection.filter({});
-    const existing = (Array.isArray(conns) ? conns : []).find((c: any) => {
-      const a = String(c.from_email || '').toLowerCase();
-      const b = String(c.to_email || '').toLowerCase();
-      return (a === fromEmail && b === toEmail) || (a === toEmail && b === fromEmail);
-    });
+    return await withActionLock([fromEmail, toEmail].sort().join('|'), 'connection_request', async () => {
+    const { items: conns } = await base44.asServiceRole.entities.Connection.filter({
+      status: { $in: ['accepted', 'pending'] }, $or: [
+        { from_email: fromEmail, to_email: toEmail }, { from_email: toEmail, to_email: fromEmail },
+      ],
+    }, { limit: 1, sort: '-updated_date' });
+    const existing = conns[0];
     if (existing) {
       if (existing.status === 'accepted') {
         return Response.json({ code: 'already_connected', error: 'You are already connected.' }, { status: 409 });
@@ -124,6 +130,7 @@ export default async function (req: Request): Promise<Response> {
       }
 
       const verdict = await classifyRisk(base44, note);
+      if (!verdict.ok) return Response.json({ error: 'Safety checks are temporarily unavailable. Your request was not sent. Try again shortly.' }, { status: 503 });
       if (verdict.risk === 'high') {
         await logModerationEvent(base44, {
           sender_email: fromEmail,
@@ -166,7 +173,8 @@ export default async function (req: Request): Promise<Response> {
     });
 
     return Response.json({ connection: created });
-  } catch (error: any) {
-    return Response.json({ error: error?.message || 'Could not send that request.' }, { status: 500 });
+    });
+  } catch (error) {
+    return safeFailure('request-connection', error, 'Could not send that request.');
   }
 }

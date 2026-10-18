@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
+import { requirePost, readJsonObject, safeFailure } from '../../shared/requestSafety.ts';
 import { screenContent, classifyRisk, logModerationEvent, excerptOf, MODERATION_BLOCK_REASON } from '../../shared/moderation.ts';
 import { consumeRateLimit } from '../../shared/rateLimit.ts';
 import { screenAttachments, IMAGE_BLOCK_REASON } from '../../shared/attachments.ts';
@@ -14,11 +15,12 @@ const CATEGORIES = [
 // messaging and the author can never be forged.
 export default async function (req: Request): Promise<Response> {
   try {
+    requirePost(req);
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
     if (!user?.email) return Response.json({ error: 'Please sign in again.' }, { status: 401 });
 
-    const payload = await req.json().catch(() => ({}));
+    const payload = await readJsonObject(req);
     const authorEmail = String(user.email).toLowerCase();
     const title = String(payload?.title || '').trim();
     const body = String(payload?.body || '').trim();
@@ -75,6 +77,7 @@ export default async function (req: Request): Promise<Response> {
     }
 
     const verdict = await classifyRisk(base44, combined);
+    if (!verdict.ok) return Response.json({ error: 'Safety checks are temporarily unavailable. Your post was not published. Try again shortly.' }, { status: 503 });
     if (verdict.risk === 'high') {
       await logModerationEvent(base44, {
         sender_email: authorEmail,
@@ -119,7 +122,6 @@ export default async function (req: Request): Promise<Response> {
 
     return Response.json({ post: created });
   } catch (error: any) {
-    console.error('create-post failed', error?.message || error);
-    return Response.json({ error: 'Could not publish that post.' }, { status: 500 });
+    return safeFailure('create-post', error, 'Could not publish that post.');
   }
 }

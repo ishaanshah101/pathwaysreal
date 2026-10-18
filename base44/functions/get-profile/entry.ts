@@ -1,130 +1,59 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
-import {
-  normalizeEmail,
-  shapeProfile,
-  connectedEmails,
-  blockedEitherWay,
-} from '../../shared/accounts.ts';
+import { normalizeEmail, shapeProfile, blockedEitherWay, getProfile } from '../../shared/accounts.ts';
+import { relatedProfileEmails, pageConnections, directoryQuery } from '../../shared/profileQueries.ts';
+import { consumeRateLimit } from '../../shared/rateLimit.ts';
+import { requirePost, readJsonObject, RequestError, safeFailure } from '../../shared/requestSafety.ts';
 
-// Reading other people's profiles.
-//
-// The Profile entity's read rule is deliberately narrow: your own row, or a row
-// you created, or an admin. That is correct — raw rows carry birth_year,
-// is_minor, plan and suspended, and none of that should ever reach another
-// member's browser.
-//
-// The consequence is that a client CANNOT read anyone else's profile directly.
-// Explore, Messages and Requests were all calling Profile.list() from the
-// browser, which returned exactly one row (your own) for a normal member and
-// every row for an admin. The app therefore looked complete to its admin and
-// showed an empty directory to everybody else. This function is the missing
-// piece the Profile schema already refers to.
-//
-// Two modes:
-//   { directory: true }        the member directory, for Explore
-//   { emails: [...] }          resolve specific people, for Messages/Requests
-//
-// Every row comes back through shapeProfile, so what a viewer sees depends on
-// whether they are connected to that person.
-
-const MAX_EMAILS = 200;
-const MAX_DIRECTORY = 500;
-
-// Of the requested emails, keep only those tied to the caller by a connection
-// (any status), a follow, a message, or a post they authored.
-async function relatedEmails(base44: any, me: string, requested: string[]): Promise<Set<string>> {
-  const db = base44.asServiceRole.entities;
-  const asList = (r: any) => (Array.isArray(r) ? r : (r?.items || []));
-  const [conns, follows, msgs, posts] = await Promise.all([
-    db.Connection.filter({ $or: [{ from_email: me }, { to_email: me }] }).catch(() => []),
-    db.Follow.filter({ $or: [{ follower_email: me }, { followed_email: me }] }).catch(() => []),
-    db.Message.filter({ $or: [{ from_email: me }, { to_email: me }] }, '-created_date', 1000).catch(() => []),
-    db.Post.filter({ author_email: { $in: requested } }, '-created_date', 1000).catch(() => []),
-  ]);
-  const ok = new Set<string>();
-  for (const c of asList(conns)) { ok.add(normalizeEmail(c.from_email)); ok.add(normalizeEmail(c.to_email)); }
-  for (const f of asList(follows)) { ok.add(normalizeEmail(f.follower_email)); ok.add(normalizeEmail(f.followed_email)); }
-  for (const m of asList(msgs)) { ok.add(normalizeEmail(m.from_email)); ok.add(normalizeEmail(m.to_email)); }
-  for (const p of asList(posts)) ok.add(normalizeEmail(p.author_email));
-  return new Set(requested.filter((e) => ok.has(e)));
-}
-
-export default async function (req: Request): Promise<Response> {
+export default async function(req) {
   try {
+    requirePost(req);
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
-    if (!user?.email) {
-      return Response.json({ error: 'Please sign in again.' }, { status: 401 });
+    if (!user?.email) return Response.json({ error: 'Please sign in again.' }, { status: 401 });
+    const me = normalizeEmail(user.email);
+    const payload = await readJsonObject(req);
+    if (payload.cursor != null && (typeof payload.cursor !== 'string' || payload.cursor.length > 4096)) throw new RequestError('That page is not available.');
+    if (payload.emails != null && (!Array.isArray(payload.emails) || payload.emails.length > 200 || payload.emails.some((v) => typeof v !== 'string' || v.length > 320))) throw new RequestError('Request no more than 200 members at once.');
+    if (payload.role && !['all', 'student', 'college_student', 'educator', 'counselor'].includes(payload.role)) throw new RequestError('Choose a valid role.');
+    if (payload.search != null && (typeof payload.search !== 'string' || payload.search.length > 100)) throw new RequestError('Keep searches under 100 characters.');
+    if (payload.topic != null && (typeof payload.topic !== 'string' || payload.topic.length > 60)) throw new RequestError('Choose a valid topic.');
+    const limit = await consumeRateLimit(base44, me, 'read_profiles', { hour: 300, day: 1500 });
+    if (!limit.ok) return Response.json({ error: limit.message }, { status: 429 });
+    const profile = await getProfile(base44, me);
+    if (profile?.suspended) return Response.json({ error: 'Your account is under review.' }, { status: 403 });
+    const directory = payload.directory === true;
+    const requested = [...new Set((payload.emails || []).map(normalizeEmail).filter(Boolean))];
+    if (!directory && !requested.length) return Response.json({ profiles: [], has_more: false });
+    const blocked = await blockedEitherWay(base44, me);
+    const db = base44.asServiceRole.entities;
+    let query;
+    if (directory) query = directoryQuery(payload, me, blocked);
+    else {
+      const related = await relatedProfileEmails(base44, me, requested);
+      const allowed = requested.filter((email) => related.has(email) && (email === me || !blocked.has(email)));
+      if (!allowed.length) return Response.json({ profiles: [], has_more: false });
+      query = { user_email: { $in: allowed } };
     }
-
-    const myEmail = normalizeEmail(user.email);
-    const payload = await req.json().catch(() => ({}));
-
-    const wantsDirectory = payload?.directory === true;
-    const requested = Array.isArray(payload?.emails)
-      ? payload.emails.map(normalizeEmail).filter(Boolean).slice(0, MAX_EMAILS)
-      : [];
-
-    if (!wantsDirectory && requested.length === 0) {
-      return Response.json({ profiles: [] });
+    const page = await db.Profile.filter(query, { limit: directory ? 50 : 200, cursor: payload.cursor, sort: 'id' });
+    const connections = await pageConnections(base44, me, page.items.map((p) => normalizeEmail(p.user_email)));
+    const profiles = page.items.map((p) => {
+      const email = normalizeEmail(p.user_email);
+      const matches = connections.filter((c) => normalizeEmail(c.from_email) === email || normalizeEmail(c.to_email) === email);
+      const connection = matches.find((c) => c.status === 'accepted') || matches[0];
+      const shaped = shapeProfile(p, email === me ? 'self' : matches.some((c) => c.status === 'accepted') ? 'connected' : 'public');
+      if (!directory) shaped.lookup_email = email;
+      if (connection) shaped.connection = { status: connection.status, direction: normalizeEmail(connection.to_email) === me ? 'incoming' : 'outgoing' };
+      return shaped;
+    });
+    const result = { profiles, has_more: page.has_more, next_cursor: page.next_cursor, truncated: page.has_more };
+    if (directory && !payload.cursor) {
+      const [total, topics] = await Promise.all([
+        db.Profile.count(query),
+        db.Profile.filter({ onboarded: true, suspended: { $ne: true }, user_email: { $nin: [me, ...blocked] } }, { distinct: 'interests', limit: 50 }),
+      ]);
+      result.total = total;
+      result.topics = topics.items.flat().filter((topic) => typeof topic === 'string');
     }
-
-    // One read of each supporting table, not one per row.
-    const [rawProfiles, connected, blocked] = await Promise.all([
-      base44.asServiceRole.entities.Profile.filter({}),
-      connectedEmails(base44, myEmail),
-      blockedEitherWay(base44, myEmail),
-    ]);
-    const { items: connections } = await base44.asServiceRole.entities.Connection.filter({
-      $or: [{ from_email: myEmail }, { to_email: myEmail }],
-    }, { limit: 500 });
-
-    const all = Array.isArray(rawProfiles) ? rawProfiles : [];
-    // Email lookups only resolve people the caller already has a relationship
-    // with, so this mode cannot be used to enumerate the membership past the
-    // directory cap.
-    const wanted = requested.length ? await relatedEmails(base44, myEmail, requested) : null;
-
-    const rows = [];
-    for (const p of all) {
-      const addr = normalizeEmail(p.user_email);
-      if (!addr) continue;
-
-      if (wanted && !wanted.has(addr) && addr !== myEmail) continue;
-
-      // A block hides the person in both directions. The client only ever knew
-      // about people IT had blocked, so someone who blocked a member still
-      // appeared in that member's directory.
-      if (blocked.has(addr) && addr !== myEmail) continue;
-
-      // Suspended accounts drop out of the directory, but stay resolvable by
-      // email so an existing conversation does not turn into a nameless thread
-      // mid-review.
-      if (wantsDirectory && !wanted && p.suspended && addr !== myEmail) continue;
-      if (wantsDirectory && !wanted && !p.onboarded && addr !== myEmail) continue;
-
-      const level = addr === myEmail
-        ? 'self'
-        : (connected.has(addr) ? 'connected' : 'public');
-
-      const shaped = shapeProfile(p, level);
-      // Email-mode callers already supplied this exact address. Preserve a
-      // correlation key without publishing it in the discoverable directory.
-      if (!wantsDirectory && requested.includes(addr)) shaped.lookup_email = addr;
-      const connection = connections.find((c) =>
-        (normalizeEmail(c.from_email) === myEmail && normalizeEmail(c.to_email) === addr)
-        || (normalizeEmail(c.to_email) === myEmail && normalizeEmail(c.from_email) === addr));
-      if (connection) shaped.connection = {
-        status: connection.status,
-        direction: normalizeEmail(connection.to_email) === myEmail ? 'incoming' : 'outgoing',
-      };
-      rows.push(shaped);
-      if (rows.length >= MAX_DIRECTORY) break;
-    }
-
-    return Response.json({ profiles: rows, truncated: rows.length >= MAX_DIRECTORY });
-  } catch (error: any) {
-    console.error('get-profile failed', error?.message || error);
-    return Response.json({ error: 'Could not load profiles right now.' }, { status: 500 });
-  }
+    return Response.json(result);
+  } catch (error) { return safeFailure('get-profile', error, 'Could not load profiles right now.'); }
 }

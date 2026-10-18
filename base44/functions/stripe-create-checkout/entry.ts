@@ -1,4 +1,8 @@
-import { createClientFromRequest } from "npm:@base44/sdk";
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
+import { consumeRateLimit } from '../../shared/rateLimit.ts';
+import { withActionLock } from '../../shared/actionLock.ts';
+import { getProfile } from '../../shared/accounts.ts';
+import { requirePost, readJsonObject, RequestError, safeFailure } from '../../shared/requestSafety.ts';
 
 // Creates a Stripe Checkout Session for a Sage subscription.
 //
@@ -56,105 +60,72 @@ function form(params: Record<string, string | number | boolean | undefined>) {
   return body;
 }
 
-async function stripe(
-  path: string,
-  secretKey: string,
-  params?: Record<string, string | number | boolean | undefined>,
-  method = "POST",
-) {
+async function stripe(path, secretKey, params, method = 'POST', idempotencyKey) {
   const res = await fetch(`${STRIPE_API}${path}`, {
-    method,
-    headers: {
-      Authorization: `Bearer ${secretKey}`,
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
+    method, redirect: 'error', signal: AbortSignal.timeout(10000),
+    headers: { Authorization: `Bearer ${secretKey}`, 'Content-Type': 'application/x-www-form-urlencoded', ...(idempotencyKey ? { 'Idempotency-Key': idempotencyKey } : {}) },
     body: params ? form(params) : undefined,
   });
   const json = await res.json();
-  if (!res.ok) {
-    throw new Error(json?.error?.message || `Stripe ${path} failed (${res.status})`);
-  }
+  if (!res.ok) throw new Error(json?.error?.message || 'Billing request failed');
   return json;
 }
 
-Deno.serve(async (req) => {
+export default async function(req) {
   try {
-    const secretKey = Deno.env.get("STRIPE_SECRET_KEY");
-    if (!secretKey) {
-      return Response.json(
-        { error: "Billing is not configured yet.", code: "stripe_not_configured" },
-        { status: 503 },
-      );
-    }
-
+    requirePost(req);
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
-    if (!user?.email) {
-      return Response.json({ error: "You must be signed in." }, { status: 401 });
-    }
-
-    const { plan } = await req.json().catch(() => ({ plan: undefined }));
-    const priceEnv = PLAN_TO_PRICE_ENV[plan];
-    if (!priceEnv) {
-      return Response.json(
-        { error: "Pick either the monthly or the yearly Sage plan." },
-        { status: 400 },
-      );
-    }
-
-    const priceId = Deno.env.get(priceEnv);
-    if (!priceId) {
-      return Response.json(
-        { error: `The ${plan} price is not configured yet.`, code: "stripe_not_configured" },
-        { status: 503 },
-      );
-    }
-
-    const appUrl = (Deno.env.get("APP_PUBLIC_URL") || "https://pathways.uno")
-      .replace(/\/+$/, "");
-
-    // Reuse the Stripe customer if this person has subscribed before, so a
-    // resubscribe lands on the same customer record instead of a duplicate.
-    let customerId: string | undefined;
-    const existing = await base44.asServiceRole.entities.Subscription.filter({
-      user_email: user.email,
+    if (!user?.email) return Response.json({ error: 'You must be signed in.' }, { status: 401 });
+    const { plan } = await readJsonObject(req);
+    if (!Object.prototype.hasOwnProperty.call(PLAN_TO_PRICE_ENV, plan)) throw new RequestError('Pick either the monthly or the yearly Sage plan.');
+    const limit = await consumeRateLimit(base44, user.email.toLowerCase(), 'start_checkout', { hour: 10, day: 20 });
+    if (!limit.ok) return Response.json({ error: limit.message }, { status: 429 });
+    const profile = await getProfile(base44, user.email);
+    if (!profile?.onboarded || profile.suspended) throw new RequestError('Finish setting up your profile before subscribing.', 403);
+    const secretKey = Deno.env.get('STRIPE_SECRET_KEY');
+    const priceId = Deno.env.get(PLAN_TO_PRICE_ENV[plan]);
+    if (!secretKey || !priceId) throw new RequestError('Billing is not configured yet.', 503);
+    return await withActionLock(user.id, 'checkout', async () => {
+      const db = base44.asServiceRole.entities.Subscription;
+      if (await db.count({ user_email: user.email, status: { $in: ['active', 'trialing', 'past_due', 'unpaid', 'incomplete'] } })) throw new RequestError('You already have a Sage subscription. Manage it from your profile instead.', 409);
+      const { items } = await db.filter({ user_email: user.email }, { limit: 1, sort: '-updated_date', fields: ['stripe_customer_id'] });
+      let customerId = items[0]?.stripe_customer_id;
+      if (!customerId) {
+        const customers = await stripe(`/customers?email=${encodeURIComponent(user.email)}&limit=100`, secretKey, undefined, 'GET');
+        customerId = customers.data.find((c) => !c.deleted && c.metadata?.app === 'pathways' && c.metadata?.user_id === user.id)?.id;
+      }
+      if (!customerId) {
+        const customer = await stripe('/customers', secretKey, {
+          email: user.email, 'metadata[user_email]': user.email, 'metadata[user_id]': user.id, 'metadata[app]': 'pathways',
+        }, 'POST', `pathways-customer-${user.id}`);
+        customerId = customer.id;
+      }
+      if (!/^cus_[A-Za-z0-9]+$/.test(customerId)) throw new Error('Invalid stored billing customer');
+      const subscriptions = await stripe(`/subscriptions?customer=${encodeURIComponent(customerId)}&status=all&limit=100`, secretKey, undefined, 'GET');
+      if (subscriptions.data.some((s) => !['canceled', 'incomplete_expired'].includes(s.status)) || subscriptions.has_more) throw new RequestError('You already have a Sage subscription. Manage it from your profile instead.', 409);
+      const pending = await stripe(`/checkout/sessions?customer=${encodeURIComponent(customerId)}&status=open&limit=100`, secretKey, undefined, 'GET');
+      if (pending.has_more) throw new RequestError('Please finish an existing checkout before starting another.', 409);
+      for (const session of pending.data) {
+        if (session.mode !== 'subscription' || session.metadata?.user_email !== user.email) continue;
+        if (session.metadata?.plan === plan && session.url) return Response.json({ url: session.url, id: session.id });
+        await stripe(`/checkout/sessions/${encodeURIComponent(session.id)}/expire`, secretKey);
+      }
+      const appUrl = new URL(Deno.env.get('APP_PUBLIC_URL') || 'https://pathways.uno');
+      if (appUrl.protocol !== 'https:' || appUrl.username || appUrl.password) throw new Error('Invalid billing return address');
+      const session = await stripe('/checkout/sessions', secretKey, {
+        mode: 'subscription', customer: customerId, 'line_items[0][price]': priceId, 'line_items[0][quantity]': 1,
+        client_reference_id: user.email, 'metadata[user_email]': user.email, 'metadata[user_id]': user.id, 'metadata[plan]': plan,
+        'subscription_data[metadata][user_email]': user.email, 'subscription_data[metadata][plan]': plan, allow_promotion_codes: true,
+        success_url: `${appUrl.origin}/app/sage?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${appUrl.origin}/app/sage?checkout=cancel`,
+      }, 'POST', `pathways-checkout-${user.id}-${plan}-${Math.floor(Date.now() / 1800000)}`);
+      return Response.json({ url: session.url, id: session.id });
     });
-    if (Array.isArray(existing) && existing.length > 0) {
-      customerId = existing[0].stripe_customer_id || undefined;
-    }
-
-    if (!customerId) {
-      const customer = await stripe("/customers", secretKey, {
-        email: user.email,
-        name: user.full_name || undefined,
-        "metadata[user_email]": user.email,
-        "metadata[app]": "pathways",
-      });
-      customerId = customer.id;
-    }
-
-    const session = await stripe("/checkout/sessions", secretKey, {
-      mode: "subscription",
-      customer: customerId,
-      "line_items[0][price]": priceId,
-      "line_items[0][quantity]": 1,
-      client_reference_id: user.email,
-      // The webhook reads these back to know who paid.
-      "metadata[user_email]": user.email,
-      "metadata[plan]": plan,
-      "subscription_data[metadata][user_email]": user.email,
-      "subscription_data[metadata][plan]": plan,
-      allow_promotion_codes: true,
-      success_url: `${appUrl}/app/sage?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${appUrl}/app/sage?checkout=cancel`,
-    });
-
-    return Response.json({ url: session.url, id: session.id });
   } catch (error) {
-    const raw = (error as Error).message || "Unknown error";
-    // The full Stripe text goes to the function logs, where you can read it.
-    console.error("[stripe-create-checkout]", raw);
-    const friendly = friendlyError(raw);
+    if (error instanceof RequestError || error?.status === 401 || error?.response?.status === 401) return safeFailure('stripe-create-checkout', error, 'Could not start checkout.');
+    console.error('stripe-create-checkout failed', error?.message);
+    const friendly = friendlyError(error?.message || 'Billing request failed');
     return Response.json({ error: friendly.message, code: friendly.code }, { status: 500 });
   }
-});
+}

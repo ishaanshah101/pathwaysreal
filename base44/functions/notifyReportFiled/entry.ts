@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
+import { requirePost, readJsonObject, safeFailure } from '../../shared/requestSafety.ts';
 import { sendGmail, escapeHtml } from '../../shared/gmail.ts';
 import { consumeRateLimit } from '../../shared/rateLimit.ts';
 
@@ -25,10 +26,11 @@ const REASON_LABELS: Record<string, string> = {
 // can only ever generate one alert per day.
 export default async function (req: Request): Promise<Response> {
   try {
+    requirePost(req);
     const base44 = createClientFromRequest(req);
-    const payload = await req.json().catch(() => ({}));
+    const payload = await readJsonObject(req);
     const reportId = String(payload?.report_id || '').trim();
-    if (!reportId) {
+    if (!/^[a-f0-9]{24}$/.test(reportId)) {
       return Response.json({ ok: false, reason: 'no_report_id' }, { status: 400 });
     }
 
@@ -37,6 +39,8 @@ export default async function (req: Request): Promise<Response> {
       return Response.json({ ok: false, reason: 'unauthorized' }, { status: 401 });
     }
 
+    const attempt = await consumeRateLimit(base44, caller.email.toLowerCase(), 'report_alert_attempt', { hour: 20, day: 50 });
+    if (!attempt.ok) return Response.json({ error: attempt.message }, { status: 429 });
     const report = await base44.asServiceRole.entities.Report.get(reportId).catch(() => null);
     if (!report) {
       return Response.json({ ok: false, reason: 'report_not_found' }, { status: 404 });
@@ -58,7 +62,9 @@ export default async function (req: Request): Promise<Response> {
       return Response.json({ ok: false, reason: 'already_alerted' }, { status: 429 });
     }
 
-    const reason = REASON_LABELS[report.reason] || report.reason || 'Safety concern';
+    const globalLimit = await consumeRateLimit(base44, '__app__', 'report_alert_budget', { hour: 50, day: 200 });
+    if (!globalLimit.ok) return Response.json({ ok: false, reason: 'email_limit_reached' }, { status: 429 });
+    const reason = REASON_LABELS[report.reason] || 'Safety concern';
     const filedAt = report.created_date ? new Date(report.created_date).toUTCString() : 'just now';
     const subject = `Pathways safety report: ${reason}`;
 
@@ -102,10 +108,11 @@ export default async function (req: Request): Promise<Response> {
     });
 
     if (!sent.ok) {
-      return Response.json({ ok: false, ...sent }, { status: 502 });
+      console.error('Safety report email failed', sent.error || sent.reason);
+      return Response.json({ ok: false, reason: 'email_unavailable' }, { status: 502 });
     }
     return Response.json({ ok: true, id: sent.id, report_id: reportId });
-  } catch (error: any) {
-    return Response.json({ ok: false, error: error?.message }, { status: 500 });
+  } catch (error) {
+    return safeFailure('notifyReportFiled', error, 'Could not send the safety alert. Your report remains saved.');
   }
 }

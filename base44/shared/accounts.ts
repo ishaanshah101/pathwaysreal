@@ -14,10 +14,10 @@ export function normalizeEmail(value: any): string {
 }
 
 export async function getProfile(base44: any, email: string) {
-  const rows = await base44.asServiceRole.entities.Profile.filter({
+  const { items } = await base44.asServiceRole.entities.Profile.filter({
     user_email: normalizeEmail(email),
-  });
-  return Array.isArray(rows) && rows.length > 0 ? rows[0] : null;
+  }, { limit: 1 });
+  return items[0] || null;
 }
 
 // An account without a completed, recognized profile cannot initiate contact.

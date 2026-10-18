@@ -47,7 +47,7 @@ export function useProfile() {
   // The server decides whose data is deleted, from the session.
   const deleteProfile = async () => {
     try {
-      const res = await base44.functions.invoke('delete-account', {});
+      const res = await base44.functions.invoke('delete-account', { confirmation: 'DELETE' });
       await queryClient.invalidateQueries({ queryKey: ['profile', email] });
       return res?.data ?? null;
     } catch (err) {

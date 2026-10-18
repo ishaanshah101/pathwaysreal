@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
-import { useProfile } from '@/lib/useProfile';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import FieldSelect from '@/components/ui/FieldSelect';
 
@@ -17,7 +16,6 @@ export const REPORT_REASONS = [
 // Filing a report is deliberately one short form. A student who feels unsafe
 // should not have to write an essay to be heard.
 export default function ReportModal({ open, onOpenChange, reportedEmail, reportedName, contextType, contextId }) {
-  const { email } = useProfile();
   const [reason, setReason] = useState('inappropriate_contact');
   const [details, setDetails] = useState('');
   const [state, setState] = useState('idle');
@@ -28,18 +26,9 @@ export default function ReportModal({ open, onOpenChange, reportedEmail, reporte
     setState('sending');
     setError('');
     try {
-      const privateTarget = String(reportedEmail || '').startsWith('profile:');
-      const created = privateTarget
-        ? (await base44.functions.invoke('memberActions', { action: 'report', target: reportedEmail, reason, details })).data
-        : await base44.entities.Report.create({
-        reporter_email: email,
-        reported_email: reportedEmail,
-        context_type: contextType || 'profile',
-        context_id: contextId || reportedEmail,
-        reason,
-        details: details.slice(0, 2000),
-        status: 'open',
-        occurred_at: new Date().toISOString(),
+      const { data: created } = await base44.functions.invoke('memberActions', {
+        action: 'report', target: reportedEmail, reason, details: details.slice(0, 2000),
+        context_type: contextType || 'profile', context_id: contextId,
       });
       // The safety inbox is emailed from here, as the signed-in reporter, so the
       // alert endpoint can verify who is asking for it. A failed email must

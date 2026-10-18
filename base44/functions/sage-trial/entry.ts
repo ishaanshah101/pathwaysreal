@@ -3,8 +3,8 @@ import { consumeAtomicLimits } from '../../shared/atomicRateLimit.ts';
 
 // The free sample on the public /sage page. One question, then it stops.
 //
-// The limit is counted server side against a hash of the visitor's IP, in a
-// table no client can read or write. Clearing cookies, opening an incognito
+// The limit is counted atomically in Redis against a hash of the visitor's IP,
+// using server-only credentials. Clearing cookies, opening an incognito
 // window, or registering a new account does not reset it, because none of
 // those change the IP and none of them are what the counter keys on.
 //

@@ -41,7 +41,7 @@ export async function consumeAtomicLimits(buckets, consume = true) {
     return `pathways:{${appId}:limits}:v1:${hash}`;
   }));
   const response = await fetch(url, {
-    method: 'POST', redirect: 'error', signal: AbortSignal.timeout(10000),
+    method: 'POST', redirect: 'manual', signal: AbortSignal.timeout(10000),
     headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
     body: JSON.stringify(['EVAL', CONSUME, keys.length, ...keys, consume ? '1' : '0',
       ...buckets.flatMap((b) => [String(b.limit), String(b.expiresAt)])]),

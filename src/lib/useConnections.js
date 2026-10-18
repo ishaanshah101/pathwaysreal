@@ -82,7 +82,12 @@ export function useConnections() {
     setBusyEmail(otherEmail);
     setError('');
     try {
-      await base44.functions.invoke('request-connection', { toEmail: otherEmail, note });
+      await base44.functions.invoke('request-connection', {
+        ...(String(otherEmail).startsWith('profile:')
+          ? { targetProfileId: otherEmail.slice(8) }
+          : { toEmail: otherEmail }),
+        note,
+      });
       await reload();
       setBusyEmail(null);
       return { ok: true };

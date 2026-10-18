@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
 import {
   normalizeEmail,
   shapeProfile,
@@ -75,6 +75,9 @@ export default async function (req: Request): Promise<Response> {
       connectedEmails(base44, myEmail),
       blockedEitherWay(base44, myEmail),
     ]);
+    const { items: connections } = await base44.asServiceRole.entities.Connection.filter({
+      $or: [{ from_email: myEmail }, { to_email: myEmail }],
+    }, { limit: 500 });
 
     const all = Array.isArray(rawProfiles) ? rawProfiles : [];
     // Email lookups only resolve people the caller already has a relationship
@@ -104,7 +107,18 @@ export default async function (req: Request): Promise<Response> {
         ? 'self'
         : (connected.has(addr) ? 'connected' : 'public');
 
-      rows.push(shapeProfile(p, level));
+      const shaped = shapeProfile(p, level);
+      // Email-mode callers already supplied this exact address. Preserve a
+      // correlation key without publishing it in the discoverable directory.
+      if (!wantsDirectory && requested.includes(addr)) shaped.lookup_email = addr;
+      const connection = connections.find((c) =>
+        (normalizeEmail(c.from_email) === myEmail && normalizeEmail(c.to_email) === addr)
+        || (normalizeEmail(c.to_email) === myEmail && normalizeEmail(c.from_email) === addr));
+      if (connection) shaped.connection = {
+        status: connection.status,
+        direction: normalizeEmail(connection.to_email) === myEmail ? 'incoming' : 'outgoing',
+      };
+      rows.push(shaped);
       if (rows.length >= MAX_DIRECTORY) break;
     }
 

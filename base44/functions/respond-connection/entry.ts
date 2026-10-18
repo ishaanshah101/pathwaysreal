@@ -1,6 +1,7 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
 import { notify, displayName } from '../../shared/notify.ts';
 import { pushToUser } from '../../shared/webPush.ts';
+import { blockedEitherWay } from '../../shared/accounts.ts';
 
 // Accepting or declining a connection request.
 //
@@ -69,13 +70,7 @@ export default async function (req: Request): Promise<Response> {
 
     // If either side has since blocked the other, the request quietly dies
     // rather than opening a thread.
-    const blocks = await base44.asServiceRole.entities.Block.filter({});
-    const blocked = (Array.isArray(blocks) ? blocks : []).some((b: any) => {
-      const a = String(b.blocker_email || '').toLowerCase();
-      const c = String(b.blocked_email || '').toLowerCase();
-      return (a === myEmail && c === fromEmail) || (a === fromEmail && c === myEmail);
-    });
-    if (blocked) {
+    if ((await blockedEitherWay(base44, myEmail)).has(fromEmail)) {
       await base44.asServiceRole.entities.Connection.update(connectionId, { status: 'declined' });
       return Response.json({ code: 'unavailable', error: 'That request is no longer available.' }, { status: 403 });
     }

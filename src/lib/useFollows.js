@@ -15,12 +15,23 @@ export function useFollows() {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [busyEmail, setBusyEmail] = useState(null);
+  const [followingCount, setFollowingCount] = useState(0);
+  const [followerCount, setFollowerCount] = useState(0);
 
   const reload = useCallback(async () => {
     if (!email) { setRows([]); setLoading(false); return; }
     try {
-      const all = await base44.entities.Follow.list('-created_date', 500);
-      setRows(Array.isArray(all) ? all : []);
+      const all = [];
+      let cursor;
+      do {
+        const res = await base44.functions.invoke('memberActions', { action: 'following', cursor });
+        const data = res.data;
+        all.push(...data.items);
+        setFollowingCount(data.followingCount);
+        setFollowerCount(data.followerCount);
+        cursor = data.has_more ? data.next_cursor : null;
+      } while (cursor);
+      setRows(all);
     } catch {
       setRows([]);
     }
@@ -56,11 +67,7 @@ export function useFollows() {
     if (!other || other === me) return;
     setBusyEmail(other);
     try {
-      await base44.entities.Follow.create({
-        follower_email: me,
-        followed_email: other,
-        followed_name: otherName,
-      });
+      await base44.functions.invoke('memberActions', { action: 'follow', target: other });
       await reload();
     } finally {
       setBusyEmail(null);
@@ -69,11 +76,10 @@ export function useFollows() {
 
   const unfollow = useCallback(async (otherEmail) => {
     const other = lower(otherEmail);
-    const row = following.find((r) => lower(r.followed_email) === other);
-    if (!row) return;
+    if (!other) return;
     setBusyEmail(other);
     try {
-      await base44.entities.Follow.delete(row.id);
+      await base44.functions.invoke('memberActions', { action: 'unfollow', target: other });
       await reload();
     } finally {
       setBusyEmail(null);
@@ -91,8 +97,8 @@ export function useFollows() {
     following,
     followers,
     followingEmails,
-    followingCount: following.length,
-    followerCount: followers.length,
+    followingCount,
+    followerCount,
     loadingFollows: loading,
     followBusyEmail: busyEmail,
     myName: profile?.full_name || '',

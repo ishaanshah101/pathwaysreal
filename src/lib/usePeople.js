@@ -80,7 +80,7 @@ export function usePeopleByEmail(emails) {
 
   const profileFor = useCallback(
     (addr) => people.find(
-      (p) => String(p.user_email || '').toLowerCase() === String(addr || '').toLowerCase(),
+      (p) => String(p.user_email || p.lookup_email || '').toLowerCase() === String(addr || '').toLowerCase(),
     ) || null,
     [people],
   );

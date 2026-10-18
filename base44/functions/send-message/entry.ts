@@ -1,9 +1,9 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
 import { screenContent, classifyRisk, logModerationEvent, excerptOf, MODERATION_BLOCK_REASON } from '../../shared/moderation.ts';
 import { consumeRateLimit } from '../../shared/rateLimit.ts';
 import { screenAttachments, IMAGE_BLOCK_REASON } from '../../shared/attachments.ts';
 import { resolveOwnedAttachments, attachmentMetadata } from '../../shared/storedAttachments.ts';
-import { getProfile, isSuspended, SUSPENDED_MESSAGE } from '../../shared/accounts.ts';
+import { getProfile, isSuspended, SUSPENDED_MESSAGE, blockedEitherWay } from '../../shared/accounts.ts';
 import { pushToUser } from '../../shared/webPush.ts';
 
 // The ONLY writer of Message rows. The Message entity's create rule is locked to
@@ -52,14 +52,7 @@ export default async function (req: Request): Promise<Response> {
     // Blocks come first, before anything else is checked. The refusal is
     // deliberately identical in both directions so a sender cannot work out
     // whether they were blocked or simply never connected.
-    const blocks = await base44.asServiceRole.entities.Block.filter({});
-    const isBlocked = (Array.isArray(blocks) ? blocks : []).some((b: any) => {
-      const blocker = String(b.blocker_email || '').toLowerCase();
-      const blocked = String(b.blocked_email || '').toLowerCase();
-      return (blocker === fromEmail && blocked === toEmail)
-        || (blocker === toEmail && blocked === fromEmail);
-    });
-    if (isBlocked) {
+    if ((await blockedEitherWay(base44, fromEmail)).has(toEmail)) {
       return Response.json(
         { code: 'blocked', error: 'You can no longer message this person.' },
         { status: 403 },

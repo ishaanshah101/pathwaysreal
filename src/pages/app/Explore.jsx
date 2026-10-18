@@ -71,14 +71,14 @@ function MentorCard({ m, onConnect, connection, busy, onBlocked, following, foll
                 posts to your feed. Connect is the mutual one that opens
                 messaging. */}
             <FollowButton
-              targetEmail={m.user_email}
+              targetEmail={m.member_ref || m.user_email}
               targetName={m.full_name}
               following={following}
               busy={followBusy}
               onToggle={onToggleFollow}
             />
             <ConnectButton
-              targetEmail={m.user_email}
+              targetEmail={m.user_email || m.member_ref}
               targetName={m.full_name}
               connection={connection}
               busy={busy}
@@ -93,10 +93,10 @@ function MentorCard({ m, onConnect, connection, busy, onBlocked, following, foll
       {!isSample && (
         <div className="flex gap-4 items-center" style={{ borderTop: '1px solid var(--color-divider)', paddingTop: 10, marginTop: 'auto' }}>
           <SafetyActions
-            targetEmail={m.user_email}
+            targetEmail={m.member_ref || m.user_email}
             targetName={m.full_name}
             contextType="profile"
-            contextId={m.user_email}
+            contextId={m.id}
             onBlocked={onBlocked}
           />
         </div>
@@ -154,12 +154,13 @@ export default function Explore() {
     // kept as a belt-and-braces filter for rows already in state when a block
     // is made, so the person disappears without waiting for a refetch.
     const real = people.filter(
-      (p) => p.user_email && p.user_email !== email && p.onboarded && !blockedEmails.includes(p.user_email),
+      (p) => (p.user_email || p.member_ref) && p.user_email !== email && p.onboarded
+        && !blockedEmails.includes(p.user_email) && !blockedEmails.includes(p.member_ref),
     );
     const all = real;
     const needle = q.trim().toLowerCase();
     return all.filter((p) => {
-      if (followingOnly && !followingEmails.includes(String(p.user_email).toLowerCase())) return false;
+      if (followingOnly && !followingEmails.includes(String(p.member_ref || p.user_email).toLowerCase())) return false;
       if (roleFilter !== 'all' && p.role !== roleFilter) return false;
       if (topicFilter !== 'all' && !(p.interests || []).includes(topicFilter)) return false;
       if (!needle) return true;
@@ -272,14 +273,14 @@ export default function Explore() {
           <div className="grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 16 }}>
             {list.slice(0, visible).map((m) => (
               <MentorCard
-                key={m.user_email}
+                key={m.id}
                 m={m}
-                onConnect={requestConnection}
-                connection={connectionWith(m.user_email)}
-                busy={busyEmail === m.user_email}
-                onBlocked={reloadBlocks}
-                following={isFollowing(m.user_email)}
-                followBusy={followBusyEmail === String(m.user_email || '').toLowerCase()}
+                onConnect={async (target) => { const result = await requestConnection(target); if (result?.ok) await load(); return result; }}
+                connection={connectionWith(m.user_email) || m.connection}
+                busy={busyEmail === (m.user_email || m.member_ref)}
+                onBlocked={async () => { await reloadBlocks(); await load(); }}
+                following={isFollowing(m.member_ref || m.user_email)}
+                followBusy={followBusyEmail === String(m.member_ref || m.user_email || '').toLowerCase()}
                 onToggleFollow={toggleFollow}
               />
             ))}

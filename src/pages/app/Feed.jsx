@@ -23,6 +23,7 @@ import PushOptInCard from '@/components/app/PushOptInCard';
 import FieldSelect from '@/components/ui/FieldSelect';
 import { useSavedPosts } from '@/lib/useSavedPosts';
 import { useOnline } from '@/lib/useOnline';
+import { usePeopleByEmail } from '@/lib/usePeople';
 import { PenLine, Users } from 'lucide-react';
 
 const PAGE_SIZE = 12;
@@ -195,7 +196,7 @@ function PostCard({
             {/* Following is the lightweight half: one tap, nothing sent to the
                 author, it only decides whether their posts follow you around. */}
             <FollowButton
-              targetEmail={post.author_email}
+              targetEmail={post.author_ref || post.author_email}
               targetName={post.author_name}
               following={following}
               busy={followBusy}
@@ -266,6 +267,7 @@ export default function Feed() {
   const online = useOnline();
   const [offlineCached, setOfflineCached] = useState(false);
   const [posts, setPosts] = useState([]);
+  const { profileFor } = usePeopleByEmail(posts.map((p) => p.author_email));
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
   const [visible, setVisible] = useState(PAGE_SIZE);
@@ -324,8 +326,9 @@ export default function Feed() {
   const combined = useMemo(
     () => (loading
       ? []
-      : posts.filter((p) => !p.author_email || !blockedEmails.includes(p.author_email))),
-    [loading, posts, blockedEmails],
+      : posts.map((p) => ({ ...p, author_ref: profileFor(p.author_email)?.member_ref }))
+        .filter((p) => !blockedEmails.includes(p.author_email) && !blockedEmails.includes(p.author_ref))),
+    [loading, posts, blockedEmails, profileFor],
   );
 
   // "Following" is a view of the same feed narrowed to the people I follow, so
@@ -334,7 +337,7 @@ export default function Feed() {
     if (filter === 'all') return combined;
     if (filter === 'following') {
       return combined.filter(
-        (p) => p.author_email && followingEmails.includes(String(p.author_email).toLowerCase()),
+        (p) => followingEmails.includes(String(p.author_ref || p.author_email || '').toLowerCase()),
       );
     }
     return combined.filter((p) => p.category === filter);
@@ -489,8 +492,8 @@ export default function Feed() {
                   onBlocked={reloadBlocks}
                   canEdit={isAdmin}
                   onSaved={load}
-                  following={p.author_email ? isFollowing(p.author_email) : false}
-                  followBusy={followBusyEmail === String(p.author_email || '').toLowerCase()}
+                  following={isFollowing(p.author_ref || p.author_email)}
+                  followBusy={followBusyEmail === String(p.author_ref || p.author_email || '').toLowerCase()}
                   onToggleFollow={toggleFollow}
                   saved={isSaved(p.id)}
                   saveBusy={busyPostId === p.id}

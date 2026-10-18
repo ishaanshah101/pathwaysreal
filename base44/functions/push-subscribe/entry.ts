@@ -1,5 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.44';
-import { vapidPublicKey } from '../../shared/webPush.ts';
+import { vapidPublicKey, validatedPushSubscription } from '../../shared/webPush.ts';
 
 // The client's only way to turn push notifications on or off. Profile writes are
 // service-role only, so this is what stores the subscription, and it stores it
@@ -37,16 +37,13 @@ export default async function (req: Request): Promise<Response> {
     }
 
     if (action === 'subscribe') {
-      const sub = payload?.subscription;
-      if (!sub?.endpoint || !sub?.keys?.p256dh || !sub?.keys?.auth) {
+      const sub = validatedPushSubscription(payload?.subscription);
+      if (!sub) {
         return Response.json({ error: 'That subscription is not usable.' }, { status: 400 });
       }
       await base44.asServiceRole.entities.Profile.update(profile.id, {
         push_enabled: true,
-        push_subscription: {
-          endpoint: String(sub.endpoint),
-          keys: { p256dh: String(sub.keys.p256dh), auth: String(sub.keys.auth) },
-        },
+        push_subscription: sub,
       });
       return Response.json({ ok: true, push_enabled: true });
     }

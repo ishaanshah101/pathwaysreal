@@ -1,10 +1,11 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
 import { consumeRateLimit } from '../../shared/rateLimit.ts';
 import { notify, displayName } from '../../shared/notify.ts';
 import {
   screenContent, classifyRisk, logModerationEvent, excerptOf, MODERATION_BLOCK_REASON,
 } from '../../shared/moderation.ts';
-import { isSuspended } from '../../shared/accounts.ts';
+import { isSuspended, blockedEitherWay, canRequestConnections } from '../../shared/accounts.ts';
+import { resolveMember } from '../../shared/memberReferences.ts';
 
 // The only place a Connection is created.
 //
@@ -15,8 +16,6 @@ import { isSuspended } from '../../shared/accounts.ts';
 // This is enforced here rather than by hiding a button, because hiding a
 // button protects nobody who knows what a browser console is.
 
-const ADULT_ROLES = ['college_student', 'educator', 'counselor'];
-
 export default async function (req: Request): Promise<Response> {
   try {
     const base44 = createClientFromRequest(req);
@@ -25,18 +24,22 @@ export default async function (req: Request): Promise<Response> {
 
     const fromEmail = String(user.email).toLowerCase();
     const payload = await req.json().catch(() => ({}));
-    const toEmail = String(payload?.toEmail || '').trim().toLowerCase();
+    const target = payload?.targetProfileId ? `profile:${payload.targetProfileId}` : payload?.toEmail;
     const note = String(payload?.note || '').trim().slice(0, 500);
 
-    if (!toEmail) return Response.json({ error: 'Who are you trying to connect with?' }, { status: 400 });
+    if (!target) return Response.json({ error: 'Who are you trying to connect with?' }, { status: 400 });
+    const [me, them] = await Promise.all([
+      resolveMember(base44, fromEmail),
+      resolveMember(base44, target),
+    ]);
+    // Registered is not onboarded: missing/unknown roles never default to student.
+    if (!canRequestConnections(me)) {
+      return Response.json({ code: 'profile_required', error: 'Finish setting up your profile first.' }, { status: 403 });
+    }
+    const toEmail = String(them?.user_email || '').toLowerCase();
     if (toEmail === fromEmail) {
       return Response.json({ error: 'You cannot connect with yourself.' }, { status: 400 });
     }
-
-    const profiles = await base44.asServiceRole.entities.Profile.filter({});
-    const all = Array.isArray(profiles) ? profiles : [];
-    const me = all.find((p: any) => String(p.user_email || '').toLowerCase() === fromEmail) || null;
-    const them = all.find((p: any) => String(p.user_email || '').toLowerCase() === toEmail) || null;
 
     if (!them) {
       return Response.json({ error: 'We could not find that person.' }, { status: 404 });
@@ -51,19 +54,13 @@ export default async function (req: Request): Promise<Response> {
 
     // Blocks in either direction end it, with a deliberately vague message so
     // a blocked person cannot confirm they were blocked.
-    const blocks = await base44.asServiceRole.entities.Block.filter({});
-    const blocked = (Array.isArray(blocks) ? blocks : []).some((b: any) => {
-      const a = String(b.blocker_email || '').toLowerCase();
-      const c = String(b.blocked_email || '').toLowerCase();
-      return (a === fromEmail && c === toEmail) || (a === toEmail && c === fromEmail);
-    });
-    if (blocked) {
+    if ((await blockedEitherWay(base44, fromEmail)).has(toEmail)) {
       return Response.json({ code: 'unavailable', error: 'That request could not be sent.' }, { status: 403 });
     }
 
     // THE RULE. An adult may not open contact with a minor.
-    const iAmAdult = ADULT_ROLES.includes(String(me?.role || 'student'));
-    const theyAreMinor = them.is_minor === true;
+    const iAmAdult = me.role !== 'student' || me.account_type === 'adult';
+    const theyAreMinor = them.is_minor !== false;
 
     if (iAmAdult && theyAreMinor) {
       return Response.json(

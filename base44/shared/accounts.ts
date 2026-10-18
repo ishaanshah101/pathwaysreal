@@ -20,6 +20,11 @@ export async function getProfile(base44: any, email: string) {
   return Array.isArray(rows) && rows.length > 0 ? rows[0] : null;
 }
 
+// An account without a completed, recognized profile cannot initiate contact.
+export function canRequestConnections(profile: any): boolean {
+  return profile?.onboarded === true && ['student', ...ADULT_ROLES].includes(profile.role);
+}
+
 // True when the account has been suspended from the moderation queue.
 export function isSuspended(profile: any): boolean {
   return Boolean(profile?.suspended);
@@ -68,14 +73,22 @@ export async function connectedEmails(base44: any, email: string): Promise<Set<s
 // people I blocked — the client only ever knew about the latter.
 export async function blockedEitherWay(base44: any, email: string): Promise<Set<string>> {
   const me = normalizeEmail(email);
-  const rows = await base44.asServiceRole.entities.Block.filter({});
+  const profile = await getProfile(base44, me);
+  const mine = profile ? [me, `profile:${profile.id}`] : [me];
+  const query = { $or: [{ blocker_email: me }, { blocked_email: { $in: mine } }] };
   const out = new Set<string>();
-  for (const b of Array.isArray(rows) ? rows : []) {
-    const blocker = normalizeEmail(b.blocker_email);
-    const blocked = normalizeEmail(b.blocked_email);
-    if (blocker === me) out.add(blocked);
-    else if (blocked === me) out.add(blocker);
-  }
+  let cursor;
+  do {
+    const page = await base44.asServiceRole.entities.Block.filter(query, { limit: 50, cursor });
+    const refs = page.items.map((b) => normalizeEmail(b.blocker_email) === me ? b.blocked_email : b.blocker_email);
+    for (const ref of refs) if (!String(ref).startsWith('profile:')) out.add(normalizeEmail(ref));
+    const ids = refs.filter((ref) => String(ref).startsWith('profile:')).map((ref) => ref.slice(8));
+    if (ids.length) {
+      const { items } = await base44.asServiceRole.entities.Profile.filter({ id: { $in: ids } }, { limit: 50, fields: ['user_email'] });
+      for (const p of items) out.add(normalizeEmail(p.user_email));
+    }
+    cursor = page.has_more ? page.next_cursor : null;
+  } while (cursor);
   return out;
 }
 
@@ -87,7 +100,7 @@ export function shapeProfile(profile: any, level: 'public' | 'connected' | 'self
 
   const base = {
     id: profile.id,
-    user_email: profile.user_email,
+    member_ref: `profile:${profile.id}`,
     role: profile.role || 'student',
     headline: profile.headline || '',
     bio: profile.bio || '',
@@ -108,6 +121,7 @@ export function shapeProfile(profile: any, level: 'public' | 'connected' | 'self
   if (level === 'connected') {
     return {
       ...base,
+      user_email: profile.user_email,
       full_name: profile.full_name || '',
       school: profile.school || '',
       grade: profile.grade || '',

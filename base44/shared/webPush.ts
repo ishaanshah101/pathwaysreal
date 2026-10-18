@@ -7,6 +7,26 @@ import webpush from 'npm:web-push@3.6.7';
 // Delivery is always best-effort: a failed push must never fail the message or
 // the connection acceptance that triggered it.
 
+// Validate at registration AND delivery, including subscriptions stored before
+// this check existed. Exact provider hosts, HTTPS, no credentials or custom ports.
+export function validatedPushSubscription(sub) {
+  try {
+    if (typeof sub?.endpoint !== 'string' || sub.endpoint.length > 4096) return null;
+    const url = new URL(sub.endpoint);
+    if (url.protocol !== 'https:' || url.username || url.password || url.port || url.hash
+      || !['fcm.googleapis.com', 'updates.push.services.mozilla.com', 'web.push.apple.com'].includes(url.hostname)) return null;
+    const decode = (value) => {
+      if (typeof value !== 'string' || value.length > 128 || !/^[A-Za-z0-9_-]+={0,2}$/.test(value)) return '';
+      return atob(value.replace(/-/g, '+').replace(/_/g, '/').replace(/=+$/, ''));
+    };
+    const key = decode(sub?.keys?.p256dh);
+    if (key.length !== 65 || key.charCodeAt(0) !== 4 || decode(sub?.keys?.auth).length !== 16) return null;
+    return { endpoint: url.href, keys: { p256dh: sub.keys.p256dh, auth: sub.keys.auth } };
+  } catch {
+    return null;
+  }
+}
+
 export function vapidPublicKey(): string {
   return Deno.env.get('VAPID_PUBLIC_KEY') || '';
 }
@@ -34,7 +54,9 @@ export async function pushToUser(
       return { ok: false, reason: 'not_subscribed' };
     }
 
-    await webpush.sendNotification(profile.push_subscription, JSON.stringify(payload));
+    const subscription = validatedPushSubscription(profile.push_subscription);
+    if (!subscription) return { ok: false, reason: 'invalid_subscription' };
+    await webpush.sendNotification(subscription, JSON.stringify(payload));
     return { ok: true };
   } catch (error: any) {
     // A 404 or 410 means the browser threw the subscription away. Clear it so we

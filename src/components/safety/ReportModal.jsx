@@ -27,7 +27,10 @@ export default function ReportModal({ open, onOpenChange, reportedEmail, reporte
     setState('sending');
     setError('');
     try {
-      const created = await base44.entities.Report.create({
+      const privateTarget = String(reportedEmail || '').startsWith('profile:');
+      const created = privateTarget
+        ? (await base44.functions.invoke('memberActions', { action: 'report', target: reportedEmail, reason, details })).data
+        : await base44.entities.Report.create({
         reporter_email: email,
         reported_email: reportedEmail,
         context_type: contextType || 'profile',

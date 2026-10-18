@@ -5,6 +5,7 @@ import GoogleButton from '@/components/GoogleButton';
 import { useAuth } from '@/lib/AuthContext';
 import { useProfile } from '@/lib/useProfile';
 import { Spinner } from '@/components/RequireAuth';
+import { isNativeApp } from '@/lib/platform';
 
 const perks = [
   'A feed of real, firsthand advice, no short-form loops',
@@ -18,7 +19,7 @@ export default function Join() {
   const { isLoadingProfile, isOnboarded } = useProfile();
 
   const planFromUrl = new URLSearchParams(window.location.search).get('plan');
-  const plan = ['sage_monthly', 'sage_yearly'].includes(planFromUrl) ? planFromUrl : null;
+  const plan = !isNativeApp() && ['sage_monthly', 'sage_yearly'].includes(planFromUrl) ? planFromUrl : null;
   const returnTo = `/onboarding${plan ? `?plan=${plan}` : ''}`;
 
   if (isLoadingPublicSettings || isLoadingAuth) return <Spinner />;

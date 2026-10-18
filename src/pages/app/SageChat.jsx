@@ -25,7 +25,7 @@ export default function SageChat() {
   const narrow = useNarrow();
   const native = isNativeApp();
 
-  const checkout = params.get('checkout');
+  const checkout = native ? null : params.get('checkout');
   // Which conversation is open lives in the URL, so the back gesture on a phone
   // closes the chat instead of leaving the app, and a chat can be linked to.
   // "new" is a real value: an empty chat that has no id yet.
@@ -86,7 +86,7 @@ export default function SageChat() {
   // The paywall is the whole page when there is no active subscription. Sage
   // is the one paid thing on Pathways, so this is the only gate in the app.
   if (!hasSage) {
-    const notice =
+    const notice = native ? null :
       checkout === 'success'
         ? { tone: 'ok', text: 'Payment received. Confirming now, this usually takes a few seconds.' }
         : checkout === 'cancel'
@@ -153,7 +153,7 @@ export default function SageChat() {
           <div className="flex flex-col items-end" style={{ gap: 4 }}>
             {/* No link out to an external payment page from inside a native
                 wrapper: Apple does not allow it. */}
-            {native || source === 'apple' ? (
+            {native ? null : source === 'apple' ? (
               <span style={{ fontSize: 11.5, color: 'var(--text-subtle)', maxWidth: 220, textAlign: 'right', lineHeight: 1.5 }}>
                 {source === 'apple'
                   ? 'Manage this subscription in your device settings.'

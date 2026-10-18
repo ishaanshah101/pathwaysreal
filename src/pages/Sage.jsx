@@ -2,6 +2,7 @@ import React from 'react';
 import Seo from '@/components/Seo';
 import PlanCard from '@/components/sage/PlanCard';
 import AskSage from '@/components/sage/AskSage';
+import { isNativeApp } from '@/lib/platform';
 
 const sagePoints = [
   'Personalized to your profile, grade, and goals',
@@ -11,11 +12,12 @@ const sagePoints = [
 ];
 
 export default function Sage() {
+  const native = isNativeApp();
   return (
     <>
       <Seo
-        title="Sage — An AI College Advisor for $5 a Month | Pathways"
-        description="Sage is the AI college and career advisor built into Pathways, personalized to your grade, school, and goals. $5 a month. Everything else stays free."
+        title={native ? 'Sage — AI College Advisor | Pathways' : 'Sage — An AI College Advisor for $5 a Month | Pathways'}
+        description={native ? 'Sage is the AI college and career advisor built into Pathways. Try a free question or sign in with an existing subscription.' : 'Sage is the AI college and career advisor built into Pathways, personalized to your grade, school, and goals. $5 a month. Everything else stays free.'}
         path="/sage"
       />
 
@@ -24,7 +26,7 @@ export default function Sage() {
             <div>
               <span className="card-kicker" style={{ display: 'block', marginBottom: 12 }}>Sage, the AI advisor</span>
               <h1 style={{ fontSize: 'clamp(32px,4.4vw,52px)', margin: '0 0 16px', maxWidth: '22ch', textWrap: 'balance' }}>
-                A private counselor costs $200 an hour. Sage costs $5 a month.
+                {native ? 'College and career guidance, with Sage.' : 'A private counselor costs $200 an hour. Sage costs $5 a month.'}
               </h1>
               <p style={{ maxWidth: '50ch', fontSize: 'clamp(15.5px,1.3vw,17px)', lineHeight: 1.62, color: 'var(--color-neutral-800)', margin: 0 }}>
                 Sage is the AI college and career advisor built into Pathways. It knows your grade,

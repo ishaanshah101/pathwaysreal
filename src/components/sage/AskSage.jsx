@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Link } from 'react-router-dom';
 import FieldSelect from '@/components/ui/FieldSelect';
+import { isNativeApp } from '@/lib/platform';
 
 // The free sample. The model call itself lives in the sage-trial backend
 // function, which enforces the one-question limit and the topic rules. This
@@ -19,6 +20,7 @@ function cleanSage(text) {
 }
 
 export default function AskSage() {
+  const native = isNativeApp();
   const [grade, setGrade] = useState('11th grade');
   const [question, setQuestion] = useState('');
   const [answer, setAnswer] = useState('');
@@ -49,12 +51,13 @@ export default function AskSage() {
   };
 
   return (
-    <section className="page-section" style={{ paddingBottom: 'clamp(40px,6vh,72px)' }}>
+    <section id="sage-free-sample" className="page-section" style={{ paddingBottom: 'clamp(40px,6vh,72px)' }}>
       <span className="card-kicker" style={{ display: 'block', marginBottom: 12 }}>Try it</span>
       <h2 style={{ fontSize: 'clamp(24px,2.8vw,32px)', margin: '0 0 10px' }}>Ask Sage one question, free</h2>
       <p style={{ maxWidth: '52ch', color: 'var(--color-neutral-800)', marginBottom: 20, fontSize: 15.5, lineHeight: 1.6 }}>
-        Ask anything about applications, majors, essays, or scholarships. No account needed. One question per day,
-        then it is $5 a month for as many as you like.
+        {native
+          ? 'Ask anything about applications, majors, essays, or scholarships. No account needed. One free question per day.'
+          : 'Ask anything about applications, majors, essays, or scholarships. No account needed. One question per day, then it is $5 a month for as many as you like.'}
       </p>
       <div className="card elev-sm" style={{ padding: 24, gap: 14, maxWidth: 720 }}>
         <div className="field">
@@ -105,7 +108,8 @@ export default function AskSage() {
           </div>
         )}
 
-        {spent && (
+        {spent && native && <p role="status">That was your free question. Come back tomorrow for another.</p>}
+        {spent && !native && (
           <div style={{ borderTop: '1px solid var(--color-divider)', paddingTop: 14, display: 'grid', gap: 10 }}>
             <p style={{ margin: 0, fontSize: 14, lineHeight: 1.6, color: 'var(--color-neutral-800)' }}>
               That was your free question. Sage remembers your grade, your school, and your goals, and you can ask it

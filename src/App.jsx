@@ -18,6 +18,7 @@ import Sage from '@/pages/Sage';
 import Faq from '@/pages/Faq';
 import Join from '@/pages/Join';
 import Privacy from '@/pages/Privacy';
+import DeleteAccount from '@/pages/DeleteAccount';
 import Terms from '@/pages/Terms';
 import Safety from '@/pages/Safety';
 
@@ -77,6 +78,7 @@ const AuthenticatedApp = () => {
         <Route path="/faq" element={<Faq />} />
         <Route path="/join" element={<Join />} />
         <Route path="/privacy" element={<Privacy />} />
+        <Route path="/delete-account" element={<DeleteAccount />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/safety" element={<Safety />} />
       </Route>

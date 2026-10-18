@@ -1,6 +1,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
+import { isNativeApp } from '@/lib/platform';
 
 // Entitlement comes from the Subscription entity and from nothing else: only a
 // server-side webhook can write that table, so reading it here is safe. It is
@@ -63,6 +64,7 @@ function messageFrom(err, fallback) {
 // Sends the user to Stripe's hosted checkout. We never touch card details:
 // Stripe collects them on its own page, which is what keeps this PCI-safe.
 export async function startSageCheckout(plan) {
+  if (isNativeApp()) return;
   try {
     const res = await base44.functions.invoke('stripe-create-checkout', { plan });
     const url = res?.data?.url;
@@ -74,6 +76,7 @@ export async function startSageCheckout(plan) {
 }
 
 export async function openBillingPortal() {
+  if (isNativeApp()) return;
   try {
     const res = await base44.functions.invoke('stripe-portal', {});
     const url = res?.data?.url;

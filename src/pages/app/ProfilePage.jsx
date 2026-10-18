@@ -422,7 +422,7 @@ export default function ProfilePage() {
               <>
                 <span style={{ fontSize: 14 }}>
                   <b>Active</b>
-                  {subscription?.plan ? ` · ${SAGE_PRICES[subscription.plan]?.amount} ${SAGE_PRICES[subscription.plan]?.cadence}` : ''}
+                  {!native && subscription?.plan ? ` · ${SAGE_PRICES[subscription.plan]?.amount} ${SAGE_PRICES[subscription.plan]?.cadence}` : ''}
                 </span>
                 {subscription?.current_period_end && (
                   <span style={{ fontSize: 12.5, color: 'var(--text-subtle)' }}>
@@ -433,7 +433,7 @@ export default function ProfilePage() {
                 {/* Inside a native wrapper we must not open an external
                     billing page, and an Apple-sourced subscription is managed
                     in the device's own settings, not by us. */}
-                {native || source === 'apple' ? (
+                {native ? null : source === 'apple' ? (
                   <span style={{ fontSize: 12.5, color: 'var(--text-subtle)', lineHeight: 1.5 }}>
                     {source === 'apple'
                       ? 'Manage or cancel this subscription in your device settings.'
@@ -462,9 +462,11 @@ export default function ProfilePage() {
                     ? 'Sage is paused until a payment goes through.'
                     : 'Everything on Pathways is free. Sage is the one optional add-on.'}
                 </span>
-                <Link to="/app/sage" className="btn btn-primary btn-sm self-start no-underline">
-                  {isPastDue ? 'Fix payment' : 'Get Sage'}
-                </Link>
+                {!native && (
+                  <Link to="/app/sage" className="btn btn-primary btn-sm self-start no-underline">
+                    {isPastDue ? 'Fix payment' : 'Get Sage'}
+                  </Link>
+                )}
               </>
             )}
             {billingError && (

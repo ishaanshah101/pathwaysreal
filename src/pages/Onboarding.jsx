@@ -8,6 +8,7 @@ import Seo from '@/components/Seo';
 import AccountTypeChoice from '@/components/onboarding/AccountTypeChoice';
 import FieldSelect from '@/components/ui/FieldSelect';
 import { INTEREST_OPTIONS, EXPERTISE_OPTIONS, ADULT_ROLES } from '@/components/app/profileFields';
+import { isNativeApp } from '@/lib/platform';
 
 export default function Onboarding() {
   const navigate = useNavigate();
@@ -182,7 +183,7 @@ export default function Onboarding() {
       // Someone who came in from a Sage pricing link lands on the Sage page so
       // they can finish the purchase they started, not on a feed they did not
       // ask for.
-      const wantsSage = ['sage_monthly', 'sage_yearly'].includes(form.plan);
+      const wantsSage = !isNativeApp() && ['sage_monthly', 'sage_yearly'].includes(form.plan);
       // Carry the chosen plan through so the Sage page can send them straight
       // to checkout now that the subscription has an account to belong to.
       navigate(wantsSage ? `/app/sage?plan=${form.plan}` : '/app', { replace: true });

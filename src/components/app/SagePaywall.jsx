@@ -130,7 +130,7 @@ export default function SagePaywall({ notice }) {
       <div>
         <span className="card-kicker" style={{ display: 'block', marginBottom: 8 }}>Sage, the AI advisor</span>
         <h1 style={{ fontSize: 'clamp(26px,3.2vw,36px)', margin: '0 0 8px', maxWidth: '22ch' }}>
-          Sage is the one paid thing on Pathways.
+          {native ? 'Sage, your college and career advisor.' : 'Sage is the one paid thing on Pathways.'}
         </h1>
         <p style={{ color: 'var(--text-muted)', margin: 0, maxWidth: '60ch', lineHeight: 1.6, fontSize: 15.5 }}>
           A private counselor costs $200 an hour. Sage knows your grade, your school, and your goals,
@@ -139,7 +139,7 @@ export default function SagePaywall({ notice }) {
         </p>
       </div>
 
-      {notice && (
+      {!native && notice && (
         <div className={`notice ${notice.tone === 'error' ? 'notice-error' : 'notice-success'}`} role="status">
           {notice.text}
         </div>

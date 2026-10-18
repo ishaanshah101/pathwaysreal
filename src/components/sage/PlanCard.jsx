@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
 import { useProfile } from '@/lib/useProfile';
 import { useSubscription, startSageCheckout } from '@/lib/useSubscription';
+import { isNativeApp } from '@/lib/platform';
+import SageComingSoonCard from '@/components/app/SageComingSoonCard';
 
 export default function PlanCard() {
   const [plan, setPlan] = useState('yearly');
@@ -30,6 +32,12 @@ export default function PlanCard() {
       setBusy(false);
     }
   };
+
+  if (isNativeApp()) {
+    return hasSage ? (
+      <Link to="/app/sage" className="btn btn-primary no-underline">Open Sage</Link>
+    ) : <SageComingSoonCard />;
+  }
 
   return (
     <div className="card elev-md" style={{ padding: 28, gap: 16 }}>

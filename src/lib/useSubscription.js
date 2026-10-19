@@ -1,4 +1,6 @@
+import { useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useSubscriptionExpiry } from '@/hooks/useSubscriptionExpiry';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
 import { isNativeApp } from '@/lib/platform';
@@ -24,18 +26,33 @@ export function useSubscription() {
     queryKey: ['subscription', email],
     enabled: Boolean(isAuthenticated && email),
     staleTime: 10000,
+    refetchInterval: 30000,
+    refetchOnWindowFocus: 'always',
     retry: 1,
     queryFn: async () => {
-      const rows = await base44.entities.Subscription.filter({ user_email: email });
-      return Array.isArray(rows) && rows.length > 0 ? rows[0] : null;
+      const active = await base44.entities.Subscription.filter({
+        user_email: email, status: { $in: ['active', 'trialing'] },
+        current_period_end: { $gt: new Date().toISOString() },
+      }, { limit: 1, sort: '-current_period_end' });
+      if (active.items[0]) return active.items[0];
+      const latest = await base44.entities.Subscription.filter({ user_email: email }, { limit: 1, sort: '-updated_date' });
+      return latest.items[0] || null;
     },
   });
 
   const subscription = query.data ?? null;
+  useSubscriptionExpiry(subscription?.current_period_end);
+  useEffect(() => {
+    if (!isAuthenticated || !email) return undefined;
+    return base44.entities.Subscription.subscribe(() => {
+      queryClient.invalidateQueries({ queryKey: ['subscription', email] });
+    });
+  }, [isAuthenticated, email, queryClient]);
+  const paidThrough = Date.parse(subscription?.current_period_end || '');
 
   return {
     subscription,
-    hasSage: ENTITLED.has(subscription?.status),
+    hasSage: ENTITLED.has(subscription?.status) && Number.isFinite(paidThrough) && paidThrough > Date.now(),
     isPastDue: subscription?.status === 'past_due' || subscription?.status === 'unpaid',
     isCanceling: Boolean(subscription?.cancel_at_period_end),
     // Which store owns this row. Used only to decide which billing controls to

@@ -1,4 +1,6 @@
-import { createClientFromRequest } from "npm:@base44/sdk";
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
+import { secrets } from 'base44:runtime';
+import { withActionLock } from '../../shared/actionLock.ts';
 
 // Stripe webhook. This is the ONLY thing that grants or revokes Sage.
 //
@@ -11,8 +13,8 @@ const STRIPE_API = "https://api.stripe.com/v1";
 const TOLERANCE_SECONDS = 300;
 
 const PRICE_TO_PLAN = (priceId: string) => {
-  if (priceId && priceId === Deno.env.get("STRIPE_PRICE_SAGE_YEARLY")) return "sage_yearly";
-  if (priceId && priceId === Deno.env.get("STRIPE_PRICE_SAGE_MONTHLY")) return "sage_monthly";
+  if (priceId && priceId === secrets.get("STRIPE_PRICE_SAGE_YEARLY")) return "sage_yearly";
+  if (priceId && priceId === secrets.get("STRIPE_PRICE_SAGE_MONTHLY")) return "sage_monthly";
   return undefined;
 };
 
@@ -63,6 +65,7 @@ async function verifyStripeSignature(rawBody: string, header: string, secret: st
 
 async function stripeGet(path: string, secretKey: string) {
   const res = await fetch(`${STRIPE_API}${path}`, {
+    redirect: 'manual', signal: AbortSignal.timeout(10000),
     headers: { Authorization: `Bearer ${secretKey}` },
   });
   const json = await res.json();
@@ -74,9 +77,9 @@ function isoOrNull(unixSeconds?: number | null) {
   return unixSeconds ? new Date(unixSeconds * 1000).toISOString() : undefined;
 }
 
-Deno.serve(async (req) => {
-  const secretKey = Deno.env.get("STRIPE_SECRET_KEY");
-  const webhookSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET");
+export default async function(req) {
+  const secretKey = secrets.get("STRIPE_SECRET_KEY");
+  const webhookSecret = secrets.get("STRIPE_WEBHOOK_SECRET");
 
   if (!secretKey || !webhookSecret) {
     return Response.json({ error: "Billing is not configured." }, { status: 503 });
@@ -125,7 +128,7 @@ Deno.serve(async (req) => {
         break;
       case "invoice.payment_succeeded":
       case "invoice.payment_failed":
-        subscriptionId = obj.subscription;
+        subscriptionId = obj.subscription || obj.parent?.subscription_details?.subscription;
         customerId = obj.customer;
         break;
       default:
@@ -137,11 +140,14 @@ Deno.serve(async (req) => {
       return Response.json({ received: true, note: "no subscription on event" });
     }
 
-    // Always re-read the subscription from Stripe rather than trusting the
-    // event payload's shape. Stripe is the source of truth for entitlement.
-    const sub = await stripeGet(`/subscriptions/${subscriptionId}`, secretKey);
-    customerId = customerId || sub.customer;
-    userEmail = userEmail || sub.metadata?.user_email;
+    if (typeof subscriptionId !== 'string' || !/^sub_[A-Za-z0-9]+$/.test(subscriptionId)) {
+      return Response.json({ error: 'Invalid subscription reference.' }, { status: 400 });
+    }
+    return await withActionLock(subscriptionId, 'stripe_subscription_sync', async () => {
+    // Serialize reads and writes so delayed events cannot restore stale access.
+    const sub = await stripeGet(`/subscriptions/${encodeURIComponent(subscriptionId)}`, secretKey);
+    customerId = sub.customer;
+    userEmail = sub.metadata?.user_email || userEmail;
 
     if (!userEmail && customerId) {
       const customer = await stripeGet(`/customers/${customerId}`, secretKey);
@@ -152,7 +158,17 @@ Deno.serve(async (req) => {
       return Response.json({ received: true, note: "could not resolve user" });
     }
 
-    const priceId = sub.items?.data?.[0]?.price?.id;
+    const item = sub.items?.data?.find((entry) => PRICE_TO_PLAN(entry.price?.id));
+    if (!item) return Response.json({ received: true, ignored: 'not_a_sage_subscription' });
+    const priceId = item.price.id;
+    // Newer Stripe versions put billing-period dates on each subscription item.
+    const periodEnd = Number(sub.current_period_end || item.current_period_end || (sub.status === 'trialing' ? sub.trial_end : 0));
+    const ends = [periodEnd, sub.status === 'trialing' ? Number(sub.trial_end) : 0,
+      Number(sub.cancel_at), sub.status === 'canceled' ? Number(sub.ended_at) : 0]
+      .filter((value) => Number.isFinite(value) && value > 0);
+    if (['active', 'trialing'].includes(sub.status) && !periodEnd) throw new Error('Stripe did not provide an access expiry');
+    const paidThrough = ends.length ? Math.min(...ends) : 0;
+    userEmail = String(userEmail).trim().toLowerCase();
     const patch = {
       user_email: userEmail,
       // Every row this function writes is a Stripe row. An Apple webhook will
@@ -161,32 +177,26 @@ Deno.serve(async (req) => {
       source: "stripe",
       external_id: sub.id,
       status: sub.status,
-      plan: PRICE_TO_PLAN(priceId) || sub.metadata?.plan || undefined,
+      plan: PRICE_TO_PLAN(priceId),
       stripe_customer_id: customerId,
       stripe_subscription_id: sub.id,
       stripe_price_id: priceId,
-      current_period_end: isoOrNull(sub.current_period_end),
-      cancel_at_period_end: Boolean(sub.cancel_at_period_end),
+      current_period_end: isoOrNull(paidThrough) || '',
+      cancel_at_period_end: Boolean(sub.cancel_at_period_end || (sub.cancel_at && sub.status !== 'canceled')),
       last_event_at: new Date().toISOString(),
     };
 
-    // One row per person. Upsert so repeated or out-of-order events converge
-    // on the same record instead of piling up duplicates.
-    const existing = await db.filter({ user_email: userEmail });
-    if (Array.isArray(existing) && existing.length > 0) {
-      await db.update(existing[0].id, patch);
-      // Clean up any duplicates a previous bad run may have left behind.
-      for (const dup of existing.slice(1)) {
-        await db.delete(dup.id).catch(() => {});
-      }
-    } else {
-      await db.create(patch);
-    }
+    // Keep separate purchases separate: an old cancellation must never
+    // overwrite a newer subscription belonging to the same member.
+    const { items } = await db.filter({ stripe_subscription_id: sub.id }, { limit: 1 });
+    if (items[0]) await db.update(items[0].id, patch);
+    else await db.create(patch);
 
     return Response.json({ received: true, type: event.type, status: sub.status });
+    });
   } catch (error) {
     // A 500 tells Stripe to retry, which is what we want on a transient failure.
     console.error('stripe-webhook failed', (error as Error)?.message || error);
     return Response.json({ error: 'Webhook processing failed.' }, { status: 500 });
   }
-});
+}

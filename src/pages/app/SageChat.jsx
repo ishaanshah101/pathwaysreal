@@ -164,7 +164,7 @@ export default function SageChat() {
             )}
             {renewalDate && (
               <span style={{ fontSize: 11.5, color: 'var(--text-subtle)' }}>
-                {isCanceling ? `Ends ${renewalDate}` : `Renews ${renewalDate}`}
+                {isCanceling ? `Renewal canceled. Sage stays available through ${renewalDate}.` : `Renews ${renewalDate}`}
               </span>
             )}
             {billingError && (

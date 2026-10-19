@@ -66,7 +66,7 @@ export default function Safety() {
         <strong>If you or someone else is in immediate danger, contact your local emergency
         number first.</strong> In the United States, that is 911. You can also reach the Suicide &amp; Crisis
         Lifeline by calling or texting <strong>988</strong>, or the Crisis Text Line by texting HOME to
-        741741 — both free, confidential, and available any time. To report child exploitation, use{' '}
+        741741, both free, confidential, and available any time. To report child exploitation, use{' '}
         <strong>CyberTipline.org</strong>.
       </Section>
 
@@ -75,6 +75,38 @@ export default function Safety() {
         details, for photos, to meet in person, or to keep a conversation secret from their parents
         or school is never acceptable and will end their account. If an adult does any of these
         things, please report it, even if you are not sure.
+      </Section>
+
+      <Section title="How messaging works">
+        Students can only message someone after both people accept a connection. Conversations
+        are one on one, never group chats. Messages are screened automatically. Phone numbers,
+        email addresses, social handles, links and attempts to move a conversation off Pathways
+        are blocked.
+      </Section>
+
+      <Section title="Verification">
+        Professors, educators and admissions counselors are checked by a person against their
+        institution's public directory before they receive a verified badge. Only verified
+        mentors show the badge.
+      </Section>
+
+      <Section title="Reporting a problem">
+        Every profile, post and conversation has a Report action. Reports are reviewed by a
+        person and treated as urgent. You can also email <ContactEmail />. Where someone may
+        be at risk, we preserve records and may contact law enforcement or the National Center
+        for Missing and Exploited Children.
+      </Section>
+
+      <Section title="For parents and guardians">
+        Pathways is for students 13 and older. If a student is under 18, a parent or guardian
+        should be aware they are using Pathways. A parent or guardian can email <ContactEmail />
+        {' '}at any time to review, correct or delete their child's information. Accounts belonging
+        to anyone under 13 are removed as soon as we learn of them. Student data is never sold.
+      </Section>
+
+      <Section title="For schools and counselors">
+        Pathways is free for students. There is nothing for a school to sign or install.
+        Counselors with questions can email <ContactEmail />.
       </Section>
 
       <p style={{ fontSize: 13.5, color: 'var(--text-muted)', margin: '4px 0 0' }}>

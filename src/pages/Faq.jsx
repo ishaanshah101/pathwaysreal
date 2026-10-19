@@ -1,5 +1,7 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import Seo from '@/components/Seo';
+import ContactEmail from '@/components/ContactEmail';
 
 const faqs = [
   { q: 'What is Pathways?', a: 'Pathways is a free platform that gives every high school student equal access to real, firsthand guidance on college and careers. Students, professors, and admissions counselors share experience, connect as mentors, and answer questions in one focused space built for reading and thinking rather than endless scrolling.' },
@@ -9,13 +11,16 @@ const faqs = [
   { q: 'How does Pathways help low-income students?', a: 'Everything that matters is free: mentorship from people who have been there, college search, application advice, and scholarship posts. Students without private counselors or alumni networks get the same access as everyone else. Pathways never sells student data.' },
   { q: 'What is Sage on Pathways?', a: 'Sage is the AI college and career advisor built into Pathways. It is personalized to your grade, school, and goals, saves your conversations, and costs $5 per month or $40 per year. You can also attach an essay draft or a transcript and ask Sage about it.' },
   { q: 'How much does Pathways cost?', a: 'The core app is free forever, with no premium tier. Sage, the optional AI advisor, costs $5 per month or $40 per year, and it is the only thing on Pathways that ever costs money. Sage subscriptions are what keep everything else free.' },
+  { q: 'Is Pathways safe for high school students?', a: <>Students can message only after both people accept a connection. Conversations are one on one, messages are screened automatically, and mentors are checked by a person before receiving a verified badge. <Link to="/safety">Read our Safety page.</Link></> },
+  { q: 'How do I report something?', a: <>Use the Report action on any profile, post or conversation, or email <ContactEmail />. A person reviews reports and treats them as urgent. <Link to="/safety">Read our Safety page.</Link></> },
+  { q: 'What should parents know?', a: <>Pathways is for students 13 and older. A parent or guardian should be aware if their child is under 18 and can email <ContactEmail /> to review, correct or delete their child's information. Student data is never sold. <Link to="/safety">Read our Safety page.</Link></> },
 ];
 
 export default function Faq() {
   return (
     <>
       <Seo
-        title="Pathways FAQ — Cost, Eligibility, and How It Compares"
+        title="Pathways FAQ: Cost, Eligibility, and How It Compares"
         description="Straight answers about Pathways: what it is, what it costs, who can join, how it differs from a private college counselor, and what Sage the AI advisor does."
         path="/faq"
       />

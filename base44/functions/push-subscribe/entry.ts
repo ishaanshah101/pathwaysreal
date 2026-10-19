@@ -1,4 +1,5 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.44';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
+import { getProfile } from '../../shared/accounts.ts';
 import { vapidPublicKey, validatedPushSubscription } from '../../shared/webPush.ts';
 import { consumeRateLimit } from '../../shared/rateLimit.ts';
 import { requirePost, readJsonObject, safeFailure } from '../../shared/requestSafety.ts';
@@ -20,6 +21,7 @@ export default async function (req: Request): Promise<Response> {
 
     const payload = await readJsonObject(req);
     const action = String(payload?.action || 'key');
+    if (!['key', 'subscribe', 'unsubscribe'].includes(action)) return Response.json({ error: 'Unknown action.' }, { status: 400 });
     const limit = await consumeRateLimit(base44, email, 'push_settings', { hour: 120, day: 500 });
     if (!limit.ok) return Response.json({ error: limit.message }, { status: 429 });
 
@@ -29,8 +31,7 @@ export default async function (req: Request): Promise<Response> {
       return Response.json({ publicKey: key });
     }
 
-    const { items } = await base44.asServiceRole.entities.Profile.filter({ user_email: email }, { limit: 1 });
-    const profile = items[0] || null;
+    const profile = await getProfile(base44, email);
     if (!profile) return Response.json({ error: 'Finish setting up your profile first.' }, { status: 404 });
 
     if (action === 'unsubscribe') {

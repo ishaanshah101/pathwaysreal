@@ -1,3 +1,5 @@
+import { reserveAICall } from './aiBudget.ts';
+
 // Attachment safety. Every file that reaches a Post or a Message goes through
 // here first.
 //
@@ -146,6 +148,7 @@ Allow ordinary things students share: screenshots of essays and applications, wh
 Respond with JSON only.`;
 
   try {
+    await reserveAICall('safety');
     const res = await base44.asServiceRole.integrations.Core.InvokeLLM({
       prompt,
       file_urls: [url],

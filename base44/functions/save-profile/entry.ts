@@ -173,6 +173,12 @@ export default async function (req: Request): Promise<Response> {
       }
     }
 
+    // A badge confirms the reviewed identity and credentials, not future edits.
+    if (existing?.verified && ['full_name', 'role', 'institution', 'job_title'].some((field) =>
+      patch[field] !== undefined && String(patch[field]).trim() !== String(existing[field] || '').trim())) {
+      patch.verified = false;
+    }
+
     let saved;
     if (existing?.id) {
       saved = await base44.asServiceRole.entities.Profile.update(existing.id, patch);

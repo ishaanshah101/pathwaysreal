@@ -1,5 +1,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.44';
 import { vapidPublicKey, validatedPushSubscription } from '../../shared/webPush.ts';
+import { consumeRateLimit } from '../../shared/rateLimit.ts';
+import { requirePost, readJsonObject, safeFailure } from '../../shared/requestSafety.ts';
 
 // The client's only way to turn push notifications on or off. Profile writes are
 // service-role only, so this is what stores the subscription, and it stores it
@@ -10,13 +12,16 @@ import { vapidPublicKey, validatedPushSubscription } from '../../shared/webPush.
 
 export default async function (req: Request): Promise<Response> {
   try {
+    requirePost(req);
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me().catch(() => null);
     if (!user?.email) return Response.json({ error: 'Please sign in again.' }, { status: 401 });
     const email = String(user.email).toLowerCase();
 
-    const payload = await req.json().catch(() => ({} as any));
+    const payload = await readJsonObject(req);
     const action = String(payload?.action || 'key');
+    const limit = await consumeRateLimit(base44, email, 'push_settings', { hour: 120, day: 500 });
+    if (!limit.ok) return Response.json({ error: limit.message }, { status: 429 });
 
     if (action === 'key') {
       const key = vapidPublicKey();
@@ -24,8 +29,8 @@ export default async function (req: Request): Promise<Response> {
       return Response.json({ publicKey: key });
     }
 
-    const rows = await base44.asServiceRole.entities.Profile.filter({ user_email: email });
-    const profile = Array.isArray(rows) && rows.length ? rows[0] : null;
+    const { items } = await base44.asServiceRole.entities.Profile.filter({ user_email: email }, { limit: 1 });
+    const profile = items[0] || null;
     if (!profile) return Response.json({ error: 'Finish setting up your profile first.' }, { status: 404 });
 
     if (action === 'unsubscribe') {
@@ -50,6 +55,6 @@ export default async function (req: Request): Promise<Response> {
 
     return Response.json({ error: 'Unknown action.' }, { status: 400 });
   } catch (error: any) {
-    return Response.json({ error: error?.message || 'Could not change notifications.' }, { status: 500 });
+    return safeFailure('push-subscribe', error, 'Could not change notifications.');
   }
 }

@@ -1,6 +1,7 @@
 import { createClientFromRequest } from "npm:@base44/sdk@0.8.54";
 import { consumeAtomicLimits } from '../../shared/atomicRateLimit.ts';
 import { requirePost, readJsonObject, RequestError, safeFailure } from '../../shared/requestSafety.ts';
+import { getProfile } from '../../shared/accounts.ts';
 
 // The /sage page stays public, but every model request requires a real session.
 // The daily allowance belongs to the authenticated account, not a caller-supplied
@@ -50,6 +51,8 @@ export default async function(req) {
       return Response.json({ error: 'Sign in to ask your free Sage question.', code: 'sign_in_required' }, { status: 401 });
     }
 
+    const profile = await getProfile(base44, user.email);
+    if (profile?.suspended) return Response.json({ error: 'This account is currently under review.' }, { status: 403 });
     const body = await readJsonObject(req);
     if (typeof body.question !== 'string' || (body.grade != null && typeof body.grade !== 'string')) {
       throw new RequestError('Enter a question and a valid grade.');

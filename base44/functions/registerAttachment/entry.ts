@@ -19,6 +19,8 @@ export default async function(req) {
       return Response.json({ error: 'Choose a file to upload. Existing storage references are not accepted.' }, { status: 400 });
     }
     if (isSuspended(await getProfile(base44, user.email))) return Response.json({ error: SUSPENDED_MESSAGE }, { status: 403 });
+    const limit = await consumeRateLimit(base44, user.email, 'register_attachment', { hour: 60, day: 200 });
+    if (!limit.ok) return Response.json({ error: limit.message }, { status: 429 });
     const bytes = await readLimitedBody(req, MAX_FILE_BYTES + 65536);
     const form = await new Response(bytes, { headers: { 'content-type': req.headers.get('content-type') } }).formData();
     if ([...form.keys()].some((key) => key !== 'file') || form.getAll('file').length !== 1) return Response.json({ error: 'Upload one file at a time, without storage references.' }, { status: 400 });
@@ -28,8 +30,6 @@ export default async function(req) {
     if (!name || !file.size || file.size > MAX_FILE_BYTES) return Response.json({ error: 'Choose a named, nonempty file no larger than 25 MB.' }, { status: 400 });
     if (isBlockedType(name, file.type)) return Response.json({ error: 'Executable files cannot be shared on Pathways.' }, { status: 400 });
     const mime = await inspectUpload(file, name);
-    const limit = await consumeRateLimit(base44, user.email, 'register_attachment', { hour: 60, day: 200 });
-    if (!limit.ok) return Response.json({ error: limit.message }, { status: 429 });
     const day = new Date().toISOString().slice(0, 10);
     const expiresAt = (Math.floor(Date.now() / 86400000) + 1) * 86400;
     const quota = await consumeAtomicLimits([

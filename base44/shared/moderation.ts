@@ -1,3 +1,5 @@
+import { reserveAICall } from './aiBudget.ts';
+
 // Safety filtering for anything a user types at another user.
 //
 // This exists because the marketing site already promises that "sharing contact
@@ -143,6 +145,7 @@ export async function classifyRisk(base44: any, text: string) {
   ].join('\n');
 
   try {
+    await reserveAICall('safety');
     const res = await base44.asServiceRole.integrations.Core.InvokeLLM({
       prompt,
       response_json_schema: {

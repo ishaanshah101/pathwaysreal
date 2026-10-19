@@ -1,16 +1,11 @@
 /* Pathways service worker.
  *
- * Three jobs:
- *   1. Keep the app shell available offline, so launching from the home screen
- *      never shows the browser's dinosaur.
- *   2. Cache feed and post data as it is read, so previously viewed posts are
- *      still readable with no connection.
- *   3. Show web push notifications for new messages and accepted connections.
+ * Keep the public app shell available offline and show web push notifications.
+ * Authenticated requests and API responses are network-only and never cached.
  */
 
-const VERSION = 'pathways-v2';
+const VERSION = 'pathways-v3';
 const SHELL = `${VERSION}-shell`;
-const DATA = `${VERSION}-data`;
 const SHELL_URLS = ['/', '/app', '/manifest.json', '/icon.svg'];
 
 self.addEventListener('install', (event) => {
@@ -23,7 +18,7 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys()
       .then((keys) => Promise.all(
-        keys.filter((k) => !k.startsWith(VERSION)).map((k) => caches.delete(k)),
+        keys.filter((k) => k.startsWith('pathways-') && k !== SHELL).map((k) => caches.delete(k)),
       ))
       .then(() => self.clients.claim()),
   );
@@ -45,21 +40,6 @@ async function handleNavigation(request) {
   }
 }
 
-// Reads of app data: network first so the feed is fresh when online, cache
-// fallback so it is still there when it is not.
-async function handleData(request) {
-  const cache = await caches.open(DATA);
-  try {
-    const res = await fetch(request);
-    if (res.ok) cache.put(request, res.clone());
-    return res;
-  } catch {
-    const hit = await cache.match(request);
-    if (hit) return hit;
-    throw new Error('offline');
-  }
-}
-
 async function handleAsset(request) {
   const cache = await caches.open(SHELL);
   const hit = await cache.match(request);
@@ -74,14 +54,15 @@ self.addEventListener('fetch', (event) => {
   if (request.method !== 'GET') return;
 
   const url = new URL(request.url);
-  if (url.origin !== self.location.origin && !/base44\.(app|com)$/.test(url.hostname)) return;
+  // Check before navigation and asset handling, even for API URLs ending in an image extension.
+  if (request.headers.has('authorization') || /\/(api|entities|functions)(\/|$)/.test(url.pathname)) {
+    event.respondWith(fetch(request, { cache: 'no-store' }));
+    return;
+  }
+  if (url.origin !== self.location.origin) return;
 
   if (request.mode === 'navigate') {
     event.respondWith(handleNavigation(request));
-    return;
-  }
-  if (/\/api\/|\/entities\//.test(url.pathname)) {
-    event.respondWith(handleData(request));
     return;
   }
   // Never cache code: stale JS or CSS chunks break the app after an update.

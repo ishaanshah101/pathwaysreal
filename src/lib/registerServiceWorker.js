@@ -1,5 +1,5 @@
 // Registers the service worker that makes Pathways installable and keeps
-// already-read posts available offline. Failure is silent: the app works
+// the public app shell available offline. Failure is silent: the app works
 // exactly as before without it.
 export function registerServiceWorker() {
   if (!('serviceWorker' in navigator)) return;

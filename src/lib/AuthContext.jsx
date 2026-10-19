@@ -115,9 +115,14 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const logout = (shouldRedirect = true) => {
-    // Drop cached data so a later sign-in on the same browser can't briefly
-    // render the previous account's name.
+  const logout = async (shouldRedirect = true) => {
+    // Remove legacy offline responses before ending the session or redirecting.
+    if ('caches' in window) {
+      const keys = await window.caches.keys();
+      await Promise.all(keys.filter((key) => key.startsWith('pathways-'))
+        .map((key) => window.caches.delete(key)));
+    }
+    // Drop in-memory data so a later sign-in cannot render the previous account.
     queryClientInstance.clear();
 
     if (shouldRedirect) {

@@ -22,7 +22,7 @@ try {
   // Swallow — let the app render normally.
 }
 
-// Makes Pathways installable and keeps already-read posts available offline.
+// Makes Pathways installable and keeps the public app shell available offline.
 registerServiceWorker()
 
 ReactDOM.createRoot(document.getElementById('root')).render(

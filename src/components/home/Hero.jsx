@@ -58,8 +58,8 @@ export default function Hero() {
             className="relative overflow-hidden"
             style={{
               aspectRatio: '4 / 4.6',
-              borderRadius: 24,
-              background: 'linear-gradient(150deg, var(--color-accent-2-400), var(--color-accent-300) 55%, var(--color-accent-400))',
+              borderRadius: 4,
+              background: 'var(--color-accent-200)',
               boxShadow: 'var(--shadow-lg)',
             }}
           >

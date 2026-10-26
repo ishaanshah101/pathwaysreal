@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { signInWithGoogle } from '@/lib/googleAuth';
+import { Image } from '@/components/ui/image';
 
 export default function Hero() {
   return (
@@ -51,9 +52,7 @@ export default function Hero() {
       </div>
 
       <div className="anim-fade-up" style={{ animationDelay: '.15s' }}>
-        {/* The photo and the two floating cards share one positioning context,
-            so the caption underneath can never push the bottom-anchored card
-            off the image. */}
+        {/* Keep the photo and its floating pricing card in one positioning context. */}
         <div className="relative">
           <div
             className="relative overflow-hidden"
@@ -64,6 +63,21 @@ export default function Hero() {
               boxShadow: 'var(--shadow-lg)',
             }}
           >
+            <Image
+              src="https://media.base44.com/images/public/6a7ac32706b0616cd94b0ec7/3041b5321_images7.jpeg"
+              alt="Student featured on the Pathways homepage"
+              width={520}
+              height={598}
+              loading="eager"
+              fetchPriority="high"
+              decoding="async"
+              fittingType="fill"
+              focalPointX={0.44}
+              focalPointY={0.5}
+              quality={82}
+              className="absolute inset-0 h-full w-full object-cover"
+              style={{ filter: 'brightness(1.08) contrast(1.05) saturate(1.05)' }}
+            />
           </div>
           <div className="card elev-md hero-float-right" style={{ position: 'absolute', right: -12, top: 22, padding: '10px 16px', gap: 2 }}>
             <span style={{ fontFamily: 'var(--font-heading)', fontSize: 22, lineHeight: 1 }}>

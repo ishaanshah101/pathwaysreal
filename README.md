@@ -1,77 +1,92 @@
-# Base44 Project
+# Pathways
 
-Use this repository to run and edit the app locally, then publish changes back through Base44.
+**Real guidance from people who have been there.**
 
-Any change pushed to the repo will also be reflected in the Base44 Builder.
+Pathways is a free website where high school students get honest, firsthand guidance about college and careers from verified mentors such as college students, professors and admissions counselors. It gives every student the kind of advice that is usually only available to people who can afford a private counselor, no matter their background or zip code.
 
-## Prerequisites
+Live site: [pathways.uno](https://pathways.uno)
 
-1. Clone the repository using the project's Git URL.
-2. Navigate to the project directory.
-3. Install dependencies: `npm install`.
-4. Install the Base44 CLI: `npm install -g base44@latest`.
+Built by Ishaan Shah, a sophomore at The Athenian School in Danville, California, as an entry for the 2026 Congressional App Challenge.
 
-See the [Base44 CLI docs](https://docs.base44.com/developers/references/cli/get-started/overview) if you want to run Base44 commands directly.
+## What it does
 
-## Run Locally
+- **Feed and posts:** students and mentors share real experiences about applications, majors, internships and careers, without reposts, short-form video or engagement-bait algorithms.
+- **Explore:** search for people and posts by school, field or interest.
+- **One-on-one messaging:** students connect directly with mentors. Students always send the first message, and there are no group chats.
+- **Verified mentors:** every mentor is checked by a human against their institution's public directory before they can be contacted.
+- **Sage:** an AI college and career advisor. Anyone can try one free question per day, and the full version is an optional subscription. Everything else on Pathways is free.
+- **Safety tools:** blocking, reporting, rate limits, AI-assisted moderation and an admin review queue. Pathways is for users 13 and older.
 
-Run the full local development environment from the project root:
+## Tech stack
 
-```bash
-base44 dev
+- **Frontend:** React, Vite, Tailwind CSS and shadcn/ui (Radix) components
+- **Backend:** [Base44](https://base44.com), which provides the database entities, authentication and serverless backend functions
+- **Payments:** Stripe Checkout and Customer Portal for the Sage subscription
+- **AI:** Base44's LLM integration, used for Sage and for content moderation
+
+## Project structure
+
+```
+src/
+  pages/            Public pages (Home, How It Works, Sage, FAQ, Safety, Privacy, Terms)
+  pages/app/        Signed-in app (Feed, Explore, Messages, Requests, Sage chat, Profile, admin moderation)
+  components/       Shared UI, layout, onboarding and Sage components
+  api/              Base44 SDK client
+base44/
+  entities/         Data model (Profile, Post, Message, Connection, Report, Subscription and more)
+  functions/        Backend functions (posting, messaging, connections, Sage, Stripe webhooks)
+  config.jsonc      Base44 project config
 ```
 
-`base44 dev` starts the local Base44 development backend and, when this app is configured for it, also starts the frontend dev server for you. Use the frontend URL printed by the command.
+Almost every write goes through a backend function running with service-role access, so the browser can never set sensitive fields such as a user's verified status, age flag or subscription status.
 
-For example, when the Base44 project config includes a `serveCommand`, `base44 dev` can launch the frontend too:
+## Running it locally
 
-```json5
-{
-  "site": {
-    "serveCommand": "npm run dev"
-  }
-}
-```
+You need [Node.js](https://nodejs.org) 18 or newer.
 
-In a Base44 project this lives in `base44/config.jsonc`.
+1. Clone the repository and install dependencies:
 
-## Run Only The Frontend
+   ```bash
+   git clone https://github.com/ishaanshah101/pathwaysreal.git
+   cd pathwaysreal
+   npm install
+   ```
 
-If you only want to work on the frontend against the hosted Base44 backend, run:
+2. Install the Base44 CLI:
 
-```bash
-npm run dev
-```
+   ```bash
+   npm install -g base44@latest
+   ```
 
-Open the local URL printed by Vite.
+3. Start the local backend and frontend together:
 
-## Use The Hosted Backend
+   ```bash
+   base44 dev
+   ```
 
-For frontend-only development, create or update `.env.local` in the project root:
+   Then open the frontend URL that the command prints.
+
+### Frontend only
+
+To run just the frontend against a hosted Base44 backend, create a `.env.local` file in the project root:
 
 ```bash
 VITE_BASE44_APP_ID=your_app_id
 VITE_BASE44_APP_BASE_URL=https://your-app.base44.app
 ```
 
-`VITE_BASE44_APP_ID` identifies the Base44 app.
-
-`VITE_BASE44_APP_BASE_URL` tells the Base44 Vite plugin where to send local `/api` requests. Point it at your deployed Base44 app URL when you want the local frontend to use the hosted backend.
-
-When you use `base44 dev`, the command injects the local Base44 values for you, so `.env.local` is mainly needed for frontend-only workflows.
-
-## Publish Your Changes
-
-After pushing your changes to git, open the Base44 dashboard and publish the app:
+Then run:
 
 ```bash
-base44 dashboard open
+npm run dev
 ```
 
-## Docs & Support
+and open the local URL that Vite prints.
 
-Documentation: [https://docs.base44.com/Integrations/Using-GitHub](https://docs.base44.com/Integrations/Using-GitHub)
+### Secrets
 
-Base44 CLI command reference: [https://docs.base44.com/developers/references/cli/commands/introduction](https://docs.base44.com/developers/references/cli/commands/introduction)
+API keys are never stored in this repository. The Sage subscription needs four secrets set in the Base44 dashboard (`STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_SAGE_MONTHLY` and `STRIPE_PRICE_SAGE_YEARLY`). The rest of the app runs without them.
 
-Support: [https://app.base44.com/support](https://app.base44.com/support)
+## Contact
+
+Questions, feedback or safety reports: [ishaan@pathways.uno](mailto:ishaan@pathways.uno)

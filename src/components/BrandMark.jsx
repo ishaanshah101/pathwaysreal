@@ -9,7 +9,7 @@ import React from 'react';
 // asphalt, the same way a printed logo has a reversed version. Pass
 // tone="light" where the surface is always dark (the footer); everywhere else
 // it follows the colour scheme through the --mark-* variables.
-export default function BrandMark({ size = 36, tone, style, ...rest }) {
+export default function BrandMark({ size = 36, tone = 'auto', style = {}, ...rest }) {
   const lane = tone === 'light' ? '#fbf6ee' : 'var(--mark-lane, #26231f)';
   const dash = tone === 'light' ? '#26231f' : 'var(--mark-dash, #fbf6ee)';
   return (

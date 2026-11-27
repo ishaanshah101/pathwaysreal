@@ -3,7 +3,7 @@ import { authorAvatar, initialsOf } from '@/lib/avatar';
 
 // A member's avatar: initials on a small plate. `seed` is what the colour is
 // derived from (an email or member ref), so it stays stable if a name changes.
-export default function Plate({ name, seed, size = 40, style, ...rest }) {
+export default function Plate({ name = '', seed = '', size = 40, style = {}, ...rest }) {
   const [bg, fg] = authorAvatar(seed || name || '?');
   return (
     <span

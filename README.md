@@ -10,8 +10,10 @@ Built by Ishaan Shah, a sophomore at The Athenian School in Danville, California
 
 ## What it does
 
-- **Feed and posts:** students and mentors share real experiences about applications, majors, internships and careers, without reposts, short-form video or engagement-bait algorithms.
+- **Feed and posts:** students and mentors share real experiences about applications, majors, internships and careers, without reposts, short-form video or engagement-bait algorithms. Posts can be searched and filtered by topic.
 - **Explore:** search for people and posts by school, field or interest.
+- **Plan:** a private planner with a dated checklist and a college list, starting from what students in each grade usually need to do next. It is saved on the device first, so it works with no connection.
+- **Glossary and By grade:** a plain-English glossary of admissions and financial aid terms, and a season-by-season guide for 9th to 12th grade. Both are public and need no account.
 - **One-on-one messaging:** students connect directly with mentors. Students always send the first message, and there are no group chats.
 - **Verified mentors:** every mentor is checked by a human against their institution's public directory before they can be contacted.
 - **Sage:** an AI college and career advisor. Anyone can try one free question per day, and the full version is an optional subscription. Everything else on Pathways is free.
@@ -20,6 +22,7 @@ Built by Ishaan Shah, a sophomore at The Athenian School in Danville, California
 ## Tech stack
 
 - **Frontend:** React, Vite, Tailwind CSS and shadcn/ui (Radix) components
+- **Design system:** documented in [DESIGN.md](DESIGN.md). Fonts are self-hosted through Fontsource, so no page view is reported to a font CDN.
 - **Backend:** [Base44](https://base44.com), which provides the database entities, authentication and serverless backend functions
 - **Payments:** Stripe Checkout and Customer Portal for the Sage subscription
 - **AI:** Base44's LLM integration, used for Sage and for content moderation
@@ -28,12 +31,15 @@ Built by Ishaan Shah, a sophomore at The Athenian School in Danville, California
 
 ```
 src/
-  pages/            Public pages (Home, How It Works, Sage, FAQ, Safety, Privacy, Terms)
-  pages/app/        Signed-in app (Feed, Explore, Messages, Requests, Sage chat, Profile, admin moderation)
+  pages/            Public pages (Home, How It Works, By Grade, Glossary, Sage, FAQ, Safety, Privacy, Terms)
+  pages/app/        Signed-in app (Feed, Explore, Messages, Requests, Plan, Sage chat, Profile, admin moderation)
   components/       Shared UI, layout, onboarding and Sage components
+  components/kit/   The small shared pieces every screen uses (Sign, Plate, Icon, PageHead)
+  styles/           The design system: tokens, base, kit, and one stylesheet per area
+  data/             Written content: the glossary and the by-grade guide
   api/              Base44 SDK client
 base44/
-  entities/         Data model (Profile, Post, Message, Connection, Report, Subscription and more)
+  entities/         Data model (Profile, Post, Message, Connection, PlanItem, Report, Subscription and more)
   functions/        Backend functions (posting, messaging, connections, Sage, Stripe webhooks)
   config.jsonc      Base44 project config
 ```

@@ -9,59 +9,61 @@ const STARTERS = [
   'Which of my classes next year matter most for a bio major?',
 ];
 
-// The transcript. Attachments are shown on the student's own bubble so it stays
-// obvious what Sage was actually looking at.
+// The transcript, set like a printed interview rather than a chat: the
+// student's question on a paper block, Sage's answer in the reading face behind
+// a sign-green rule. Attachments stay on the question so it is obvious what
+// Sage was actually looking at.
 export default function SageMessages({ messages, thinking, loading, onStarter }) {
   const endRef = useRef(null);
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages.length, thinking]);
 
   return (
-    <div className="flex flex-col" style={{ gap: 12, flex: 1, minHeight: 0, overflowY: 'auto', paddingRight: 4 }}>
+    <div className="sage-log">
       {loading ? (
-        <span className="text-quiet" style={{ fontSize: 13.5 }}>Loading this conversation…</span>
+        <p className="meta" role="status">Loading this conversation…</p>
       ) : messages.length === 0 ? (
-        <div className="flex flex-col" style={{ gap: 10 }}>
-          <span style={{ fontSize: 14, color: 'var(--text-muted)' }}>Not sure where to start?</span>
-          <div className="flex flex-col items-start" style={{ gap: 8 }}>
+        <div className="sage-starters">
+          <span className="kicker">Not sure where to start?</span>
+          <ul className="sage-starter-list">
             {STARTERS.map((s) => (
-              <button
-                key={s}
-                type="button"
-                onClick={() => onStarter(s)}
-                className="btn btn-secondary text-left"
-                style={{ fontFamily: 'var(--font-body)', fontSize: 13.5, borderRadius: 18, padding: '9px 16px' }}
-              >
-                {s}
-              </button>
+              <li key={s}>
+                <button type="button" className="sage-starter" onClick={() => onStarter(s)}>{s}</button>
+              </li>
             ))}
-          </div>
+          </ul>
         </div>
       ) : (
-        messages.map((m) => {
+        messages.map((m, i) => {
           const mine = m.role === 'user';
           return (
-            <div
-              key={m.id}
-              style={{
-                alignSelf: mine ? 'flex-end' : 'flex-start',
-                maxWidth: mine ? '78%' : '92%',
-                background: mine ? 'var(--color-ink)' : 'var(--color-surface-2)',
-                color: mine ? 'var(--color-bg)' : 'var(--color-text)',
-                padding: '11px 16px',
-                borderRadius: mine ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
-                fontSize: 14.5,
-                lineHeight: 1.6,
-                whiteSpace: 'pre-wrap',
-              }}
-            >
-              {m.content}
-              <AttachmentList files={m.attachments} />
-            </div>
+            <React.Fragment key={m.id}>
+              {mine && i > 0 && <hr className="lane lane-soft" />}
+              <div className="turn">
+                <span className="turn-label" data-who={mine ? 'you' : 'sage'}>{mine ? 'You asked' : 'Sage'}</span>
+                {mine ? (
+                  <div className="turn-q">
+                    {m.content}
+                    <AttachmentList files={m.attachments} />
+                  </div>
+                ) : (
+                  <div className="prose turn-a">
+                    {m.content}
+                    <AttachmentList files={m.attachments} />
+                  </div>
+                )}
+              </div>
+            </React.Fragment>
           );
         })
       )}
       {thinking && (
-        <span className="text-quiet" style={{ fontSize: 13.5, alignSelf: 'flex-start' }}>Sage is reading and thinking…</span>
+        <div className="turn" role="status">
+          <span className="turn-label" data-who="sage">Sage</span>
+          <div className="turn-thinking">
+            <span className="lane-run" aria-hidden="true" />
+            <span>Sage is reading and thinking…</span>
+          </div>
+        </div>
       )}
       <div ref={endRef} />
     </div>

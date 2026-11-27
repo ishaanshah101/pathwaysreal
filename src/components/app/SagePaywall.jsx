@@ -1,9 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Sparkles, Check, Loader2 } from 'lucide-react';
 import { startSageCheckout, SAGE_PRICES } from '@/lib/useSubscription';
 import { SAMPLE_SAGE_EXCHANGES } from '@/data/sampleContent';
 import { isNativeApp } from '@/lib/platform';
 import SageComingSoonCard from '@/components/app/SageComingSoonCard';
+import PageHead from '@/components/kit/PageHead';
+import Sign from '@/components/kit/Sign';
 
 const points = [
   'Personalized to your profile, grade, and goals',
@@ -51,139 +52,108 @@ export default function SagePaywall({ notice }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // The price, printed as a toll ticket, the same one the public Sage page
+  // shows: this is the one toll road on a map where every other road is free.
   const pricing = native ? <SageComingSoonCard /> : (
-    <div className="card elev-md" style={{ padding: 'clamp(22px,3vw,28px)', gap: 18 }}>
-      <span className="card-kicker">Sage subscription</span>
-      <div className="seg self-start">
-        {['sage_monthly', 'sage_yearly'].map((p) => (
-          <button
-            key={p}
-            type="button"
-            className="seg-opt"
-            data-on={String(plan === p)}
-            onClick={() => { setPlan(p); setError(''); }}
-          >
-            {SAGE_PRICES[p].label}
-          </button>
-        ))}
+    <div className="ticket">
+      <div className="ticket-top">
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <span className="kicker" style={{ margin: 0 }}>Toll ticket · Sage</span>
+          <div className="seg" role="group" aria-label="Billing period">
+            {['sage_monthly', 'sage_yearly'].map((p) => (
+              <button
+                key={p}
+                type="button"
+                className="seg-opt"
+                data-on={String(plan === p)}
+                aria-pressed={plan === p}
+                onClick={() => { setPlan(p); setError(''); }}
+              >
+                {SAGE_PRICES[p].label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="ticket-price">
+          <b className="num">{price.amount}</b>
+          <span style={{ fontWeight: 700, color: 'var(--ink-2)' }}>{price.cadence}</span>
+          {yearly && <Sign color="yellow" style={{ marginLeft: 'auto' }}>Save 33%</Sign>}
+        </div>
+
+        <ul className="ticket-rows">
+          <li><span>Per week</span><span className="num">{price.perWeek}</span></li>
+          <li><span>Cancel anytime</span><span>Yes</span></li>
+        </ul>
+
+        <ul className="checklist ticket-points">
+          {points.map((t) => <li key={t}>{t}</li>)}
+        </ul>
       </div>
 
-      <div key={plan} className="anim-fade-swap">
-        <div className="flex items-baseline gap-2 flex-wrap">
-          <span style={{ fontFamily: 'var(--font-heading)', fontSize: 'clamp(40px,5vw,52px)', lineHeight: 1 }}>
-            {price.amount}
-          </span>
-          <span style={{ fontSize: 15, color: 'var(--text-muted)' }}>{price.cadence}</span>
-          {yearly && <span className="tag tag-accent" style={{ marginLeft: 8 }}>Save 33%</span>}
-        </div>
-        <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>
-          That is {price.perWeek} a week. Cancel anytime.
+      <div className="ticket-tear" aria-hidden="true" />
+
+      <div className="ticket-bottom">
+        {error && <span role="alert" className="msg msg-error">{error}</span>}
+
+        <button
+          type="button"
+          className="btn btn-sun btn-lg btn-block"
+          onClick={() => subscribe()}
+          disabled={busy}
+        >
+          {busy ? 'Opening secure checkout…' : 'Subscribe to Sage'}
+        </button>
+
+        <span className="meta" style={{ textAlign: 'center', lineHeight: 1.5 }}>
+          Payment is handled by Stripe on their secure checkout page. Pathways never sees or stores
+          your card details.
         </span>
       </div>
-
-      <div className="flex flex-col" style={{ gap: 10 }}>
-        {points.map((t) => (
-          <span key={t} className="flex gap-[10px] items-start" style={{ fontSize: 14.5, lineHeight: 1.5 }}>
-            <span
-              aria-hidden="true"
-              className="flex items-center justify-center"
-              style={{ flex: 'none', width: 20, height: 20, borderRadius: 999, marginTop: 1, background: 'var(--color-accent-2-200)', color: 'var(--color-accent-2-800)' }}
-            >
-              <Check size={12} strokeWidth={3} />
-            </span>
-            {t}
-          </span>
-        ))}
-      </div>
-
-      {error && (
-        <span role="alert" style={{ fontSize: 13.5, color: 'var(--color-accent-700)', lineHeight: 1.5 }}>{error}</span>
-      )}
-
-      <button
-        type="button"
-        className="btn btn-primary btn-block btn-lg"
-        style={{ gap: 8 }}
-        onClick={() => subscribe()}
-        disabled={busy}
-      >
-        {busy ? (
-          <>
-            <Loader2 size={17} className="animate-spin" /> Opening secure checkout…
-          </>
-        ) : (
-          <>
-            <Sparkles size={17} /> Subscribe to Sage
-          </>
-        )}
-      </button>
-
-      <span style={{ fontSize: 12, color: 'var(--text-subtle)', textAlign: 'center', lineHeight: 1.55 }}>
-        Payment is handled by Stripe on their secure checkout page. Pathways never sees or stores
-        your card details.
-      </span>
     </div>
   );
 
   return (
-    <div className="flex flex-col" style={{ gap: 22 }}>
-      <div>
-        <span className="card-kicker" style={{ display: 'block', marginBottom: 8 }}>Sage, the AI advisor</span>
-        <h1 style={{ fontSize: 'clamp(26px,3.2vw,36px)', margin: '0 0 8px', maxWidth: '22ch' }}>
-          {native ? 'Sage, your college and career advisor.' : 'Sage is the one paid thing on Pathways.'}
-        </h1>
-        <p style={{ color: 'var(--text-muted)', margin: 0, maxWidth: '60ch', lineHeight: 1.6, fontSize: 15.5 }}>
-          A private counselor costs $200 an hour. Sage knows your grade, your school, and your goals,
-          and answers like a mentor with all the time in the world. Everything else on Pathways stays
-          free, always.
-        </p>
-      </div>
+    <div className="page">
+      <PageHead
+        kicker="Sage, the AI advisor"
+        title={native ? 'Sage, your college and career advisor.' : 'Sage is the one paid thing on Pathways.'}
+        sub="A private counselor costs $200 an hour. Sage knows your grade, your school, and your goals, and answers like a mentor with all the time in the world. Everything else on Pathways stays free, always."
+      />
 
       {!native && notice && (
-        <div className={`notice ${notice.tone === 'error' ? 'notice-error' : 'notice-success'}`} role="status">
+        <div className={`notice ${notice.tone === 'error' ? 'notice-error' : 'notice-success'}`} role="status" style={{ marginBottom: 24 }}>
           {notice.text}
         </div>
       )}
 
-      <div
-        className="grid app-split"
-        style={{ gridTemplateColumns: 'minmax(0,7fr) minmax(0,5fr)', gap: 20, alignItems: 'start' }}
-      >
+      <div className="paywall-layout">
         {/* Real answers, so the value is visible before anyone is asked to pay. */}
-        <div className="flex flex-col" style={{ gap: 12 }}>
-          <div>
-            <h2 className="h-sans" style={{ fontSize: 18, margin: '0 0 4px' }}>What Sage actually sounds like</h2>
-            <p style={{ color: 'var(--text-muted)', margin: 0, fontSize: 14 }}>
-              Four real answers, unedited. Yours would also know your grade, school, and goals.
-            </p>
+        <div>
+          <div className="paywall-samples-head">
+            <h2>What Sage actually sounds like</h2>
+            <p>Four real answers, unedited. Yours would also know your grade, school, and goals.</p>
           </div>
-          {SAMPLE_SAGE_EXCHANGES.map((ex) => (
-            <div key={ex.q} className="card elev-sm" style={{ padding: 18, gap: 10 }}>
-              <div
-                style={{
-                  alignSelf: 'flex-end', maxWidth: '85%',
-                  background: 'var(--color-ink)', color: 'var(--color-bg)',
-                  padding: '9px 14px', borderRadius: '16px 16px 4px 16px', fontSize: 14, lineHeight: 1.5,
-                }}
-              >
-                {ex.q}
+          {SAMPLE_SAGE_EXCHANGES.map((ex, i) => (
+            <React.Fragment key={ex.q}>
+              {i > 0 && <hr className="lane lane-soft" />}
+              <div className="paywall-sample">
+                <div className="turn">
+                  <span className="turn-label" data-who="you">A student asked</span>
+                  <div className="turn-q">{ex.q}</div>
+                </div>
+                <div className="turn">
+                  <span className="turn-label" data-who="sage">Sage</span>
+                  <div className="prose turn-a">{ex.a}</div>
+                </div>
               </div>
-              <div
-                style={{
-                  alignSelf: 'flex-start', maxWidth: '95%',
-                  background: 'var(--color-surface-2)', padding: '12px 16px', borderRadius: '16px 16px 16px 4px',
-                  fontSize: 14.5, lineHeight: 1.62, whiteSpace: 'pre-wrap',
-                }}
-              >
-                {ex.a}
-              </div>
-            </div>
+            </React.Fragment>
           ))}
         </div>
 
-        <div className="split-aside" style={{ position: 'sticky', top: 84 }}>
+        <aside className="paywall-aside split-aside" aria-label="Sage subscription">
           {pricing}
-        </div>
+        </aside>
       </div>
     </div>
   );

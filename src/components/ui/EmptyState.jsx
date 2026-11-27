@@ -1,27 +1,18 @@
 import React from 'react';
+import Icon from '@/components/kit/Icon';
 
 // One empty/error state for the whole product. Every state says what happened,
 // why, and what to do next, so no screen is ever an unexplained blank.
-export default function EmptyState({ icon: Icon, title, body, action, tone = 'neutral' }) {
-  const toneColor = tone === 'error' ? 'var(--color-danger)' : 'var(--text-muted)';
+//
+// It is drawn as a rest area: a dashed pull-off, a pictogram on a services
+// plate, one short sentence, and a way back onto the road.
+export default function EmptyState({ icon: Glyph, title, body, action, tone = 'neutral' }) {
   return (
-    <div
-      className="flex flex-col items-center text-center"
-      style={{ gap: 'var(--space-3)', padding: 'var(--space-7) var(--space-4)' }}
-    >
-      {Icon && <Icon size={26} strokeWidth={1.6} style={{ color: toneColor }} aria-hidden="true" />}
-      <p style={{ fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 'var(--text-lg)', margin: 0 }}>{title}</p>
-      {body && (
-        <p
-          style={{
-            margin: 0, maxWidth: 380, fontSize: 'var(--text-base)',
-            lineHeight: 'var(--leading-normal)', color: toneColor,
-          }}
-        >
-          {body}
-        </p>
-      )}
-      {action}
+    <div className={tone === 'error' ? 'empty empty-error' : 'empty'}>
+      {Glyph && <span className="empty-icon"><Icon as={Glyph} size={20} /></span>}
+      <p className="empty-title">{title}</p>
+      {body && <p className="empty-body">{body}</p>}
+      {action && <div className="empty-action">{action}</div>}
     </div>
   );
 }

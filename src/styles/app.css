@@ -94,4 +94,4 @@
 
 /* ---- Section headings inside a page ------------------------------------------------ */
 .sub-head { display: flex; align-items: baseline; gap: 10px; margin: 0 0 4px; font-size: 13px; font-family: var(--font-mono); font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-2); }
-.quote-note { margin: 0; padding: 10px 14px; border-left: 5px solid var(--sun); background: var(--paper-2); font-family: var(--font-read); font-size: 16px; line-height: 1.55; border-radius: 0 var(--r-1) var(--r-1) 0; }
+.quote-note { margin: 0; padding: 10px 14px; border-left: 5px solid var(--sun); background: var(--paper-2); font-family: var(--font-read); font-size: 16px; line-height: 1.55; }

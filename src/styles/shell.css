@@ -133,6 +133,7 @@
   /* Every control stays tappable on a phone. */
   .btn, .btn-chip { min-height: 44px; }
   .btn-sm { min-height: 40px; }
+  .btn-lg { min-height: 54px; }
 }
 
 /* ---- The jump menu -------------------------------------------------------------- */

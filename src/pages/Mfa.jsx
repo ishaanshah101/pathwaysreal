@@ -1,12 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Loader2, Lock, Mail } from "lucide-react";
 import GoogleIcon from "@/components/GoogleIcon";
 import MfaFlow from "@/components/MfaFlow";
 import MfaManage from "@/components/MfaManage";
 import { MfaHeader, MfaNotice, MfaScreen, useAppInfo } from "@/components/MfaParts";
+import { Spinner } from "@/components/RequireAuth";
 import { finishSignIn, resumeMfa, signInToManageMfa, signInWithProvider } from "@/lib/authMfaFlow";
 import { safeReturnTo } from "@/lib/authReturnTo";
 
@@ -37,13 +34,7 @@ export default function Mfa() {
       .catch((err) => { setError(err); setResuming(false); });
   }, []);
 
-  if (resuming) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
-      </div>
-    );
-  }
+  if (resuming) return <Spinner />;
   return (
     <MfaScreen>
       {managing ? <MfaManage session={managing} returnTo={returnTo} />
@@ -80,47 +71,56 @@ function ConfirmIdentity({ returnTo, onChallenge, initialError }) {
   return (
     <>
       <MfaHeader title={info && `Welcome to ${info.name || "the app"}`} description="Sign in to continue" />
-      <MfaNotice error={error} />
-      {!options && !error && <Loader2 className="mx-auto w-6 h-6 animate-spin text-muted-foreground" />}
-      {options && (
-        <div className="space-y-4">
-          {providers.map((provider) => (
-            <Button key={provider.id} variant="outline" className="w-full h-12 text-sm font-medium" onClick={() => withProvider(provider.id)}>
-              {provider.id === "google" && <GoogleIcon className="w-5 h-5 mr-2" />}
-              Continue with {provider.name}
-            </Button>
-          ))}
-          {(options.enable_sso_login || options.use_workspace_sso) && (
-            <Button variant="outline" className="w-full h-12 text-sm font-medium" onClick={() => withProvider("sso")}>
-              Continue with SSO
-            </Button>
-          )}
-          {options.enable_username_password && (
-            <form onSubmit={submit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="mfa-email">Email</Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
-                  <Input id="mfa-email" type="email" autoComplete="email" placeholder="you@example.com" value={email}
-                    onChange={(e) => setEmail(e.target.value)} className="pl-10 h-12" required />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="mfa-password">Password</Label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
-                  <Input id="mfa-password" type="password" autoComplete="current-password" placeholder="••••••••" value={password}
-                    onChange={(e) => setPassword(e.target.value)} className="pl-10 h-12" required />
-                </div>
-              </div>
-              <Button type="submit" className="w-full h-12 font-medium" disabled={busy}>
-                {busy && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                Continue
-              </Button>
-            </form>
-          )}
-        </div>
-      )}
+      <div className="auth-stack">
+        <MfaNotice error={error} />
+        {!options && !error && (
+          <div className="auth-wait" role="status">
+            <span className="lane-load" aria-hidden="true" />
+            Loading sign-in options…
+          </div>
+        )}
+        {options && (
+          <>
+            {providers.map((provider) => (
+              <button key={provider.id} type="button" className="btn btn-secondary btn-lg btn-block" style={{ gap: 10 }} onClick={() => withProvider(provider.id)}>
+                {provider.id === "google" && (
+                  // Google's mark always sits on white, whatever the button colour.
+                  <span className="flex items-center justify-center" style={{ width: 24, height: 24, borderRadius: 3, background: "#fff", flex: "none" }}>
+                    <GoogleIcon style={{ width: 18, height: 18 }} />
+                  </span>
+                )}
+                Continue with {provider.name}
+              </button>
+            ))}
+            {(options.enable_sso_login || options.use_workspace_sso) && (
+              <button type="button" className="btn btn-secondary btn-lg btn-block" onClick={() => withProvider("sso")}>
+                Continue with SSO
+              </button>
+            )}
+            {options.enable_username_password && (
+              <>
+                {(providers.length > 0 || options.enable_sso_login || options.use_workspace_sso) && <div className="or-rule">or</div>}
+                <form onSubmit={submit} className="auth-form">
+                  <div className="field">
+                    <label htmlFor="mfa-email">Email</label>
+                    <input id="mfa-email" type="email" autoComplete="email" placeholder="you@example.com" value={email}
+                      onChange={(e) => setEmail(e.target.value)} className="input" required />
+                  </div>
+                  <div className="field">
+                    <label htmlFor="mfa-password">Password</label>
+                    <input id="mfa-password" type="password" autoComplete="current-password" value={password}
+                      onChange={(e) => setPassword(e.target.value)} className="input" required />
+                  </div>
+                  <button type="submit" className="btn btn-primary btn-lg btn-block" disabled={busy}>
+                    {busy && <span className="lane-load" aria-hidden="true" />}
+                    Continue
+                  </button>
+                </form>
+              </>
+            )}
+          </>
+        )}
+      </div>
     </>
   );
 }

@@ -13,3 +13,12 @@
 @import '@fontsource-variable/literata/opsz-italic.css';
 @import '@fontsource/overpass-mono/latin-400.css';
 @import '@fontsource/overpass-mono/latin-600.css';
+
+/* Overpass draws its middle dot hard against the next letter, so "11th grade ·
+   Skyline High" reads as "grade ·Skyline". Take that one character from the
+   system's own sans instead; nothing else changes. */
+@font-face {
+  font-family: 'Pathways Dot';
+  src: local('Helvetica Neue'), local('Helvetica'), local('Arial'), local('Roboto'), local('Liberation Sans'), local('DejaVu Sans');
+  unicode-range: U+00B7;
+}

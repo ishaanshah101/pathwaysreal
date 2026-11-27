@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { Trash2 } from 'lucide-react';
+import { Cancel as AlertDialogCancelPrimitive } from '@radix-ui/react-alert-dialog';
 import {
-  AlertDialog, AlertDialogCancel, AlertDialogContent,
-  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+  AlertDialog, AlertDialogContent,
+  AlertDialogDescription, AlertDialogHeader, AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { useProfile } from '@/lib/useProfile';
 import { useAuth } from '@/lib/AuthContext';
 import { useSubscription } from '@/lib/useSubscription';
+import Icon from '@/components/kit/Icon';
 
 // Account deletion, in the app, as Apple requires. There is no grace period and
 // no deactivate-instead: an account that can be restored is not deleted.
@@ -34,29 +36,28 @@ export default function DeleteAccountCard() {
   };
 
   return (
-    <div
-      className="card elev-sm"
-      style={{ padding: 22, gap: 10, borderTop: '3px solid var(--color-danger)', marginTop: 12 }}
-    >
-      <span className="card-kicker" style={{ color: 'var(--color-danger)' }}>Delete account</span>
-      <p style={{ margin: 0, fontSize: 14.5, lineHeight: 1.65, color: 'var(--text-muted)' }}>
-        Closes your Pathways account for good and deletes your profile, your posts, your Sage
-        conversations, and your connections.
-      </p>
-      <button
-        type="button"
-        className="btn btn-danger self-start"
-        onClick={() => { setTyped(''); setError(''); setOpen(true); }}
-      >
-        <Trash2 size={15} aria-hidden="true" /> Delete account
-      </button>
+    <section className="panel profile-panel profile-panel-danger" aria-labelledby="del-head">
+      <div className="panel-head" id="del-head">Delete account</div>
+      <div className="panel-body">
+        <p>
+          Closes your Pathways account for good and deletes your profile, your posts, your Sage
+          conversations, and your connections.
+        </p>
+        <button
+          type="button"
+          className="btn btn-danger btn-sm"
+          onClick={() => { setTyped(''); setError(''); setOpen(true); }}
+        >
+          <Icon as={Trash2} size={15} /> Delete account
+        </button>
+      </div>
 
       <AlertDialog open={open} onOpenChange={(v) => { if (!busy) setOpen(v); }}>
-        <AlertDialogContent>
+        <AlertDialogContent className="pw-dialog profile-danger-dialog">
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete your account permanently?</AlertDialogTitle>
+            <AlertDialogTitle className="pw-dialog-title">Delete your account permanently?</AlertDialogTitle>
             <AlertDialogDescription asChild>
-              <div style={{ fontSize: 14, lineHeight: 1.65, display: 'grid', gap: 10 }}>
+              <div className="profile-danger-copy">
                 <span>
                   This is permanent and cannot be undone. There is no grace period and no way to
                   restore the account afterwards.
@@ -98,8 +99,13 @@ export default function DeleteAccountCard() {
 
           {error && <span className="msg msg-error" role="alert">{error}</span>}
 
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={busy}>Keep my account</AlertDialogCancel>
+          <div className="profile-danger-acts">
+            {/* The Radix cancel, used directly so it keeps its behaviour (it
+                is what takes focus when the dialog opens, so the safe answer
+                is the default one) without the stock button styling. */}
+            <AlertDialogCancelPrimitive asChild>
+              <button type="button" className="btn btn-secondary" disabled={busy}>Keep my account</button>
+            </AlertDialogCancelPrimitive>
             <button
               type="button"
               className="btn btn-danger"
@@ -108,9 +114,9 @@ export default function DeleteAccountCard() {
             >
               {busy ? 'Deleting…' : 'Delete my account'}
             </button>
-          </AlertDialogFooter>
+          </div>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </section>
   );
 }

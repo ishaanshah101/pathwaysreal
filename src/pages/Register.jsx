@@ -1,13 +1,9 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { UserPlus, Mail, Lock, Loader2 } from "lucide-react";
-import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
-import AuthLayout from "@/components/AuthLayout";
-import GoogleIcon from "@/components/GoogleIcon";
+import { UserPlus, Mail } from "lucide-react";
+import AuthLayout, { CodeBoxes } from "@/components/AuthLayout";
+import GoogleButton from "@/components/GoogleButton";
 import { toast } from "@/components/ui/use-toast";
 import { safeReturnTo } from "@/lib/authReturnTo";
 import Seo from '@/components/Seo';
@@ -68,60 +64,45 @@ export default function Register() {
     }
   };
 
-  const handleGoogle = () => {
-    base44.auth.loginWithProvider("google", safeReturnTo());
-  };
-
   if (showOtp) {
     return (
       <AuthLayout
         icon={Mail}
-        title="Verify your email"
-        subtitle={`We sent a code to ${email}`}
+        kicker="Check your email"
+        title="Verify your email."
+        subtitle={`We sent a 6-digit code to ${email}`}
+        footer={
+          <>
+            Didn't get the code?{" "}
+            <button type="button" onClick={handleResend} className="link-btn">
+              Send it again
+            </button>
+          </>
+        }
       >
         {error && (
-          <div role="alert" className="mb-4 p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
+          <div role="alert" className="notice notice-error">
             {error}
           </div>
         )}
-        <div className="flex justify-center mb-6">
-          <InputOTP
-            maxLength={6}
+        <div className="code-field">
+          <label htmlFor="register-code">Verification code</label>
+          <CodeBoxes
+            id="register-code"
             value={otpCode}
             onChange={setOtpCode}
             autoFocus
             autoComplete="one-time-code"
-          >
-            <InputOTPGroup>
-              <InputOTPSlot index={0} />
-              <InputOTPSlot index={1} />
-              <InputOTPSlot index={2} />
-              <InputOTPSlot index={3} />
-              <InputOTPSlot index={4} />
-              <InputOTPSlot index={5} />
-            </InputOTPGroup>
-          </InputOTP>
+          />
         </div>
-        <Button
-          className="w-full h-11 font-semibold"
+        <button
+          type="button"
+          className={`btn btn-primary btn-lg btn-block${loading ? '' : ' btn-go'}`}
           onClick={handleVerify}
           disabled={loading || otpCode.length < 6}
         >
-          {loading ? (
-            <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              Verifying...
-            </>
-          ) : (
-            "Verify"
-          )}
-        </Button>
-        <p className="text-center text-sm text-muted-foreground mt-4">
-          Didn't receive the code?{" "}
-          <button type="button" onClick={handleResend} className="text-primary font-medium hover:underline">
-            Resend
-          </button>
-        </p>
+          {loading ? "Verifying…" : "Verify"}
+        </button>
       </AuthLayout>
     );
   }
@@ -129,105 +110,73 @@ export default function Register() {
   return (
     <AuthLayout
       icon={UserPlus}
-      title="Create your account"
-      subtitle="Sign up to get started"
+      kicker="New account"
+      title="Create your account."
+      subtitle="Free for every student, and it stays free."
       footer={
         <>
           Already have an account?{" "}
-          <Link
-            to={"/login" + (safeReturnTo() !== "/" ? "?returnTo=" + encodeURIComponent(safeReturnTo()) : "")}
-            className="text-primary font-medium hover:underline"
-          >
+          <Link to={"/login" + (safeReturnTo() !== "/" ? "?returnTo=" + encodeURIComponent(safeReturnTo()) : "")}>
             Log in
           </Link>
         </>
       }
     >
       <Seo title="Create Your Free Account | Pathways" description="Sign up for Pathways free with Google or email and start getting firsthand college and career guidance." path="/register" noindex />
-      <Button
-        variant="outline"
-        className="w-full h-11 text-sm font-semibold mb-6"
-        onClick={handleGoogle}
-      >
-        <GoogleIcon className="w-5 h-5 mr-2" />
-        Continue with Google
-      </Button>
 
-      <div className="relative mb-6">
-        <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-border" />
-        </div>
-        <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-card px-3 text-muted-foreground font-semibold tracking-wider">or</span>
-        </div>
-      </div>
+      {/* GoogleButton calls base44.auth.loginWithProvider("google", returnTo). */}
+      <GoogleButton label="Continue with Google" returnTo={safeReturnTo()} variant="secondary" block />
+
+      <div className="or-rule">or</div>
 
       {error && (
-        <div role="alert" className="mb-4 p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
+        <div role="alert" className="notice notice-error">
           {error}
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
-          <div className="relative">
-            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
-            <Input
-              id="email"
-              type="email"
-              autoComplete="email"
-              autoFocus
-              placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="pl-10 h-11"
-              required
-            />
-          </div>
+      <form onSubmit={handleSubmit} className="auth-form">
+        <div className="field">
+          <label htmlFor="email">Email</label>
+          <input
+            id="email"
+            type="email"
+            autoComplete="email"
+            autoFocus
+            placeholder="you@example.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="input"
+            required
+          />
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="password">Password</Label>
-          <div className="relative">
-            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
-            <Input
-              id="password"
-              type="password"
-              autoComplete="new-password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="pl-10 h-11"
-              required
-            />
-          </div>
+        <div className="field">
+          <label htmlFor="password">Password</label>
+          <input
+            id="password"
+            type="password"
+            autoComplete="new-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="input"
+            required
+          />
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="confirm">Confirm Password</Label>
-          <div className="relative">
-            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
-            <Input
-              id="confirm"
-              type="password"
-              autoComplete="new-password"
-              placeholder="••••••••"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              className="pl-10 h-11"
-              required
-            />
-          </div>
+        <div className="field">
+          <label htmlFor="confirm">Confirm password</label>
+          <input
+            id="confirm"
+            type="password"
+            autoComplete="new-password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            className="input"
+            required
+          />
         </div>
-        <Button type="submit" className="w-full h-11 font-semibold" disabled={loading}>
-          {loading ? (
-            <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              Creating account...
-            </>
-          ) : (
-            "Create account"
-          )}
-        </Button>
+        <button type="submit" className={`btn btn-primary btn-lg btn-block${loading ? '' : ' btn-go'}`} disabled={loading}>
+          {loading ? "Creating account…" : "Create account"}
+        </button>
       </form>
     </AuthLayout>
   );

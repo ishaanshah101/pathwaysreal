@@ -105,7 +105,7 @@
   font-weight: 700; font-size: 13.5px;
   background: transparent; border: 1.5px solid var(--hairline-strong); border-radius: var(--r-1); color: var(--ink-2);
 }
-.btn-chip:hover:not(:disabled) { border-color: var(--ink); color: var(--ink); }
+.btn-chip:hover:not(:disabled):not([aria-pressed='true']):not([data-on='true']) { border-color: var(--ink); color: var(--ink); }
 .btn-chip[aria-pressed='true'], .btn-chip[data-on='true'] { background: var(--asphalt); border-color: var(--asphalt); color: var(--paper); }
 
 .btn-icon { width: 40px; min-height: 40px; padding: 0; border: 1.5px solid var(--hairline-strong); border-radius: var(--r-2); background: var(--sheet); }
@@ -156,13 +156,13 @@ select.input {
 .msg-error { color: var(--red); }
 
 .notice {
-  padding: 12px 14px 12px 16px; font-size: 14.5px; line-height: 1.45;
-  border-radius: var(--r-2); border-left: 5px solid var(--ink); background: var(--paper-2); color: var(--ink);
+  padding: 12px 14px; font-size: 14.5px; line-height: 1.45;
+  border: 2px solid var(--ink); border-radius: var(--r-2); background: var(--paper-2); color: var(--ink);
 }
-.notice-success { border-left-color: var(--green); background: var(--green-tint); }
-.notice-warning { border-left-color: var(--yellow); background: var(--yellow-tint); }
-.notice-error { border-left-color: var(--red); background: var(--red-tint); }
-.notice-info { border-left-color: var(--blue); background: var(--blue-tint); }
+.notice-success { border-color: var(--green); background: var(--green-tint); }
+.notice-warning { border-color: #1d1a16; background: var(--yellow); color: #1d1a16; }
+.notice-error { border-color: var(--red); background: var(--red-tint); }
+.notice-info { border-color: var(--blue); background: var(--blue-tint); }
 
 .badge {
   display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;
@@ -334,3 +334,5 @@ button, .btn, .btn-chip, .seg-opt, .badge, .tag, .sign, .bottom-tab, .rail-link 
 .pw-pop { background: var(--sheet); color: var(--ink); border: 2px solid var(--ink); border-radius: var(--r-2); box-shadow: var(--lift); }
 .pw-option { font-size: 15.5px; font-weight: 600; border-radius: var(--r-1); }
 .pw-option:focus, .pw-option[data-highlighted] { background: var(--asphalt); color: var(--paper); }
+.pw-dialog-desc { font-size: 15.5px; line-height: 1.5; color: var(--ink-2); }
+.pw-label { display: block; font-size: 13.5px; font-weight: 800; color: var(--ink); line-height: 1.3; }

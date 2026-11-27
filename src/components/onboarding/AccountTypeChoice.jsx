@@ -1,10 +1,12 @@
 import React from 'react';
-import { GraduationCap, Briefcase, Check, UserPlus, MessageCircle } from 'lucide-react';
+import { Check } from 'lucide-react';
+import Icon from '@/components/kit/Icon';
+import Sign from '@/components/kit/Sign';
 
 const OPTIONS = [
   {
     value: 'student',
-    Icon: GraduationCap,
+    kicker: 'In high school',
     title: "I'm a student",
     blurb: "You're in high school and want to hear from people who have already done what you're about to do.",
     points: [
@@ -15,7 +17,7 @@ const OPTIONS = [
   },
   {
     value: 'adult',
-    Icon: Briefcase,
+    kicker: 'In college, teaching or advising',
     title: "I'm an adult",
     blurb: 'You’re a college student, educator, or counselor who can answer the questions students actually have.',
     points: [
@@ -26,53 +28,24 @@ const OPTIONS = [
   },
 ];
 
-function Card({ option, selected, onSelect }) {
-  const { Icon, title, blurb, points } = option;
+// One of the two signs at the fork. Outlined until it is picked, then it turns
+// into the sign itself: green for the student's road, blue for the people who
+// are the help along it. The box in the corner is the tick.
+function Choice({ option, selected, onSelect }) {
+  const { value, kicker, title, blurb, points } = option;
   return (
     <button
       type="button"
       onClick={onSelect}
       aria-pressed={selected}
-      className="card text-left card-interactive"
-      style={{
-        padding: 'var(--space-5)', gap: 'var(--space-2)', borderRadius: 'var(--radius-lg)',
-        font: 'inherit', outlineOffset: 3,
-        border: selected ? '2px solid var(--color-accent)' : '1px solid var(--color-divider)',
-        background: selected ? 'var(--color-accent-100)' : 'var(--color-surface)',
-      }}
+      className={`choice choice-${value}`}
     >
-      <span className="flex items-center gap-[10px]">
-        <span
-          className="flex items-center justify-center"
-          style={{
-            width: 34, height: 34, borderRadius: 'var(--radius-pill)', flex: 'none',
-            background: selected ? 'var(--color-action)' : 'var(--color-neutral-200)',
-            color: selected ? 'var(--color-bg)' : 'var(--text-muted)',
-          }}
-        >
-          <Icon size={17} strokeWidth={2.2} aria-hidden="true" />
-        </span>
-        <span style={{ fontWeight: 700, fontSize: 'var(--text-lg)', letterSpacing: '-0.01em' }}>{title}</span>
-        {selected && (
-          <span className="badge badge-accent" style={{ marginLeft: 'auto' }}>
-            <Check size={11} aria-hidden="true" /> Selected
-          </span>
-        )}
-      </span>
-      <span style={{ fontSize: 'var(--text-base)', lineHeight: 'var(--leading-normal)', color: 'var(--text-default)' }}>
-        {blurb}
-      </span>
-      <span className="flex flex-col" style={{ gap: 'var(--space-1)', marginTop: 'var(--space-1)' }}>
-        {points.map((p) => (
-          <span
-            key={p}
-            className="flex items-start gap-2"
-            style={{ fontSize: 'var(--text-sm)', color: 'var(--text-muted)' }}
-          >
-            <Check size={13} strokeWidth={2.4} aria-hidden="true" style={{ marginTop: 2, flex: 'none', color: 'var(--color-accent-600)' }} />
-            {p}
-          </span>
-        ))}
+      <span className="choice-box" aria-hidden="true"><Icon as={Check} size={16} weight={3.4} /></span>
+      <span className="choice-kicker">{kicker}</span>
+      <span className="choice-title">{title}</span>
+      <span className="choice-blurb">{blurb}</span>
+      <span className="choice-points">
+        {points.map((p) => <span key={p}>{p}</span>)}
       </span>
     </button>
   );
@@ -81,57 +54,51 @@ function Card({ option, selected, onSelect }) {
 // The two ways people reach each other on Pathways. Explained here, at the
 // moment someone picks an account type, because that is when it actually
 // matters: it is the difference between reading someone and messaging them.
+// Set as a map legend, with each word on the same kind of button it will be
+// in the app: Follow outlined, Connect solid.
 function FollowVsConnect() {
-  const rows = [
-    {
-      Icon: UserPlus,
-      title: 'Following is one way',
-      body: 'You see what someone posts in your feed. Nothing is sent to them, they do not have to agree, and it never opens a conversation.',
-    },
-    {
-      Icon: MessageCircle,
-      title: 'Connecting goes both ways',
-      body: 'One person asks, the other accepts, and only then can the two of you message. Students send the first request, so no adult can open contact with someone under 18.',
-    },
-  ];
-
   return (
-    <div
-      className="flex flex-col"
-      style={{
-        gap: 'var(--space-3)', padding: 'var(--space-4)',
-        borderRadius: 'var(--radius-md)', background: 'var(--color-bg)',
-      }}
-    >
-      <span style={{ fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--text-muted)' }}>
-        Either way, there are two ways to reach someone here
-      </span>
-      {rows.map(({ Icon, title, body }) => (
-        <span key={title} className="flex items-start gap-[10px]">
-          <Icon size={16} strokeWidth={2.2} aria-hidden="true" style={{ marginTop: 3, flex: 'none', color: 'var(--color-accent-600)' }} />
-          <span style={{ fontSize: 'var(--text-sm)', lineHeight: 'var(--leading-normal)', color: 'var(--text-default)' }}>
-            <b style={{ fontWeight: 600 }}>{title}.</b> {body}
+    <div className="panel">
+      <div className="panel-head">Legend · Two ways to reach someone here</div>
+      <ul className="reach-list">
+        <li>
+          <Sign color="white">Follow</Sign>
+          <span>
+            <b>Following is one way.</b> You see what someone posts in your feed. Nothing is sent
+            to them, they do not have to agree, and it never opens a conversation.
           </span>
-        </span>
-      ))}
+        </li>
+        <li>
+          <Sign color="ink">Connect</Sign>
+          <span>
+            <b>Connecting goes both ways.</b> One person asks, the other accepts, and only then can
+            the two of you message. Students send the first request, so no adult can open contact
+            with someone under 18.
+          </span>
+        </li>
+      </ul>
     </div>
   );
 }
 
-export default function AccountTypeChoice({ value, onChange }) {
+// `labelledBy` is the id of a heading that already asks the question. Without
+// it the component asks the question itself.
+export default function AccountTypeChoice({ value, onChange, labelledBy }) {
   return (
-    <div className="flex flex-col" style={{ gap: 'var(--space-3)' }}>
-      <div>
-        <label style={{ display: 'block', fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--text-muted)' }}>
-          Which of these are you?
-        </label>
-        <span className="field-hint" style={{ marginTop: 2 }}>
-          Pick one and we will only ask for the details that apply to you.
-        </span>
-      </div>
-      <div className="grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 'var(--space-3)' }}>
+    <div className="flex flex-col" style={{ gap: 16 }}>
+      {!labelledBy && (
+        <div>
+          <span id="account-type-label" style={{ display: 'block', fontSize: 13.5, fontWeight: 800 }}>
+            Which of these are you?
+          </span>
+          <span className="field-hint" style={{ marginTop: 2 }}>
+            Pick one and we will only ask for the details that apply to you.
+          </span>
+        </div>
+      )}
+      <div className="choices" role="group" aria-labelledby={labelledBy || 'account-type-label'}>
         {OPTIONS.map((o) => (
-          <Card
+          <Choice
             key={o.value}
             option={o}
             selected={value === o.value}

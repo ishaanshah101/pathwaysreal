@@ -3,6 +3,7 @@ import { MoreHorizontal, Pencil, Trash2, Folder, FolderMinus, Archive, ArchiveRe
 import {
   DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
+import Icon from '@/components/kit/Icon';
 
 // One chat in the sidebar. Rename stays inline; move and delete live behind a
 // small menu so the row does not carry three separate icon buttons.
@@ -13,7 +14,7 @@ export default function ThreadRow({ thread, active, folders, onSelect, onRename,
 
   if (editing) {
     return (
-      <div className="flex items-center gap-1">
+      <div className="inline-edit">
         <input
           className="input"
           autoFocus
@@ -23,14 +24,13 @@ export default function ThreadRow({ thread, active, folders, onSelect, onRename,
             if (e.key === 'Enter') { e.preventDefault(); commit(); }
             if (e.key === 'Escape') setEditing(false);
           }}
-          style={{ fontSize: 13, minHeight: 32, padding: '4px 12px' }}
           aria-label="Chat name"
         />
-        <button type="button" className="btn btn-ghost" style={{ padding: 4 }} onClick={commit} aria-label="Save name">
-          <Check size={15} />
+        <button type="button" className="mini-tool" onClick={commit} aria-label="Save name">
+          <Icon as={Check} size={16} />
         </button>
-        <button type="button" className="btn btn-ghost" style={{ padding: 4 }} onClick={() => setEditing(false)} aria-label="Cancel">
-          <X size={15} />
+        <button type="button" className="mini-tool" onClick={() => setEditing(false)} aria-label="Cancel">
+          <Icon as={X} size={16} />
         </button>
       </div>
     );
@@ -39,55 +39,43 @@ export default function ThreadRow({ thread, active, folders, onSelect, onRename,
   const otherFolders = folders.filter((f) => f.id !== thread.folder_id);
 
   return (
-    <div
-      className="flex items-center gap-1"
-      style={{
-        borderRadius: 10,
-        background: active ? 'var(--color-surface-2)' : 'transparent',
-        boxShadow: active ? 'inset 3px 0 0 var(--color-accent)' : 'none',
-        padding: '2px 4px 2px 2px',
-      }}
-    >
+    <div className="chat-row" data-on={active ? 'true' : 'false'}>
       <button
         type="button"
+        className="chat-row-open"
         onClick={() => onSelect(thread.id)}
         aria-current={active ? 'true' : undefined}
-        style={{
-          flex: 1, textAlign: 'left', background: 'none', border: 0, cursor: 'pointer',
-          font: 'inherit', fontSize: 13.5, fontWeight: active ? 600 : 500, padding: '8px 10px', borderRadius: 8,
-          color: 'var(--color-text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-        }}
       >
         {thread.title || 'New chat'}
       </button>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <button type="button" className="btn btn-ghost" style={{ padding: 4 }} aria-label={`Options for ${thread.title || 'chat'}`}>
-            <MoreHorizontal size={14} />
+          <button type="button" className="mini-tool" aria-label={`Options for ${thread.title || 'chat'}`}>
+            <Icon as={MoreHorizontal} size={16} />
           </button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={() => { setDraft(thread.title || ''); setEditing(true); }}>
-            <Pencil size={13} style={{ marginRight: 6 }} /> Rename
+        <DropdownMenuContent align="end" className="row-menu">
+          <DropdownMenuItem className="row-menu-item" onClick={() => { setDraft(thread.title || ''); setEditing(true); }}>
+            <Icon as={Pencil} size={15} /> Rename
           </DropdownMenuItem>
           {otherFolders.map((f) => (
-            <DropdownMenuItem key={f.id} onClick={() => onMove(thread.id, f.id)}>
-              <Folder size={13} style={{ marginRight: 6 }} /> Move to {f.name}
+            <DropdownMenuItem key={f.id} className="row-menu-item" onClick={() => onMove(thread.id, f.id)}>
+              <Icon as={Folder} size={15} /> Move to {f.name}
             </DropdownMenuItem>
           ))}
           {thread.folder_id && (
-            <DropdownMenuItem onClick={() => onMove(thread.id, '')}>
-              <FolderMinus size={13} style={{ marginRight: 6 }} /> Remove from folder
+            <DropdownMenuItem className="row-menu-item" onClick={() => onMove(thread.id, '')}>
+              <Icon as={FolderMinus} size={15} /> Remove from folder
             </DropdownMenuItem>
           )}
-          <DropdownMenuItem onClick={() => onArchive(thread.id, !thread.archived)}>
+          <DropdownMenuItem className="row-menu-item" onClick={() => onArchive(thread.id, !thread.archived)}>
             {thread.archived
-              ? <><ArchiveRestore size={13} style={{ marginRight: 6 }} /> Unarchive</>
-              : <><Archive size={13} style={{ marginRight: 6 }} /> Archive</>}
+              ? <><Icon as={ArchiveRestore} size={15} /> Unarchive</>
+              : <><Icon as={Archive} size={15} /> Archive</>}
           </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => onDelete(thread.id)} style={{ color: 'var(--color-danger)' }}>
-            <Trash2 size={13} style={{ marginRight: 6 }} /> Delete
+          <DropdownMenuSeparator className="row-menu-sep" />
+          <DropdownMenuItem className="row-menu-item" data-danger="true" onClick={() => onDelete(thread.id)}>
+            <Icon as={Trash2} size={15} /> Delete
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

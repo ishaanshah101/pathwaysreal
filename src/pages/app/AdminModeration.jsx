@@ -1,10 +1,13 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { RefreshCw } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
 import { threadKey } from '@/lib/useProfile';
 import PageNotFound from '@/lib/PageNotFound';
 import { Spinner } from '@/components/RequireAuth';
 import Seo from '@/components/Seo';
+import PageHead from '@/components/kit/PageHead';
+import Icon from '@/components/kit/Icon';
 
 // The moderation queue. Reports and blocked-content events are written to
 // admin-only tables; without this page they were being collected and never
@@ -23,26 +26,46 @@ const REASON_LABEL = {
   other: 'Other',
 };
 
-const STATUS_STYLE = {
-  open: { bg: 'var(--color-accent-100)', fg: 'var(--color-accent-800)' },
-  reviewing: { bg: 'var(--color-accent-2-200)', fg: 'var(--color-accent-2-800)' },
-  actioned: { bg: '#d1f0d9', fg: '#1a5c2c' },
-  dismissed: { bg: 'var(--color-neutral-200)', fg: 'var(--color-neutral-700)' },
+// Status reads the way a sign does: yellow needs attention, blue is being
+// handled, green is done, grey was set aside.
+const STATUS_BADGE = {
+  open: 'badge-warning',
+  reviewing: 'badge-blue',
+  actioned: 'badge-success',
+  dismissed: 'badge-neutral',
 };
 
-function Pill({ children, tone }) {
-  const s = STATUS_STYLE[tone] || STATUS_STYLE.dismissed;
-  return (
-    <span style={{
-      background: s.bg, color: s.fg, borderRadius: 999, padding: '3px 10px',
-      fontSize: 12, fontWeight: 600, whiteSpace: 'nowrap',
-    }}>{children}</span>
-  );
+function StatusBadge({ status }) {
+  return <span className={`badge ${STATUS_BADGE[status] || 'badge-neutral'}`}>{status}</span>;
 }
 
 function when(iso) {
   if (!iso) return '';
   try { return new Date(iso).toLocaleString(); } catch { return String(iso); }
+}
+
+// The queue is a table on a wide screen and a list on a phone. The roles are
+// spelled out so it is still announced as a table once the phone layout turns
+// the cells into blocks.
+function QueueTable({ label, columns, children }) {
+  return (
+    <div className="mod-scroll">
+      <table className="table mod-table" role="table" aria-label={label}>
+        <thead role="rowgroup">
+          <tr role="row">
+            {columns.map(([name, cls]) => (
+              <th key={name} role="columnheader" scope="col" className={cls}>{name}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody role="rowgroup">{children}</tbody>
+      </table>
+    </div>
+  );
+}
+
+function QueueNote({ children }) {
+  return <p className="notice" style={{ margin: 0 }}>{children}</p>;
 }
 
 export default function AdminModeration() {
@@ -74,7 +97,7 @@ export default function AdminModeration() {
     } catch (err) {
       setReports([]);
       setEvents([]);
-      setError('Could not load the queue. This is an error, not an empty queue — refresh and try again.');
+      setError('Could not load the queue. This is an error, not an empty queue. Refresh and try again.');
     }
     setLoading(false);
   };
@@ -160,168 +183,214 @@ export default function AdminModeration() {
   if (isLoadingAuth || loading) return <Spinner />;
   if (!isAdmin) return <PageNotFound />;
 
+  const queues = [
+    ['reports', 'Open', openReports.length],
+    ['blocked', 'Blocked content', highEvents.length],
+    ['closed', 'Closed', closedReports.length],
+  ];
+
   return (
-    <div style={{ paddingBottom: 40 }}>
+    <div className="page">
       <Seo title="Moderation | Pathways" description="Admin moderation queue." path="/app/admin/moderation" noindex />
 
-      <h1 style={{ fontSize: 'clamp(24px,3vw,32px)', margin: '0 0 4px' }}>Moderation</h1>
-      <p style={{ color: 'var(--text-muted)', fontSize: 14, marginBottom: 18 }}>
-        {openReports.length} open report{openReports.length === 1 ? '' : 's'} · {highEvents.length} high-severity
-        blocked message{highEvents.length === 1 ? '' : 's'}
-      </p>
+      <PageHead
+        kicker="Admin"
+        title="Moderation"
+        sub={`${openReports.length} open report${openReports.length === 1 ? '' : 's'} and ${highEvents.length} high-severity blocked message${highEvents.length === 1 ? '' : 's'}.`}
+      >
+        <button type="button" className="btn btn-secondary btn-sm" onClick={load}>
+          <Icon as={RefreshCw} size={15} /> Refresh
+        </button>
+      </PageHead>
 
       {error && (
-        <p role="alert" style={{ color: 'var(--color-danger-700, #b42318)', fontSize: 14 }}>{error}</p>
+        <p role="alert" className="notice notice-error" style={{ margin: '0 0 18px' }}>{error}</p>
       )}
 
-      <div style={{ display: 'flex', gap: 8, marginBottom: 18 }}>
-        {[
-          ['reports', `Open (${openReports.length})`],
-          ['blocked', `Blocked content (${highEvents.length})`],
-          ['closed', `Closed (${closedReports.length})`],
-        ].map(([key, label]) => (
-          <button
-            key={key}
-            type="button"
-            className={`btn ${tab === key ? 'btn-primary' : 'btn-secondary'}`}
-            style={{ fontSize: 13 }}
-            onClick={() => setTab(key)}
-          >
-            {label}
-          </button>
-        ))}
-        <button type="button" className="btn btn-secondary" style={{ fontSize: 13, marginLeft: 'auto' }} onClick={load}>
-          Refresh
-        </button>
+      <div className="mod-bar">
+        <div className="seg mod-seg" role="group" aria-label="Queue">
+          {queues.map(([key, label, count]) => (
+            <button
+              key={key}
+              type="button"
+              className="seg-opt"
+              data-on={tab === key ? 'true' : 'false'}
+              aria-pressed={tab === key}
+              onClick={() => setTab(key)}
+            >
+              {label}
+              <span className="num">{count}</span>
+            </button>
+          ))}
+        </div>
       </div>
 
       {tab === 'reports' && (
         openReports.length === 0 ? (
           // Only claim the queue is clear when we know it loaded. Otherwise
           // this reassuring line is exactly what a moderator should not see.
-          <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>
+          <QueueNote>
             {error
               ? 'The queue could not be loaded, so we cannot say whether anything is open.'
               : 'Nothing open. That is the good outcome.'}
-          </p>
+          </QueueNote>
         ) : (
-          <div style={{ display: 'grid', gap: 12 }}>
+          <QueueTable
+            label="Open reports"
+            columns={[['Status', 'mod-col-status'], ['Report'], ['Who'], ['Filed', 'mod-col-when']]}
+          >
             {openReports.map((r) => (
-              <div key={r.id} className="card elev-sm" style={{ padding: 18, gap: 10 }}>
-                <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
-                  <Pill tone={r.status}>{r.status}</Pill>
-                  <b style={{ fontSize: 15 }}>{REASON_LABEL[r.reason] || r.reason}</b>
-                  <span style={{ fontSize: 12.5, color: 'var(--text-subtle)' }}>
-                    {r.context_type} · {when(r.created_date)}
-                  </span>
-                </div>
-
-                <div style={{ fontSize: 14, lineHeight: 1.6 }}>
-                  <div><b>Reported:</b> {r.reported_email}</div>
-                  <div><b>Reporter:</b> {r.reporter_email}</div>
-                  {r.details && (
-                    <div style={{ marginTop: 8, background: 'var(--color-surface-2)', borderRadius: 14, padding: 12 }}>
-                      {r.details}
+              <React.Fragment key={r.id}>
+                <tr role="row" className="mod-main">
+                  <td role="cell" data-label="Status"><StatusBadge status={r.status} /></td>
+                  <td role="cell" data-label="Report">
+                    <span className="mod-reason">{REASON_LABEL[r.reason] || r.reason}</span>
+                    {r.details && <p className="mod-details">{r.details}</p>}
+                  </td>
+                  <td role="cell" data-label="Who">
+                    <dl className="mod-who">
+                      <dt>Reported</dt>
+                      <dd>{r.reported_email}</dd>
+                      <dt>Reporter</dt>
+                      <dd>{r.reporter_email}</dd>
+                    </dl>
+                  </td>
+                  <td role="cell" data-label="Filed">
+                    <span className="mod-when num">{when(r.created_date)}</span>
+                    <span className="mod-when">{r.context_type}</span>
+                  </td>
+                </tr>
+                <tr role="row" className="mod-acts">
+                  <td role="cell" colSpan={4}>
+                    <div className="mod-buttons">
+                      <button
+                        type="button"
+                        className="btn btn-secondary btn-sm"
+                        disabled={busyId === r.id}
+                        aria-expanded={Boolean(context[r.id])}
+                        onClick={() => loadContext(r)}
+                      >
+                        {context[r.id] ? 'Hide conversation' : 'View conversation'}
+                      </button>
+                      {r.status === 'open' && (
+                        <button
+                          type="button"
+                          className="btn btn-secondary btn-sm"
+                          disabled={busyId === r.id}
+                          onClick={() => act(r, 'reviewing', 'Picked up')}
+                        >
+                          Mark reviewing
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        className="btn btn-secondary btn-sm"
+                        disabled={busyId === r.id}
+                        onClick={() => act(r, 'actioned', 'Warned user')}
+                      >
+                        Warn
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-danger btn-sm"
+                        disabled={busyId === r.id}
+                        onClick={() => suspend(r)}
+                      >
+                        Suspend account
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-quiet btn-sm"
+                        disabled={busyId === r.id}
+                        onClick={() => act(r, 'dismissed', 'Dismissed')}
+                      >
+                        Dismiss
+                      </button>
                     </div>
-                  )}
-                </div>
 
-                {context[r.id] && context[r.id] !== 'none' && (
-                  <div style={{ background: 'var(--color-surface-2)', borderRadius: 14, padding: 12, display: 'grid', gap: 8 }}>
-                    {context[r.id].map((m) => (
-                      <div key={m.id} style={{ fontSize: 13.5, lineHeight: 1.55 }}>
-                        <b>{m.from_email === r.reported_email ? 'Reported user' : 'Reporter'}:</b> {m.body}
-                      </div>
-                    ))}
-                  </div>
-                )}
-                {context[r.id] === 'none' && (
-                  <p style={{ fontSize: 13, color: 'var(--text-subtle)', margin: 0 }}>
-                    No messages found between these two.
-                  </p>
-                )}
-
-                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                  <button type="button" className="btn btn-secondary" style={{ fontSize: 13 }}
-                    disabled={busyId === r.id} onClick={() => loadContext(r)}>
-                    {context[r.id] ? 'Hide conversation' : 'View conversation'}
-                  </button>
-                  {r.status === 'open' && (
-                    <button type="button" className="btn btn-secondary" style={{ fontSize: 13 }}
-                      disabled={busyId === r.id} onClick={() => act(r, 'reviewing', 'Picked up')}>
-                      Mark reviewing
-                    </button>
-                  )}
-                  <button type="button" className="btn btn-secondary" style={{ fontSize: 13 }}
-                    disabled={busyId === r.id} onClick={() => act(r, 'actioned', 'Warned user')}>
-                    Warn
-                  </button>
-                  <button type="button" className="btn btn-primary" style={{ fontSize: 13 }}
-                    disabled={busyId === r.id} onClick={() => suspend(r)}>
-                    Suspend account
-                  </button>
-                  <button type="button" className="btn btn-secondary" style={{ fontSize: 13 }}
-                    disabled={busyId === r.id} onClick={() => act(r, 'dismissed', 'Dismissed')}>
-                    Dismiss
-                  </button>
-                </div>
-              </div>
+                    {context[r.id] && context[r.id] !== 'none' && (
+                      <ol className="mod-thread">
+                        {context[r.id].map((m) => (
+                          <li key={m.id} data-from={m.from_email === r.reported_email ? 'reported' : 'reporter'}>
+                            <b>{m.from_email === r.reported_email ? 'Reported user' : 'Reporter'}</b>
+                            <span>{m.body}</span>
+                          </li>
+                        ))}
+                      </ol>
+                    )}
+                    {context[r.id] === 'none' && (
+                      <p className="mod-thread-none">No messages found between these two.</p>
+                    )}
+                  </td>
+                </tr>
+              </React.Fragment>
             ))}
-          </div>
+          </QueueTable>
         )
       )}
 
       {tab === 'blocked' && (
         highEvents.length === 0 ? (
-          <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>
-            No high-severity blocks recorded.
-          </p>
+          <QueueNote>No high-severity blocks recorded.</QueueNote>
         ) : (
-          <div style={{ display: 'grid', gap: 12 }}>
+          <QueueTable
+            label="High-severity blocked content"
+            columns={[['Severity', 'mod-col-status'], ['Rule'], ['Who'], ['When', 'mod-col-when']]}
+          >
             {highEvents.map((e) => (
-              <div key={e.id} className="card elev-sm" style={{ padding: 18, gap: 8 }}>
-                <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
-                  <Pill tone="open">{e.severity}</Pill>
-                  <b style={{ fontSize: 15 }}>{e.rule}</b>
-                  <span style={{ fontSize: 12.5, color: 'var(--text-subtle)' }}>
-                    {e.surface} · {when(e.occurred_at || e.created_date)}
-                  </span>
-                </div>
-                <div style={{ fontSize: 14, lineHeight: 1.6 }}>
-                  <div><b>From:</b> {e.sender_email}</div>
-                  {e.recipient_email && <div><b>To:</b> {e.recipient_email}</div>}
-                  {e.detail && <div style={{ color: 'var(--text-muted)' }}>{e.detail}</div>}
-                  {e.excerpt && (
-                    <div style={{ marginTop: 8, background: 'var(--color-surface-2)', borderRadius: 14, padding: 12, fontStyle: 'italic' }}>
-                      {e.excerpt}
-                    </div>
-                  )}
-                </div>
-              </div>
+              <tr role="row" key={e.id}>
+                <td role="cell" data-label="Severity"><span className="badge badge-red">{e.severity}</span></td>
+                <td role="cell" data-label="Rule">
+                  <span className="mod-reason">{e.rule}</span>
+                  {e.detail && <p className="mod-detail">{e.detail}</p>}
+                  {e.excerpt && <p className="mod-details">{e.excerpt}</p>}
+                </td>
+                <td role="cell" data-label="Who">
+                  <dl className="mod-who">
+                    <dt>From</dt>
+                    <dd>{e.sender_email}</dd>
+                    {e.recipient_email && (
+                      <>
+                        <dt>To</dt>
+                        <dd>{e.recipient_email}</dd>
+                      </>
+                    )}
+                  </dl>
+                </td>
+                <td role="cell" data-label="When">
+                  <span className="mod-when num">{when(e.occurred_at || e.created_date)}</span>
+                  <span className="mod-when">{e.surface}</span>
+                </td>
+              </tr>
             ))}
-          </div>
+          </QueueTable>
         )
       )}
 
       {tab === 'closed' && (
         closedReports.length === 0 ? (
-          <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>Nothing closed yet.</p>
+          <QueueNote>Nothing closed yet.</QueueNote>
         ) : (
-          <div style={{ display: 'grid', gap: 10 }}>
+          <QueueTable
+            label="Closed reports"
+            columns={[['Status', 'mod-col-status'], ['Report'], ['Reported'], ['Filed', 'mod-col-when']]}
+          >
             {closedReports.map((r) => (
-              <div key={r.id} className="card elev-sm" style={{ padding: 14, gap: 6 }}>
-                <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
-                  <Pill tone={r.status}>{r.status}</Pill>
-                  <b style={{ fontSize: 14 }}>{REASON_LABEL[r.reason] || r.reason}</b>
-                  <span style={{ fontSize: 12.5, color: 'var(--text-subtle)' }}>{when(r.created_date)}</span>
-                </div>
-                <div style={{ fontSize: 13.5 }}>
-                  {r.reported_email}
-                  {r.admin_notes ? ` · ${r.admin_notes}` : ''}
-                </div>
-              </div>
+              <tr role="row" key={r.id}>
+                <td role="cell" data-label="Status"><StatusBadge status={r.status} /></td>
+                <td role="cell" data-label="Report">
+                  <span className="mod-reason">{REASON_LABEL[r.reason] || r.reason}</span>
+                  {r.admin_notes && <p className="mod-detail">{r.admin_notes}</p>}
+                </td>
+                <td role="cell" data-label="Reported">
+                  <span className="mod-email">{r.reported_email}</span>
+                </td>
+                <td role="cell" data-label="Filed">
+                  <span className="mod-when num">{when(r.created_date)}</span>
+                </td>
+              </tr>
             ))}
-          </div>
+          </QueueTable>
         )
       )}
     </div>

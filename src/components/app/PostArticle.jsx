@@ -17,8 +17,8 @@ import VerifiedBadge from '@/components/app/VerifiedBadge';
 // body in a reading face, with the actions underneath. The topic is a road
 // sign so the colour tells you what kind of post it is before you read a word.
 export default function PostArticle({
-  post, connection, busy, onConnect, isMine, onBlocked, canEdit, onSaved,
-  following, followBusy, onToggleFollow, saved, saveBusy, onToggleSave,
+  post, connection = null, busy = false, onConnect, isMine = false, onBlocked, canEdit = false, onSaved,
+  following = false, followBusy = false, onToggleFollow, saved = false, saveBusy = false, onToggleSave,
   verified = false, focused = false,
 }) {
   const isLong = (post.body || '').length > 620;

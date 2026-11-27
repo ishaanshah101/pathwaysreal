@@ -1,30 +1,42 @@
 import React from 'react';
+import BrandMark from '@/components/BrandMark';
+import ContactEmail from '@/components/ContactEmail';
+import { useAuth } from '@/lib/AuthContext';
 
+// Shown when someone is signed in with an account this app does not know. It is
+// a dead end unless it says what to do, so it offers the two things that
+// actually fix it: a different account, or a person to write to.
 const UserNotRegisteredError = () => {
+  const { logout } = useAuth();
+
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-white to-slate-50">
-      <div className="max-w-md w-full p-8 bg-white rounded-lg shadow-lg border border-slate-100">
-        <div className="text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 mb-6 rounded-full bg-orange-100">
-            <svg className="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
-          </div>
-          <h1 className="text-3xl font-bold text-slate-900 mb-4">Access Restricted</h1>
-          <p className="text-slate-600 mb-8">
-            You are not registered to use this application. Please contact the app administrator to request access.
-          </p>
-          <div className="p-4 bg-slate-50 rounded-md text-sm text-slate-600">
-            <p>If you believe this is an error, you can:</p>
-            <ul className="list-disc list-inside mt-2 space-y-1">
-              <li>Verify you are logged in with the correct account</li>
-              <li>Contact the app administrator for access</li>
-              <li>Try logging out and back in again</li>
-            </ul>
-          </div>
+    <main className="lost">
+      <div className="lost-inner">
+        <div className="gate-sign" aria-hidden="true">
+          <b>Road closed</b>
+          <span>Account not registered</span>
+        </div>
+
+        <h1 className="title-2">This account can't get in yet.</h1>
+
+        <p className="lede" style={{ marginTop: 14 }}>
+          You are signed in, but this account is not registered to use Pathways.
+        </p>
+
+        <ul className="gate-list">
+          <li><b>Check the account.</b> If you have more than one email, you may be signed in with the wrong one.</li>
+          <li><b>Sign out and back in.</b> That clears a sign-in that went stale.</li>
+          <li><b>Ask us.</b> Email <ContactEmail /> and a person will sort it out.</li>
+        </ul>
+
+        <div className="flex flex-wrap items-center" style={{ gap: 12, marginTop: 26 }}>
+          <button type="button" className="btn btn-primary btn-lg" onClick={() => logout(true)}>
+            Sign out
+          </button>
+          <BrandMark size={44} />
         </div>
       </div>
-    </div>
+    </main>
   );
 };
 

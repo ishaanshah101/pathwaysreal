@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
+import React, { useId, useState } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import FieldSelect from '@/components/ui/FieldSelect';
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 
 export const REPORT_REASONS = [
   ['inappropriate_contact', 'Asked for contact details or to meet up'],
@@ -20,6 +19,8 @@ export default function ReportModal({ open, onOpenChange, reportedEmail, reporte
   const [details, setDetails] = useState('');
   const [state, setState] = useState('idle');
   const [error, setError] = useState('');
+  // Each open dialog gets its own radio group name.
+  const group = useId();
 
   const submit = async (e) => {
     e.preventDefault();
@@ -52,44 +53,59 @@ export default function ReportModal({ open, onOpenChange, reportedEmail, reporte
 
   return (
     <Dialog open={open} onOpenChange={(v) => (v ? onOpenChange(true) : close())}>
-      <DialogContent style={{ background: 'var(--color-surface)', borderRadius: 16, maxWidth: 460 }}>
-        <DialogHeader>
-          <DialogTitle style={{ fontFamily: 'var(--font-heading)', fontWeight: 400, fontSize: 24 }}>
-            {state === 'done' ? 'Report received' : `Report ${reportedName || reportedEmail}`}
-          </DialogTitle>
-        </DialogHeader>
-
+      <DialogContent className="max-w-md">
         {state === 'done' ? (
-          <div className="flex flex-col" style={{ gap: 14 }}>
-            <p style={{ fontSize: 14, lineHeight: 1.6, margin: 0, color: 'var(--color-neutral-800)' }}>
-              Thank you for telling us. A real person on the Pathways safety team reviews every
-              report, usually within one day. You will not be told who reported what, and the
-              person you reported is never shown your report.
-            </p>
-            <p style={{ fontSize: 14, lineHeight: 1.6, margin: 0, color: 'var(--color-neutral-800)' }}>
+          <div className="dlg">
+            <div>
+              <span className="kicker">Safety</span>
+              <DialogTitle>Report received</DialogTitle>
+            </div>
+            <DialogDescription asChild>
+              <p className="dlg-lede">
+                Thank you for telling us. A real person on the Pathways safety team reviews every
+                report, usually within one day. You will not be told who reported what, and the
+                person you reported is never shown your report.
+              </p>
+            </DialogDescription>
+            <p className="notice notice-warning">
               If you feel unsafe right now, you can also block them so they can never message you
               again. If someone is in danger, contact your local emergency number.
             </p>
-            <button type="button" className="btn btn-primary self-start" onClick={close}>Done</button>
+            <div className="dlg-actions">
+              <button type="button" className="btn btn-primary" onClick={close}>Done</button>
+            </div>
           </div>
         ) : (
-          <form onSubmit={submit} className="flex flex-col" style={{ gap: 14 }}>
-            <div className="field">
-              <label htmlFor="report-reason">What happened?</label>
-              <FieldSelect
-                id="report-reason"
-                value={reason}
-                onValueChange={setReason}
-                options={REPORT_REASONS}
-              />
+          <form onSubmit={submit} className="dlg">
+            <div>
+              <span className="kicker">Safety</span>
+              <DialogTitle>Report {reportedName || reportedEmail}</DialogTitle>
             </div>
+
+            <fieldset className="reason-set">
+              <legend>What happened?</legend>
+              <div className="reason-list">
+                {REPORT_REASONS.map(([value, label]) => (
+                  <label key={value} className="reason" data-on={String(reason === value)}>
+                    <input
+                      type="radio"
+                      name={group}
+                      value={value}
+                      checked={reason === value}
+                      onChange={() => setReason(value)}
+                    />
+                    <span className="reason-mark" aria-hidden="true" />
+                    <span>{label}</span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
 
             <div className="field">
               <label htmlFor="report-details">Anything you want to add? (optional)</label>
               <textarea
                 id="report-details"
                 className="input"
-                style={{ minHeight: 100 }}
                 maxLength={2000}
                 value={details}
                 onChange={(e) => setDetails(e.target.value)}
@@ -97,18 +113,20 @@ export default function ReportModal({ open, onOpenChange, reportedEmail, reporte
               />
             </div>
 
-            <p style={{ fontSize: 12.5, lineHeight: 1.55, margin: 0, color: 'var(--text-muted)' }}>
-              A human on the safety team reads this. Reports are private, the person you report is
-              never told who reported them.
-            </p>
+            <DialogDescription asChild>
+              <p className="dlg-small">
+                A human on the safety team reads this. Reports are private. The person you report is
+                never told who reported them.
+              </p>
+            </DialogDescription>
 
-            {error && <span style={{ fontSize: 12.5, color: 'var(--color-accent-700)' }}>{error}</span>}
+            {error && <span role="alert" className="msg msg-error">{error}</span>}
 
-            <div className="flex gap-2">
+            <div className="dlg-actions">
               <button type="submit" className="btn btn-primary" disabled={state === 'sending'}>
                 {state === 'sending' ? 'Sending…' : 'Send report'}
               </button>
-              <button type="button" className="btn btn-secondary" onClick={close}>Cancel</button>
+              <button type="button" className="btn btn-quiet" onClick={close}>Cancel</button>
             </div>
           </form>
         )}

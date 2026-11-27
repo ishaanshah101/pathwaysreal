@@ -1,61 +1,58 @@
 import React from 'react';
 
-// WhatsApp-style delivery state, shown only on messages you sent.
+// Delivery state, shown only under messages you sent. A small mark and the
+// word for it, in the same small print as the time, so nobody has to learn
+// what one tick or two ticks means.
 //
-//   sending    a small clock, the row has not reached the server yet
-//   sent       one tick, stored
-//   delivered  two ticks, the recipient's app has it
-//   read       two ticks, tinted, they opened the conversation
-//   failed     an exclamation, worth retrying
+//   sending    a moving lane line, the row has not reached the server yet
+//   sent       one check, stored
+//   delivered  two checks, the recipient's app has it
+//   read       two checks in sign green, they opened the conversation
+//   failed     a red mark, held back or lost
+
+const WORDS = {
+  sending: 'Sending',
+  sent: 'Sent',
+  delivered: 'Delivered',
+  read: 'Read',
+  failed: 'Not delivered',
+};
 
 function Check({ x = 0 }) {
-  return <path d={`M${x} 6.6 L${x + 2.6} 9.2 L${x + 7.6} 3.4`} />;
+  return <path d={`M${x + 1} 6.4 L${x + 3.6} 9 L${x + 8.4} 3.2`} />;
 }
 
-export default function DeliveryTicks({ state, onLight = true }) {
-  // On the accent-coloured outgoing bubble, plain ticks need to be light.
-  const dim = onLight ? 'rgba(245,234,216,0.72)' : 'var(--color-neutral-500)';
-  const readColor = '#7cc6ff';
-
-  if (state === 'sending') {
-    return (
-      <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke={dim} strokeWidth="1.6"
-        strokeLinecap="round" aria-label="Sending">
-        <circle cx="7" cy="7" r="5.4" />
-        <path d="M7 4.2 V7.2 L9 8.6" />
-      </svg>
-    );
-  }
-
-  if (state === 'failed') {
-    return (
-      <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="#ffd7c7" strokeWidth="1.8"
-        strokeLinecap="round" aria-label="Not delivered">
-        <circle cx="7" cy="7" r="5.4" />
-        <path d="M7 4.1 V7.6" />
-        <path d="M7 9.7 V9.8" />
-      </svg>
-    );
-  }
-
-  const isRead = state === 'read';
-  const color = isRead ? readColor : dim;
-  const double = state === 'delivered' || isRead;
+export default function DeliveryTicks({ state }) {
+  // Anything unrecognised is treated as stored, which is the least it can be.
+  const key = WORDS[state] ? state : 'sent';
+  const double = key === 'delivered' || key === 'read';
 
   return (
-    <svg
-      width={double ? 18 : 13}
-      height="13"
-      viewBox={`0 0 ${double ? 19 : 13} 13`}
-      fill="none"
-      stroke={color}
-      strokeWidth="1.7"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-label={isRead ? 'Read' : double ? 'Delivered' : 'Sent'}
-    >
-      <Check x={double ? 5 : 2} />
-      {double && <Check x={0} />}
-    </svg>
+    <span className="receipt" data-state={key}>
+      {key === 'sending' ? (
+        <span className="lane-run lane-run-sm" aria-hidden="true" />
+      ) : key === 'failed' ? (
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="square" aria-hidden="true">
+          <path d="M6 2 V7" />
+          <path d="M6 10 V10.2" />
+        </svg>
+      ) : (
+        <svg
+          width={double ? 17 : 12}
+          height="12"
+          viewBox={`0 0 ${double ? 17 : 12} 12`}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="square"
+          strokeLinejoin="miter"
+          aria-hidden="true"
+        >
+          <Check x={double ? 6 : 1} />
+          {double && <Check x={0} />}
+        </svg>
+      )}
+      {WORDS[key]}
+    </span>
   );
 }

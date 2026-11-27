@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Check, LogOut } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
-import { useProfile } from '@/lib/useProfile';
+import { useProfile, ROLE_LABELS } from '@/lib/useProfile';
 import { useSubscription, openBillingPortal, SAGE_PRICES } from '@/lib/useSubscription';
 import { isNativeApp } from '@/lib/platform';
 import Seo from '@/components/Seo';
@@ -13,9 +14,89 @@ import VerificationCard from '@/components/app/VerificationCard';
 import VerifiedBadge from '@/components/app/VerifiedBadge';
 import DeleteAccountCard from '@/components/app/DeleteAccountCard';
 import NotificationSettingsCard from '@/components/app/NotificationSettingsCard';
+import PageHead from '@/components/kit/PageHead';
+import Plate from '@/components/kit/Plate';
+import Sign from '@/components/kit/Sign';
+import Icon from '@/components/kit/Icon';
 import { useFollows } from '@/lib/useFollows';
 import { useConnections } from '@/lib/useConnections';
+import { useBlocks } from '@/lib/useBlocks';
 import { INTEREST_OPTIONS, EXPERTISE_OPTIONS, ADULT_ROLES } from '@/components/app/profileFields';
+
+// The sign beside a member's name says which side of the conversation they are
+// on. Students get the yellow-green of a school crossing. The adults who
+// answer them get the blue of a services sign: help is nearby.
+const ROLE_SIGN = {
+  student: 'lime',
+  college_student: 'lime',
+  educator: 'blue',
+  counselor: 'blue',
+};
+
+// The people this member has blocked, with a way to undo it. Undoing a block
+// asks first, because it lets that person reach them again.
+function BlockedPanel() {
+  const { blocks, unblock } = useBlocks();
+  const [asking, setAsking] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+
+  if (blocks.length === 0) return null;
+
+  const confirm = async (blockedEmail) => {
+    setBusy(true);
+    setError('');
+    try {
+      await unblock(blockedEmail);
+      setAsking('');
+    } catch {
+      setError('Could not unblock them just now. Please try again.');
+    }
+    setBusy(false);
+  };
+
+  return (
+    <section className="panel profile-panel" aria-labelledby="blocked-head">
+      <div className="panel-head" id="blocked-head">Blocked people</div>
+      <div className="panel-body">
+        <p>They cannot message you, and they do not show up in your feed or in Explore. They are not told.</p>
+        <ul className="profile-blocked">
+          {blocks.map((b) => {
+            const name = b.blocked_name || b.blocked_email;
+            return (
+              <li key={b.id}>
+                {asking === b.blocked_email ? (
+                  <>
+                    <span>
+                      Unblock <b>{name}</b>? They will show up in your feed and in Explore again, and
+                      will be able to message you if you are connected.
+                    </span>
+                    <span className="profile-panel-acts">
+                      <button type="button" className="btn btn-secondary btn-sm" disabled={busy} onClick={() => confirm(b.blocked_email)}>
+                        {busy ? 'Unblocking…' : 'Yes, unblock'}
+                      </button>
+                      <button type="button" className="btn btn-quiet btn-sm" disabled={busy} onClick={() => { setAsking(''); setError(''); }}>
+                        Keep blocked
+                      </button>
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <b>{name}</b>
+                    <button type="button" className="quiet-link" onClick={() => { setAsking(b.blocked_email); setError(''); }}>
+                      Unblock
+                    </button>
+                  </>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+        {error && <span className="msg msg-error" role="alert">{error}</span>}
+      </div>
+    </section>
+  );
+}
 
 export default function ProfilePage() {
   const { user, logout } = useAuth();
@@ -29,6 +110,9 @@ export default function ProfilePage() {
   const [form, setForm] = useState(null);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  // Display only: whether anything has been edited since the page loaded or
+  // was last saved. It decides when the save bar follows you down the form.
+  const [dirty, setDirty] = useState(false);
   const [error, setError] = useState('');
   const [requests, setRequests] = useState([]);
   // The form is filled from the profile exactly once. A background refetch used
@@ -90,10 +174,11 @@ export default function ProfilePage() {
     await loadRequests();
   };
 
-  const set = (k) => (e) => { setForm((f) => ({ ...f, [k]: e.target.value })); setSaved(false); };
+  const set = (k) => (e) => { setForm((f) => ({ ...f, [k]: e.target.value })); setSaved(false); setDirty(true); };
 
   const toggleIn = (key) => (label) => {
     setSaved(false);
+    setDirty(true);
     setForm((f) => ({
       ...f,
       [key]: (f[key] || []).includes(label)
@@ -147,6 +232,7 @@ export default function ProfilePage() {
     try {
       await saveProfile(payload);
       setSaved(true);
+      setDirty(false);
     } catch (err) {
       setError(err?.message || 'Could not save. Please try again.');
     }
@@ -155,353 +241,380 @@ export default function ProfilePage() {
 
   if (!form) {
     return (
-      <div className="card elev-sm" style={{ padding: 26, gap: 14, maxWidth: 620 }} aria-busy="true">
+      <div className="page" aria-busy="true">
         <span className="sr-only">Loading your profile</span>
-        <SkeletonTitle width="40%" />
-        <SkeletonLine width="70%" />
-        <SkeletonLine width="90%" />
-        <SkeletonLine width="60%" />
+        <div className="profile-top">
+          <span className="kicker">Your profile</span>
+          <span className="skeleton" style={{ width: 88, height: 88, borderRadius: '22%' }} />
+          <div style={{ display: 'grid', gap: 12 }}>
+            <SkeletonTitle width="40%" />
+            <SkeletonLine width="60%" />
+          </div>
+        </div>
+        <div style={{ display: 'grid', gap: 14, maxWidth: 620 }}>
+          <SkeletonLine width="70%" />
+          <SkeletonLine width="90%" />
+          <SkeletonLine width="60%" />
+        </div>
       </div>
     );
   }
 
+  const isStudentForm = form.account_type === 'student';
+  const roleLabel = ROLE_LABELS[profile?.role];
+  // What other members read under the name. If nothing more specific has been
+  // written, the role sign already says it, so the line is left out.
+  const tagline = profile?.headline
+    || [profile?.grade, profile?.school].filter(Boolean).join(' · ')
+    || [profile?.job_title, profile?.institution].filter(Boolean).join(', ');
+
   return (
-    // Was pinned to a 680px column hugging the left edge, which left a large
-    // dead area on the right. Now it uses the full content width and splits
-    // into two columns on desktop, collapsing to one on narrow screens.
-    <div className="flex flex-col" style={{ gap: 20, width: '100%' }}>
+    <div className="page">
       <Seo title="Your Profile | Pathways" description="Edit your Pathways profile, topics, and Sage subscription." path="/app/profile" noindex />
-      <div>
-        <div className="flex items-center gap-3 flex-wrap mb-1.5">
-          <h1 style={{ fontSize: 'clamp(26px,3.2vw,36px)', margin: 0 }}>Your profile</h1>
-          <VerifiedBadge verified={profile?.verified} />
-        </div>
-        <p style={{ color: 'var(--text-muted)', margin: 0, fontSize: 15 }}>
-          Signed in as {user?.email}. This is what other members see when they find you.
-        </p>
+
+      {/* The top of the page is the member as other people meet them: plate,
+          name, the one line under it, and the signs that say who they are. */}
+      <div className="profile-top">
+        <span className="kicker">Your profile</span>
+        <Plate name={profile?.full_name} seed={email} size={88} />
+        <PageHead
+          title={profile?.full_name || 'No name yet'}
+          sub={(
+            <>
+              {tagline}
+              <span className="profile-id">
+                {roleLabel && <Sign color={ROLE_SIGN[profile?.role] || 'ink'}>{roleLabel}</Sign>}
+                <VerifiedBadge verified={profile?.verified} />
+                {/* Following is one-way, so these two numbers are not the same
+                    thing as connections and are shown separately. */}
+                <span className="meta num">
+                  <Link to="/app/explore">{followingCount} following</Link>
+                  {` · ${followerCount} follower${followerCount === 1 ? '' : 's'}`}
+                </span>
+              </span>
+            </>
+          )}
+        >
+          {/* Sign out stays reachable but quiet: it is also in the account
+              menu in the header. */}
+          <button type="button" className="btn btn-secondary btn-sm" onClick={() => logout(true)}>
+            <Icon as={LogOut} size={15} /> Sign out
+          </button>
+        </PageHead>
       </div>
 
       {requests.length > 0 && (
-        <div className="card elev-sm" style={{ padding: 20, gap: 12, borderLeft: '3px solid var(--color-accent)' }}>
-          <span className="card-kicker">Connection requests</span>
-          {requests.map((c) => (
-            <div key={c.id} className="flex items-center gap-3 flex-wrap">
-              <span style={{ fontSize: 14 }}>
-                <b>{c.from_name || c.from_email}</b> wants to connect.
-              </span>
-              <div className="flex gap-2" style={{ marginLeft: 'auto' }}>
-                <button type="button" className="btn btn-primary btn-sm" onClick={() => respond(c, 'accepted')}>
-                  Accept
-                </button>
-                <button type="button" className="btn btn-secondary btn-sm" onClick={() => respond(c, 'declined')}>
-                  Decline
-                </button>
+        <section className="panel profile-requests" aria-labelledby="pr-head">
+          <div className="panel-head" id="pr-head">
+            Connection requests
+            <span className="num">({requests.length})</span>
+          </div>
+          <div className="panel-body">
+            {requests.map((c) => (
+              <div key={c.id} className="profile-request">
+                <span>
+                  <b>{c.from_name || c.from_email}</b> wants to connect.
+                </span>
+                <div className="profile-request-acts">
+                  <button type="button" className="btn btn-primary btn-sm" onClick={() => respond(c, 'accepted')}>
+                    Accept
+                  </button>
+                  <button type="button" className="btn btn-secondary btn-sm" onClick={() => respond(c, 'declined')}>
+                    Decline
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
-          {respondError && (
-            <span role="alert" className="msg msg-error">{respondError}</span>
-          )}
-        </div>
+            ))}
+            {respondError && (
+              <span role="alert" className="msg msg-error">{respondError}</span>
+            )}
+          </div>
+        </section>
       )}
 
-      <form onSubmit={submit} className="flex flex-col" style={{ gap: 16 }}>
-      <div className="grid app-split" style={{ gridTemplateColumns: 'minmax(0,7fr) minmax(0,5fr)', gap: 16, alignItems: 'start' }}>
-        <div className="card elev-sm" style={{ padding: 26, gap: 16 }}>
-        <div className="field">
-          <label htmlFor="pf-name">Full name</label>
-          <input id="pf-name" className="input" required value={form.full_name} onChange={set('full_name')} />
-        </div>
+      <div className="profile-layout">
+        <form onSubmit={submit} className="profile-form">
+          <section className="profile-section" aria-labelledby="pf-sec-about">
+            <h2 className="sub-head" id="pf-sec-about">About you</h2>
+            <p className="profile-section-note">This is what other members see when they find you.</p>
 
-        {/* Account type is fixed after sign-up on purpose. If an adult could
-            relabel themselves as a student, the rule that students always send
-            the first message would be trivial to get around. */}
-        <div className="field">
-          <label htmlFor="pf-account-type">Account type</label>
-          <input
-            id="pf-account-type"
-            className="input"
-            value={form.account_type === 'adult' ? 'Adult' : 'Student'}
-            readOnly
-            aria-disabled="true"
-          />
-          <span className="field-hint">
-            This is set when you create your account and cannot be changed here. If it is wrong,
-            contact us and a person will look at it.
-          </span>
-        </div>
-
-        {form.account_type === 'adult' && (
-          <div className="field">
-            <label htmlFor="pf-role">Which best describes you?</label>
-            <FieldSelect
-              id="pf-role"
-              value={form.role}
-              onValueChange={(role) => { setForm((f) => ({ ...f, role })); setSaved(false); }}
-              options={ADULT_ROLES}
-            />
-          </div>
-        )}
-
-        {/* Once a birth year is on file it is fixed, but it was previously not
-            shown at all, so people could not tell we had it. */}
-        {profile?.birth_year ? (
-          <div className="field">
-            <label htmlFor="pf-birth-year">Year you were born</label>
-            <input id="pf-birth-year" className="input" value={profile.birth_year} readOnly aria-disabled="true" />
-            <span className="field-hint">
-              Never shown on your profile. It cannot be changed here, because it decides which safety
-              rules apply to your account.
-            </span>
-          </div>
-        ) : (
-          <div className="field">
-            <label htmlFor="pf-birth-year">Year you were born</label>
-            <input
-              id="pf-birth-year"
-              className="input"
-              required
-              inputMode="numeric"
-              pattern="[0-9]{4}"
-              maxLength={4}
-              placeholder="2008"
-              value={form.birth_year}
-              onChange={set('birth_year')}
-            />
-            <span className="field-hint">
-              You joined before we asked for this. Pathways is for people 13 and older, and we use it to
-              protect members who are under 18. It is never shown on your profile.
-            </span>
-          </div>
-        )}
-
-        <div className="field">
-          <label htmlFor="pf-headline">Headline</label>
-          <input
-            id="pf-headline"
-            className="input"
-            placeholder="CMU first-year, Information Systems"
-            value={form.headline}
-            onChange={set('headline')}
-          />
-        </div>
-
-        {form.account_type === 'student' ? (
-          <>
-            <div className="grid app-split" style={{ gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-              <div className="field">
-                <label htmlFor="pf-grade">Grade or year</label>
-                <input id="pf-grade" className="input" placeholder="11th grade" value={form.grade} onChange={set('grade')} />
-              </div>
-              <div className="field">
-                <label htmlFor="pf-school">School</label>
-                <input id="pf-school" className="input" placeholder="Lincoln High" value={form.school} onChange={set('school')} />
-              </div>
+            <div className="field">
+              <label htmlFor="pf-name">Full name</label>
+              <input id="pf-name" className="input" required value={form.full_name} onChange={set('full_name')} />
             </div>
 
             <div className="field">
-              <label htmlFor="pf-goals">Anything specific on your mind?</label>
-              <textarea
-                id="pf-goals"
-                className="input"
-                value={form.goals}
-                onChange={set('goals')}
-                placeholder="Picking a major, essays, scholarships…"
-              />
-            </div>
-          </>
-        ) : (
-          <>
-            <div className="field">
-              <label htmlFor="pf-institution">Where are you now?</label>
+              <label htmlFor="pf-headline">Headline</label>
               <input
-                id="pf-institution"
+                id="pf-headline"
                 className="input"
-                placeholder="UC Berkeley, Lincoln High, Acme Admissions…"
-                value={form.institution}
-                onChange={set('institution')}
+                placeholder="CMU first-year, Information Systems"
+                value={form.headline}
+                onChange={set('headline')}
               />
-            </div>
-
-            <div className="grid app-split" style={{ gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-              <div className="field">
-                <label htmlFor="pf-title">Your title or year</label>
-                <input
-                  id="pf-title"
-                  className="input"
-                  placeholder="Associate Professor of Biology"
-                  value={form.job_title}
-                  onChange={set('job_title')}
-                />
-              </div>
-              <div className="field">
-                <label htmlFor="pf-years">Years in your field</label>
-                <input
-                  id="pf-years"
-                  className="input"
-                  inputMode="numeric"
-                  pattern="[0-9]{1,2}"
-                  maxLength={2}
-                  placeholder="6"
-                  value={form.years_experience}
-                  onChange={set('years_experience')}
-                />
-              </div>
             </div>
 
             <div className="field">
-              <label htmlFor="pf-help">What are you happy for students to ask you about?</label>
+              <label htmlFor="pf-bio">Short bio</label>
               <textarea
-                id="pf-help"
+                id="pf-bio"
                 className="input"
-                value={form.help_with}
-                onChange={set('help_with')}
-                placeholder="What my major is actually like day to day, how research placements work…"
+                value={form.bio}
+                onChange={set('bio')}
+                placeholder="What can people ask you about?"
               />
             </div>
-          </>
-        )}
+          </section>
 
-        <div className="field">
-          <label htmlFor="pf-bio">Short bio</label>
-          <textarea
-            id="pf-bio"
-            className="input"
-            value={form.bio}
-            onChange={set('bio')}
-            placeholder="What can people ask you about?"
-          />
-        </div>
-        </div>
-
-        <div className="card elev-sm" style={{ padding: 26, gap: 16 }}>
-        <div className="field">
-          {form.account_type === 'student' ? (
-            <>
-              <label>What do you want help with?</label>
-              <ChipPicker options={INTEREST_OPTIONS} selected={form.interests} onToggle={toggleIn('interests')} />
-            </>
+          {isStudentForm ? (
+            <section className="profile-section" aria-labelledby="pf-sec-school">
+              <h2 className="sub-head" id="pf-sec-school">School</h2>
+              <div className="profile-pair">
+                <div className="field">
+                  <label htmlFor="pf-grade">Grade or year</label>
+                  <input id="pf-grade" className="input" placeholder="11th grade" value={form.grade} onChange={set('grade')} />
+                </div>
+                <div className="field">
+                  <label htmlFor="pf-school">School</label>
+                  <input id="pf-school" className="input" placeholder="Lincoln High" value={form.school} onChange={set('school')} />
+                </div>
+              </div>
+            </section>
           ) : (
-            <>
-              <label>What can you speak to?</label>
-              <ChipPicker options={EXPERTISE_OPTIONS} selected={form.expertise} onToggle={toggleIn('expertise')} />
-            </>
+            <section className="profile-section" aria-labelledby="pf-sec-work">
+              <h2 className="sub-head" id="pf-sec-work">Where you are</h2>
+              <div className="field">
+                <label htmlFor="pf-role">Which best describes you?</label>
+                <FieldSelect
+                  id="pf-role"
+                  value={form.role}
+                  onValueChange={(role) => { setForm((f) => ({ ...f, role })); setSaved(false); setDirty(true); }}
+                  options={ADULT_ROLES}
+                />
+              </div>
+
+              <div className="field">
+                <label htmlFor="pf-institution">Where are you now?</label>
+                <input
+                  id="pf-institution"
+                  className="input"
+                  placeholder="UC Berkeley, Lincoln High, Acme Admissions"
+                  value={form.institution}
+                  onChange={set('institution')}
+                />
+              </div>
+
+              <div className="profile-pair">
+                <div className="field">
+                  <label htmlFor="pf-title">Your title or year</label>
+                  <input
+                    id="pf-title"
+                    className="input"
+                    placeholder="Associate Professor of Biology"
+                    value={form.job_title}
+                    onChange={set('job_title')}
+                  />
+                </div>
+                <div className="field">
+                  <label htmlFor="pf-years">Years in your field</label>
+                  <input
+                    id="pf-years"
+                    className="input"
+                    inputMode="numeric"
+                    pattern="[0-9]{1,2}"
+                    maxLength={2}
+                    placeholder="6"
+                    value={form.years_experience}
+                    onChange={set('years_experience')}
+                  />
+                </div>
+              </div>
+            </section>
           )}
-        </div>
 
-        {/* Following is one-way, so these two numbers are not the same thing as
-            connections and are shown separately. */}
-        <div className="field">
-          <label>Follows</label>
-          <div style={{ background: 'var(--color-surface-2)', borderRadius: 12, padding: '14px 16px', display: 'flex', gap: 32 }}>
-            <Link to="/app/explore" className="no-underline" style={{ color: 'inherit' }}>
-              <span style={{ display: 'block', fontSize: 22, fontWeight: 700, letterSpacing: '-0.02em', lineHeight: 1.1 }}>{followingCount}</span>
-              <span style={{ fontSize: 12.5, color: 'var(--text-muted)' }}>Following</span>
-            </Link>
-            <span>
-              <span style={{ display: 'block', fontSize: 22, fontWeight: 700, letterSpacing: '-0.02em', lineHeight: 1.1 }}>{followerCount}</span>
-              <span style={{ fontSize: 12.5, color: 'var(--text-muted)' }}>Followers</span>
-            </span>
-          </div>
-        </div>
-
-        {form.account_type === 'adult' && <VerificationCard profile={profile} email={email} />}
-
-        {/* Subscription state is read-only here on purpose. It is written only
-            by the Stripe webhook, so picking a paid plan from a dropdown can
-            never grant access. */}
-        <div className="field">
-          <label>Sage subscription</label>
-          <div
-            style={{
-              background: 'var(--color-surface-2)', borderRadius: 12, padding: '14px 16px',
-              display: 'flex', flexDirection: 'column', gap: 8,
-            }}
-          >
-            {hasSage ? (
+          <section className="profile-section" aria-labelledby="pf-sec-topics">
+            <h2 className="sub-head" id="pf-sec-topics">Topics</h2>
+            {isStudentForm ? (
               <>
-                <span style={{ fontSize: 14 }}>
-                  <b>Active</b>
-                  {!native && subscription?.plan ? ` · ${SAGE_PRICES[subscription.plan]?.amount} ${SAGE_PRICES[subscription.plan]?.cadence}` : ''}
-                </span>
-                {subscription?.current_period_end && (
-                  <span style={{ fontSize: 12.5, color: 'var(--text-subtle)' }}>
-                    {isCanceling ? 'Ends' : 'Renews'}{' '}
-                    {new Date(subscription.current_period_end).toLocaleDateString()}
-                  </span>
-                )}
-                {/* Inside a native wrapper we must not open an external
-                    billing page, and an Apple-sourced subscription is managed
-                    in the device's own settings, not by us. */}
-                {native ? null : source === 'apple' ? (
-                  <span style={{ fontSize: 12.5, color: 'var(--text-subtle)', lineHeight: 1.5 }}>
-                    Manage or cancel this subscription in your device settings.
-                  </span>
-                ) : (
-                  <button
-                    type="button"
-                    className="btn btn-secondary btn-sm self-start"
-                    onClick={async () => {
-                      setBillingError('');
-                      try { await openBillingPortal(); } catch (err) { setBillingError(err.message); }
-                    }}
-                  >
-                    Manage or cancel
-                  </button>
-                )}
+                <div className="field">
+                  <label id="pf-topics-label">What do you want help with?</label>
+                  <ChipPicker options={INTEREST_OPTIONS} selected={form.interests} onToggle={toggleIn('interests')} labelledBy="pf-topics-label" />
+                </div>
+                <div className="field">
+                  <label htmlFor="pf-goals">Anything specific on your mind?</label>
+                  <textarea
+                    id="pf-goals"
+                    className="input"
+                    value={form.goals}
+                    onChange={set('goals')}
+                    placeholder="Picking a major, essays, scholarships"
+                  />
+                </div>
               </>
             ) : (
               <>
-                <span style={{ fontSize: 14 }}>
-                  <b>{isPastDue ? 'Payment failed' : 'Free plan'}</b>
-                </span>
-                <span style={{ fontSize: 12.5, color: 'var(--text-subtle)', lineHeight: 1.5 }}>
-                  {isPastDue
-                    ? 'Sage is paused until a payment goes through.'
-                    : 'Everything on Pathways is free. Sage is the one optional add-on.'}
-                </span>
-                {!native && (
-                  <Link to="/app/sage" className="btn btn-primary btn-sm self-start no-underline">
-                    {isPastDue ? 'Fix payment' : 'Get Sage'}
-                  </Link>
-                )}
+                <div className="field">
+                  <label id="pf-topics-label">What can you speak to?</label>
+                  <ChipPicker options={EXPERTISE_OPTIONS} selected={form.expertise} onToggle={toggleIn('expertise')} labelledBy="pf-topics-label" />
+                </div>
+                <div className="field">
+                  <label htmlFor="pf-help">What are you happy for students to ask you about?</label>
+                  <textarea
+                    id="pf-help"
+                    className="input"
+                    value={form.help_with}
+                    onChange={set('help_with')}
+                    placeholder="What my major is actually like day to day, how research placements work"
+                  />
+                </div>
               </>
             )}
-            {billingError && (
-              <span className="msg msg-error" role="alert">{billingError}</span>
+          </section>
+
+          <section className="profile-section" aria-labelledby="pf-sec-account">
+            <h2 className="sub-head" id="pf-sec-account">Account</h2>
+            <p className="profile-section-note">Signed in as {user?.email}.</p>
+
+            <div className="profile-pair">
+              {/* Account type is fixed after sign-up on purpose. If an adult could
+                  relabel themselves as a student, the rule that students always send
+                  the first message would be trivial to get around. */}
+              <div className="field">
+                <label htmlFor="pf-account-type">Account type</label>
+                <input
+                  id="pf-account-type"
+                  className="input"
+                  value={form.account_type === 'adult' ? 'Adult' : 'Student'}
+                  readOnly
+                  aria-disabled="true"
+                />
+                <span className="field-hint">
+                  This is set when you create your account and cannot be changed here. If it is wrong,
+                  contact us and a person will look at it.
+                </span>
+              </div>
+
+              {/* Once a birth year is on file it is fixed, but it was previously not
+                  shown at all, so people could not tell we had it. */}
+              {profile?.birth_year ? (
+                <div className="field">
+                  <label htmlFor="pf-birth-year">Year you were born</label>
+                  <input id="pf-birth-year" className="input" value={profile.birth_year} readOnly aria-disabled="true" />
+                  <span className="field-hint">
+                    Never shown on your profile. It cannot be changed here, because it decides which safety
+                    rules apply to your account.
+                  </span>
+                </div>
+              ) : (
+                <div className="field">
+                  <label htmlFor="pf-birth-year">Year you were born</label>
+                  <input
+                    id="pf-birth-year"
+                    className="input"
+                    required
+                    inputMode="numeric"
+                    pattern="[0-9]{4}"
+                    maxLength={4}
+                    placeholder="2008"
+                    value={form.birth_year}
+                    onChange={set('birth_year')}
+                  />
+                  <span className="field-hint">
+                    You joined before we asked for this. Pathways is for people 13 and older, and we use it to
+                    protect members who are under 18. It is never shown on your profile.
+                  </span>
+                </div>
+              )}
+            </div>
+          </section>
+
+          {/* The save action sits under the whole form it saves. Once a field
+              has been changed it stays in reach while the form scrolls. */}
+          <div className="profile-save" data-dirty={dirty ? 'true' : undefined}>
+            <button type="submit" className="btn btn-primary" disabled={saving}>
+              {saving ? 'Saving…' : 'Save changes'}
+            </button>
+            {dirty && !saving && !error && <span className="meta">Not saved yet</span>}
+            {saved && (
+              <span className="msg msg-success" role="status">
+                <Icon as={Check} size={15} weight={3} /> Saved.
+              </span>
             )}
+            {error && <span className="msg msg-error" role="alert">{error}</span>}
           </div>
-        </div>
+        </form>
 
-        </div>
+        <aside className="profile-aside" aria-label="Account settings">
+          {form.account_type === 'adult' && <VerificationCard profile={profile} email={email} />}
+
+          {/* Subscription state is read-only here on purpose. It is written only
+              by the Stripe webhook, so picking a paid plan from a dropdown can
+              never grant access. */}
+          <section className="panel profile-panel" aria-labelledby="sage-head">
+            <div className="panel-head" id="sage-head">Sage subscription</div>
+            <div className="panel-body">
+              {hasSage ? (
+                <>
+                  <span className="panel-lead">
+                    Active
+                    {!native && subscription?.plan && (
+                      <span className="meta num">
+                        {SAGE_PRICES[subscription.plan]?.amount} {SAGE_PRICES[subscription.plan]?.cadence}
+                      </span>
+                    )}
+                  </span>
+                  {subscription?.current_period_end && (
+                    <p className="num">
+                      {isCanceling ? 'Ends' : 'Renews'}{' '}
+                      {new Date(subscription.current_period_end).toLocaleDateString()}
+                    </p>
+                  )}
+                  {/* Inside a native wrapper we must not open an external
+                      billing page, and an Apple-sourced subscription is managed
+                      in the device's own settings, not by us. */}
+                  {native ? null : source === 'apple' ? (
+                    <p>Manage or cancel this subscription in your device settings.</p>
+                  ) : (
+                    <button
+                      type="button"
+                      className="btn btn-secondary btn-sm"
+                      onClick={async () => {
+                        setBillingError('');
+                        try { await openBillingPortal(); } catch (err) { setBillingError(err.message); }
+                      }}
+                    >
+                      Manage or cancel
+                    </button>
+                  )}
+                </>
+              ) : (
+                <>
+                  <span className="panel-lead">{isPastDue ? 'Payment failed' : 'Free plan'}</span>
+                  <p>
+                    {isPastDue
+                      ? 'Sage is paused until a payment goes through.'
+                      : 'Everything on Pathways is free. Sage is the one optional add-on.'}
+                  </p>
+                  {!native && (
+                    <Link to="/app/sage" className={isPastDue ? 'btn btn-primary btn-sm' : 'btn btn-secondary btn-sm'}>
+                      {isPastDue ? 'Fix payment' : 'Get Sage'}
+                    </Link>
+                  )}
+                </>
+              )}
+              {billingError && (
+                <span className="msg msg-error" role="alert">{billingError}</span>
+              )}
+            </div>
+          </section>
+
+          <NotificationSettingsCard />
+
+          <BlockedPanel />
+
+          <DeleteAccountCard />
+        </aside>
       </div>
-
-        {/* The save action sits under the whole form it saves, not tucked at
-            the bottom of the sidebar. Sign out stays reachable but quiet: it
-            is also in the account menu in the header. */}
-        <div
-          className="card elev-md flex items-center gap-3 flex-wrap"
-          style={{ flexDirection: 'row', padding: '14px 18px', position: 'sticky', bottom: 16, zIndex: 5 }}
-        >
-          <button type="submit" className="btn btn-primary" disabled={saving}>
-            {saving ? 'Saving…' : 'Save changes'}
-          </button>
-          {saved && <span className="msg msg-success" role="status">Saved.</span>}
-          {error && <span className="msg msg-error" role="alert">{error}</span>}
-          <button
-            type="button"
-            className="btn btn-quiet"
-            style={{ marginLeft: 'auto' }}
-            onClick={() => logout(true)}
-          >
-            Sign out
-          </button>
-        </div>
-      </form>
-
-      <NotificationSettingsCard />
-
-      <DeleteAccountCard />
     </div>
   );
 }

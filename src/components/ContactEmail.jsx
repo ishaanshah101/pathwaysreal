@@ -22,7 +22,7 @@ import { useMemo } from 'react';
 const LOCAL = ['ishaan'];
 const DOMAIN = ['pathways', 'uno'];
 
-export default function ContactEmail({ className, style, bold = true }) {
+export default function ContactEmail({ className = undefined, style = undefined, bold = true }) {
   const address = useMemo(
     () => `${LOCAL.join('.')}@${DOMAIN.join('.')}`,
     []

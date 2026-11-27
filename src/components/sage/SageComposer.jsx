@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Send } from 'lucide-react';
 import AttachmentDropzone from '@/components/attachments/AttachmentDropzone';
 import useAttachmentQueue from '@/components/attachments/useAttachmentQueue';
 
@@ -20,26 +19,26 @@ export default function SageComposer({ onSend, thinking }) {
   };
 
   return (
-    <form onSubmit={submit} className="flex flex-col" style={{ gap: 8 }}>
+    <form onSubmit={submit} className="convo-compose sage-compose">
       <AttachmentDropzone queue={queue} disabled={thinking || sending} />
-      <div className="flex flex-wrap gap-2 items-end">
+      <div className="compose-row">
         <textarea
           className="input"
           aria-label="Your question for Sage"
           disabled={thinking || sending}
-          style={{ minHeight: 46, flex: '1 1 240px' }}
+          rows={2}
           value={text}
           onChange={(e) => setText(e.target.value)}
-          placeholder="Ask about applications, majors, essays, or scholarships. Attach a draft and Sage will read it."
+          placeholder="Ask about applications, majors, essays, or scholarships."
           onKeyDown={(e) => {
             if (e.key === 'Enter' && !e.shiftKey) submit(e);
           }}
         />
-        <button type="submit" className="btn btn-primary" disabled={thinking || sending || queue.blocked || !text.trim()}>
-          <Send size={15} aria-hidden="true" /> {queue.busy ? 'Uploading…' : thinking || sending ? 'Thinking…' : 'Ask Sage'}
+        <button type="submit" className="btn btn-primary btn-go" disabled={thinking || sending || queue.blocked || !text.trim()}>
+          {queue.busy ? 'Uploading…' : thinking || sending ? 'Thinking…' : 'Ask Sage'}
         </button>
       </div>
-      <span className="field-hint" style={{ marginTop: 0 }}>
+      <span className="field-hint">
         Sage reads images, PDFs and common documents together. Extract archives or provide transcripts for audio/video. It helps you write your own work, not submit work written for you.
       </span>
     </form>

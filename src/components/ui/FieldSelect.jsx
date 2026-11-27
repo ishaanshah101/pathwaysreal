@@ -10,7 +10,7 @@ import {
 //
 // options: array of [value, label].
 export default function FieldSelect({
-  id, value, onValueChange, options, placeholder = 'Choose one', disabled, ariaLabel,
+  id = undefined, value, onValueChange, options, placeholder = 'Choose one', disabled = false, ariaLabel = undefined,
 }) {
   return (
     <Select value={value || undefined} onValueChange={onValueChange} disabled={disabled}>

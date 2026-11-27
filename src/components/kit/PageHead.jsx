@@ -3,7 +3,7 @@ import React from 'react';
 // The top of every signed-in page: a line of small print, the title, one
 // sentence, and whatever the page's main action is. Same place, same size,
 // every time.
-export default function PageHead({ kicker, title, sub, children, live = false }) {
+export default function PageHead({ kicker = '', title, sub = null, children = null, live = false }) {
   return (
     <header className="page-head">
       <div style={{ minWidth: 0 }}>

@@ -1,81 +1,73 @@
-# Pathways design system: "Wayfinding"
+# Pathways design system: "The Notebook"
 
-The mark is a road running to a sun, so the product borrows its visual language
-from the road: map paper, asphalt, lane lines, and the sign colours a driver
-already knows how to read. This file is the short version of the rules. The
-long version is the CSS in `src/styles/`.
+Pathways was made by a student, for students, so it looks like what is in a student's backpack. The page is a desk. On it are sheets of lined paper, binder tabs, a set of highlighters, sticky notes, index cards, and a red pen for the things that matter. The logo sits on it like a sticker on a cover.
 
-## The idea in one paragraph
+The logo and the name are unchanged. Everything else is drawn from that one idea.
 
-Pathways gives directions. So pages are laid out like a good road atlas:
-typographic, flat, dense where it helps, with colour reserved for signs that
-mean something. Nothing floats on a soft shadow. Nothing is a pill. Structure
-comes from rules and type, not from stacking rounded cards.
+## Where things live
+
+| File | What it holds |
+| --- | --- |
+| `src/styles/tokens.css` | Colours, type, spacing, shadows, dark mode, and aliases for older token names |
+| `src/styles/fonts.css` | Self-hosted fonts (no font CDN) |
+| `src/styles/base.css` | Element defaults |
+| `src/styles/kit.css` | Shared pieces: buttons, inputs, labels, sticky notes, index cards, ruled paper |
+| `src/styles/site.css` | Public pages |
+| `src/styles/shell.css` | The signed-in frame: top bar, binder tabs, bottom tabs |
+| `src/styles/app.css`, `plan.css`, `messages.css`, `profile.css`, `auth.css` | One per area of the app |
+| `src/styles/social.css` | Feed tabs, post actions, people to follow, profile numbers and tabs |
 
 ## Type
 
-| Role | Face | Where |
+| Role | Face | Used for |
 | --- | --- | --- |
-| Sign lettering | Overpass (variable, 400 to 900) | Headlines, buttons, labels, all UI |
-| Reading | Literata (variable, optical size) | Anything a person wrote at length: posts, Sage answers, notes, legal text. Class `.prose` |
-| Small print | Overpass Mono | Kickers, dates, counts, metadata. Classes `.kicker`, `.meta` |
-
-Headlines are weight 900, tight tracking, sentence case. Never all caps except
-mono small print.
+| Marker | Shantell Sans (variable, 300 to 800) | Headlines, buttons, tabs, all controls |
+| Reading | Andika | Anything a person wrote at length: posts, Sage answers, notes, legal text. Class `.prose` |
+| Handwriting | Kalam | Short notes in the margin and your own private notes. Class `.scribble`. Never the only place something important is said |
+| Typewriter | Courier Prime | Labels, dates, counts. Classes `.kicker`, `.meta` |
 
 ## Colour
 
-Tokens live in `src/styles/tokens.css`. Use the tokens, not hex values, except
-for signs and road, which keep literal colours so they look the same at night.
+| Token | Light | What it is |
+| --- | --- | --- |
+| `--desk` | `#eadfc6` | The page background: a kraft desk |
+| `--sheet` | `#fffdf6` | Paper |
+| `--ink` | `#232732` | Blue-black pen |
+| `--rule` | `#c5d6e8` | The blue rules on lined paper |
+| `--margin` | `#e79b98` | The red margin line |
+| `--pen-red` | `#c2362b` | Red pen: counts, circled numbers, things that are late |
+| `--sun` | `#e05e12` | The orange of the logo. Primary call to action only |
+| `--hl-yellow`, `--hl-green`, `--hl-blue`, `--hl-pink`, `--hl-orange`, `--hl-lime` | | The highlighter set |
 
-- `--paper`, `--paper-2`, `--paper-3`, `--sheet`: page, wells, raised sheet.
-- `--ink`, `--ink-2`, `--ink-3`: text. `--hairline`, `--hairline-strong`: rules.
-- `--sun` (the logo orange) is the single accent. `--sun-deep` for orange text.
-- Sign colours: green, blue, brown, yellow, lime, red, plus ink and white.
+Dark mode is homework after dark: a darker desk and paper under a lamp. Sticky notes, highlighter, the legal pad and the notebook cover keep their own colours, and the ink tokens are re-pointed on those surfaces so whatever is written on them stays dark.
 
-Topic to sign colour is decided in one place: `src/lib/categories.js`.
+## Building blocks
 
-## Building blocks (all in `src/styles/kit.css`)
-
-- Buttons: `.btn` plus `.btn-primary` (asphalt), `.btn-sun`, `.btn-secondary`
-  (ink outline), `.btn-quiet`, `.btn-danger`; sizes `.btn-sm`, `.btn-lg`;
-  `.btn-go` adds the arrow. Filter chips are `.btn-chip` or a pressed `.sign`.
-- Text actions: `.link-btn`, `.quiet-link`, `.tool-btn`.
-- Forms: `.field > label`, `.input`, `.field-hint`, `.field-error`, `.seg`.
-- Signs: `<Sign color="green">` (`src/components/kit/Sign.jsx`).
-- Avatars: `<Plate name seed size>` (`src/components/kit/Plate.jsx`).
-- Icons: always `<Icon as={LucideGlyph} />` (`src/components/kit/Icon.jsx`),
-  which gives every icon square ends and a heavier stroke.
-- Surfaces: `.panel` with `.panel-head` and `.panel-body` (ink border, for
-  things that are objects: forms, menus, legends). `.card` is the quiet version.
-  Lists are rows separated by `1px solid var(--hairline)`, not stacks of cards.
-- Dividers: `.lane` (the dashed lane line), `.road` (a strip of asphalt).
-- Feedback: `.notice notice-{info,success,warning,error}`, `.msg`, `.badge`,
-  `.empty` with `.empty-title` and `.empty-body`, `.skeleton`.
-- Page top inside the app: `<PageHead kicker title sub>` then content inside
-  `.page` (wide) or `.page-read` (reading width).
+- **Ruled sheet** (`.ruled`, `.post`): lined paper with a margin line and punched holes. Body text uses `--line` as its line height so it sits on the rules.
+- **Index card** (`.panel`): a red line under the heading. Used for anything short.
+- **Sticky note** (`.notice`, `.sticky`, toasts, your own messages): a highlighter-coloured square with a paper shadow.
+- **Highlighter** (`.hl`, `.sign`, selected rows and tabs): one swipe of colour behind a few words. Topic labels are highlighter in the topic's colour.
+- **Binder tabs** (`.nb-tab`): the app's navigation, one colour per section.
+- **Red pen** (`.mile`, `.count`, `.scribble`): circled numbers, counts, and margin notes.
+- **Composition cover** (`.band-road`, `.cover-label`): the black and white marble cover with a white label. Used for the closing section of the home page and the sign-in pages.
+- **Legal pad** (`.ob-side`): the yellow pad that carries the onboarding checklist.
 
 ## Rules
 
-1. No soft drop shadows on anything in the page flow. Only floating things
-   (menus, dialogs) use `var(--lift)`.
-2. No pills. Corners are 3 to 8px. Avatars are rounded squares.
-3. No gradients, no glass, no glow, no emoji, no sparkle icons.
-4. One accent. If two things on a screen are orange, one of them is wrong.
-5. Copy is plain and specific. No em dashes. Say what happens when you press.
-6. Every control is at least 40px tall on a phone, and every state (loading,
-   empty, error) says what happened and what to do next.
-7. Dark mode comes from the tokens. Do not hard-code light colours.
+1. Paper has square corners. Only things drawn by hand wobble (`--wobble`).
+2. Shadows are small and real: paper lying on a desk. Nothing glows and nothing floats, apart from menus and toasts.
+3. No gradients as decoration. Colour comes from highlighter, and each highlighter colour means something.
+4. Orange is the logo's colour and marks the one primary action on a page.
+5. Handwriting is for short notes only. Anything a person has to read is in the reading face.
+6. Selected is highlighted. Pressed chips, the current tab, the open conversation, and a picked option all use the same swipe of highlighter.
+7. Anything on a highlighter or sticky-note surface uses literal dark ink, so it reads the same in both themes.
 
 ## Social patterns
 
-The signed-in app borrows its layout from social apps on purpose, so nobody has to learn where things are. The drawing stays in the house style.
+The signed-in app borrows its layout from social apps on purpose, so nobody has to learn where things are. The drawing stays in the notebook.
 
-- **Feed tabs.** "For you" and "Following" are tabs above the stream, with the lane-line orange under the one you are on. Topics are one row of signs under the tabs that scrolls sideways.
+- **Feed tabs.** "For you" and "Following" are tabs above the stream, with highlighter over the one you are on. Topics are one row of labels under the tabs that scrolls sideways.
 - **A post.** Follow sits beside the author's name. One row of actions sits under the post: Helpful (counted, and nobody can see who pressed it), Save, Share, then Connect.
 - **People to learn from.** A short list beside the feed with a Follow button on each row. Verified educators and counselors come first.
-- **Compose on a phone.** One orange button above the tab bar.
+- **Compose on a phone.** One round orange button above the tab bar.
 - **Profile.** Posts, followers and following as numbers under the name, then three tabs: Profile, Posts, Account.
-
-All of this is styled in `src/styles/social.css`.
-

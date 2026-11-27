@@ -23,7 +23,7 @@ export default function SharePostButton({ post }) {
   return (
     <button type="button" className="tool-btn" onClick={share}>
       <Icon as={copied ? Check : Share2} size={16} />
-      {copied ? 'Link copied' : 'Share'}
+      <span className="act-label">{copied ? 'Link copied' : 'Share'}</span>
     </button>
   );
 }

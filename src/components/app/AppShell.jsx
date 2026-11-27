@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { NavLink, Link } from 'react-router-dom';
-import { LogOut, Search, UserPlus } from 'lucide-react';
+import { LogOut, PenLine, Search, UserPlus } from 'lucide-react';
 import RouteTransition from '@/components/app/RouteTransition';
 import NativeTabOutlet from '@/components/app/NativeTabOutlet';
 import { isNativeApp } from '@/lib/platform';
@@ -103,6 +103,11 @@ export default function AppShell() {
             <RailLink key={s.to} {...s} count={countFor(s.to)} countLabel={countLabelFor(s.to)} />
           ))}
         </nav>
+
+        {/* The one big button in the rail, where every social app keeps it. */}
+        <Link to="/app?compose=1" className="btn btn-sun rail-post">
+          <Icon as={PenLine} size={17} /> Post
+        </Link>
 
         <span className="rail-head" id="rail-ref">Reference</span>
         <nav style={{ display: 'grid', gap: 2 }} aria-labelledby="rail-ref">

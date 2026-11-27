@@ -131,3 +131,202 @@ button.stat:hover, a.stat:hover { color: var(--ink); text-decoration: underline;
 .profile-posts { min-width: 0; max-width: 760px; }
 .profile-posts .post:first-child { padding-top: 4px; }
 .profile-aside { grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); align-items: start; max-width: none; }
+
+/* ===========================================================================
+   The signed-in app, drawn the way social apps are drawn.
+
+   Everything below is scoped to .shell, so the public site keeps its road
+   signs and the app gets the conventions people already know: round pictures,
+   pill buttons, soft cards with a hairline round them, plain icons in the side
+   nav with one big Post button, and posts as compact cards in a centred
+   column. The type, the map-paper warmth and the logo's orange stay.
+   =========================================================================== */
+.shell {
+  --rail-w: 262px;
+  --r-1: 8px; --r-2: 12px; --r-3: 16px; --r-4: 20px;
+  grid-template-columns: var(--rail-w) minmax(0, 1fr);
+}
+.shell .shell-road, .shell .topbar-road { display: none; }
+
+/* ---- Side nav ------------------------------------------------------------------ */
+.shell .rail { padding: 14px 14px 14px; border-right: 1px solid var(--hairline); }
+.shell .rail .brand { margin: 4px 12px 0; }
+.shell .rail-nav { gap: 2px; margin-top: 18px; }
+.shell .rail-link {
+  grid-template-columns: 28px minmax(0, 1fr) auto; gap: 14px; padding: 10px 14px 10px 12px;
+  border-radius: 999px; font-size: 17.5px; font-weight: 700; letter-spacing: -0.008em;
+}
+.shell .rail-link[aria-current='page'] { background: transparent; color: var(--ink); font-weight: 900; }
+.shell .rail-link:hover, .shell .rail-link[aria-current='page']:hover { background: var(--paper-2); }
+.shell .picto { width: 28px; height: 28px; background: none; color: var(--ink); box-shadow: none; border-radius: 0; }
+.shell .picto svg { width: 24px; height: 24px; }
+.shell .rail-link[aria-current='page'] .picto { color: var(--sun-deep); box-shadow: none; }
+.shell .rail-link[aria-current='page'] .picto svg { stroke-width: 2.7; }
+.shell .rail-link-quiet { font-size: 15.5px; font-weight: 600; color: var(--ink-2); padding-block: 7px; }
+.shell .rail-link-quiet .picto svg { width: 20px; height: 20px; }
+.shell .rail-head { margin: 22px 14px 4px; font: 800 13px/1 var(--font-sign); letter-spacing: 0; text-transform: none; color: var(--ink-3); }
+.shell .rail-post { margin: 16px 2px 0; min-height: 52px; font-size: 17.5px; font-weight: 900; }
+.shell .rail-user { border: 0; background: transparent; border-radius: 999px; padding: 8px 12px; }
+.shell .rail-user:hover { background: var(--paper-2); }
+.shell .rail-user small { font-family: var(--font-sign); font-size: 13px; }
+.shell .count { border-radius: 999px; }
+
+/* ---- Top bar --------------------------------------------------------------------- */
+.shell .topbar { background: color-mix(in srgb, var(--paper) 86%, transparent); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
+.shell .jump {
+  width: min(440px, 100%); height: 42px; padding: 0 12px 0 16px;
+  background: var(--paper-2); border: 1.5px solid transparent; border-radius: 999px; font-weight: 500; font-size: 15px;
+}
+.shell .jump:hover { border-color: var(--hairline-strong); }
+.shell .jump kbd { border-radius: 6px; }
+.shell .icon-btn { width: 42px; height: 42px; background: transparent; border: 0; border-radius: 50%; }
+.shell .icon-btn:hover { background: var(--paper-2); }
+.shell .icon-btn .count { top: 0; right: 0; }
+.shell .popover { border: 1px solid var(--hairline); border-radius: 16px; overflow: hidden; }
+
+/* ---- Shared pieces ------------------------------------------------------------------ */
+.shell .plate { border-radius: 50%; }
+.shell .btn { border-radius: 999px; }
+.shell .btn-sm { padding: 0 15px; }
+.shell .btn-chip { border-radius: 999px; }
+.shell .btn-primary:hover:not(:disabled) { background: var(--asphalt-2); border-color: var(--asphalt-2); color: var(--paper); }
+.shell .btn-secondary { border: 1.5px solid var(--hairline-strong); }
+.shell .btn-secondary:hover:not(:disabled) { background: var(--paper-2); border-color: var(--ink); color: var(--ink); }
+.shell .sign { padding: 6px 12px 5px; border-radius: 999px; box-shadow: none; letter-spacing: 0; font-weight: 800; }
+.shell .sign[aria-pressed='false'] { box-shadow: inset 0 0 0 1.5px var(--hairline-strong); }
+.shell .sign[aria-pressed='false']:hover { box-shadow: inset 0 0 0 1.5px var(--ink); }
+.shell .notice { border-width: 1px; border-radius: 16px; padding: 14px 16px; }
+
+.shell .panel { border: 1px solid var(--hairline); border-radius: 16px; overflow: hidden; }
+.shell .panel-head {
+  padding: 14px 16px 6px; border-bottom: 0; background: none; color: var(--ink);
+  font: 900 18px/1.2 var(--font-sign); letter-spacing: -0.015em; text-transform: none;
+}
+.shell .panel-body { padding: 10px 16px 16px; }
+.shell .profile-panel-danger .panel-head { color: var(--red); }
+.shell .who-list { padding: 2px 16px 0; }
+.shell .who + .who { border-top: 0; }
+.shell .who-follow { border-radius: 999px; min-height: 34px; padding: 0 16px; }
+.shell .who-more { padding: 8px 16px 15px; }
+
+.shell .searchbox .input { min-height: 44px; border-radius: 999px; background: var(--paper-2); border-color: transparent; }
+.shell .searchbox .input:hover { border-color: var(--hairline-strong); }
+.shell .searchbox .input:focus-visible { background: var(--sheet); border-color: var(--ink); }
+
+.shell .page-head { align-items: center; padding-bottom: 14px; margin-bottom: 18px; border-bottom: 1px solid var(--hairline); }
+.shell .page-head .kicker { display: none; }
+.shell .page-head h1 { font-size: clamp(24px, 2.4vw, 30px); letter-spacing: -0.02em; line-height: 1.12; }
+.shell .page-head p { margin-top: 6px; font-size: 15px; }
+
+/* ---- Feed: a centred column, with a column of extras beside it ------------------------ */
+.feed-left { display: none; }
+.feed-main { display: grid; gap: 14px; min-width: 0; align-content: start; }
+.shell .feed-layout { grid-template-columns: minmax(0, 640px) 340px; justify-content: center; gap: 34px; }
+.shell .feed-aside { display: grid; gap: 14px; top: 76px; }
+@media (min-width: 1180px) { .feed-bar .feed-search { display: none; } }
+@media (max-width: 1179px) {
+  .shell .feed-layout { grid-template-columns: minmax(0, 640px); }
+  .shell .feed-aside { display: none; }
+}
+
+.shell .composer-bar { padding: 12px 14px; border: 1px solid var(--hairline); border-radius: 16px; }
+.shell .composer-field { height: 46px; padding: 0 18px; border-radius: 999px; font-weight: 500; font-size: 16px; }
+
+.shell .feed-bar { border-bottom: 1px solid var(--hairline); }
+.shell .feed-tabs { flex: 1; gap: 0; }
+.shell .feed-tab { flex: 1; justify-content: center; min-height: 50px; }
+.shell .feed-tab:hover { background: var(--paper-2); }
+.shell .feed-tab::after, .shell .tab::after { left: calc(50% - 34px); right: auto; width: 68px; height: 4px; bottom: -1px; border-radius: 4px 4px 0 0; transform-origin: center; }
+.shell .tabs { gap: 6px; border-bottom: 1px solid var(--hairline); }
+.shell .tab { padding: 0 16px; min-height: 48px; }
+.shell .tab:hover { background: var(--paper-2); }
+.shell .tabs .tab::after { bottom: -2px; }
+
+/* A post is a card: who, a headline, a few lines, then the row of actions. */
+.shell .feed-stream { display: grid; gap: 12px; }
+.shell .feed-stream > hr.lane { display: none; }
+.shell .post, .shell .post:first-child { padding: 16px 18px 8px; background: var(--sheet); border: 1px solid var(--hairline); border-radius: 16px; }
+.shell .post-author { font-size: 16px; }
+.shell .post-meta { margin-top: 2px; font-family: var(--font-sign); font-size: 13.5px; }
+.shell .post-title { margin: 12px 0 6px; font-size: 21px; letter-spacing: -0.016em; line-height: 1.2; }
+.shell .post-body.prose { font-family: var(--font-sign); font-size: 16px; line-height: 1.55; }
+.shell .post-body[data-clamped='true'] { -webkit-line-clamp: 5; }
+.post-more { margin-top: 6px; font-size: 15px; font-weight: 800; }
+.shell .post-more { color: var(--ink-3); text-decoration: none; }
+.shell .post-more:hover { color: var(--ink); text-decoration: underline; }
+.shell .post-tags { margin-top: 10px; gap: 2px 12px; }
+.shell .post-tags .tag { padding: 0; border: 0; font-family: var(--font-sign); font-size: 15px; font-weight: 600; color: var(--blue); }
+.shell .post-bar { margin-top: 12px; padding-top: 6px; }
+.shell .post-bar .tool-btn { min-height: 40px; border-radius: 999px; font-size: 14px; }
+.shell .post-bar .tool-btn svg { width: 19px; height: 19px; }
+.shell .post[data-focus='true'] { margin-inline: 0; padding-inline: 18px; background: var(--sheet); box-shadow: 0 0 0 3px var(--sun); }
+@media (max-width: 480px) {
+  .shell .post { border-radius: 14px; padding-inline: 14px; }
+  /* Icons only on a phone. The words are still there for a screen reader. */
+  .post-bar .tool-btn:not(.act-helpful) .act-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+}
+
+.shell .people-grid { gap: 14px; }
+.shell .person { padding: 16px 18px; background: var(--sheet); border: 1px solid var(--hairline); border-radius: 16px; }
+
+/* ---- Messages: rounded bubbles, yours on the right ----------------------------------- */
+.shell .duo { border: 1px solid var(--hairline); border-radius: 16px; }
+.shell .duo-side { border-right: 1px solid var(--hairline); }
+.shell .side-tabs, .shell .side-action, .shell .convo-head { border-bottom: 1px solid var(--hairline); }
+.shell .side-tab { min-height: 48px; font: 800 14.5px/1 var(--font-sign); letter-spacing: 0; text-transform: none; }
+.shell .side-tab + .side-tab { border-left: 0; }
+.shell .side-tab[aria-selected='true'] { background: transparent; color: var(--ink); box-shadow: inset 0 -4px 0 var(--sun); }
+.shell .thread-row[aria-current='true'] { background: var(--paper-2); color: var(--ink); border-bottom-color: var(--hairline); }
+.shell .thread-row[aria-current='true'] .plate { box-shadow: none; }
+.shell .chat-row[data-on='true'] { background: var(--paper-2); color: var(--ink); border-bottom-color: var(--hairline); }
+.shell .convo-log { background: var(--sheet); }
+.shell .convo-compose { border-top: 1px solid var(--hairline); }
+.shell .said-body { padding: 10px 15px; border: 0; border-radius: 20px 20px 20px 6px; background: var(--paper-2); }
+.shell .said[data-mine='true'] .said-body { border-radius: 20px 20px 6px 20px; background: var(--asphalt); color: var(--paper); }
+.shell .said[data-state='failed'] .said-body { border: 1.5px dashed var(--red); background: transparent; }
+.shell .compose-row textarea.input { border-radius: 22px; padding-inline: 16px; }
+
+/* ---- Compose on a phone, and the tab bar ------------------------------------------------ */
+.shell .fab { border: 0; border-radius: 50%; box-shadow: 0 8px 18px -6px rgba(29, 26, 22, .55); }
+.shell .fab:active { transform: scale(.94); box-shadow: 0 4px 10px -4px rgba(29, 26, 22, .5); }
+@media (max-width: 999px) {
+  .shell .bottom-tabs { border-top: 1px solid var(--hairline); }
+  .shell .bottom-tab-inner[data-on='true'] { color: var(--sun-deep); }
+  .shell .bottom-tab-inner[data-on='true']::before { display: none; }
+  .shell .bottom-tab-inner[data-on='true'] svg { stroke-width: 2.6; }
+}
+
+/* ---- Profile: a cover, with the picture standing on its edge ----------------------------- */
+.profile-cover { display: none; }
+.shell .profile-cover {
+  display: block; grid-column: 1 / -1; height: clamp(108px, 15vw, 168px); border-radius: 16px;
+  background:
+    radial-gradient(circle at 84% 118%, #e05e12 0, #e05e12 118px, transparent 119px),
+    repeating-linear-gradient(90deg, #fbf6ee 0, #fbf6ee 34px, transparent 34px, transparent 62px) 0 62% / 66% 5px no-repeat,
+    #26231f;
+}
+.shell .profile-top { gap: 10px 20px; }
+.shell .profile-top > .kicker { display: none; }
+.shell .profile-top > .plate { position: relative; margin: -52px 0 0 20px; box-shadow: 0 0 0 5px var(--paper); }
+.shell .profile-top .page-head { border-bottom: 0; align-items: flex-end; }
+.shell .profile-top .page-head h1 { font-size: clamp(26px, 2.8vw, 34px); }
+@media (max-width: 560px) {
+  .shell .profile-top > .plate { margin-left: 14px; }
+}
+
+/* ---- You, beside the feed (used where the layout has no side nav) -------------------------- */
+.mini { text-align: center; }
+.mini-cover { height: 62px; background: #26231f; }
+.mini-who { display: grid; justify-items: center; gap: 3px; padding: 0 14px 12px; margin-top: -32px; color: var(--ink); text-decoration: none; }
+.mini-who .plate { box-shadow: 0 0 0 4px var(--sheet); margin-bottom: 6px; }
+.mini-who b { display: flex; align-items: center; gap: 6px; font-size: 17px; font-weight: 900; }
+.mini-who small { font-size: 13.5px; line-height: 1.35; color: var(--ink-3); }
+.mini-stats { display: flex; justify-content: center; gap: 18px; padding: 10px 14px; border-top: 1px solid var(--hairline); font-size: 13.5px; color: var(--ink-2); }
+.mini-stats a { color: inherit; text-decoration: none; }
+.mini-stats b { color: var(--ink); font-weight: 900; }
+.mini-links { display: grid; padding: 6px; border-top: 1px solid var(--hairline); text-align: left; }
+.mini-links a { padding: 9px 10px; border-radius: 10px; font-weight: 700; font-size: 14.5px; color: var(--ink); text-decoration: none; }
+.mini-links a:hover { background: var(--paper-2); }
+.shell .feed-tab .num { display: none; }
+.shell .dir-tags { gap: 2px 12px; }
+.shell .dir-tags .tag { padding: 0; border: 0; font-family: var(--font-sign); font-size: 14px; font-weight: 600; color: var(--blue); }

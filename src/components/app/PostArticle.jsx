@@ -76,8 +76,8 @@ export default function PostArticle({
       <p className="prose post-body" data-clamped={clamped ? 'true' : undefined}>{post.body}</p>
 
       {isLong && (
-        <button type="button" className="link-btn" style={{ marginTop: 10, fontWeight: 800, fontSize: 15 }} onClick={() => setOpen((o) => !o)} aria-expanded={open}>
-          {open ? 'Show less' : 'Keep reading'}
+        <button type="button" className="link-btn post-more" onClick={() => setOpen((o) => !o)} aria-expanded={open}>
+          {open ? 'See less' : 'See more'}
         </button>
       )}
 

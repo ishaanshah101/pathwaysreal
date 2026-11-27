@@ -15,10 +15,10 @@ import PullToRefresh from '@/components/app/PullToRefresh';
 import PushOptInCard from '@/components/app/PushOptInCard';
 import PostArticle from '@/components/app/PostArticle';
 import FieldSelect from '@/components/ui/FieldSelect';
-import PageHead from '@/components/kit/PageHead';
 import Plate from '@/components/kit/Plate';
 import Icon from '@/components/kit/Icon';
 import SuggestedPeople from '@/components/app/SuggestedPeople';
+import MiniProfile from '@/components/app/MiniProfile';
 import { useSavedPosts } from '@/lib/useSavedPosts';
 import { useReactions } from '@/lib/useReactions';
 import { useOnline } from '@/lib/useOnline';
@@ -54,7 +54,9 @@ export default function Feed() {
   const {
     connectionWith, requestConnection, busyEmail, connectionError, clearConnectionError,
   } = useConnections();
-  const { isFollowing, toggleFollow, followBusyEmail, followingEmails } = useFollows();
+  const {
+    isFollowing, toggleFollow, followBusyEmail, followingEmails, followingCount: myFollowing, followerCount: myFollowers,
+  } = useFollows();
   const { isSaved, toggleSave, busyPostId } = useSavedPosts();
   const {
     hasReacted, countFor: helpfulFor, toggleReaction, busyPostId: reactBusyId, reactionError, clearReactionError,
@@ -198,22 +200,17 @@ export default function Feed() {
       <div className="page">
         <Seo title="Your Feed | Pathways" description="Long-form, firsthand college and career advice from students, professors, and counselors on Pathways." path="/app" noindex />
 
-        <PageHead
-          kicker="Feed"
-          title={first ? `Welcome back, ${first}.` : 'Welcome back.'}
-          sub={combined.length === 0
-            ? 'Nothing here yet. Be the first to write something someone else needs to read.'
-            : `${combined.length} post${combined.length === 1 ? '' : 's'} from students, professors, and counselors who've been where you are.`}
-        >
-          {!composing && (
-            <button type="button" className="btn btn-primary hide-mobile" onClick={() => setComposing(true)}>
-              <Icon as={PenLine} size={16} /> Write a post
-            </button>
-          )}
-        </PageHead>
+        {/* No big headline here. Like any social app, the feed opens straight
+            onto the composer and the posts; the page still has a name for
+            screen readers. */}
+        <h1 className="sr-only">{first ? `Your feed, ${first}` : 'Your feed'}</h1>
 
         <div className="feed-layout">
-          <div style={{ display: 'grid', gap: 18, minWidth: 0 }}>
+          <aside className="feed-left" aria-label="You">
+            <MiniProfile profile={profile} email={email} followerCount={myFollowers} followingCount={myFollowing} />
+          </aside>
+
+          <div className="feed-main">
             {(!online || offlineCached) && <OfflineBanner cached={posts.length} />}
 
             {/* Asked here, inside the app, after onboarding, and only when the
@@ -280,7 +277,7 @@ export default function Feed() {
               <div className="composer-bar">
                 <Plate name={profile?.full_name} seed={email} size={40} />
                 <button type="button" className="composer-field" onClick={() => setComposing(true)}>
-                  Share something you learned…
+                  {first ? `What did you learn this week, ${first}?` : 'What did you learn this week?'}
                 </button>
                 <button type="button" className="btn btn-primary btn-sm" onClick={() => setComposing(true)}>Post</button>
               </div>
@@ -389,6 +386,20 @@ export default function Feed() {
           </div>
 
           <aside className="feed-aside" aria-label="People and reference">
+            {/* Search lives up here when there is room for the side column, and
+                under the tabs when there is not. Both are the same search. */}
+            <div className="searchbox rail-search">
+              <Icon as={Search} size={17} />
+              <input
+                className="input"
+                type="search"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search posts"
+                aria-label="Search posts by word, person, or tag"
+              />
+            </div>
+
             <SuggestedPeople isFollowing={isFollowing} toggleFollow={toggleFollow} followBusyEmail={followBusyEmail} />
 
             <div className="panel">

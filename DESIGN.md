@@ -69,13 +69,15 @@ Topic to sign colour is decided in one place: `src/lib/categories.js`.
 
 ## Social patterns
 
-The signed-in app borrows its layout from social apps on purpose, so nobody has to learn where things are. The drawing stays in the house style.
+The public site is drawn as road signs. The signed-in app is drawn the way social apps are drawn, on purpose, so nobody has to learn where things are. It keeps the type, the map-paper warmth and the logo's orange.
 
-- **Feed tabs.** "For you" and "Following" are tabs above the stream, with the lane-line orange under the one you are on. Topics are one row of signs under the tabs that scrolls sideways.
-- **A post.** Follow sits beside the author's name. One row of actions sits under the post: Helpful (counted, and nobody can see who pressed it), Save, Share, then Connect.
-- **People to learn from.** A short list beside the feed with a Follow button on each row. Verified educators and counselors come first.
-- **Compose on a phone.** One orange button above the tab bar.
-- **Profile.** Posts, followers and following as numbers under the name, then three tabs: Profile, Posts, Account.
+- **Shape.** Round profile pictures, pill buttons, and soft cards with a hairline round them. Everything inside `.shell` gets this; the public pages do not.
+- **Side nav.** Plain icons and bold labels, the current page in orange, one big orange Post button, and you at the bottom.
+- **Feed.** A centred column. Composer first, then "For you" and "Following" tabs with the orange bar under the one you are on, then one row of topic pills.
+- **A post.** A compact card. Follow sits beside the author's name. One row of actions sits under the post: Helpful (counted, and nobody can see who pressed it), Save, Share, then Message or Connect.
+- **Beside the feed.** Search, "People to learn from" with a Follow button on each row, then your plan and the word of the day.
+- **Messages.** Rounded bubbles, yours dark on the right.
+- **Profile.** A cover strip with the picture standing on its edge, then posts, followers and following as numbers, then three tabs: Profile, Posts, Account.
+- **Phone.** A round orange compose button above the tab bar, and icon-only actions under posts.
 
 All of this is styled in `src/styles/social.css`.
-

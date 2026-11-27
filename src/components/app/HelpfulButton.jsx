@@ -12,7 +12,7 @@ export default function HelpfulButton({ count = 0, reacted = false, busy = false
     return (
       <span className="tool-btn act-helpful" data-static="true" title={label}>
         <Icon as={ThumbsUp} size={16} />
-        Helpful
+        <span className="act-label">Helpful</span>
         {count > 0 && <span className="act-count num">{count}</span>}
         <span className="sr-only">{label}</span>
       </span>
@@ -29,7 +29,7 @@ export default function HelpfulButton({ count = 0, reacted = false, busy = false
       title={reacted ? 'You marked this helpful. Press to undo.' : 'Mark this post as helpful'}
     >
       <Icon as={ThumbsUp} size={16} weight={reacted ? 2.6 : 2} />
-      Helpful
+      <span className="act-label">Helpful</span>
       {count > 0 && <span className="act-count num" aria-hidden="true">{count}</span>}
       {count > 0 && <span className="sr-only">{label}</span>}
     </button>

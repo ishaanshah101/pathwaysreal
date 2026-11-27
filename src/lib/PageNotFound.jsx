@@ -2,6 +2,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import Seo from '@/components/Seo';
+import BrandMark from '@/components/BrandMark';
 
 /**
  * Pathways is a client-rendered SPA, so the host returns HTTP 200 for every
@@ -18,11 +19,11 @@ import Seo from '@/components/Seo';
  */
 
 const LINKS = [
-  ['/', 'Home'],
   ['/how-it-works', 'How it works'],
+  ['/by-grade', 'By grade'],
+  ['/glossary', 'Glossary'],
   ['/sage', 'Sage'],
   ['/faq', 'FAQ'],
-  ['/join', 'Join free'],
   ['/safety', 'Safety'],
 ];
 
@@ -43,50 +44,35 @@ export default function PageNotFound() {
   });
 
   return (
-    <main
-      className="flex items-center justify-center"
-      style={{ minHeight: '100vh', padding: 24, background: 'var(--color-bg)', color: 'var(--color-text)' }}
-    >
+    <main className="lost">
       <Seo title="Page not found | Pathways" noindex />
-      <div className="flex flex-col" style={{ maxWidth: 460, width: '100%', gap: 20, textAlign: 'center' }}>
-        <p style={{ fontFamily: 'var(--font-heading)', fontSize: 56, lineHeight: 1, color: 'var(--color-accent-700)', margin: 0 }}>
-          404
-        </p>
+      <div className="lost-inner">
+        <div className="lost-sign" aria-hidden="true">
+          <b>Wrong page</b>
+          <span>Error 404 · nothing is written here</span>
+        </div>
 
-        <h1 style={{ fontSize: 'var(--text-2xl)', margin: 0 }}>This page isn't here</h1>
+        <h1 className="title-2">This page isn't here.</h1>
 
-        <p style={{ fontSize: 'var(--text-base)', lineHeight: 'var(--leading-normal)', color: 'var(--text-muted)', margin: 0 }}>
+        <p className="lede" style={{ marginTop: 14 }}>
           {pageName
-            ? <>We couldn't find <b style={{ color: 'var(--color-text)' }}>/{pageName}</b>. It may have moved, or the link may be mistyped.</>
+            ? <>We couldn't find <b style={{ color: 'var(--ink)' }}>/{pageName}</b>. It may have moved, or the link may be mistyped.</>
             : <>We couldn't find that page. It may have moved, or the link may be mistyped.</>}
         </p>
 
-        <nav className="flex flex-wrap justify-center" style={{ gap: 8, marginTop: 4 }} aria-label="Site">
+        <div className="flex flex-wrap items-center" style={{ gap: 12, marginTop: 26 }}>
+          <Link to="/" className="btn btn-primary btn-lg btn-go">Back to Pathways</Link>
+          <BrandMark size={44} />
+        </div>
+
+        <nav className="flex flex-wrap" style={{ gap: '8px 22px', marginTop: 34, paddingTop: 20, borderTop: '1px solid var(--hairline)' }} aria-label="Site">
           {LINKS.map(([to, label]) => (
-            <Link
-              key={to}
-              to={to}
-              className="btn btn-secondary no-underline"
-              style={{ fontSize: 'var(--text-sm)' }}
-            >
-              {label}
-            </Link>
+            <Link key={to} to={to} style={{ fontWeight: 800, fontSize: 16 }}>{label}</Link>
           ))}
         </nav>
 
-        <Link to="/" className="btn btn-primary btn-lg no-underline self-center" style={{ marginTop: 4 }}>
-          Back to Pathways
-        </Link>
-
         {isFetched && authData?.isAuthenticated && authData.user?.role === 'admin' && (
-          <p
-            className="card"
-            style={{
-              fontSize: 'var(--text-sm)', lineHeight: 'var(--leading-normal)',
-              color: 'var(--text-muted)', textAlign: 'left', padding: '12px 16px',
-              borderRadius: 'var(--radius-md)', marginTop: 12,
-            }}
-          >
+          <p className="notice notice-info" style={{ marginTop: 26 }}>
             <b>Admin note.</b> This route has no page yet, or you are not allowed to see it.
           </p>
         )}

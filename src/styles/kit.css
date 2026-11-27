@@ -1,0 +1,344 @@
+/* ---------------------------------------------------------------------------
+   The kit: every reusable piece, in one place.
+   --------------------------------------------------------------------------- */
+
+/* ---- Page furniture ------------------------------------------------------ */
+.wrap { width: 100%; max-width: 1180px; margin-inline: auto; padding-inline: var(--gutter); }
+.wrap-read { width: 100%; max-width: 780px; margin-inline: auto; padding-inline: var(--gutter); }
+
+/* Small print, off the label maker. */
+.kicker {
+  display: block; margin: 0 0 10px;
+  font-family: var(--font-mono); font-size: 12.5px; font-weight: 700;
+  letter-spacing: .1em; text-transform: uppercase; color: var(--ink-2);
+}
+.kicker-sun { color: var(--pen-red); }
+.card-kicker { font-family: var(--font-mono); font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--pen-red); font-style: normal; }
+
+.lede { font-size: clamp(17.5px, 1.5vw, 20px); line-height: 1.55; color: var(--ink-2); max-width: 58ch; }
+.meta { font-family: var(--font-mono); font-size: 12.5px; letter-spacing: .01em; color: var(--ink-3); }
+
+/* Anything a person sat down and wrote. */
+.prose { font-family: var(--font-read); font-size: 17.5px; line-height: 1.7; color: var(--ink); }
+.prose p { margin: 0 0 1em; }
+.prose-narrow { max-width: 62ch; }
+
+/* A note in the margin, in handwriting. Short, and never the only place
+   something important is said. */
+.scribble { font-family: var(--font-hand); font-weight: 400; color: var(--pen-red); line-height: 1.15; }
+
+/* One swipe of highlighter behind a few words. */
+.hl {
+  --hl: var(--hl-yellow);
+  color: #232732;
+  background: linear-gradient(101deg, transparent .35em, var(--hl) .35em, var(--hl) calc(100% - .3em), transparent calc(100% - .3em));
+  padding: .02em .28em; margin: 0 -.28em;
+  -webkit-box-decoration-break: clone; box-decoration-break: clone;
+}
+
+/* A sheet of lined paper: margin line, rules, three punched holes. Text set
+   on it uses --line as its line height so it sits on the rules. */
+.ruled {
+  position: relative; background-color: var(--sheet); box-shadow: var(--paper-shadow);
+  background-image:
+    linear-gradient(to right, transparent 55px, var(--margin) 55px, var(--margin) 57px, transparent 57px),
+    repeating-linear-gradient(to bottom, transparent 0, transparent calc(var(--line) - 1px), var(--rule) calc(var(--line) - 1px), var(--rule) var(--line));
+}
+.ruled::before {
+  content: ''; position: absolute; left: 17px; top: 0; bottom: 0; width: 20px; pointer-events: none;
+  background: radial-gradient(circle at 10px 10px, var(--desk) 8.5px, transparent 9.5px) 0 56px / 20px 208px repeat-y;
+}
+@media (max-width: 640px) {
+  .ruled { background-image: repeating-linear-gradient(to bottom, transparent 0, transparent calc(var(--line) - 1px), var(--rule) calc(var(--line) - 1px), var(--rule) var(--line)); }
+  .ruled::before { display: none; }
+}
+
+/* Dividers. A pencil line, and the row of holes along a spiral-bound edge. */
+.lane { height: 0; border: 0; margin: 0; border-top: 2px dashed var(--hairline-strong); background: none; }
+.lane-soft { border-top-color: var(--hairline); }
+.lane-sun { border-top-color: var(--sun); }
+.road {
+  position: relative; height: 18px; background-color: var(--sheet);
+  background-image: radial-gradient(circle at 12px 9px, var(--desk-2) 4.5px, transparent 5.5px);
+  background-size: 24px 18px; border-bottom: 1px solid var(--hairline);
+}
+.road-v { height: auto; width: 0; background: none; border: 0; border-left: 2px dashed var(--hairline-strong); }
+
+.divider { height: 1px; background: var(--hairline); border: 0; margin: 0; }
+.rule-ink { height: 2px; background: var(--ink); border: 0; margin: 0; }
+
+/* ---- Buttons ------------------------------------------------------------- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 44px; padding: 0 18px;
+  font-family: var(--font-marker); font-weight: 700; font-size: 16px; line-height: 1;
+  white-space: nowrap; text-decoration: none; cursor: pointer;
+  color: var(--ink); background: transparent;
+  border: 2px solid transparent; border-radius: var(--wobble);
+  transition: background var(--t) var(--ease), color var(--t) var(--ease), border-color var(--t) var(--ease), transform var(--t-fast) var(--ease);
+}
+.btn:disabled, .btn[aria-disabled='true'] { opacity: .45; cursor: not-allowed; }
+.btn:active:not(:disabled) { transform: translateY(1px); }
+
+.btn-primary { background: var(--asphalt); border-color: var(--asphalt); color: var(--sheet); }
+.btn-primary:hover:not(:disabled) { background: var(--sun); border-color: var(--sun); color: #232732; }
+
+/* Near-black on the orange, so the label passes contrast at every size. */
+.btn-sun { background: var(--sun); border-color: #232732; color: #14161b; }
+.btn-sun:hover:not(:disabled) { background: var(--hl-yellow); }
+
+.btn-secondary { background: var(--sheet); border-color: var(--ink); color: var(--ink); }
+.btn-secondary:hover:not(:disabled) { background: var(--hl-yellow); border-color: #232732; color: #232732; }
+
+.btn-ghost { color: var(--pen-red); padding-inline: 10px; }
+.btn-ghost:hover:not(:disabled) { background: var(--red-tint); }
+
+.btn-quiet { color: var(--ink-2); padding-inline: 10px; font-weight: 600; }
+.btn-quiet:hover:not(:disabled) { background: var(--paper-2); color: var(--ink); }
+
+.btn-danger { background: var(--red); border-color: var(--red); color: var(--on-red); }
+.btn-danger:hover:not(:disabled) { background: #8f2319; border-color: #8f2319; }
+
+.btn-block { width: 100%; }
+.btn-sm { min-height: 34px; padding: 0 12px; font-size: 14.5px; }
+.btn-lg { min-height: 54px; padding: 0 26px; font-size: 19px; }
+
+.btn-go::after { content: '\2192'; font-family: var(--font-read); font-weight: 700; transition: transform var(--t) var(--ease); }
+.btn-go:hover::after { transform: translateX(4px); }
+
+.link-btn {
+  background: none; border: 0; padding: 0; font: inherit; color: inherit; cursor: pointer;
+  text-decoration: underline; text-decoration-color: var(--pen-red); text-decoration-thickness: 2px; text-underline-offset: 3px;
+}
+.link-btn:hover { text-decoration-color: currentColor; }
+
+/* Filter chips: words in a hand-drawn box. On means highlighted. */
+.btn-chip {
+  min-height: 34px; padding: 0 12px; gap: 6px;
+  font-weight: 600; font-size: 14.5px;
+  background: var(--sheet); border: 1.5px solid var(--hairline-strong); border-radius: var(--wobble-2); color: var(--ink-2);
+}
+.btn-chip:hover:not(:disabled):not([aria-pressed='true']):not([data-on='true']) { border-color: var(--ink); color: var(--ink); }
+.btn-chip[aria-pressed='true'], .btn-chip[data-on='true'] { background: var(--hl-yellow); border-color: #232732; color: #232732; font-weight: 700; }
+
+.btn-icon { width: 40px; min-height: 40px; padding: 0; border: 1.5px solid var(--hairline-strong); border-radius: var(--wobble-2); background: var(--sheet); }
+.btn-icon:hover:not(:disabled) { border-color: var(--ink); }
+
+/* ---- Forms: fill in the blank -------------------------------------------- */
+.field > label {
+  display: block; margin-bottom: 4px;
+  font-family: var(--font-marker); font-size: 15px; font-weight: 700; color: var(--ink);
+}
+.input {
+  width: 100%; min-height: 46px; padding: 10px 12px 8px;
+  font-family: var(--font-read); font-size: 17px; line-height: 1.4; color: var(--ink);
+  caret-color: var(--pen-red);
+  background: var(--sheet);
+  border: 0; border-bottom: 2px solid var(--ink); border-radius: 3px 3px 0 0;
+  box-shadow: inset 0 0 0 1px var(--hairline);
+  transition: background var(--t) ease, box-shadow var(--t) ease;
+}
+textarea.input {
+  min-height: 128px; resize: vertical; line-height: var(--line); padding-top: 0; padding-bottom: 0;
+  background-image: repeating-linear-gradient(to bottom, transparent 0, transparent calc(var(--line) - 1px), var(--rule) calc(var(--line) - 1px), var(--rule) var(--line));
+  background-attachment: local;
+}
+select.input {
+  appearance: none; -webkit-appearance: none; padding-right: 38px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%236b6e78' stroke-width='3' stroke-linecap='round'%3E%3Cpath d='m5 9 7 7 7-7'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 13px center;
+}
+.input:hover { box-shadow: inset 0 0 0 1px var(--hairline-strong); }
+.input:focus-visible { outline: none; background-color: var(--yellow-tint); box-shadow: inset 0 0 0 1px var(--ink); }
+.input:disabled, .input[aria-disabled='true'] { cursor: not-allowed; background-color: var(--paper-2); color: var(--ink-3); border-bottom-style: dashed; }
+.input::placeholder { color: var(--ink-3); opacity: .75; }
+.input[aria-invalid='true'] { border-bottom-color: var(--red); }
+.field-error { display: block; margin-top: 5px; font-family: var(--font-hand); font-size: 17px; color: var(--pen-red); }
+.field-hint { display: block; margin-top: 6px; font-size: 14px; line-height: 1.45; color: var(--ink-3); }
+
+/* Segmented control: two tabs cut from one sheet. */
+.seg { display: inline-flex; gap: 4px; }
+.seg-opt {
+  padding: 8px 15px; font: 700 15px/1.2 var(--font-marker); color: var(--ink-2);
+  background: var(--paper-2); border: 1.5px solid var(--hairline-strong); border-radius: var(--wobble-2); cursor: pointer;
+  transition: background var(--t) ease, color var(--t) ease;
+}
+.seg-opt[data-on='true'] { background: var(--hl-yellow); border-color: #232732; color: #232732; }
+.seg-opt[data-on='false']:hover { background: var(--sheet); color: var(--ink); }
+
+/* ---- Feedback ------------------------------------------------------------ */
+.msg { display: inline-flex; align-items: center; gap: 6px; font-size: 14.5px; font-weight: 700; line-height: 1.35; }
+.msg-success { color: var(--green); }
+.msg-warning { color: var(--yellow-deep); }
+.msg-error { color: var(--red); }
+
+/* A sticky note. */
+.notice {
+  position: relative; padding: 14px 16px 14px; font-size: 15px; line-height: 1.45; color: #232732;
+  background: var(--hl-yellow); border-radius: 1px 1px 14px 1px / 1px 1px 10px 1px; box-shadow: var(--paper-shadow);
+}
+.notice-success { background: var(--hl-green); }
+.notice-warning { background: var(--hl-yellow); }
+.notice-error { background: var(--hl-pink); }
+.notice-info { background: var(--hl-blue); }
+.notice a, .notice .link-btn { color: #232732; }
+.notice .btn-quiet { color: #232732; }
+.notice .btn-primary { background: #232732; border-color: #232732; color: #fffdf6; }
+
+.badge {
+  display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;
+  font-family: var(--font-mono); font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+  padding: 3px 7px 2px; border-radius: 2px;
+}
+.badge-neutral { background: var(--paper-3); color: var(--ink-2); }
+/* A teacher's stamp. */
+.badge-verified { background: transparent; color: var(--green); border: 1.5px solid var(--green); border-radius: var(--wobble-2); transform: rotate(-2deg); padding: 2px 7px 1px; }
+.badge-accent { background: var(--hl-orange); color: #232732; }
+.badge-success { background: var(--hl-green); color: #232732; }
+.badge-warning { background: var(--hl-yellow); color: #232732; }
+
+.tag {
+  display: inline-flex; align-items: center;
+  font-family: var(--font-hand); font-size: 17px; line-height: 1.1; color: var(--blue);
+}
+.tag-accent { color: var(--pen-red); }
+.tag-accent-2 { color: var(--blue); }
+
+.skeleton { background: var(--paper-3); border-radius: 2px; animation: skeleton-pulse 1.1s ease-in-out infinite alternate; }
+.skeleton-line { height: 12px; }
+.skeleton-title { height: 24px; }
+.skeleton-avatar { width: 40px; height: 40px; border-radius: 50%; }
+@keyframes skeleton-pulse { to { opacity: .45; } }
+
+/* An empty page in the notebook: a pencil box and a note. */
+.empty {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 8px;
+  padding: 24px; border: 2px dashed var(--hairline-strong); border-radius: var(--wobble);
+}
+.empty-icon { display: none; }
+.empty-title { margin: 0; font-family: var(--font-hand); font-weight: 700; font-size: 27px; line-height: 1.1; color: var(--ink); }
+.empty-body { margin: 0; font-size: 15.5px; line-height: 1.5; color: var(--ink-2); max-width: 46ch; }
+
+/* ---- Stickers, labels, numbers ----------------------------------------------- */
+
+/* An avatar is a round sticker with initials in marker. */
+.avatar, .plate {
+  display: inline-flex; align-items: center; justify-content: center; flex: none; overflow: hidden;
+  border-radius: 50%; border: 2px solid var(--sheet); box-shadow: 0 1px 3px rgba(60, 45, 15, .4);
+  font-family: var(--font-marker); font-weight: 800; letter-spacing: 0; line-height: 1;
+}
+.avatar-sm { width: 30px; height: 30px; font-size: 12px; }
+.avatar-md { width: 40px; height: 40px; font-size: 15px; }
+.avatar-lg { width: 56px; height: 56px; font-size: 21px; }
+.avatar-xl { width: 88px; height: 88px; font-size: 33px; }
+
+/* A topic label: typed on the label maker, then run over with a highlighter. */
+.sign {
+  --sb: var(--hl-yellow);
+  display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
+  font-family: var(--font-mono); font-weight: 700; font-size: 12.5px; line-height: 1; letter-spacing: .08em; text-transform: uppercase;
+  color: #232732; padding: 5px 9px 4px; text-decoration: none; border-radius: 1px;
+  background: linear-gradient(100deg, transparent 5px, var(--sb) 5px, var(--sb) calc(100% - 4px), transparent calc(100% - 4px));
+}
+.sign-lg { font-size: 15px; padding: 8px 13px 6px; }
+.sign-green { --sb: var(--hl-green); }
+.sign-blue { --sb: var(--hl-blue); }
+.sign-brown { --sb: #e4cfa6; }
+.sign-red { --sb: var(--hl-pink); }
+.sign-ink { --sb: #232732; color: #fffdf6; }
+.sign-yellow { --sb: var(--hl-yellow); }
+.sign-lime { --sb: var(--hl-lime); }
+.sign-sun { --sb: var(--hl-orange); }
+.sign-white { --sb: #ffffff; box-shadow: inset 0 0 0 1.5px #232732; background: #fff; }
+button.sign { border: 0; cursor: pointer; min-height: 32px; }
+button.sign[aria-pressed='false'] { background: var(--sheet); color: var(--ink-2); box-shadow: inset 0 0 0 1.5px var(--hairline-strong); }
+button.sign[aria-pressed='false']:hover { color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--ink); }
+
+/* A number, circled in red pen. */
+.mile {
+  display: inline-flex; align-items: center; justify-content: center; flex: none;
+  width: 46px; height: 44px; padding: 0 0 2px; background: transparent; color: var(--pen-red);
+  border: 2.5px solid var(--pen-red); border-radius: 48% 52% 55% 45% / 52% 46% 54% 48%; transform: rotate(-4deg);
+  font-family: var(--font-hand); font-weight: 700; font-size: 26px; line-height: 1;
+}
+.mile small { display: none; }
+
+.count {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 21px; height: 21px; padding: 0 5px; border-radius: 999px;
+  background: var(--pen-red); color: var(--on-red); font: 700 12.5px/1 var(--font-marker);
+}
+
+/* ---- Surfaces -------------------------------------------------------------- */
+.card {
+  display: flex; flex-direction: column; gap: 10px;
+  padding: 18px; background: var(--sheet); box-shadow: var(--paper-shadow); border-radius: 2px;
+}
+.card-inset { background: var(--paper-2); box-shadow: none; }
+.card-interactive { cursor: pointer; }
+.elev-sm, .elev-md { box-shadow: var(--paper-shadow); }
+.elev-lg { box-shadow: var(--lift); }
+
+/* An index card: a red line under the heading, blue lines under that. */
+.panel { background: var(--sheet); border-radius: 2px; box-shadow: var(--paper-shadow); }
+.panel-head {
+  display: flex; align-items: center; gap: 8px; padding: 11px 16px 9px;
+  border-bottom: 2px solid var(--margin);
+  font-family: var(--font-marker); font-size: 16px; font-weight: 700; line-height: 1.2;
+}
+.panel-body { padding: 14px 16px 16px; }
+
+.popover { background: var(--sheet); border-radius: 2px; box-shadow: var(--lift); border: 1px solid var(--hairline); }
+.menu-item {
+  display: flex; align-items: center; gap: 10px; width: 100%; padding: 9px 10px;
+  font: 600 15.5px/1.2 var(--font-marker); color: var(--ink); text-align: left; text-decoration: none;
+  background: transparent; border: 0; border-radius: 3px; cursor: pointer;
+}
+.menu-item:hover { background: var(--hl-yellow); color: #232732; }
+
+/* ---- Tables ---------------------------------------------------------------- */
+.table { width: 100%; border-collapse: collapse; font-size: 15.5px; }
+.table th {
+  text-align: left; padding: 8px 12px; border-bottom: 2px solid var(--margin);
+  font-family: var(--font-mono); font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-2);
+}
+.table td { padding: 12px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+.table tbody tr:last-child td { border-bottom: 0; }
+
+/* ---- Legacy layout helpers still used by a few components ------------------ */
+.page-hero { padding: clamp(32px, 5vh, 64px) 0 clamp(20px, 3vh, 32px); }
+.page-section { padding: clamp(28px, 5vh, 56px) 0; }
+.washed { filter: saturate(.6) contrast(.9); }
+.anim-fade-up, .anim-fade-swap, .anim-drift, .anim-drift-slow { animation: none; }
+.frame { background: var(--sheet); box-shadow: var(--paper-shadow); overflow: hidden; }
+.frame-bar { display: flex; align-items: center; gap: 6px; padding: 8px 12px; border-bottom: 2px solid var(--margin); }
+.frame-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--ink-3); }
+
+@media (max-width: 860px) {
+  .hide-mobile { display: none !important; }
+  .show-mobile { display: inline-flex !important; }
+  .app-split { grid-template-columns: minmax(0, 1fr) !important; }
+  .split-aside { position: static !important; order: -1; }
+  .msg-split[data-active='false'] .msg-pane { display: none; }
+  .msg-split[data-active='true'] .msg-list { display: none; }
+}
+@media (min-width: 861px) { .show-mobile { display: none !important; } }
+
+button, .btn, .btn-chip, .seg-opt, .badge, .tag, .sign, .bottom-tab, .rail-link {
+  -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent;
+}
+
+/* ---- Radix primitives, in the house style ------------------------------------ */
+.pw-overlay { background: rgba(30, 24, 12, .55); }
+.pw-dialog {
+  background: var(--sheet); color: var(--ink); border-radius: 2px; box-shadow: var(--lift);
+  width: calc(100% - 28px); max-height: calc(100dvh - 28px); overflow-y: auto;
+}
+.pw-dialog-title { font-family: var(--font-marker); font-weight: 800; font-size: 26px; letter-spacing: -0.01em; line-height: 1.1; padding-right: 30px; }
+.pw-dialog-desc { font-size: 15.5px; line-height: 1.5; color: var(--ink-2); }
+.pw-dialog-close { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; color: var(--ink-2); }
+.pw-dialog-close:hover { background: var(--hl-yellow); color: #232732; }
+.pw-pop { background: var(--sheet); color: var(--ink); border: 1px solid var(--hairline); border-radius: 2px; box-shadow: var(--lift); }
+.pw-option { font-family: var(--font-marker); font-size: 15.5px; font-weight: 600; border-radius: 3px; }
+.pw-option:focus, .pw-option[data-highlighted] { background: var(--hl-yellow); color: #232732; }
+.pw-label { display: block; font-family: var(--font-marker); font-size: 15px; font-weight: 700; color: var(--ink); line-height: 1.3; }

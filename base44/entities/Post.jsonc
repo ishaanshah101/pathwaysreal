@@ -49,6 +49,11 @@
         "type": "string"
       }
     },
+    "helpful_count": {
+      "type": "number",
+      "default": 0,
+      "description": "How many members marked this post helpful. Written only by the react-to-post backend function, as a fresh count of PostReaction rows."
+    },
     "attachments": {
       "type": "array",
       "maxItems": 10,

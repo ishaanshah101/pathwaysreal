@@ -2,11 +2,11 @@ import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import TabActivityContext from '@/components/app/TabActivityContext';
 import { useSearchParams } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
-import { useProfile, threadKey } from '@/lib/useProfile';
+import { useProfile, threadKey, ROLE_LABELS } from '@/lib/useProfile';
 import { useMessages, deliveryStateOf } from '@/lib/MessagesContext';
 import DeliveryTicks from '@/components/app/DeliveryTicks';
 import UnreadBadge from '@/components/app/UnreadBadge';
-import { authorAvatar, initialsOf } from '@/lib/avatar';
+import VerifiedBadge from '@/components/app/VerifiedBadge';
 import SafetyActions from '@/components/safety/SafetyActions';
 import ContactDetailsPanel from '@/components/app/ContactDetailsPanel';
 import { useBlocks } from '@/lib/useBlocks';
@@ -14,8 +14,11 @@ import { useConnections } from '@/lib/useConnections';
 import { useContactNotes } from '@/lib/useContactNotes';
 import { usePeopleByEmail } from '@/lib/usePeople';
 import Seo from '@/components/Seo';
+import PageHead from '@/components/kit/PageHead';
+import Plate from '@/components/kit/Plate';
+import Icon from '@/components/kit/Icon';
 import { SkeletonRows } from '@/components/ui/Skeletons';
-import { ArrowLeft, MessageCircle, Search, Send } from 'lucide-react';
+import { Archive, ArchiveRestore, ArrowLeft, MessageSquare, NotebookPen, Search } from 'lucide-react';
 
 function clockTime(iso) {
   if (!iso) return '';
@@ -24,30 +27,44 @@ function clockTime(iso) {
   } catch { return ''; }
 }
 
-function Bubble({ mine, children, meta }) {
+function sameDay(a, b) {
+  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+}
+
+// The heading on the rule between two days of a conversation.
+function dayLabel(iso) {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '';
+  const now = new Date();
+  if (sameDay(d, now)) return 'Today';
+  const yesterday = new Date(now);
+  yesterday.setDate(now.getDate() - 1);
+  if (sameDay(d, yesterday)) return 'Yesterday';
+  return d.toLocaleDateString(undefined, {
+    weekday: 'short', month: 'short', day: 'numeric',
+    ...(d.getFullYear() === now.getFullYear() ? {} : { year: 'numeric' }),
+  });
+}
+
+// When a conversation last moved, as short as it can be said: a time today, a
+// weekday this week, a date before that.
+function listTime(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '';
+  const now = new Date();
+  if (sameDay(d, now)) return clockTime(iso);
+  if (now - d < 6 * 86400000) return d.toLocaleDateString(undefined, { weekday: 'short' });
+  return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+}
+
+// One message. A squared block with the time and delivery state in small print
+// underneath, never inside it.
+function Said({ mine, state, children, meta }) {
   return (
-    <div
-      style={{
-        alignSelf: mine ? 'flex-end' : 'flex-start',
-        maxWidth: '78%',
-        background: mine ? 'var(--color-ink)' : 'var(--color-surface-2)',
-        color: mine ? 'var(--color-bg)' : 'var(--color-text)',
-        padding: '9px 14px 6px',
-        borderRadius: mine ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
-        fontSize: 14.5,
-        lineHeight: 1.55,
-        whiteSpace: 'pre-wrap',
-      }}
-    >
-      {children}
-      {meta && (
-        <span
-          className="flex items-center justify-end gap-[5px]"
-          style={{ marginTop: 3, fontSize: 10.5, opacity: 0.85, lineHeight: 1 }}
-        >
-          {meta}
-        </span>
-      )}
+    <div className="said" data-mine={mine ? 'true' : 'false'} data-state={state || undefined}>
+      <div className="said-body">{children}</div>
+      {meta && <div className="said-meta meta">{meta}</div>}
     </div>
   );
 }
@@ -269,41 +286,36 @@ export default function Messages() {
   };
 
   const activeMeta = threads.find((t) => t.other === activeWith);
+  const activePerson = people.find((p) => p.user_email === activeWith);
+  const activeNote = activeWith ? noteFor(activeWith) : null;
+  const activeLine = activeWith && !activeWith.startsWith('deleted:')
+    ? activePerson?.headline || activePerson?.job_title || ROLE_LABELS[activePerson?.role] || ''
+    : '';
+  const usingNickname = Boolean(activeMeta?.realName && activeMeta.realName !== activeMeta.name);
 
   return (
-    <div className="flex flex-col" style={{ gap: 18 }}>
+    <div className="page fit-page" data-open={String(Boolean(activeWith))}>
       <Seo title="Messages | Pathways" description="One-on-one mentoring conversations on Pathways with students, professors, and counselors." path="/app/messages" noindex />
-      <div>
-        <h1 style={{ fontSize: 'clamp(26px,3.2vw,36px)', margin: '0 0 6px' }}>Messages</h1>
-        <p style={{ color: 'var(--text-muted)', margin: 0, fontSize: 15 }}>
-          One-on-one only, never group chats. Messages arrive instantly, no refresh needed.
-        </p>
-      </div>
 
-      <div
-        className="grid app-split msg-split"
-        data-active={String(Boolean(activeWith))}
-        style={{
-          gridTemplateColumns: 'minmax(0,4fr) minmax(0,8fr)', gap: 16, alignItems: 'stretch',
-          // One scroll region per pane, sized off the viewport rather than a
-          // fixed pixel height. On a phone this stops the page and the pane
-          // both scrolling at once, which is what produced two scrollbars and
-          // a rubber-banding mess inside a WebView.
-          height: 'calc(100dvh - 250px)', minHeight: 420,
-        }}
-      >
-        <div
-          className="card elev-sm msg-list"
-          style={{ padding: 12, gap: 4, overflowY: 'auto', minHeight: 0, alignSelf: 'stretch' }}
-        >
-          <div className="seg" style={{ alignSelf: 'flex-start', marginBottom: 6 }} role="tablist" aria-label="Inbox or archived">
+      <PageHead
+        kicker="Messages"
+        title="Your conversations."
+        sub="One on one only, never group chats. Messages arrive as they are sent."
+      />
+
+      {/* One scroll region per pane. The frame is sized off the viewport, so on
+          a phone the page and the pane never both scroll at once, which is
+          what produced two scrollbars and a rubber-banding mess in a WebView. */}
+      <div className="duo msg-split" data-active={String(Boolean(activeWith))}>
+        <section className="duo-side msg-list" aria-label="Conversations">
+          <div className="side-tabs" role="tablist" aria-label="Inbox or archived">
             {[[false, 'Inbox'], [true, `Archived${archivedEmails.length ? ` (${archivedEmails.length})` : ''}`]].map(([val, label]) => (
               <button
                 key={label}
                 type="button"
                 role="tab"
                 aria-selected={showArchived === val}
-                className="seg-opt"
+                className="side-tab"
                 data-on={String(showArchived === val)}
                 onClick={() => setShowArchived(val)}
               >
@@ -312,164 +324,130 @@ export default function Messages() {
             ))}
           </div>
 
-          <div style={{ padding: '0 0 8px', position: 'relative' }}>
-            <Search size={15} aria-hidden="true" style={{ position: 'absolute', left: 12, top: 13, color: 'var(--color-neutral-500)' }} />
+          <div className="side-search">
+            <Icon as={Search} size={16} />
             <input
-              className="input"
-              style={{ fontSize: 13.5, minHeight: 38, paddingLeft: 34 }}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search messages and people…"
+              placeholder="Search messages and people"
               aria-label="Search your messages"
             />
-            {search.trim() && (
-              <span
-                className="flex items-center gap-2"
-                style={{ fontSize: 12, color: 'var(--text-subtle)', padding: '6px 2px 0' }}
-                aria-live="polite"
-              >
-                {threads.length} match{threads.length === 1 ? '' : 'es'}
-                <button
-                  type="button"
-                  onClick={() => setSearch('')}
-                  style={{ background: 'none', border: 0, cursor: 'pointer', font: 'inherit', color: 'var(--color-accent-700)' }}
-                >
-                  Clear
-                </button>
-              </span>
+          </div>
+          {search.trim() && (
+            <div className="side-count" aria-live="polite">
+              <span className="meta">{threads.length} match{threads.length === 1 ? '' : 'es'}</span>
+              <button type="button" className="link-btn" onClick={() => setSearch('')}>Clear</button>
+            </div>
+          )}
+
+          <div className="side-scroll">
+            {loading ? (
+              <SkeletonRows count={4} />
+            ) : threads.length === 0 ? (
+              <p className="side-empty">
+                {search.trim()
+                  ? 'Nothing matches that search. Try a name, or a word from the conversation.'
+                  : showArchived
+                    ? 'Nothing archived yet. Conversations you archive move here and stay searchable.'
+                    : 'No conversations yet. Once a connection is accepted, it opens here.'}
+              </p>
+            ) : (
+              threads.map((t) => {
+                const on = t.other === activeWith;
+                return (
+                  <button
+                    key={t.other}
+                    type="button"
+                    onClick={() => setParams({ to: t.other })}
+                    className="thread-row"
+                    aria-current={on ? 'true' : undefined}
+                    data-unread={t.unread > 0 ? 'true' : undefined}
+                  >
+                    <Plate name={t.name} seed={t.other} size={40} />
+                    <span style={{ minWidth: 0 }}>
+                      <span className="thread-top">
+                        <span className="thread-name">{t.name}</span>
+                        <span className="meta num">{listTime(t.at)}</span>
+                      </span>
+                      {t.subtitle && <span className="meta" style={{ display: 'block' }}>{t.subtitle}</span>}
+                      <span className="thread-bottom">
+                        <span className="thread-preview">{t.preview}</span>
+                        <UnreadBadge count={t.unread} standalone />
+                      </span>
+                    </span>
+                  </button>
+                );
+              })
             )}
           </div>
+        </section>
 
-          {loading ? (
-            <SkeletonRows count={4} />
-          ) : threads.length === 0 ? (
-            <span className="field-hint" style={{ padding: '8px 4px 4px' }}>
-              {search.trim()
-                ? 'Nothing matches that search. Try a name, or a word from the conversation.'
-                : showArchived
-                  ? 'Nothing archived yet. Conversations you archive move here and stay searchable.'
-                  : 'No conversations yet. Once a connection is accepted, it opens here.'}
-            </span>
-          ) : (
-            threads.map((t) => {
-              const on = t.other === activeWith;
-              const [bg, fg] = authorAvatar(t.other);
-              return (
-                <button
-                  key={t.other}
-                  type="button"
-                  onClick={() => setParams({ to: t.other })}
-                  className="flex items-start gap-[10px] text-left"
-                  aria-current={on ? 'true' : undefined}
-                  style={{
-                    padding: '10px 12px', borderRadius: 10, cursor: 'pointer', border: 0, font: 'inherit',
-                    background: on ? 'var(--color-surface-2)' : 'transparent',
-                    boxShadow: on ? 'inset 3px 0 0 var(--color-accent)' : 'none',
-                  }}
-                >
-                  <span className="avatar avatar-md" style={{ background: bg, color: fg }}>
-                    {initialsOf(t.name)}
-                  </span>
-                  <span className="flex flex-col" style={{ minWidth: 0, gap: 1, flex: 1 }}>
-                    <span className="flex items-center gap-2">
-                      <span style={{ fontSize: 14, fontWeight: t.unread ? 700 : 600 }}>{t.name}</span>
-                      {t.unread > 0 && (
-                        <span style={{ marginLeft: 'auto' }}>
-                          <UnreadBadge count={t.unread} standalone />
-                        </span>
-                      )}
-                    </span>
-                    {t.subtitle && (
-                      <span style={{ fontSize: 11.5, color: 'var(--color-accent-700)' }}>{t.subtitle}</span>
-                    )}
-                    <span
-                      style={{
-                        fontSize: 12,
-                        color: t.unread ? 'var(--color-text)' : 'var(--text-subtle)',
-                        fontWeight: t.unread ? 600 : 400,
-                        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '100%',
-                      }}
-                    >
-                      {t.preview}
-                    </span>
-                  </span>
-                </button>
-              );
-            })
-          )}
-        </div>
-
-        <div className="card elev-sm msg-pane" style={{ padding: 18, gap: 12, minHeight: 0, overflow: 'hidden' }}>
+        <section className="duo-main msg-pane" aria-label={activeWith ? `Conversation with ${activeMeta?.name || activeWith}` : 'Conversation'}>
           {!activeWith ? (
-            <div className="empty" style={{ flex: 1, justifyContent: 'center', border: 0 }}>
-              <span className="empty-icon"><MessageCircle size={20} aria-hidden="true" /></span>
-              <p className="empty-title">{showArchived ? 'Nothing archived' : 'Pick a conversation'}</p>
-              <p className="empty-body">
-                {showArchived
-                  ? 'Conversations you archive move here and stay searchable.'
-                  : 'Choose one on the left. To start a new one, find someone in Explore and send a connection request first.'}
-              </p>
-              {!showArchived && (
-                <a href="/app/explore" className="btn btn-secondary no-underline" style={{ marginTop: 6 }}>Go to Explore</a>
-              )}
+            <div className="convo-log">
+              <div className="empty convo-blank">
+                <span className="empty-icon"><Icon as={MessageSquare} size={20} /></span>
+                <p className="empty-title">{showArchived ? 'Nothing archived' : 'Pick a conversation'}</p>
+                <p className="empty-body">
+                  {showArchived
+                    ? 'Conversations you archive move here and stay searchable.'
+                    : 'Choose one on the left. To start a new one, find someone in Explore and send a connection request first.'}
+                </p>
+                {!showArchived && (
+                  <a href="/app/explore" className="btn btn-secondary no-underline" style={{ marginTop: 6 }}>Go to Explore</a>
+                )}
+              </div>
             </div>
           ) : (
             <>
-              <div
-                className="flex items-center gap-3 flex-wrap"
-                style={{ borderBottom: '1px solid var(--color-divider)', paddingBottom: 10, minHeight: 44 }}
-              >
+              <header className="convo-head">
                 <button
                   type="button"
                   className="btn btn-quiet btn-sm show-mobile"
                   onClick={() => setParams({})}
                   aria-label="Back to conversations"
-                  style={{ paddingLeft: 6, paddingRight: 8 }}
+                  style={{ paddingInline: 6, marginLeft: -8 }}
                 >
-                  <ArrowLeft size={16} aria-hidden="true" /> Inbox
+                  <Icon as={ArrowLeft} size={16} /> Inbox
                 </button>
-                <div style={{ minWidth: 0 }}>
-                  <span style={{ fontSize: 16, fontWeight: 700 }}>{activeMeta?.name || activeWith}</span>
-                  {/* If a nickname is in use, their real name still shows here so
-                      it is never possible to forget who you are actually
-                      talking to. */}
-                  {activeMeta?.realName && activeMeta.realName !== activeMeta.name && (
-                    <div style={{ fontSize: 12, color: 'var(--text-subtle)' }}>
-                      {activeMeta.realName}
-                    </div>
-                  )}
-                  {noteFor(activeWith)?.notes && (
-                    <div
-                      style={{
-                        fontSize: 12, color: 'var(--text-muted)', marginTop: 4,
-                        maxWidth: 420, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                      }}
-                      title={noteFor(activeWith).notes}
-                    >
-                      {noteFor(activeWith).notes}
-                    </div>
-                  )}
+                <div className="convo-who">
+                  <Plate name={activeMeta?.name || activeWith} seed={activeWith} size={40} />
+                  <div>
+                    <h2 className="convo-name">
+                      <span>{activeMeta?.name || activeWith}</span>
+                      <VerifiedBadge verified={activePerson?.verified} />
+                    </h2>
+                    {/* If a nickname is in use, their real name still shows here so
+                        it is never possible to forget who you are actually
+                        talking to. */}
+                    {(usingNickname || activeLine) && (
+                      <div className="meta convo-sub">
+                        {[usingNickname ? activeMeta.realName : '', activeLine].filter(Boolean).join(' · ')}
+                      </div>
+                    )}
+                  </div>
                 </div>
                 {!activeSample && (
-                  <span className="flex gap-2 items-center flex-wrap" style={{ marginLeft: 'auto' }}>
+                  <span className="convo-tools">
                     <button
                       type="button"
-                      className="btn btn-secondary btn-sm"
+                      className="tool-btn"
                       onClick={() => setEditingContact(true)}
                       title="Add a private nickname and notes about this person. Only you can see them."
                     >
-                      {noteFor(activeWith) ? 'Edit notes' : 'Add notes'}
+                      <Icon as={NotebookPen} size={15} /> {activeNote ? 'Edit notes' : 'Add notes'}
                     </button>
                     <button
                       type="button"
-                      className="btn btn-secondary btn-sm"
+                      className="tool-btn"
                       onClick={toggleArchive}
                       disabled={archiveBusy}
                       title={isArchived
                         ? 'Move this conversation back to your inbox'
                         : 'Hide this from your inbox. The other person is not told, and nothing is deleted.'}
                     >
-                      {archiveBusy ? '…' : isArchived ? 'Unarchive' : 'Archive'}
+                      <Icon as={isArchived ? ArchiveRestore : Archive} size={15} />
+                      {archiveBusy ? 'Working…' : isArchived ? 'Unarchive' : 'Archive'}
                     </button>
                     <SafetyActions
                       targetEmail={activeWith}
@@ -480,95 +458,110 @@ export default function Messages() {
                     />
                   </span>
                 )}
-              </div>
+              </header>
+
+              {activeNote?.notes && (
+                <div className="convo-note" title={activeNote.notes}>
+                  <span>Your note</span>
+                  <span>{activeNote.notes}</span>
+                </div>
+              )}
 
               {/* role="log" + aria-live so a screen reader user is told when a
                   reply arrives. Messages stream in without a refresh, and
                   before this the arrival of a new message was completely
-                  silent — the thread had to be re-read manually to discover it. */}
+                  silent: the thread had to be re-read manually to discover it. */}
               <div
                 role="log"
                 aria-live="polite"
                 aria-relevant="additions"
                 aria-label="Conversation"
-                className="flex flex-col"
-                style={{ gap: 9, flex: 1, minHeight: 0, overflowY: 'auto', paddingRight: 4 }}
+                className="convo-log"
+                tabIndex={0}
               >
                 {activeSample ? (
                   activeSample.messages.map((m, i) => (
-                    <Bubble
+                    <Said
                       key={i}
                       mine={m.me}
                       meta={m.me ? <DeliveryTicks state="read" /> : null}
                     >
                       {m.body}
-                    </Bubble>
+                    </Said>
                   ))
                 ) : thread.length === 0 ? (
-                  <span style={{ fontSize: 13.5, color: 'var(--text-subtle)' }}>
-                    No messages yet. Be direct about what you need help with, people respond to that.
-                  </span>
+                  <div className="empty convo-blank">
+                    <p className="empty-title">No messages yet.</p>
+                    <p className="empty-body">Be direct about what you need help with. People respond to that.</p>
+                  </div>
                 ) : (
-                  thread.map((m) => {
+                  thread.map((m, i) => {
                     const mine = m.from_email === email;
                     const state = deliveryStateOf(m, receiptByMessage.get(m.id));
+                    const day = dayLabel(m.created_date);
+                    const newDay = i === 0 || day !== dayLabel(thread[i - 1].created_date);
                     return (
-                      <Bubble
-                        key={m.id}
-                        mine={mine}
-                        meta={
-                          <>
-                            <span>{clockTime(m.created_date)}</span>
-                            {mine && <DeliveryTicks state={state} />}
-                          </>
-                        }
-                      >
-                        {m.body}
-                      </Bubble>
+                      <React.Fragment key={m.id}>
+                        {newDay && day && <div className="day-sep">{day}</div>}
+                        <Said
+                          mine={mine}
+                          state={mine ? state : undefined}
+                          meta={
+                            <>
+                              <span className="num">{clockTime(m.created_date)}</span>
+                              {mine && <DeliveryTicks state={state} />}
+                            </>
+                          }
+                        >
+                          {m.body}
+                        </Said>
+                      </React.Fragment>
                     );
                   })
                 )}
                 <div ref={endRef} />
               </div>
 
-              {sendError && (
-                <span className="notice notice-warning" role="status">{sendError}</span>
-              )}
+              <div className="convo-compose">
+                {sendError && (
+                  <span className="notice notice-warning" role="status">{sendError}</span>
+                )}
 
-              {activeSample ? (
-                <div
-                  style={{
-                    background: 'var(--color-surface-2)', borderRadius: 18, padding: '12px 16px',
-                    fontSize: 12.5, color: 'var(--text-muted)', lineHeight: 1.5,
-                  }}
-                >
-                  This is a sample conversation showing how mentoring works on Pathways. Find a real
-                  member on Explore to start your own.
-                </div>
-              ) : activeWith.startsWith('deleted:') ? (
-                <p className="notice notice-info" role="status">This account has been deleted. You can still read this conversation.</p>
-              ) : (
-                <form onSubmit={send} className="flex gap-2 items-end">
-                  <textarea
-                    className="input"
-                    aria-label="Write a message"
-                    maxLength={4000}
-                    style={{ minHeight: 44, flex: 1 }}
-                    value={draft}
-                    onChange={(e) => setDraft(e.target.value)}
-                    placeholder="Write a message…"
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(e); }
-                    }}
-                  />
-                  <button type="submit" className="btn btn-primary" disabled={sending || !draft.trim()} style={{ minHeight: 44 }}>
-                    <Send size={15} aria-hidden="true" /> Send
-                  </button>
-                </form>
-              )}
+                {activeSample ? (
+                  <p className="notice">
+                    This is a sample conversation showing how mentoring works on Pathways. Find a real
+                    member on Explore to start your own.
+                  </p>
+                ) : activeWith.startsWith('deleted:') ? (
+                  <p className="notice notice-info" role="status">This account has been deleted. You can still read this conversation.</p>
+                ) : (
+                  <>
+                    <form onSubmit={send} className="compose-row">
+                      <textarea
+                        className="input"
+                        aria-label="Write a message"
+                        maxLength={4000}
+                        rows={1}
+                        value={draft}
+                        onChange={(e) => setDraft(e.target.value)}
+                        placeholder="Write a message"
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(e); }
+                        }}
+                      />
+                      <button type="submit" className="btn btn-primary btn-go" disabled={sending || !draft.trim()}>
+                        Send
+                      </button>
+                    </form>
+                    <p className="compose-foot">
+                      Screened before delivery. Contact details, links, and requests to meet up are blocked.
+                    </p>
+                  </>
+                )}
+              </div>
             </>
           )}
-        </div>
+        </section>
       </div>
 
       {activeWith && (

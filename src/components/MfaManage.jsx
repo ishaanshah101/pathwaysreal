@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Loader2, Smartphone, MessageSquare } from "lucide-react";
+import { Smartphone, MessageSquare } from "lucide-react";
+import Icon from "@/components/kit/Icon";
+import Sign from "@/components/kit/Sign";
 import MfaMethodSetup from "@/components/MfaMethodSetup";
 import { CodeField, MfaHeader, MfaNotice, ResendLine, useCooldown } from "@/components/MfaParts";
 
@@ -39,37 +40,49 @@ export default function MfaManage({ session, returnTo }) {
       {view.name === "setup" && <MfaMethodSetup session={session} method={view.method} signInPath="/mfa" onDone={back} onBack={() => setView({ name: "list" })} />}
       {view.name === "disable" && <Disable session={session} method={view.method} onDone={back} onBack={() => setView({ name: "list" })} />}
       {view.name === "list" && (
-        <div className="space-y-4">
+        <div className="auth-stack">
           <MfaNotice error={error} signInPath="/mfa" />
-          {!status && !error && <Loader2 className="mx-auto w-6 h-6 animate-spin text-muted-foreground" />}
-          {status && METHODS.map(({ id, name, icon: Icon, description }) => {
-            const enrolled = status.methods.includes(id);
-            return (
-              <div key={id} className="flex flex-wrap items-center gap-3 rounded-lg border border-border p-4">
-                <Icon className="w-5 h-5 text-muted-foreground shrink-0" aria-hidden="true" />
-                <div className="flex-1 min-w-[10rem]">
-                  <p className="font-medium">{name}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {enrolled ? (id === "sms" && status.phone_hint ? `Enabled · ${status.phone_hint}` : "Enabled") : description}
-                  </p>
-                </div>
-                {/* On a narrow screen the actions drop below the method instead of squeezing it. */}
-                <div className="flex gap-2 ml-auto">
-                  <Button size="sm" variant="outline" onClick={() => setView({ name: "setup", method: id })}>
-                    {enrolled ? "Replace" : "Enable"}
-                  </Button>
-                  {enrolled && (
-                    <Button size="sm" variant="ghost" onClick={() => setView({ name: "disable", method: id })}>
-                      Disable
-                    </Button>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-          <Button className="w-full h-12 font-medium" onClick={() => { window.location.href = returnTo; }}>
+          {!status && !error && (
+            <div className="auth-wait" role="status">
+              <span className="lane-load" aria-hidden="true" />
+              Loading your methods…
+            </div>
+          )}
+          {status && (
+            <ul className="mfa-methods">
+              {METHODS.map(({ id, name, icon, description }) => {
+                const enrolled = status.methods.includes(id);
+                return (
+                  <li key={id} className="mfa-method">
+                    <Icon as={icon} size={22} />
+                    <div style={{ minWidth: 0 }}>
+                      <span className="mfa-method-name">
+                        {name}
+                        {enrolled && <Sign color="green">On</Sign>}
+                      </span>
+                      <p>
+                        {enrolled ? (id === "sms" && status.phone_hint ? `Enabled · ${status.phone_hint}` : "Enabled") : description}
+                      </p>
+                    </div>
+                    {/* On a narrow screen the actions drop below the method instead of squeezing it. */}
+                    <div className="mfa-method-actions">
+                      <button type="button" className="btn btn-secondary btn-sm" onClick={() => setView({ name: "setup", method: id })}>
+                        {enrolled ? "Replace" : "Enable"}
+                      </button>
+                      {enrolled && (
+                        <button type="button" className="btn btn-quiet btn-sm" onClick={() => setView({ name: "disable", method: id })}>
+                          Disable
+                        </button>
+                      )}
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+          <button type="button" className="btn btn-primary btn-lg btn-block" onClick={() => { window.location.href = returnTo; }}>
             Done
-          </Button>
+          </button>
         </div>
       )}
     </div>
@@ -111,8 +124,8 @@ function Disable({ session, method, onDone, onBack }) {
   };
 
   return (
-    <div className="space-y-4">
-      <h2 className="text-lg font-semibold text-center">
+    <div className="auth-stack">
+      <h2 className="auth-step-title">
         {method === "totp" ? "Enter a code from your authenticator app" : "Verify with a code sent to your phone"}
       </h2>
       <MfaNotice error={error} signInPath="/mfa" />
@@ -122,17 +135,17 @@ function Disable({ session, method, onDone, onBack }) {
           {method === "sms" && <ResendLine cooldown={cooldown} disabled={busy} onResend={sendCode} />}
         </>
       ) : (
-        <Button className="w-full h-11" disabled={busy} onClick={sendCode}>
-          {busy && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-          Send Code
-        </Button>
+        <button type="button" className="btn btn-secondary btn-block" disabled={busy} onClick={sendCode}>
+          {busy && <span className="lane-load" aria-hidden="true" />}
+          Send code
+        </button>
       )}
-      <div className="grid grid-cols-2 gap-3 pt-2">
-        <Button variant="outline" className="h-11" disabled={busy} onClick={onBack}>Cancel</Button>
-        <Button className="h-11" disabled={busy || !codeSent || code.length < 6} onClick={() => confirm()}>
-          {busy && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-          Verify & Disable
-        </Button>
+      <div className="auth-actions">
+        <button type="button" className="btn btn-secondary" disabled={busy} onClick={onBack}>Cancel</button>
+        <button type="button" className="btn btn-danger" disabled={busy || !codeSent || code.length < 6} onClick={() => confirm()}>
+          {busy && <span className="lane-load" aria-hidden="true" />}
+          Verify and disable
+        </button>
       </div>
     </div>
   );

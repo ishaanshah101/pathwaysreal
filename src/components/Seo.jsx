@@ -27,7 +27,7 @@ function upsertCanonical(href) {
 // A single-page app keeps one <title> for every route unless something updates
 // it. Search and AI crawlers that do render JS read the updated head, and it
 // also fixes the browser tab and shared-link previews per page.
-export default function Seo({ title, description, path, noindex = false }) {
+export default function Seo({ title, description = undefined, path = undefined, noindex = false }) {
   const active = useContext(TabActivityContext);
   useEffect(() => {
     if (!active) return;

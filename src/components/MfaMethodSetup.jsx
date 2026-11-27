@@ -1,7 +1,4 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Loader2 } from "lucide-react";
 import {
   CodeField, CopyKeyButton, INVALID_PHONE, MfaNotice, PhoneField, ResendLine,
   defaultDialCode, isPlausiblePhone, isTouchDevice, useCooldown,
@@ -103,41 +100,48 @@ export default function MfaMethodSetup({ session, method, onDone, onBack, signIn
   };
 
   const actions = (secondary, onSecondary, primary, onPrimary, disabled = false) => (
-    <div className="grid grid-cols-2 gap-3 pt-2">
-      <Button variant="outline" className="h-11" disabled={busy} onClick={onSecondary}>{secondary}</Button>
-      <Button className="h-11" disabled={busy || disabled} onClick={onPrimary}>
-        {busy && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+    <div className="auth-actions">
+      <button type="button" className="btn btn-secondary" disabled={busy} onClick={onSecondary}>{secondary}</button>
+      <button type="button" className="btn btn-primary" disabled={busy || disabled} onClick={onPrimary}>
+        {busy && <span className="lane-load" aria-hidden="true" />}
         {primary}
-      </Button>
+      </button>
     </div>
   );
 
   if (method === "totp" && step === "start") {
     return (
-      <div className="space-y-4">
-        <h2 className="text-lg font-semibold text-center">Set up your authenticator app</h2>
+      <div className="auth-stack">
+        <h2 className="auth-step-title">Set up your authenticator app</h2>
         <MfaNotice error={error} signInPath={signInPath} />
-        {!setup && !error && <Loader2 className="mx-auto w-6 h-6 animate-spin text-muted-foreground" />}
+        {!setup && !error && (
+          <div className="auth-wait" role="status">
+            <span className="lane-load" aria-hidden="true" />
+            Making your setup key…
+          </div>
+        )}
         {setup && (isTouchDevice() ? (
-          <div className="space-y-3 text-sm">
-            <ol className="list-decimal pl-5 space-y-1 text-muted-foreground">
+          <div className="auth-group">
+            <ol className="auth-steps">
               <li>Copy the key below.</li>
               <li>In your authenticator app, add an account and paste the key.</li>
               <li>Come back here and enter the code the app shows.</li>
             </ol>
-            <code className="block rounded-lg border border-border px-3 py-3 text-center font-mono font-medium tracking-wider break-all">
+            <code className="keycode">
               {setup.secret_formatted}
             </code>
             <CopyKeyButton text={setup.secret_formatted} wide />
           </div>
         ) : (
-          <div className="flex flex-col items-center gap-2 text-sm">
-            <p className="font-medium">Scan the QR code with your authenticator app</p>
-            <img src={setup.qr_code} alt="QR code for authenticator app setup" className="w-36 h-36 rounded-lg border border-border bg-white p-1" />
-            <p className="text-muted-foreground mt-3">Can't scan the code? Enter it manually:</p>
-            <div className="flex flex-wrap items-center justify-center gap-1">
-              <code className="font-mono font-medium tracking-wider break-all">{setup.secret_formatted}</code>
-              <CopyKeyButton text={setup.secret_formatted} />
+          <div className="qr-row">
+            <img src={setup.qr_code} alt="QR code for authenticator app setup" className="qr" />
+            <div className="auth-group">
+              <p className="auth-note"><b>Scan the QR code with your authenticator app</b></p>
+              <p className="auth-note">Can't scan the code? Enter it manually:</p>
+              <div className="key-row">
+                <code className="keycode">{setup.secret_formatted}</code>
+                <CopyKeyButton text={setup.secret_formatted} />
+              </div>
             </div>
           </div>
         ))}
@@ -149,11 +153,13 @@ export default function MfaMethodSetup({ session, method, onDone, onBack, signIn
   if (method === "sms" && step === "start") {
     const phoneError = fieldError ?? (error && !error.mustSignInAgain ? error.message : null);
     return (
-      <div className="space-y-4">
-        <h2 className="text-lg font-semibold text-center">Enter your phone number</h2>
-        <p className="text-sm text-muted-foreground text-center">A verification code will be sent to this number to confirm it's yours.</p>
-        <div className="space-y-1.5">
-          <Label htmlFor="mfa-phone">Phone number</Label>
+      <div className="auth-stack">
+        <div className="auth-group" style={{ gap: 6 }}>
+          <h2 className="auth-step-title">Enter your phone number</h2>
+          <p className="auth-note">A verification code will be sent to this number to confirm it's yours.</p>
+        </div>
+        <div className="field">
+          <label htmlFor="mfa-phone">Phone number</label>
           <PhoneField
             countryCode={countryCode} onCountryCodeChange={setCountryCode}
             phoneNumber={phoneNumber} onPhoneNumberChange={(value) => { setPhoneNumber(value); setFieldError(null); }}
@@ -161,23 +167,25 @@ export default function MfaMethodSetup({ session, method, onDone, onBack, signIn
           />
         </div>
         {error?.mustSignInAgain && <MfaNotice error={error} signInPath={signInPath} />}
-        {actions("Cancel", onBack, "Send Code", sendCode, phoneNumber.length < 4)}
+        {actions("Cancel", onBack, "Send code", sendCode, phoneNumber.length < 4)}
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
-      <h2 className="text-lg font-semibold text-center">
-        {method === "totp" ? "Enter a code from your authenticator app" : "Verify your phone number"}
-      </h2>
-      {method === "sms" && <p className="text-sm text-muted-foreground text-center">A 6-digit code sent to {countryCode} {phoneNumber}</p>}
-      <div className="flex flex-col items-center gap-2">
+    <div className="auth-stack">
+      <div className="auth-group" style={{ gap: 6 }}>
+        <h2 className="auth-step-title">
+          {method === "totp" ? "Enter a code from your authenticator app" : "Verify your phone number"}
+        </h2>
+        {method === "sms" && <p className="auth-note">A 6-digit code sent to {countryCode} {phoneNumber}</p>}
+      </div>
+      <div className="auth-group" style={{ gap: 8 }}>
         <CodeField id="mfa-setup-code" value={code} onChange={(value) => { setCode(value); setFieldError(null); }}
           onComplete={confirm} hasError={Boolean(fieldError)} />
-        {fieldError && <p className="text-sm text-destructive">{fieldError}</p>}
+        {fieldError && <span className="field-error" style={{ marginTop: 0 }}>{fieldError}</span>}
         {method === "totp"
-          ? <p className="text-xs text-muted-foreground">Codes refresh every 30 seconds.</p>
+          ? <span className="field-hint" style={{ marginTop: 0 }}>Codes refresh every 30 seconds.</span>
           : <ResendLine cooldown={cooldown} onResend={resend} error={resendError} />}
       </div>
       <MfaNotice error={error} signInPath={signInPath} />

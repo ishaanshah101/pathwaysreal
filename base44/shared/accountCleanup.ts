@@ -6,6 +6,22 @@ export async function deleteOwned(table, query) {
   }
 }
 
+// For data types added after launch (the planner, helpful marks). If the type
+// has not been created on this app yet there is nothing of the member's to
+// remove, and that must not stop the rest of the deletion. Any other failure
+// still stops it, the same as deleteOwned.
+export async function deleteOwnedIfPresent(table, query) {
+  if (!table) return;
+  try {
+    await deleteOwned(table, query);
+  } catch (error) {
+    const status = error?.status ?? error?.response?.status;
+    const text = String(error?.message || error?.response?.data?.message || '');
+    if (status === 404 || /not found|does not exist|unknown entity|no such entity/i.test(text)) return;
+    throw error;
+  }
+}
+
 export async function anonymizeOwned(table, query, patch) {
   while (true) {
     await table.updateMany(query, { $set: patch });

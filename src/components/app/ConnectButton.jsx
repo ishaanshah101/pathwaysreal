@@ -18,7 +18,6 @@ export default function ConnectButton({
   connection,
   busy = false,
   onConnect,
-  size = 13,
 }) {
   const [confirming, setConfirming] = useState(false);
   const [error, setError] = useState('');
@@ -42,8 +41,7 @@ export default function ConnectButton({
     return (
       <Link
         to={`/app/messages?to=${encodeURIComponent(targetEmail)}`}
-        className="btn btn-secondary btn-sm no-underline"
-        style={{ fontSize: size }}
+        className="btn btn-secondary btn-sm"
       >
         Message {first}
       </Link>
@@ -54,7 +52,7 @@ export default function ConnectButton({
   // and the accept and decline controls sit together.
   if (status === 'pending' && incoming) {
     return (
-      <Link to="/app/requests" className="btn btn-primary btn-sm no-underline" style={{ fontSize: size }}>
+      <Link to="/app/requests" className="btn btn-sun btn-sm">
         Answer their request
       </Link>
     );
@@ -62,7 +60,7 @@ export default function ConnectButton({
 
   if (status === 'pending') {
     return (
-      <span className="badge badge-neutral" style={{ minHeight: 32, padding: '0 12px', fontSize: size }}>
+      <span className="badge badge-neutral" style={{ minHeight: 34, padding: '0 10px' }}>
         Request sent
       </span>
     );
@@ -70,9 +68,7 @@ export default function ConnectButton({
 
   if (status === 'declined') {
     return (
-      <span style={{ fontSize: 12.5, color: 'var(--text-subtle)' }}>
-        Not connected
-      </span>
+      <span className="meta">Not connected</span>
     );
   }
 
@@ -81,7 +77,6 @@ export default function ConnectButton({
       <button
         type="button"
         className="btn btn-primary btn-sm"
-        style={{ fontSize: size }}
         disabled={busy}
         onClick={() => { setError(''); setConfirming(true); }}
       >
@@ -89,20 +84,20 @@ export default function ConnectButton({
       </button>
 
       <Dialog open={confirming} onOpenChange={(o) => { if (!o) { setConfirming(false); setError(''); } }}>
-        <DialogContent style={{ background: 'var(--color-surface)', borderRadius: 16, maxWidth: 440 }}>
+        <DialogContent style={{ maxWidth: 460 }}>
           <DialogHeader>
-            <DialogTitle style={{ fontFamily: 'var(--font-heading)', fontWeight: 400, fontSize: 24 }}>
+            <DialogTitle>
               Connect with {targetName || 'them'}?
             </DialogTitle>
           </DialogHeader>
 
           <div className="flex flex-col" style={{ gap: 14 }}>
-            <p style={{ fontSize: 14, lineHeight: 1.6, margin: 0, color: 'var(--color-neutral-800)' }}>
+            <p style={{ fontSize: 16, lineHeight: 1.55, margin: 0, color: 'var(--ink)' }}>
               We will send {first} a request. They can accept, decline, or look at your profile
               first. You will be able to message each other once they accept, and you will get a
               notification when they do.
             </p>
-            <p style={{ fontSize: 13, lineHeight: 1.6, margin: 0, color: 'var(--text-muted)' }}>
+            <p style={{ fontSize: 14.5, lineHeight: 1.5, margin: 0, color: 'var(--ink-2)' }}>
               They are not told anything about you beyond what is already on your profile.
             </p>
 

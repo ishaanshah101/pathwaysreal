@@ -85,17 +85,17 @@ export default async function (req: Request): Promise<Response> {
     ];
 
     const html = [
-      `<div style="font-family:Figtree,Arial,sans-serif;color:#201e1d;max-width:560px;margin:0 auto">`,
-      `<h1 style="font-size:20px;color:#b2622d;margin:0 0 12px">New safety report: ${escapeHtml(reason)}</h1>`,
+      `<div style="font-family:'Trebuchet MS',Verdana,Arial,sans-serif;color:#232732;max-width:560px;margin:0 auto;padding:22px 24px;background:#fffdf6;border-left:2px solid #e79b98">`,
+      `<h1 style="font-size:20px;color:#c2362b;margin:0 0 12px">New safety report: ${escapeHtml(reason)}</h1>`,
       `<table style="font-size:14.5px;line-height:1.6;border-collapse:collapse">`,
-      `<tr><td style="padding-right:12px;color:#82796a">Reported member</td><td><b>${escapeHtml(report.reported_email || 'unknown')}</b></td></tr>`,
-      `<tr><td style="padding-right:12px;color:#82796a">Filed by</td><td>${escapeHtml(report.reporter_email || 'unknown')}</td></tr>`,
-      `<tr><td style="padding-right:12px;color:#82796a">Where</td><td>${escapeHtml(report.context_type || 'profile')}</td></tr>`,
-      `<tr><td style="padding-right:12px;color:#82796a">Filed at</td><td>${escapeHtml(filedAt)}</td></tr>`,
+      `<tr><td style="padding-right:12px;color:#6b6e78">Reported member</td><td><b>${escapeHtml(report.reported_email || 'unknown')}</b></td></tr>`,
+      `<tr><td style="padding-right:12px;color:#6b6e78">Filed by</td><td>${escapeHtml(report.reporter_email || 'unknown')}</td></tr>`,
+      `<tr><td style="padding-right:12px;color:#6b6e78">Where</td><td>${escapeHtml(report.context_type || 'profile')}</td></tr>`,
+      `<tr><td style="padding-right:12px;color:#6b6e78">Filed at</td><td>${escapeHtml(filedAt)}</td></tr>`,
       `</table>`,
       `<p style="font-size:14.5px;line-height:1.6;margin-top:16px"><b>What they wrote</b><br/>${escapeHtml(report.details || '(no extra detail given)')}</p>`,
-      `<p style="font-size:14.5px;line-height:1.6"><a href="${QUEUE_URL}" style="color:#b2622d"><b>Open the moderation queue</b></a></p>`,
-      `<p style="font-size:12.5px;color:#82796a;margin-top:22px">Sent automatically by Pathways because a member filed a report.</p>`,
+      `<p style="font-size:14.5px;line-height:1.6"><a href="${QUEUE_URL}" style="color:#24548f"><b>Open the moderation queue</b></a></p>`,
+      `<p style="font-size:12.5px;color:#6b6e78;margin-top:22px">Sent automatically by Pathways because a member filed a report.</p>`,
       `</div>`,
     ].join('');
 

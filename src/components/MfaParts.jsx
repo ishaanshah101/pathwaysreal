@@ -1,12 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Check, ChevronsUpDown, Copy, ShieldCheck } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Check, ChevronsUpDown, Copy } from "lucide-react";
+import { AuthFrame, CodeBoxes } from "@/components/AuthLayout";
+import Icon from "@/components/kit/Icon";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
-import { Input } from "@/components/ui/input";
-import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
-import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
 import { loadSignInOptions } from "@/lib/authMfaFlow";
 import { safeReturnTo } from "@/lib/authReturnTo";
 
@@ -24,26 +21,22 @@ export function useAppInfo() {
   return info;
 }
 
-// A whole page holding one MFA card. MfaFlow and MfaManage are card content, so a page that
-// shows them returns <MfaScreen> in place of its own layout instead of nesting them in its card.
+// A whole page holding one MFA step, in the same frame as the other sign-in pages. MfaFlow and
+// MfaManage are that page's content, so a page that shows them returns <MfaScreen> in place of
+// its own layout instead of nesting them inside another one.
 export function MfaScreen({ children }) {
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4 py-8">
-      <div className="w-full max-w-md bg-card rounded-2xl shadow-sm border border-border p-8">{children}</div>
-    </div>
-  );
+  return <AuthFrame>{children}</AuthFrame>;
 }
 
-// An icon, a title and a description, then the step's controls. A title that waits for the app's
-// name is null until it loads, so the right text appears once instead of replacing a placeholder.
+// A line of small print, a title and a description, then the step's controls. A title that waits
+// for the app's name is null until it loads, so the right text appears once instead of replacing
+// a placeholder; the min-height holds its line open meanwhile.
 export function MfaHeader({ title, description }) {
   return (
-    <div className="flex flex-col items-center text-center mb-6">
-      <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-primary mb-4">
-        <ShieldCheck className="w-7 h-7 text-primary-foreground" aria-hidden="true" />
-      </div>
-      <h1 className="text-2xl font-bold tracking-tight text-foreground min-h-[2rem]">{title}</h1>
-      {description && <p className="text-muted-foreground mt-2">{description}</p>}
+    <div className="auth-head">
+      <span className="kicker kicker-sun">Two-step sign-in</span>
+      <h1 className="auth-title auth-title-sm" style={{ minHeight: "1em" }}>{title}</h1>
+      {description && <p className="auth-sub">{description}</p>}
     </div>
   );
 }
@@ -52,17 +45,11 @@ export function MfaHeader({ title, description }) {
 // included, and the Enter key both call onComplete with the code as it stands.
 export function CodeField({ id, label = "Enter the 6-digit code", value, onChange, onComplete, hasError = false }) {
   return (
-    <div className="space-y-2">
-      <Label htmlFor={id} className="block text-center font-normal text-muted-foreground">{label}</Label>
-      <InputOTP id={id} maxLength={6} value={value} autoFocus autoComplete="one-time-code" containerClassName="justify-center"
+    <div className="code-field">
+      <label htmlFor={id}>{label}</label>
+      <CodeBoxes id={id} value={value} autoFocus autoComplete="one-time-code" invalid={hasError}
         onChange={(next) => { onChange(next); if (next.length === 6) onComplete?.(next); }}
-        onKeyDown={(e) => { if (e.key === "Enter" && onComplete) { e.preventDefault(); onComplete(value); } }}>
-        <InputOTPGroup>
-          {[0, 1, 2, 3, 4, 5].map((index) => (
-            <InputOTPSlot key={index} index={index} className={hasError ? "border-destructive" : undefined} />
-          ))}
-        </InputOTPGroup>
-      </InputOTP>
+        onKeyDown={(e) => { if (e.key === "Enter" && onComplete) { e.preventDefault(); onComplete(value); } }} />
     </div>
   );
 }
@@ -70,18 +57,18 @@ export function CodeField({ id, label = "Enter the 6-digit code", value, onChang
 // "Didn't receive a code? Resend", counting down while a resend isn't allowed yet.
 export function ResendLine({ cooldown, disabled, onResend, error }) {
   return (
-    <div className="space-y-1 text-center">
-      <p className="text-sm text-muted-foreground">
+    <div className="auth-group" style={{ gap: 4 }}>
+      <p className="auth-note">
         Didn't receive a code?{" "}
         {cooldown > 0 ? (
-          <span>Resend in {cooldown}s</span>
+          <span className="num">Resend in {cooldown}s</span>
         ) : (
-          <button type="button" disabled={disabled} onClick={onResend} className="font-semibold text-foreground hover:underline disabled:opacity-50">
+          <button type="button" disabled={disabled} onClick={onResend} className="link-btn" style={{ fontWeight: 800, color: "var(--ink)", opacity: disabled ? 0.5 : 1 }}>
             Resend
           </button>
         )}
       </p>
-      {error && <p className="text-sm text-destructive">{error}</p>}
+      {error && <span className="field-error" style={{ marginTop: 0 }}>{error}</span>}
     </div>
   );
 }
@@ -133,22 +120,21 @@ function DialCodePicker({ value, onChange }) {
   return (
     <Popover open={open} onOpenChange={handleOpenChange} modal>
       <PopoverTrigger asChild>
-        <Button type="button" variant="outline" role="combobox" aria-expanded={open} aria-label="Country code"
-          className="h-10 w-[100px] justify-between px-2.5 font-normal shadow-none">
+        <button type="button" role="combobox" aria-expanded={open} aria-label="Country code" className="input dial-trigger num">
           {value}
-          <ChevronsUpDown className="ml-1 h-3.5 w-3.5 shrink-0 opacity-50" aria-hidden="true" />
-        </Button>
+          <Icon as={ChevronsUpDown} size={15} style={{ color: "var(--ink-3)", flex: "none" }} />
+        </button>
       </PopoverTrigger>
-      <PopoverContent className="w-[140px] p-0" align="start" side="bottom" avoidCollisions={false}>
+      <PopoverContent className="pw-pop dial-pop" align="start" side="bottom" avoidCollisions={false}>
         <Command filter={(item, text) => (matchesSearch(item, text) ? 1 : 0)}>
           <CommandInput placeholder="Search..." className="h-9" onValueChange={(text) => { search.current = text; }} />
-          <CommandList>
+          <CommandList className="dial-list">
             <CommandEmpty>No match</CommandEmpty>
             <CommandGroup>
               {DIAL_CODES.map((code) => (
-                <CommandItem key={code} value={code} onSelect={() => { onChange(`+${code}`); search.current = ""; setOpen(false); }}>
+                <CommandItem key={code} value={code} className="dial-item num" onSelect={() => { onChange(`+${code}`); search.current = ""; setOpen(false); }}>
                   +{code}
-                  <Check className={cn("ml-auto h-3.5 w-3.5", value === `+${code}` ? "opacity-100" : "opacity-0")} aria-hidden="true" />
+                  <Icon as={Check} size={15} style={{ marginLeft: "auto", opacity: value === `+${code}` ? 1 : 0 }} />
                 </CommandItem>
               ))}
             </CommandGroup>
@@ -166,18 +152,18 @@ export function PhoneField({ countryCode, onCountryCodeChange, phoneNumber, onPh
   const invalid = touched && phoneNumber.length >= 4 && !isPlausiblePhone(`${countryCode}${phoneNumber}`);
   const message = error ?? (invalid ? INVALID_PHONE : null);
   return (
-    <div className="space-y-1.5">
-      <div className="flex gap-2">
+    <div>
+      <div className="phone-row">
         <DialCodePicker value={countryCode} onChange={onCountryCodeChange} />
-        <Input id="mfa-phone" type="tel" autoComplete="tel-national" autoFocus value={phoneNumber} maxLength={15}
+        <input id="mfa-phone" type="tel" autoComplete="tel-national" autoFocus value={phoneNumber} maxLength={15}
           placeholder="5551234567" aria-invalid={Boolean(message)}
           onChange={(e) => { onPhoneNumberChange(e.target.value.replace(/\D/g, "")); setTouched(true); }}
           onKeyDown={(e) => { if (e.key === "Enter" && onSubmit) { e.preventDefault(); onSubmit(); } }}
-          className={cn("h-10 flex-1", message && "border-destructive focus-visible:ring-destructive")} />
+          className="input num" />
       </div>
       {message
-        ? <p className="text-sm text-destructive">{message}</p>
-        : <p className="text-sm text-muted-foreground">Standard message and data rates may apply.</p>}
+        ? <span className="field-error">{message}</span>
+        : <span className="field-hint">Standard message and data rates may apply.</span>}
     </div>
   );
 }
@@ -192,15 +178,14 @@ export function CopyKeyButton({ text, wide = false }) {
   };
   if (wide) {
     return (
-      <Button type="button" variant="outline" className="w-full h-11" onClick={copy}>
+      <button type="button" className="btn btn-secondary btn-block" onClick={copy}>
         {copied ? "Copied" : "Copy key"}
-      </Button>
+      </button>
     );
   }
   return (
-    <button type="button" onClick={copy} title="Copy to clipboard" aria-label="Copy to clipboard"
-      className="inline-flex items-center justify-center rounded-md p-2 text-muted-foreground hover:text-foreground hover:bg-muted">
-      {copied ? <Check className="w-4 h-4" aria-hidden="true" /> : <Copy className="w-4 h-4" aria-hidden="true" />}
+    <button type="button" onClick={copy} title="Copy to clipboard" aria-label="Copy to clipboard" className="btn btn-icon">
+      <Icon as={copied ? Check : Copy} size={17} />
     </button>
   );
 }
@@ -212,11 +197,11 @@ export function MfaNotice({ error, signInPath = "/login" }) {
   if (!error) return null;
   const returnTo = safeReturnTo();
   return (
-    <div role="alert" className="mb-4 p-3 rounded-lg bg-destructive/10 text-destructive text-sm text-center">
+    <div role="alert" className="notice notice-error">
       {error.mustSignInAgain ? (
         <>
           Your sign-in expired.{" "}
-          <a href={signInPath + (returnTo !== "/" ? "?returnTo=" + encodeURIComponent(returnTo) : "")} className="font-medium underline">
+          <a href={signInPath + (returnTo !== "/" ? "?returnTo=" + encodeURIComponent(returnTo) : "")} style={{ fontWeight: 800 }}>
             Sign in again
           </a>
         </>
@@ -227,8 +212,8 @@ export function MfaNotice({ error, signInPath = "/login" }) {
 
 export function RememberDevice({ checked, onChange }) {
   return (
-    <label className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-      <input type="checkbox" className="h-4 w-4 accent-primary" checked={checked} onChange={(e) => onChange(e.target.checked)} />
+    <label className="check-line">
+      <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} />
       Remember this device for 30 days
     </label>
   );

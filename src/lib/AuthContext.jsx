@@ -124,6 +124,14 @@ export const AuthProvider = ({ children }) => {
     }
     // Drop in-memory data so a later sign-in cannot render the previous account.
     queryClientInstance.clear();
+    // And what was kept on this device for offline use. A plan is private, and
+    // a saved list or a cached feed belongs to whoever was signed in, so none
+    // of it should be waiting for the next person to open this browser.
+    try {
+      Object.keys(window.localStorage)
+        .filter((key) => key.startsWith('pathways.plan.') || key === 'pathways.savedPosts' || key === 'pathways.feedCache')
+        .forEach((key) => window.localStorage.removeItem(key));
+    } catch { /* storage unavailable; nothing was cached */ }
 
     if (shouldRedirect) {
       // Hard-redirect to the Phase 1 home page WITHOUT first clearing the

@@ -60,79 +60,83 @@ export default function AskSage() {
   };
 
   return (
-    <section id="sage-free-sample" className="page-section" style={{ paddingBottom: 'clamp(40px,6vh,72px)' }}>
-      <span className="card-kicker" style={{ display: 'block', marginBottom: 12 }}>Try it</span>
-      <h2 style={{ fontSize: 'clamp(24px,2.8vw,32px)', margin: '0 0 10px' }}>Ask Sage one question, free</h2>
-      <p style={{ maxWidth: '52ch', color: 'var(--color-neutral-800)', marginBottom: 20, fontSize: 15.5, lineHeight: 1.6 }}>
-        {native
-          ? 'Ask anything about applications, majors, essays, or scholarships. Sign in for one free question per account each day.'
-          : 'Ask anything about applications, majors, essays, or scholarships. Sign in for one free question per account each day, then it is $5 a month for as many as you like.'}
-      </p>
-      <div className="card elev-sm" style={{ padding: 24, gap: 14, maxWidth: 720 }}>
-        <div className="field">
-          <label htmlFor="sage-grade">Your grade</label>
-          <FieldSelect
-            id="sage-grade"
-            value={grade}
-            disabled={spent || isLoadingAuth || !isAuthenticated}
-            onValueChange={setGrade}
-            options={['9th grade', '10th grade', '11th grade', '12th grade', 'College student'].map((g) => [g, g])}
-          />
-        </div>
-        <div className="field">
-          <label htmlFor="sage-q">Your question</label>
-          <textarea
-            id="sage-q"
-            className="input"
-            value={question}
-            disabled={spent || isLoadingAuth || !isAuthenticated}
-            onChange={(e) => setQuestion(e.target.value)}
-            placeholder="How do I pick which colleges to apply to?"
-          />
+    <section id="sage-free-sample" className="band band-sheet">
+      <div className="wrap top-split" style={{ alignItems: 'start' }}>
+        <div>
+          <span className="kicker">Try it</span>
+          <h2 className="title-2">Ask Sage one question, free</h2>
+          <p className="lede" style={{ marginTop: 16 }}>
+            {native
+              ? 'Ask anything about applications, majors, essays, or scholarships. Sign in for one free question per account each day.'
+              : 'Ask anything about applications, majors, essays, or scholarships. Sign in for one free question per account each day, then it is $5 a month for as many as you like.'}
+          </p>
         </div>
 
-        {!spent && (!isLoadingAuth && !isAuthenticated ? (
-          <Link to="/login?returnTo=%2Fsage" className="btn btn-primary self-start no-underline">
-            Sign in to ask Sage
-          </Link>
-        ) : (
-          <button
-            type="button"
-            className="btn btn-primary self-start"
-            onClick={ask}
-            disabled={isLoadingAuth || loading || !question.trim()}
-          >
-            {isLoadingAuth ? 'Checking sign-in…' : loading ? 'Sage is thinking…' : 'Ask Sage'}
-          </button>
-        ))}
+        <div className="panel">
+          <div className="panel-head">Your question</div>
+          <div className="panel-body" style={{ display: 'grid', gap: 16, padding: 20 }}>
+            <div className="field">
+              <label htmlFor="sage-grade">Your grade</label>
+              <FieldSelect
+                id="sage-grade"
+                value={grade}
+                disabled={spent || isLoadingAuth || !isAuthenticated}
+                onValueChange={setGrade}
+                options={['9th grade', '10th grade', '11th grade', '12th grade', 'College student'].map((g) => [g, g])}
+              />
+            </div>
+            <div className="field">
+              <label htmlFor="sage-q">Your question</label>
+              <textarea
+                id="sage-q"
+                className="input"
+                value={question}
+                disabled={spent || isLoadingAuth || !isAuthenticated}
+                onChange={(e) => setQuestion(e.target.value)}
+                placeholder="How do I pick which colleges to apply to?"
+              />
+            </div>
 
-        {error && (
-          <p role="alert" className="msg msg-error" style={{ margin: 0 }}>{error}</p>
-        )}
+            {!spent && (!isLoadingAuth && !isAuthenticated ? (
+              <Link to="/login?returnTo=%2Fsage" className="btn btn-primary self-start">
+                Sign in to ask Sage
+              </Link>
+            ) : (
+              <button
+                type="button"
+                className="btn btn-primary self-start"
+                onClick={ask}
+                disabled={isLoadingAuth || loading || !question.trim()}
+              >
+                {isLoadingAuth ? 'Checking sign-in…' : loading ? 'Sage is thinking…' : 'Ask Sage'}
+              </button>
+            ))}
 
-        {answer && (
-          <div
-            className="anim-fade-swap"
-            role="status"
-            aria-live="polite"
-            style={{ background: 'var(--color-surface-2)', borderRadius: 12, padding: 18, fontSize: 14.5, lineHeight: 1.65, whiteSpace: 'pre-wrap' }}
-          >
-            {answer}
+            {error && <p role="alert" className="msg msg-error" style={{ margin: 0 }}>{error}</p>}
+
+            {answer && (
+              <div
+                role="status"
+                aria-live="polite"
+                className="prose"
+                style={{ whiteSpace: 'pre-wrap' }}
+              >
+                {answer}
+              </div>
+            )}
+
+            {spent && native && <p role="status" style={{ margin: 0 }}>That was your free question. Come back tomorrow for another.</p>}
+            {spent && !native && (
+              <div style={{ borderTop: '1px solid var(--hairline)', paddingTop: 16, display: 'grid', gap: 12 }}>
+                <p style={{ margin: 0, fontSize: 15.5, lineHeight: 1.55, color: 'var(--ink-2)' }}>
+                  That was your free question. Sage remembers your grade, your school, and your goals, and you can ask it
+                  anything, as often as you want, for $5 a month.
+                </p>
+                <Link to="/join?plan=sage_monthly" className="btn btn-sun self-start btn-go">Get Sage</Link>
+              </div>
+            )}
           </div>
-        )}
-
-        {spent && native && <p role="status">That was your free question. Come back tomorrow for another.</p>}
-        {spent && !native && (
-          <div style={{ borderTop: '1px solid var(--color-divider)', paddingTop: 14, display: 'grid', gap: 10 }}>
-            <p style={{ margin: 0, fontSize: 14, lineHeight: 1.6, color: 'var(--color-neutral-800)' }}>
-              That was your free question. Sage remembers your grade, your school, and your goals, and you can ask it
-              anything, as often as you want, for $5 a month.
-            </p>
-            <Link to="/join?plan=sage_monthly" className="btn btn-primary self-start no-underline">
-              Get Sage
-            </Link>
-          </div>
-        )}
+        </div>
       </div>
     </section>
   );

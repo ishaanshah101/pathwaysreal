@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useProfile } from '@/lib/useProfile';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 
 // Blocking is instant and quiet. The other person is never notified, which is
 // the whole point: leaving should never require a confrontation.
@@ -29,30 +29,31 @@ export default function BlockModal({ open, onOpenChange, blockedEmail, blockedNa
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent style={{ background: 'var(--color-surface)', borderRadius: 16, maxWidth: 440 }}>
-        <DialogHeader>
-          <DialogTitle style={{ fontFamily: 'var(--font-heading)', fontWeight: 400, fontSize: 24 }}>
-            Block {blockedName || blockedEmail}?
-          </DialogTitle>
-        </DialogHeader>
+      <DialogContent className="max-w-md">
+        <div className="dlg">
+          <div>
+            <span className="kicker">Safety</span>
+            <DialogTitle>Block {blockedName || blockedEmail}?</DialogTitle>
+          </div>
 
-        <div className="flex flex-col" style={{ gap: 14 }}>
-          <p style={{ fontSize: 14, lineHeight: 1.6, margin: 0, color: 'var(--color-neutral-800)' }}>
-            They will no longer be able to message you, and they will disappear from your feed and
-            from Explore. They are not told that you blocked them.
-          </p>
-          <p style={{ fontSize: 13, lineHeight: 1.6, margin: 0, color: 'var(--text-muted)' }}>
+          <DialogDescription asChild>
+            <p className="dlg-lede">
+              They will no longer be able to message you, and they will disappear from your feed and
+              from Explore. They are not told that you blocked them.
+            </p>
+          </DialogDescription>
+          <p className="notice notice-info">
             Blocking is not the same as reporting. If they did something wrong, please report them
             too so the safety team can look into it.
           </p>
 
-          {error && <span style={{ fontSize: 12.5, color: 'var(--color-accent-700)' }}>{error}</span>}
+          {error && <span role="alert" className="msg msg-error">{error}</span>}
 
-          <div className="flex gap-2">
-            <button type="button" className="btn btn-primary" onClick={confirm} disabled={state === 'sending'}>
+          <div className="dlg-actions">
+            <button type="button" className="btn btn-danger" onClick={confirm} disabled={state === 'sending'}>
               {state === 'sending' ? 'Blocking…' : 'Block them'}
             </button>
-            <button type="button" className="btn btn-secondary" onClick={() => onOpenChange(false)}>
+            <button type="button" className="btn btn-quiet" onClick={() => onOpenChange(false)}>
               Cancel
             </button>
           </div>

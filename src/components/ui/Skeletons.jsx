@@ -1,22 +1,22 @@
 import React from 'react';
 
-// Shaped placeholders built from the .skeleton tokens. They occupy the same
+// Shaped placeholders built from the .skeleton classes. They occupy the same
 // space as the real content, so arriving data does not shift the layout.
 
 export function SkeletonLine({ width = '100%', height }) {
-  return <span className="skeleton skeleton-line" style={{ display: 'block', width, height }} />;
+  return <span className="skeleton skeleton-line skeleton-block" style={{ width, height }} />;
 }
 
 export function SkeletonTitle({ width = '55%' }) {
-  return <span className="skeleton skeleton-title" style={{ display: 'block', width }} />;
+  return <span className="skeleton skeleton-title skeleton-block" style={{ width }} />;
 }
 
-// Matches an avatar + two lines row, used for conversation and people lists.
+// Matches a plate + two lines row, used for conversation and people lists.
 export function SkeletonRow() {
   return (
-    <div className="flex items-start" style={{ gap: 'var(--space-3)', padding: '10px 12px' }}>
+    <div className="skeleton-row">
       <span className="skeleton skeleton-avatar" />
-      <span className="flex flex-col" style={{ gap: 6, flex: 1 }}>
+      <span className="skeleton-row-lines">
         <SkeletonLine width="45%" />
         <SkeletonLine width="80%" />
       </span>

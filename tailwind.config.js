@@ -48,6 +48,10 @@ module.exports = {
   		colors: {
   			cream: 'var(--color-bg)',
   			surface: 'var(--color-surface)',
+  			paper: { DEFAULT: 'var(--paper)', 2: 'var(--paper-2)', 3: 'var(--paper-3)' },
+  			sheet: 'var(--sheet)',
+  			asphalt: 'var(--asphalt)',
+  			sun: { DEFAULT: 'var(--sun)', deep: 'var(--sun-deep)', tint: 'var(--sun-tint)', wash: 'var(--sun-wash)' },
   			ink: {
   				DEFAULT: 'var(--color-text)',
   				muted: 'var(--text-muted)',
@@ -148,6 +152,8 @@ module.exports = {
   			heading: ['var(--font-heading)'],
   			body: ['var(--font-body)'],
   			display: ['var(--font-display)'],
+  			sign: ['var(--font-sign)'],
+  			read: ['var(--font-read)'],
   			mono: ['var(--font-mono)']
   		},
   		keyframes: {

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { appParams } from "@/lib/app-params";
-import { Button } from "@/components/ui/button";
-import { ShieldCheck, Loader2 } from "lucide-react";
+import { ShieldCheck } from "lucide-react";
 import AuthLayout from "@/components/AuthLayout";
 import Seo from '@/components/Seo';
 
@@ -137,10 +136,10 @@ export default function OAuthConsent() {
 
   if (checking) {
     return (
-      <AuthLayout icon={ShieldCheck} title="Authorize access">
+      <AuthLayout icon={ShieldCheck} kicker="Permission" title="Authorize access">
         <Seo title="Authorize Access | Pathways" description="Review and approve an AI client's request to access your Pathways account." path="/oauth-consent" noindex />
-        <div className="flex items-center justify-center py-6 text-muted-foreground">
-          <Loader2 className="w-5 h-5 mr-2 animate-spin" aria-hidden="true" />
+        <div className="auth-wait" role="status">
+          <span className="lane-load" aria-hidden="true" />
           Loading…
         </div>
       </AuthLayout>
@@ -154,6 +153,7 @@ export default function OAuthConsent() {
     return (
       <AuthLayout
         icon={ShieldCheck}
+        kicker="Permission"
         title={decided === "approve" ? "Access granted" : "Access denied"}
         subtitle={`You can return to ${client} and close this window.`}
       />
@@ -165,8 +165,8 @@ export default function OAuthConsent() {
   // no approve/deny controls.
   if (reconnect) {
     return (
-      <AuthLayout icon={ShieldCheck} title="Reconnect required">
-        <div className="p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
+      <AuthLayout icon={ShieldCheck} kicker="Permission" title="Reconnect required">
+        <div role="alert" className="notice notice-error">
           {reconnect}
         </div>
       </AuthLayout>
@@ -178,8 +178,8 @@ export default function OAuthConsent() {
   // the error alone, never the approve/deny controls.
   if (error && !info) {
     return (
-      <AuthLayout icon={ShieldCheck} title="Authorize access">
-        <div className="p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
+      <AuthLayout icon={ShieldCheck} kicker="Permission" title="Authorize access">
+        <div role="alert" className="notice notice-error">
           {error}
         </div>
       </AuthLayout>
@@ -191,50 +191,52 @@ export default function OAuthConsent() {
   return (
     <AuthLayout
       icon={ShieldCheck}
+      kicker="Permission"
       title="Authorize access"
       subtitle={`${client} wants to access ${appName} on your behalf`}
     >
       {error && (
-        <div className="mb-4 p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
+        <div role="alert" className="notice notice-error">
           {error}
         </div>
       )}
 
-      <p className="text-sm font-medium text-foreground mb-2">
-        {tools.length ? `It will be able to use these tools in ${appName}:` : "No tools requested"}
-      </p>
-      {tools.length > 0 && (
-        <ul className="space-y-2 text-sm mb-6">
-          {tools.map((tool) => (
-            <li key={tool.name} className="flex flex-col">
-              <span className="text-foreground font-medium">
-                {tool.title || tool.name}
-              </span>
-              {tool.description && (
-                <span className="text-muted-foreground">{tool.description}</span>
-              )}
-            </li>
-          ))}
-        </ul>
-      )}
+      <div className="auth-group">
+        <p className="auth-note">
+          <b>{tools.length ? `It will be able to use these tools in ${appName}:` : "No tools requested"}</b>
+        </p>
+        {tools.length > 0 && (
+          <ul className="grant-list">
+            {tools.map((tool) => (
+              <li key={tool.name}>
+                <b>{tool.title || tool.name}</b>
+                {tool.description && (
+                  <span>{tool.description}</span>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
 
-      <div className="flex gap-3">
-        <Button
-          variant="outline"
-          className="flex-1 h-11 font-semibold"
+      <div className="auth-actions">
+        <button
+          type="button"
+          className="btn btn-secondary btn-lg"
           disabled={submitting}
           onClick={() => respond("deny")}
         >
           Deny
-        </Button>
-        <Button
-          className="flex-1 h-11 font-semibold"
+        </button>
+        <button
+          type="button"
+          className="btn btn-primary btn-lg"
           disabled={submitting}
           onClick={() => respond("approve")}
         >
-          {submitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+          {submitting ? <span className="lane-load" aria-hidden="true" /> : null}
           Approve
-        </Button>
+        </button>
       </div>
     </AuthLayout>
   );

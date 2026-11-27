@@ -1,6 +1,4 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
 import MfaMethodSetup from "@/components/MfaMethodSetup";
 import { CodeField, MfaHeader, MfaNotice, RememberDevice, ResendLine, useAppInfo, useCooldown } from "@/components/MfaParts";
 import { finishSignIn, mfaSession } from "@/lib/authMfaFlow";
@@ -35,9 +33,9 @@ function Enroll({ session, onDone }) {
       {method ? (
         <MfaMethodSetup session={session} method={method} onDone={onDone} onBack={() => setMethod(null)} />
       ) : (
-        <div className="space-y-3">
-          <Button className="w-full h-12 font-medium" onClick={() => setMethod("totp")}>Set up your authenticator app</Button>
-          <Button variant="outline" className="w-full h-12 font-medium" onClick={() => setMethod("sms")}>Enter your phone number</Button>
+        <div className="auth-stack">
+          <button type="button" className="btn btn-primary btn-lg btn-block" onClick={() => setMethod("totp")}>Set up your authenticator app</button>
+          <button type="button" className="btn btn-secondary btn-lg btn-block" onClick={() => setMethod("sms")}>Enter your phone number</button>
         </div>
       )}
     </>
@@ -93,28 +91,28 @@ function Verify({ session, challenge, returnTo, onDone }) {
   return (
     <>
       <MfaHeader title="Verify your identity" />
-      <div className="space-y-4">
+      <div className="auth-stack">
         <MfaNotice error={error} />
-        <p className="text-sm text-muted-foreground text-center">
+        <p className="auth-note" aria-live="polite">
           {method === "totp" ? "Enter the code from your authenticator app"
             : sending && !cooldown ? `Sending code to ${phone}…` : `Enter the code sent to ${phone}`}
         </p>
         <CodeField id="mfa-code" value={code} onChange={setCode} onComplete={verify} />
         <RememberDevice checked={remember} onChange={setRemember} />
-        <Button className="w-full h-12 font-medium" disabled={busy || code.length < 6} onClick={() => verify()}>
-          {busy && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-          {busy ? "Verifying..." : "Verify"}
-        </Button>
+        <button type="button" className="btn btn-primary btn-lg btn-block" disabled={busy || code.length < 6} onClick={() => verify()}>
+          {busy && <span className="lane-load" aria-hidden="true" />}
+          {busy ? "Verifying…" : "Verify"}
+        </button>
         {method === "sms" && <ResendLine cooldown={cooldown} disabled={sending} onResend={sendCode} />}
         {other && (
-          <Button variant="outline" className="w-full" onClick={() => { setMethod(other); setCode(""); setError(null); }}>
-            {other === "sms" ? "Verify via Text Message" : "Verify via Authenticator App"}
-          </Button>
+          <button type="button" className="btn btn-secondary btn-block" onClick={() => { setMethod(other); setCode(""); setError(null); }}>
+            {other === "sms" ? "Verify by text message" : "Verify with authenticator app"}
+          </button>
         )}
-        <div className="text-center">
-          <a href={returnTo && returnTo !== "/" ? "/login?returnTo=" + encodeURIComponent(returnTo) : "/login"} className="text-sm text-muted-foreground hover:underline">Back to Login</a>
-        </div>
       </div>
+      <p className="auth-foot">
+        <a href={returnTo && returnTo !== "/" ? "/login?returnTo=" + encodeURIComponent(returnTo) : "/login"}>Back to log in</a>
+      </p>
     </>
   );
 }

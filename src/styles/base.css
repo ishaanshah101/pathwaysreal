@@ -1,0 +1,66 @@
+/* ---------------------------------------------------------------------------
+   Base elements.
+   --------------------------------------------------------------------------- */
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--desk);
+  color: var(--ink);
+  font-family: var(--font-read);
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+::selection { background: var(--hl-yellow); color: #232732; }
+
+:focus-visible { outline: 3px solid var(--sun); outline-offset: 2px; border-radius: 3px; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
+
+.skip-link {
+  position: absolute; left: -9999px; top: 0; z-index: 999;
+  background: var(--hl-yellow); color: #232732; font-family: var(--font-marker); font-weight: 700;
+  padding: 12px 18px;
+}
+.skip-link:focus { left: 0; }
+
+/* Headlines are written in marker. */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-marker);
+  margin: 0 0 8px;
+  text-wrap: balance;
+}
+h1, h2 { font-weight: 800; line-height: 1.04; letter-spacing: -0.012em; }
+h3, h4, h5, h6 { font-weight: 700; line-height: 1.2; letter-spacing: -0.005em; }
+
+.h-sans { font-family: var(--font-marker) !important; font-weight: 700 !important; letter-spacing: -0.005em !important; line-height: 1.2 !important; }
+.h-display { font-family: var(--font-marker); font-weight: 800; letter-spacing: -0.012em; }
+
+p { margin: 0 0 1em; }
+p:last-child { margin-bottom: 0; }
+
+/* Links are underlined in red pen. Colour alone never marks a link. */
+a { color: inherit; text-decoration-line: underline; text-decoration-color: var(--pen-red); text-decoration-thickness: 2px; text-underline-offset: 3px; }
+a:hover { text-decoration-color: currentColor; }
+a.no-underline, .btn, nav a { text-decoration: none; }
+/* In running text, pointing at a link runs a highlighter over it. */
+.prose a:hover, .doc a:hover, .lede a:hover { background: var(--hl-yellow); color: #232732; }
+
+b, strong { font-weight: 700; }
+
+hr { border: 0; height: 1px; background: var(--hairline); margin: 0; }
+
+.text-muted { color: var(--ink-3); }
+.text-quiet { color: var(--ink-2); }
+.num { font-variant-numeric: tabular-nums lining-nums; }

@@ -2,11 +2,12 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Bell, UserPlus, Check, X } from 'lucide-react';
 import { useNotifications } from '@/lib/useNotifications';
+import Icon from '@/components/kit/Icon';
 
 const ICONS = {
-  connection_request: UserPlus,
-  connection_accepted: Check,
-  connection_declined: X,
+  connection_request: [UserPlus, 'picto-blue'],
+  connection_accepted: [Check, 'picto-green'],
+  connection_declined: [X, 'picto-ink'],
 };
 
 function timeAgo(iso) {
@@ -35,8 +36,13 @@ export default function NotificationBell() {
     const onDown = (e) => {
       if (wrapRef.current && !wrapRef.current.contains(e.target)) setOpen(false);
     };
+    const onKey = (e) => { if (e.key === 'Escape') setOpen(false); };
     document.addEventListener('mousedown', onDown);
-    return () => document.removeEventListener('mousedown', onDown);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onDown);
+      document.removeEventListener('keydown', onKey);
+    };
   }, [open]);
 
   const openItem = (n) => {
@@ -49,92 +55,54 @@ export default function NotificationBell() {
     <div className="relative" ref={wrapRef}>
       <button
         type="button"
+        className="icon-btn"
         onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
         aria-label={unreadCount > 0 ? `Notifications, ${unreadCount} unread` : 'Notifications'}
-        className="flex items-center justify-center"
-        style={{
-          width: 34, height: 34, borderRadius: 999, cursor: 'pointer', position: 'relative',
-          border: '1px solid var(--color-border-strong)', background: 'var(--color-surface)',
-        }}
       >
-        <Bell size={16} strokeWidth={2.2} />
-        {unreadCount > 0 && (
-          <span
-            className="flex items-center justify-center"
-            style={{
-              position: 'absolute', top: -4, right: -4, minWidth: 17, height: 17,
-              padding: '0 4px', borderRadius: 999, background: '#e5484d', boxShadow: '0 0 0 2px var(--color-bg)',
-              color: '#fff', fontSize: 10.5, fontWeight: 700, lineHeight: 1,
-            }}
-          >
-            {unreadCount > 9 ? '9+' : unreadCount}
-          </span>
-        )}
+        <Icon as={Bell} size={18} />
+        {unreadCount > 0 && <span className="count" aria-hidden="true">{unreadCount > 9 ? '9+' : unreadCount}</span>}
       </button>
 
       {open && (
         <div
-          className="card elev-lg anim-fade-swap"
-          style={{
-            position: 'absolute', right: 0, top: 42, width: 320, maxHeight: 400,
-            overflowY: 'auto', padding: 8, gap: 2, borderRadius: 16, zIndex: 40,
-          }}
+          className="popover"
+          style={{ position: 'absolute', right: 0, top: 48, width: 'min(340px, calc(100vw - 32px))', maxHeight: 420, overflowY: 'auto', zIndex: 40 }}
         >
-          <div className="flex items-center gap-2" style={{ padding: '6px 10px 8px' }}>
-            <span style={{ fontSize: 13, fontWeight: 600 }}>Notifications</span>
+          <div className="panel-head" style={{ justifyContent: 'space-between' }}>
+            <span>Notifications</span>
             {unreadCount > 0 && (
-              <button
-                type="button"
-                onClick={markAllRead}
-                style={{
-                  marginLeft: 'auto', background: 'none', border: 0, cursor: 'pointer',
-                  font: 'inherit', fontSize: 12, color: 'var(--color-accent-700)',
-                }}
-              >
+              <button type="button" className="link-btn" style={{ fontFamily: 'var(--font-sign)', fontSize: 13, fontWeight: 700, letterSpacing: 0, textTransform: 'none' }} onClick={markAllRead}>
                 Mark all read
               </button>
             )}
           </div>
 
           {notifications.length === 0 ? (
-            <span style={{ fontSize: 13, color: 'var(--text-subtle)', padding: '8px 10px 12px', lineHeight: 1.55 }}>
+            <p style={{ margin: 0, padding: '16px 14px 18px', fontSize: 14.5, lineHeight: 1.5, color: 'var(--ink-2)' }}>
               Nothing yet. Connection requests and acceptances show up here.
-            </span>
+            </p>
           ) : (
-            notifications.map((n) => {
-              const Icon = ICONS[n.type] || Bell;
-              return (
-                <button
-                  key={n.id}
-                  type="button"
-                  onClick={() => openItem(n)}
-                  className="flex items-start gap-[10px] text-left"
-                  style={{
-                    padding: '10px 10px', borderRadius: 14, cursor: 'pointer', border: 0,
-                    font: 'inherit', width: '100%',
-                    background: n.read ? 'transparent' : 'var(--color-accent-100)',
-                  }}
-                >
-                  <span
-                    className="flex items-center justify-center"
-                    style={{
-                      width: 26, height: 26, borderRadius: 999, flex: 'none', marginTop: 1,
-                      background: 'var(--color-accent-2-200)', color: 'var(--color-accent-2-800)',
-                    }}
+            <div style={{ padding: 6 }}>
+              {notifications.map((n) => {
+                const [Glyph, tone] = ICONS[n.type] || [Bell, 'picto-ink'];
+                return (
+                  <button
+                    key={n.id}
+                    type="button"
+                    onClick={() => openItem(n)}
+                    className="menu-item"
+                    style={{ alignItems: 'flex-start', background: n.read ? undefined : 'var(--sun-wash)' }}
                   >
-                    <Icon size={14} strokeWidth={2.2} />
-                  </span>
-                  <span className="flex flex-col" style={{ gap: 2, minWidth: 0 }}>
-                    <span style={{ fontSize: 13.5, lineHeight: 1.45, fontWeight: n.read ? 400 : 600 }}>
-                      {n.body}
+                    <span className={`picto ${tone}`} style={{ width: 28, height: 28 }}><Icon as={Glyph} size={15} /></span>
+                    <span style={{ minWidth: 0, display: 'grid', gap: 3 }}>
+                      <span style={{ fontSize: 14.5, lineHeight: 1.4, fontWeight: n.read ? 500 : 800 }}>{n.body}</span>
+                      <span className="meta">{timeAgo(n.occurred_at || n.created_date)}</span>
                     </span>
-                    <span style={{ fontSize: 11.5, color: 'var(--text-subtle)' }}>
-                      {timeAgo(n.occurred_at || n.created_date)}
-                    </span>
-                  </span>
-                </button>
-              );
-            })
+                  </button>
+                );
+              })}
+            </div>
           )}
         </div>
       )}

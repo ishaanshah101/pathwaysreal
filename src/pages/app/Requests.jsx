@@ -1,13 +1,18 @@
 import React, { useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { Inbox } from 'lucide-react';
 import { ROLE_LABELS } from '@/lib/useProfile';
 import { useConnections } from '@/lib/useConnections';
 import { usePeopleByEmail } from '@/lib/usePeople';
 import { useBlocks } from '@/lib/useBlocks';
-import { authorAvatar, initialsOf } from '@/lib/avatar';
+import { timeAgo } from '@/lib/time';
 import SafetyActions from '@/components/safety/SafetyActions';
+import VerifiedBadge from '@/components/app/VerifiedBadge';
 import Seo from '@/components/Seo';
-import { Inbox } from 'lucide-react';
+import PageHead from '@/components/kit/PageHead';
+import Plate from '@/components/kit/Plate';
+import EmptyState from '@/components/ui/EmptyState';
+import { SkeletonRows } from '@/components/ui/Skeletons';
 
 // Where connection requests are answered.
 //
@@ -16,37 +21,31 @@ import { Inbox } from 'lucide-react';
 // lists everything waiting on you, shows enough of the person to decide, and
 // gives you accept, decline and their full profile side by side.
 
-function timeAgo(iso) {
-  if (!iso) return '';
-  const secs = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
-  if (secs < 60) return 'just now';
-  const mins = Math.floor(secs / 60);
-  if (mins < 60) return `${mins}m ago`;
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h ago`;
-  const days = Math.floor(hrs / 24);
-  if (days < 7) return `${days}d ago`;
-  return new Date(iso).toLocaleDateString();
-}
-
-function PersonCard({ conn, who, profile, busy, onAccept, onDecline, onBlocked, outgoing }) {
-  const [bg, fg] = authorAvatar(who || 'A');
+// One request, as a ruled row rather than a card: who, the note they wrote,
+// and the answer buttons, with report and block at the far end.
+function RequestRow({ conn, who, profile, busy, onAccept, onDecline, onBlocked, outgoing }) {
   const [showProfile, setShowProfile] = useState(false);
   const name = profile?.full_name || (outgoing ? conn.to_name : conn.from_name) || who;
+  const interests = Array.isArray(profile?.interests) ? profile.interests : [];
+  const expertise = Array.isArray(profile?.expertise) ? profile.expertise : [];
+  // The preview used to open as an empty box for a member who had a profile
+  // row but had written nothing in it. That case now says so, the same as for
+  // someone with no profile at all.
+  const hasDetails = Boolean(profile?.bio || profile?.help_with || profile?.goals || interests.length || expertise.length);
 
   return (
-    <div className="card elev-sm" style={{ padding: 20, gap: 12 }}>
-      <div className="flex items-start gap-3">
-        <span className="avatar" style={{ width: 46, height: 46, fontSize: 15, background: bg, color: fg }}>
-          {initialsOf(name)}
-        </span>
-        <div className="flex flex-col" style={{ minWidth: 0, flex: 1, gap: 2 }}>
-          <span style={{ fontSize: 15, fontWeight: 600 }}>
-            {outgoing
-              ? <>You asked to connect with <b>{name}</b></>
-              : <><b>{name}</b> wants to connect with you</>}
-          </span>
-          <span style={{ fontSize: 12.5, color: 'var(--text-subtle)', lineHeight: 1.4 }}>
+    <article className="req-row">
+      <Plate name={name} seed={who || 'A'} size={48} />
+
+      <div>
+        <p className="req-line">
+          {outgoing
+            ? <>You asked to connect with <b>{name}</b></>
+            : <><b>{name}</b> wants to connect with you</>}
+        </p>
+        <div className="req-meta">
+          <VerifiedBadge verified={profile?.verified === true} />
+          <span className="meta">
             {profile?.headline
               || [profile?.grade, profile?.school].filter(Boolean).join(' · ')
               || [profile?.job_title, profile?.institution].filter(Boolean).join(' · ')
@@ -57,55 +56,52 @@ function PersonCard({ conn, who, profile, busy, onAccept, onDecline, onBlocked, 
         </div>
       </div>
 
-      {conn.note && (
-        <p
-          style={{
-            fontSize: 14, lineHeight: 1.55, margin: 0, padding: '10px 14px',
-            borderRadius: 12, background: 'var(--color-surface-2)', color: 'var(--color-neutral-800)',
-            borderLeft: '3px solid var(--color-accent)',
-          }}
-        >
-          {conn.note}
-        </p>
+      {conn.note && <blockquote className="quote-note">{conn.note}</blockquote>}
+
+      {showProfile && !hasDetails && (
+        <p className="req-profile-none">They have not filled in a profile yet.</p>
       )}
 
-      {showProfile && (
-        <div
-          className="flex flex-col"
-          style={{ gap: 8, padding: '12px 14px', borderRadius: 12, background: 'var(--color-surface-2)' }}
-        >
+      {showProfile && hasDetails && (
+        <dl className="req-profile">
           {profile?.bio && (
-            <p style={{ fontSize: 14, lineHeight: 1.55, margin: 0 }}>{profile.bio}</p>
+            <>
+              <dt>About</dt>
+              <dd>{profile.bio}</dd>
+            </>
           )}
           {profile?.help_with && (
-            <p style={{ fontSize: 13.5, lineHeight: 1.55, margin: 0, color: 'var(--color-neutral-800)' }}>
-              <strong style={{ fontWeight: 600 }}>Happy to help with:</strong> {profile.help_with}
-            </p>
+            <>
+              <dt>Helps with</dt>
+              <dd>{profile.help_with}</dd>
+            </>
           )}
           {profile?.goals && (
-            <p style={{ fontSize: 13.5, lineHeight: 1.55, margin: 0, color: 'var(--color-neutral-800)' }}>
-              <strong style={{ fontWeight: 600 }}>Working on:</strong> {profile.goals}
-            </p>
+            <>
+              <dt>Working on</dt>
+              <dd>{profile.goals}</dd>
+            </>
           )}
-          {Array.isArray(profile?.interests) && profile.interests.length > 0 && (
-            <div className="flex gap-[6px] flex-wrap">
-              {profile.interests.map((i) => <span key={i} className="tag tag-accent-2">{i}</span>)}
-            </div>
+          {interests.length > 0 && (
+            <>
+              <dt>Interested in</dt>
+              <dd className="dir-tags">
+                {interests.map((i) => <span key={i} className="tag">{i}</span>)}
+              </dd>
+            </>
           )}
-          {Array.isArray(profile?.expertise) && profile.expertise.length > 0 && (
-            <div className="flex gap-[6px] flex-wrap">
-              {profile.expertise.map((i) => <span key={i} className="tag tag-accent">{i}</span>)}
-            </div>
+          {expertise.length > 0 && (
+            <>
+              <dt>Can speak to</dt>
+              <dd className="dir-tags">
+                {expertise.map((i) => <span key={i} className="tag">{i}</span>)}
+              </dd>
+            </>
           )}
-          {!profile && (
-            <span style={{ fontSize: 13, color: 'var(--text-subtle)' }}>
-              They have not filled in a profile yet.
-            </span>
-          )}
-        </div>
+        </dl>
       )}
 
-      <div className="flex gap-2 flex-wrap items-center">
+      <div className="req-actions">
         {outgoing ? (
           <span className="badge badge-neutral">Waiting for their answer</span>
         ) : (
@@ -138,7 +134,7 @@ function PersonCard({ conn, who, profile, busy, onAccept, onDecline, onBlocked, 
         </button>
 
         {!outgoing && (
-          <span className="flex gap-4 items-center" style={{ marginLeft: 'auto' }}>
+          <span className="req-actions-end">
             <SafetyActions
               targetEmail={who}
               targetName={name}
@@ -149,7 +145,7 @@ function PersonCard({ conn, who, profile, busy, onAccept, onDecline, onBlocked, 
           </span>
         )}
       </div>
-    </div>
+    </article>
   );
 }
 
@@ -192,38 +188,40 @@ export default function Requests() {
   const decline = async (conn) => { await respondToConnection(conn.id, 'declined'); };
 
   return (
-    <div className="flex flex-col" style={{ gap: 20 }}>
+    <div className="page-read">
       <Seo title="Requests | Pathways" description="Connection requests waiting for you on Pathways." path="/app/requests" noindex />
 
-      <div>
-        <h1 style={{ fontSize: 'clamp(26px,3.2vw,36px)', margin: '0 0 6px' }}>Requests</h1>
-        <p style={{ color: 'var(--text-muted)', margin: 0, fontSize: 15 }}>
-          People who want to connect with you. Nobody can message you until you accept.
-        </p>
-      </div>
+      <PageHead
+        kicker="Requests"
+        title="Who wants to connect."
+        sub="Nobody can message you until you accept."
+      />
 
       {connectionError && (
-        <div role="alert" className="notice notice-warning">{connectionError}</div>
+        <div role="alert" className="notice notice-warning" style={{ marginBottom: 24 }}>{connectionError}</div>
       )}
 
       {loadingConnections ? (
-        <p role="status" style={{ color: 'var(--text-subtle)' }}>Loading your requests…</p>
+        <div role="status" aria-label="Loading your requests">
+          <SkeletonRows count={3} />
+        </div>
       ) : (
         <>
-          <section className="flex flex-col" style={{ gap: 12 }}>
-            <h2 className="h-sans" style={{ fontSize: 16, margin: 0, color: 'var(--text-muted)' }}>
-              Waiting on you{incoming.length > 0 ? ` (${incoming.length})` : ''}
+          <section className="req-section" aria-labelledby="req-incoming">
+            <h2 className="sub-head" id="req-incoming">
+              Waiting on you
+              {incoming.length > 0 && <span className="num">({incoming.length})</span>}
             </h2>
             {incoming.length === 0 ? (
-              <div className="empty">
-                <span className="empty-icon"><Inbox size={20} aria-hidden="true" /></span>
-                <p className="empty-title">No requests right now</p>
-                <p className="empty-body">When someone asks to connect, it appears here and you get a notification.</p>
-                <Link to="/app/explore" className="btn btn-secondary no-underline" style={{ marginTop: 6 }}>Find people in Explore</Link>
-              </div>
+              <EmptyState
+                icon={Inbox}
+                title="No requests right now."
+                body="When someone asks to connect, it appears here and you get a notification."
+                action={<Link to="/app/explore" className="btn btn-secondary">Find people in Explore</Link>}
+              />
             ) : (
               incoming.map((c) => (
-                <PersonCard
+                <RequestRow
                   key={c.id}
                   conn={c}
                   who={c.from_email}
@@ -238,12 +236,13 @@ export default function Requests() {
           </section>
 
           {outgoingPending.length > 0 && (
-            <section className="flex flex-col" style={{ gap: 12 }}>
-              <h2 className="h-sans" style={{ fontSize: 16, margin: '10px 0 0', color: 'var(--text-muted)' }}>
-                Sent by you ({outgoingPending.length})
+            <section className="req-section" aria-labelledby="req-outgoing">
+              <h2 className="sub-head" id="req-outgoing">
+                Sent by you
+                <span className="num">({outgoingPending.length})</span>
               </h2>
               {outgoingPending.map((c) => (
-                <PersonCard
+                <RequestRow
                   key={c.id}
                   conn={c}
                   who={c.to_email}
@@ -259,7 +258,7 @@ export default function Requests() {
           )}
 
           {incoming.length > 0 && (
-            <p style={{ fontSize: 13.5, color: 'var(--text-subtle)', margin: 0 }}>
+            <p className="req-foot">
               Looking for someone new? <Link to="/app/explore">Find people in Explore</Link>.
             </p>
           )}

@@ -6,6 +6,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { useProfile } from '@/lib/useProfile';
 import { Spinner } from '@/components/RequireAuth';
 import { isNativeApp } from '@/lib/platform';
+import Sign from '@/components/kit/Sign';
 
 const perks = [
   'A feed of real, firsthand advice, no short-form loops',
@@ -37,78 +38,47 @@ export default function Join() {
         path="/join"
       />
 
-      <section className="page-hero" style={{ paddingBottom: 'clamp(40px,6vh,72px)' }}>
-        <h1 style={{ fontSize: 'clamp(32px,4.4vw,52px)', maxWidth: '18ch', margin: '0 0 14px', textWrap: 'balance' }}>
-          Start your path, it's free.
-        </h1>
-        <p style={{ maxWidth: '50ch', color: 'var(--color-neutral-800)', fontSize: 'clamp(15.5px,1.3vw,17px)', lineHeight: 1.6, marginBottom: 32 }}>
-          Create your account and we'll match you with mentors who've been exactly where you are.
-          Free for every student, forever.
-        </p>
+      <section className="band gridded">
+        <div className="wrap join-grid">
+          <div>
+            <span className="kicker kicker-sun">Sign-up sheet</span>
+            <h1 className="title-1" style={{ maxWidth: '12ch' }}>Start your path. It's free.</h1>
+            <p className="lede" style={{ marginTop: 20 }}>
+              Create your account and we'll match you with mentors who've been exactly where you
+              are. Free for every student, forever.
+            </p>
+            <h2 className="kicker" style={{ margin: '34px 0 0' }}>What you get</h2>
+            <ul className="checklist" style={{ marginTop: 14 }}>
+              {perks.map((t) => <li key={t}>{t}</li>)}
+            </ul>
+            {plan && (
+              <p style={{ marginTop: 22 }}>
+                <Sign color="yellow">Sage {plan === 'sage_yearly' ? '$40 / year' : '$5 / month'} selected</Sign>
+              </p>
+            )}
+          </div>
 
-        <div
-          className="grid items-start app-split"
-          style={{ gridTemplateColumns: 'minmax(0,6fr) minmax(0,5fr)', gap: 'clamp(24px,4vw,52px)', maxWidth: 900 }}
-        >
-          <div className="card elev-md" style={{ padding: 28, gap: 16 }}>
+          <div className="join-card">
             {/* Google covers both cases: a returning member is signed straight
                 back in, a new one goes on to set up a profile. */}
             <GoogleButton label="Continue with Google" returnTo={returnTo} block />
 
-            <div className="relative" style={{ margin: '2px 0' }}>
-              <div style={{ borderTop: '1px solid var(--color-divider)' }} />
-              <span
-                style={{
-                  position: 'absolute', top: -10, left: '50%', transform: 'translateX(-50%)',
-                  background: 'var(--color-surface)', padding: '0 12px', fontSize: 11, fontWeight: 600,
-                  letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--text-subtle)',
-                }}
-              >
-                or
-              </span>
-            </div>
+            <div className="or-rule">or</div>
 
-            <Link
-              to={`/register?returnTo=${encodeURIComponent(returnTo)}`}
-              className="btn btn-secondary btn-block no-underline"
-              style={{ minHeight: 46, fontSize: 14.5 }}
-            >
+            <Link to={`/register?returnTo=${encodeURIComponent(returnTo)}`} className="btn btn-secondary btn-lg btn-block">
               Sign up with email
             </Link>
 
-            <span style={{ fontSize: 13.5, textAlign: 'center', color: 'var(--text-muted)' }}>
+            <p style={{ margin: 0, fontSize: 15, textAlign: 'center', color: 'var(--ink-2)' }}>
               Already have an account?{' '}
-              <Link to={`/login?returnTo=${encodeURIComponent('/')}`} style={{ color: 'var(--color-accent-700)', fontWeight: 600 }}>
-                Log in
-              </Link>
-            </span>
+              <Link to={`/login?returnTo=${encodeURIComponent('/')}`} style={{ fontWeight: 800 }}>Log in</Link>
+            </p>
 
-            <span style={{ fontSize: 11.5, color: 'var(--text-subtle)', textAlign: 'center', lineHeight: 1.55 }}>
+            <p className="meta" style={{ margin: 0, textAlign: 'center', lineHeight: 1.6 }}>
               13+ · COPPA and FERPA aligned · We never sell student data
               <br />
-              By joining you agree to our{' '}
-              <Link to="/terms" style={{ color: 'var(--color-accent-700)' }}>Terms</Link> and{' '}
-              <Link to="/privacy" style={{ color: 'var(--color-accent-700)' }}>Privacy Policy</Link>.
-            </span>
-          </div>
-
-          <div className="flex flex-col" style={{ gap: 13, paddingTop: 6 }}>
-            <h2 className="card-kicker" style={{ margin: '0 0 4px', fontFamily: 'var(--font-body)' }}>What you get</h2>
-            {perks.map((t) => (
-              <span key={t} className="flex gap-[10px] items-start" style={{ fontSize: 15, lineHeight: 1.5 }}>
-                <span className="grid place-items-center" style={{ width: 20, height: 20, borderRadius: 999, background: 'var(--color-accent-2-200)', flex: 'none', marginTop: 1 }}>
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent-2-800)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    <path d="M20 6 9 17l-5-5" />
-                  </svg>
-                </span>
-                {t}
-              </span>
-            ))}
-            {plan && (
-              <span className="tag tag-accent" style={{ alignSelf: 'flex-start', marginTop: 8 }}>
-                Sage {plan === 'sage_yearly' ? '$40 / year' : '$5 / month'} selected
-              </span>
-            )}
+              By joining you agree to our <Link to="/terms">Terms</Link> and <Link to="/privacy">Privacy Policy</Link>.
+            </p>
           </div>
         </div>
       </section>

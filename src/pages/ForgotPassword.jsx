@@ -1,11 +1,9 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Mail, ArrowLeft, Loader2 } from "lucide-react";
+import { Mail, ArrowLeft } from "lucide-react";
 import AuthLayout from "@/components/AuthLayout";
+import Icon from "@/components/kit/Icon";
 import Seo from '@/components/Seo';
 
 export default function ForgotPassword() {
@@ -29,48 +27,39 @@ export default function ForgotPassword() {
   return (
     <AuthLayout
       icon={Mail}
-      title="Reset password"
-      subtitle="We'll send you a link to reset it"
+      kicker="Password"
+      title="Reset your password."
+      subtitle="Enter your email and we'll send a link to set a new one."
       footer={
-        <Link to="/login" className="text-primary font-medium hover:underline">
-          <ArrowLeft className="w-3 h-3 inline mr-1" />Back to log in
+        <Link to="/login" className="auth-back">
+          <Icon as={ArrowLeft} size={16} />Back to log in
         </Link>
       }
     >
       <Seo title="Reset Your Password | Pathways" description="Request a password reset link for your Pathways account." path="/forgot-password" noindex />
       {sent ? (
-        <p className="text-sm text-foreground text-center">
+        <div role="status" className="notice notice-success">
           If an account exists with that email, you'll receive a password reset link shortly.
-        </p>
+        </div>
       ) : (
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="email">Email address</Label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
-              <Input
-                id="email"
-                type="email"
-                autoComplete="email"
-                autoFocus
-                placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="pl-10 h-11"
-                required
-              />
-            </div>
+        <form onSubmit={handleSubmit} className="auth-form">
+          <div className="field">
+            <label htmlFor="email">Email address</label>
+            <input
+              id="email"
+              type="email"
+              autoComplete="email"
+              autoFocus
+              placeholder="you@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="input"
+              required
+            />
           </div>
-          <Button type="submit" className="w-full h-11 font-semibold" disabled={loading}>
-            {loading ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Sending...
-              </>
-            ) : (
-              "Send reset link"
-            )}
-          </Button>
+          <button type="submit" className="btn btn-primary btn-lg btn-block" disabled={loading}>
+            {loading ? "Sending…" : "Send reset link"}
+          </button>
         </form>
       )}
     </AuthLayout>

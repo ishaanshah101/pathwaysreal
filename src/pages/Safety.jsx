@@ -1,34 +1,40 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import Seo from '@/components/Seo';
-import SectionHeader from '@/components/SectionHeader';
 import ContactEmail from '@/components/ContactEmail';
 
 function Section({ title, children }) {
   return (
-    <section className="card elev-sm" style={{ padding: 24, gap: 8 }}>
-      <h2 className="h-sans" style={{ fontSize: 18, margin: 0 }}>{title}</h2>
-      <div style={{ fontSize: 15, lineHeight: 1.7, color: 'var(--text-muted)' }}>{children}</div>
+    <section className="safety-item">
+      <h2>{title}</h2>
+      <div>{children}</div>
     </section>
   );
 }
 
 export default function Safety() {
   return (
-    <div className="flex flex-col page-hero" style={{ gap: 14, paddingBottom: 'clamp(40px,6vh,72px)' }}>
+    <>
       <Seo
         title="Safety on Pathways | How to report someone and get help"
         description="How Pathways keeps student conversations safe: one-on-one messaging only, contact details and meetup requests filtered out, plus reporting and blocking."
         path="/safety"
       />
 
-      <SectionHeader
-        as="h1"
-        eyebrow="Safety"
-        title="You should never feel unsafe here."
-        intro="Pathways exists so students can get real guidance from people who have been there. That only works if it is safe. Here is exactly what we do, and what you can do."
-      />
+      <section className="page-top">
+        <div className="wrap">
+          <span className="kicker kicker-sun">Safety</span>
+          <h1 className="title-1" style={{ maxWidth: '16ch' }}>You should never feel unsafe here.</h1>
+          <p className="lede">
+            Pathways exists so students can get real guidance from people who have been there. That
+            only works if it is safe. Here is exactly what we do, and what you can do.
+          </p>
+        </div>
+      </section>
 
+      <section className="band-tight" style={{ paddingTop: 0 }}>
+        <div className="wrap safety-grid">
+          <div>
       <Section title="What is blocked automatically">
         Every message and post is screened before it is saved. Phone numbers, email addresses,
         social handles, links off the platform, requests to text, call, or meet in person,
@@ -109,10 +115,23 @@ export default function Safety() {
         Counselors with questions can email <ContactEmail />.
       </Section>
 
-      <p style={{ fontSize: 13.5, color: 'var(--text-muted)', margin: '4px 0 0' }}>
-        See also our <Link to="/privacy" style={{ color: 'var(--color-accent-700)' }}>Privacy policy</Link>
-        {' '}and <Link to="/terms" style={{ color: 'var(--color-accent-700)' }}>Terms</Link>.
-      </p>
-    </div>
+            <p style={{ margin: '22px 0 0', fontSize: 15, color: 'var(--ink-2)' }}>
+              See also our <Link to="/privacy">Privacy policy</Link> and <Link to="/terms">Terms</Link>.
+            </p>
+          </div>
+
+          <aside className="urgent" aria-label="If it is urgent">
+            <h2>If it is urgent</h2>
+            <dl>
+              <div><dt>Immediate danger</dt><dd>Call 911</dd></div>
+              <div><dt>Suicide &amp; Crisis Lifeline</dt><dd>Call or text 988</dd></div>
+              <div><dt>Crisis Text Line</dt><dd>Text HOME to 741741</dd></div>
+              <div><dt>Child exploitation</dt><dd>CyberTipline.org</dd></div>
+              <div><dt>A person at Pathways</dt><dd style={{ fontSize: 17 }}><ContactEmail /></dd></div>
+            </dl>
+          </aside>
+        </div>
+      </section>
+    </>
   );
 }

@@ -3,6 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { Clock } from 'lucide-react';
 import VerifiedBadge from '@/components/app/VerifiedBadge';
 import FieldSelect from '@/components/ui/FieldSelect';
+import Icon from '@/components/kit/Icon';
 
 // Onboarding tells adults they can ask to have their role verified "from your
 // profile once you are in", and until now there was nowhere to do it. A person
@@ -64,24 +65,24 @@ export default function VerificationCard({ profile, email }) {
   };
 
   return (
-    <div className="field">
-      <label>Verification</label>
-      <div style={{ background: 'var(--color-surface-2)', borderRadius: 18, padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+    <section className="panel profile-panel" aria-labelledby="vr-head">
+      <div className="panel-head" id="vr-head">Verification</div>
+      <div className="panel-body">
         {profile?.verified ? (
           <>
             <VerifiedBadge verified={profile?.verified} />
-            <span style={{ fontSize: 12.5, color: 'var(--text-muted)', lineHeight: 1.5 }}>
+            <p>
               A Pathways admin has confirmed your institutional email or role. Members see this badge on your profile.
-            </span>
+            </p>
           </>
         ) : request?.status === 'pending' ? (
           <>
-            <span className="badge badge-warning self-start">
-              <Clock size={12} aria-hidden="true" /> Under review
+            <span className="badge badge-warning">
+              <Icon as={Clock} size={12} weight={3} /> Under review
             </span>
-            <span style={{ fontSize: 12.5, color: 'var(--text-muted)', lineHeight: 1.5 }}>
+            <p>
               We have your request. A person checks these by hand, so it can take a few days.
-            </span>
+            </p>
           </>
         ) : open ? (
           <>
@@ -108,37 +109,35 @@ export default function VerificationCard({ profile, email }) {
             </div>
             <div className="field">
               <label htmlFor="vr-url">A link we can open</label>
-              <input id="vr-url" className="input" value={form.evidence_url} onChange={set('evidence_url')} placeholder="Faculty page, staff directory, LinkedIn…" />
+              <input id="vr-url" className="input" value={form.evidence_url} onChange={set('evidence_url')} placeholder="Faculty page, staff directory, LinkedIn" />
             </div>
             <div className="field">
               <label htmlFor="vr-note">Anything else?</label>
               <textarea id="vr-note" className="input" value={form.note} onChange={set('note')} />
             </div>
             {error && <span className="msg msg-error" role="alert">{error}</span>}
-            <div className="flex gap-2">
-              <button type="button" className="btn btn-primary" style={{ fontSize: 13 }} onClick={submit} disabled={sending}>
+            <div className="profile-panel-acts">
+              <button type="button" className="btn btn-primary btn-sm" onClick={submit} disabled={sending}>
                 {sending ? 'Sending…' : 'Send request'}
               </button>
-              <button type="button" className="btn btn-secondary" style={{ fontSize: 13 }} onClick={() => setOpen(false)}>
+              <button type="button" className="btn btn-secondary btn-sm" onClick={() => setOpen(false)}>
                 Cancel
               </button>
             </div>
           </>
         ) : (
           <>
-            <span style={{ fontSize: 14 }}>
-              <b>{request?.status === 'rejected' ? 'Not verified' : 'Unverified'}</b>
-            </span>
-            <span style={{ fontSize: 12.5, color: 'var(--text-muted)', lineHeight: 1.5 }}>
+            <span className="panel-lead">{request?.status === 'rejected' ? 'Not verified' : 'Unverified'}</span>
+            <p>
               Your role shows as unverified until a person here has checked it. Verified members are
               easier for students to trust.
-            </span>
-            <button type="button" className="btn btn-secondary self-start" style={{ fontSize: 13 }} onClick={() => setOpen(true)}>
+            </p>
+            <button type="button" className="btn btn-secondary btn-sm" onClick={() => setOpen(true)}>
               Ask to be verified
             </button>
           </>
         )}
       </div>
-    </div>
+    </section>
   );
 }

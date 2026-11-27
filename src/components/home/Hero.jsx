@@ -1,91 +1,76 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { signInWithGoogle } from '@/lib/googleAuth';
-import { Image } from '@/components/ui/image';
+
+// The first page of the notebook: the pitch written out on lined paper, with
+// the important part highlighted and a note in the margin. Beside it, the mark
+// as a sticker and a sticky note with the sums on it.
+const sums = [
+  { num: '$200', unit: '/hr', label: 'what a private college counselor can cost' },
+  { num: '16 million', label: 'US high schoolers deciding right now' },
+  { num: '$0', label: 'what Pathways costs every one of them' },
+];
 
 export default function Hero() {
   return (
-    <header
-      className="grid items-center"
-      style={{
-        gridTemplateColumns: 'minmax(0,7fr) minmax(0,5fr)',
-        gap: 'clamp(24px,4vw,64px)',
-        padding: 'clamp(32px,7vh,80px) 0 clamp(28px,5vh,56px)',
-      }}
-    >
-      <div className="anim-fade-up">
-        {/* One headline, one paragraph, one primary action. The "free forever"
-            promise lives inside the sentence that earns it, not as a separate
-            badge competing with the headline for attention. */}
-        <span className="card-kicker" style={{ display: 'block', marginBottom: 16 }}>Free college and career guidance</span>
-        <h1 style={{ fontSize: 'clamp(38px,5.2vw,62px)', lineHeight: 1.05, margin: '0 0 20px', textWrap: 'balance' }}>
-          Every student deserves someone who's been there.
-        </h1>
-        <p style={{ fontSize: 'clamp(16px,1.4vw,18.5px)', maxWidth: '50ch', color: 'var(--color-neutral-800)', margin: '0 0 28px', lineHeight: 1.6 }}>
-          Pathways gives every high schooler real, firsthand guidance on college and careers from
-          students, professors, and counselors who actually did it. Free for every student, forever.
-        </p>
+    <header className="hero">
+      <div className="wrap hero-grid">
+        <div className="ruled hero-sheet">
+          <span className="kicker">Free college and career guidance</span>
 
-        <div className="flex gap-3 items-center flex-wrap">
-          <Link to="/join" className="btn btn-primary btn-lg" style={{ fontSize: 15.5, padding: '13px 26px' }}>
-            Start your path, it's free
-          </Link>
-          <Link to="/how-it-works" className="btn btn-secondary btn-lg" style={{ fontSize: 15 }}>
-            See how it works
-          </Link>
-        </div>
+          <h1>
+            Every student deserves <span className="hl">someone who's been there.</span>
+          </h1>
 
-        <p style={{ margin: '18px 0 0', fontSize: 13.5, color: 'var(--color-neutral-700)' }}>
-          Already have an account?{' '}
-          <button
-            type="button"
-            onClick={() => signInWithGoogle('/')}
-            style={{
-              background: 'none', border: 0, padding: 0, font: 'inherit', cursor: 'pointer',
-              color: 'var(--color-accent-700)', fontWeight: 600, textDecoration: 'underline',
-              textUnderlineOffset: 3,
-            }}
-          >
-            Log in with Google
-          </button>
-        </p>
-      </div>
+          <p className="lede">
+            Pathways is where high schoolers get straight answers about college and careers from
+            the students, professors, and counselors who already made the trip. It is free for
+            every student, and it stays free.
+          </p>
 
-      <div className="anim-fade-up" style={{ animationDelay: '.15s' }}>
-        {/* Keep the photo and its floating pricing card in one positioning context. */}
-        <div className="relative">
-          <div
-            className="relative overflow-hidden"
-            style={{
-              aspectRatio: '4 / 4.6',
-              borderRadius: 4,
-              background: 'var(--color-accent-200)',
-              boxShadow: 'var(--shadow-lg)',
-            }}
-          >
-            <Image
-              src="https://media.base44.com/images/public/6a7ac32706b0616cd94b0ec7/3041b5321_images7.jpeg"
-              alt="Student featured on the Pathways homepage"
-              width={520}
-              height={598}
-              loading="eager"
-              fetchPriority="high"
-              decoding="async"
-              fittingType="fill"
-              focalPointX={0.44}
-              focalPointY={0.5}
-              quality={82}
-              className="absolute inset-0 h-full w-full object-cover"
-              style={{ filter: 'brightness(1.08) contrast(1.05) saturate(1.05)' }}
-            />
-          </div>
-          <div className="card elev-md hero-float-right" style={{ position: 'absolute', right: -12, top: 22, padding: '10px 16px', gap: 2 }}>
-            <span style={{ fontFamily: 'var(--font-heading)', fontSize: 22, lineHeight: 1 }}>
-              $0 <span style={{ fontFamily: 'var(--font-body)', fontWeight: 600, fontSize: 12, color: 'var(--color-accent-700)' }}>forever</span>
+          <div className="hero-cta">
+            <Link to="/join" className="btn btn-sun btn-lg btn-go">Join free</Link>
+            <Link to="/how-it-works" className="btn btn-secondary btn-lg">See how it works</Link>
+            <span className="scribble hero-note" aria-hidden="true">
+              <svg width="46" height="26" viewBox="0 0 46 26" fill="none">
+                <path d="M44 6C32 18 18 20 4 15" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" />
+                <path d="M13 7 3 15l11 7" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              free. actually free.
             </span>
-            <span style={{ fontSize: 11.5, color: 'var(--text-muted)' }}>the core app, for every student</span>
           </div>
+
+          <p className="hero-aside">
+            Already a member?{' '}
+            <button type="button" className="link-btn" style={{ fontWeight: 700 }} onClick={() => signInWithGoogle('/')}>
+              Log in with Google
+            </button>
+          </p>
         </div>
+
+        <aside className="hero-side" aria-label="Why Pathways exists">
+          <div className="sticker" aria-hidden="true">
+            <svg viewBox="0 0 100 100" width="104" height="104" fill="none">
+              <circle cx="50" cy="31" r="27" fill="#e05e12" />
+              <path d="M47.8 55 L42 97 L1 97 Z" fill="#26231f" />
+              <path d="M52.2 55 L58 97 L99 97 Z" fill="#26231f" />
+              <path className="dash" d="M45.6 62 L28 93" stroke="#fbf6ee" strokeWidth="4" strokeDasharray="7 7" />
+              <path className="dash" d="M54.4 62 L72 93" stroke="#fbf6ee" strokeWidth="4" strokeDasharray="7 7" />
+            </svg>
+          </div>
+
+          <div className="sticky">
+            <div className="sticky-title">Do the math</div>
+            <ul className="sums">
+              {sums.map((s) => (
+                <li key={s.label}>
+                  <b className="num">{s.num}{s.unit ? <small>{s.unit}</small> : null}</b>
+                  {s.label}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </aside>
       </div>
     </header>
   );

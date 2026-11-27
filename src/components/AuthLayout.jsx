@@ -1,46 +1,78 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { OTPInput } from "input-otp";
 import BrandMark from "@/components/BrandMark";
 
-// The frame around Log in, Register, and the password pages.
+// The frame around Log in, Register, the password pages, and two-step sign-in.
 //
-// This used to be the stock scaffold: a generic icon in a square, a bold sans
-// title, and primitives whose colour tokens were never defined, so it rendered
-// with black borders and an invisible primary button on an otherwise cream
-// site. It now uses the brand mark, the display face for the title, and the
-// same card as everything else. The `icon` prop is still accepted so callers
-// do not have to change, but the brand mark is what we show.
-export default function AuthLayout({ title, subtitle, footer, children }) {
+// Wide, it is an open notebook: the form is the page you are writing on, and
+// beside it is the marbled cover with its label filled in. On a phone there is
+// only the page. The cover is decoration, so it is hidden from assistive tech;
+// the headline says what the page is.
+export function AuthFrame({ children }) {
   return (
-    <div
-      className="min-h-screen flex flex-col items-center justify-center"
-      style={{ background: 'var(--color-bg)', padding: '40px 20px' }}
-    >
-      <div className="w-full" style={{ maxWidth: 420 }}>
-        <div className="text-center" style={{ marginBottom: 28 }}>
-          <Link
-            to="/"
-            className="inline-flex items-center gap-[10px] no-underline text-inherit"
-            style={{ marginBottom: 22 }}
-            aria-label="Pathways home"
-          >
-            <BrandMark size={40} />
-            <span style={{ fontFamily: 'var(--font-heading)', fontSize: 22, letterSpacing: '-0.01em' }}>Pathways</span>
+    <div className="auth">
+      <div className="auth-main">
+        <header className="auth-top">
+          <Link to="/" className="brand" aria-label="Pathways home">
+            <BrandMark size={38} />
+            <span className="brand-name">Pathways</span>
           </Link>
-          <h1 style={{ fontSize: 'clamp(28px,4vw,34px)', margin: '0 0 6px' }}>{title}</h1>
-          {subtitle && (
-            <p style={{ margin: 0, fontSize: 15, color: 'var(--text-muted)' }}>{subtitle}</p>
-          )}
-        </div>
-
-        <div className="card elev-md" style={{ padding: 28, gap: 0, display: 'block' }}>
-          {children}
-        </div>
-
-        {footer && (
-          <p className="text-center" style={{ fontSize: 14, color: 'var(--text-muted)', marginTop: 22 }}>{footer}</p>
-        )}
+        </header>
+        <main className="auth-body">{children}</main>
       </div>
+
+      <aside className="auth-side band-road" aria-hidden="true">
+        <div className="cover-label auth-cover">
+          <BrandMark size={92} className="auth-cover-mark" />
+          <span className="auth-cover-title">Pathways</span>
+          <span className="auth-cover-sub">College and career notebook</span>
+          <dl className="auth-cover-lines">
+            <div><dt>Name</dt><dd>you</dd></div>
+            <div><dt>Subject</dt><dd>what comes after high school</dd></div>
+            <div><dt>Price</dt><dd>free. actually free.</dd></div>
+          </dl>
+          <span className="auth-cover-fine">13+ · COPPA and FERPA aligned · Student data is never sold</span>
+        </div>
+      </aside>
     </div>
+  );
+}
+
+// The `icon` prop is still accepted so callers do not have to change, but the
+// brand mark is what we show. `kicker` is the line of small print above the
+// title.
+export default function AuthLayout({ title, subtitle, footer, kicker, children }) {
+  return (
+    <AuthFrame>
+      <div className="auth-head">
+        {kicker && <span className="kicker kicker-sun">{kicker}</span>}
+        <h1 className="auth-title">{title}</h1>
+        {subtitle && <p className="auth-sub">{subtitle}</p>}
+      </div>
+
+      {children && <div className="auth-stack">{children}</div>}
+
+      {footer && <p className="auth-foot">{footer}</p>}
+    </AuthFrame>
+  );
+}
+
+// A one-time code as six separate boxes. Every prop goes straight through to
+// the underlying input (value, onChange, onKeyDown, autoFocus and so on), so a
+// caller decides what a finished code does. `invalid` turns the boxes red.
+export function CodeBoxes({ invalid = false, ...props }) {
+  return (
+    <OTPInput
+      maxLength={6}
+      containerClassName="otp"
+      {...props}
+      render={({ slots }) => slots.map((slot, index) => (
+        <span key={index} className="otp-slot" data-active={slot.isActive} data-invalid={invalid}>
+          {slot.char}
+          {slot.hasFakeCaret && <span className="otp-caret" />}
+        </span>
+      ))}
+    />
   );
 }

@@ -18,13 +18,18 @@
 - Mutual connections before direct messaging. One-on-one conversations only, never group chats, with contact-sharing and meetup arranging blocked automatically.
 - Mentor verification is done by a human reviewing public institutional evidence, not by an automated email-domain check, so students know who is answering them.
 - Search across people, high schools, colleges with public/private and in-state filters, summer programs, and majors.
+- A private planner for signed-in members: a dated checklist and a college list, starting from what students in each grade usually need to do next. Only the member can see it.
+- A public, plain-English glossary of college admissions and financial aid terms, and a season-by-season guide for 9th to 12th grade. Neither needs an account.
 
 ## Pages
 
 - [Home](https://pathways.uno/): What Pathways is and who it is for.
 - [How it works](https://pathways.uno/how-it-works): Features in detail, and how Pathways compares to TikTok, Instagram, Reddit, College Confidential, LinkedIn, and Google search.
+- [By grade](https://pathways.uno/by-grade): What to do in 9th, 10th, 11th, and 12th grade, season by season.
+- [Glossary](https://pathways.uno/glossary): College admissions and financial aid terms explained in plain English, including FAFSA, CSS Profile, Early Decision, and net price.
 - [Sage](https://pathways.uno/sage): The optional AI advisor, what it does, and what it costs.
 - [FAQ](https://pathways.uno/faq): Direct answers on cost, eligibility, and how Pathways differs from a private counselor.
+- [Safety](https://pathways.uno/safety): How messaging is protected, and how to report or block someone.
 - [Join free](https://pathways.uno/join): Create an account with Google or email.
 - [Privacy Policy](https://pathways.uno/privacy)
 - [Terms of Service](https://pathways.uno/terms)

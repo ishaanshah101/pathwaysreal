@@ -7,24 +7,24 @@ import {
 } from '@/lib/company';
 
 const S = ({ title, children }) => (
-  <section style={{ marginBottom: 26 }}>
-    <h2 className="h-sans" style={{ fontSize: 18, margin: '0 0 8px' }}>{title}</h2>
-    <div className="prose" style={{ fontSize: 15, lineHeight: 1.7, color: 'var(--text-muted)' }}>{children}</div>
+  <section>
+    <h2>{title}</h2>
+    <div className="prose">{children}</div>
   </section>
 );
 
 export default function Privacy() {
   return (
-    <section className="page-hero" style={{ paddingBottom: 'clamp(40px,6vh,72px)', maxWidth: '68ch' }}>
+    <section className="band doc">
+      <div className="wrap-read">
       <Seo
         title="Privacy Policy | Pathways"
         description="How Pathways handles student information: what we collect, who can see it, how long we keep it, and how to delete it. We never sell student data."
         path="/privacy"
       />
-      <h1 style={{ fontSize: 'clamp(30px,4.2vw,46px)', margin: '0 0 8px' }}>Privacy Policy</h1>
-      <p style={{ color: 'var(--text-subtle)', fontSize: 13, marginBottom: 32 }}>
-        Last updated August 2026
-      </p>
+      <span className="kicker kicker-sun">The rules</span>
+      <h1 className="title-1">Privacy Policy</h1>
+      <p className="meta" style={{ margin: '14px 0 8px' }}>Last updated November 2026</p>
 
       <S title="1. Who we are">
         {PRODUCT_NAME} ({PRODUCT_DOMAIN}) is a platform that connects high school students with students,
@@ -44,6 +44,12 @@ export default function Privacy() {
         <b>As you use Pathways:</b> the posts you publish, the messages you send and receive, your connection
         requests, and the questions you ask Sage along with Sage's answers, so your conversation is there when you
         come back.
+        <br /><br />
+        <b>Your plan:</b> the tasks, dates, colleges, and notes you add to your private planner. Only you can see
+        them. They are not shown to other members, to mentors, or in search.
+        <br /><br />
+        <b>Posts you mark helpful:</b> which posts you marked. Other members see only the total on a post,
+        never who marked it.
         <br /><br />
         <b>Notes you keep on other members:</b> a private nickname and up to 4,000 characters of free-text notes you
         can write about another member, the way the notes field on a phone contact works. The person you are writing
@@ -113,9 +119,9 @@ export default function Privacy() {
         afterwards.
         <br /><br />
         <b>What is deleted:</b> your profile, every post you wrote, your Sage conversations, folders and
-        free-sample counters, all your connections and pending requests, the blocks you placed on other
-        people, your rate-limit counters, any verification request you submitted, and your sign-in itself,
-        so the account can no longer be used to log in.
+        free-sample counters, your plan and college list, your helpful marks, all your connections and pending requests, the
+        blocks you placed on other people, your rate-limit counters, any verification request you submitted,
+        and your sign-in itself, so the account can no longer be used to log in.
         <br /><br />
         <b>If you subscribe to Sage:</b> we cancel your subscription with Stripe before anything is
         deleted. If that cancellation fails, we stop and delete nothing, so you are never left paying for
@@ -189,6 +195,7 @@ export default function Privacy() {
         Questions, requests, or concerns about privacy go to <ContactEmail />. Safety concerns are
         treated as urgent — see our <Link to="/safety">Safety page</Link>.
       </S>
+      </div>
     </section>
   );
 }

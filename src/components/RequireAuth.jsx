@@ -2,14 +2,17 @@ import React, { useEffect } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
 import { useProfile } from '@/lib/useProfile';
+import BrandMark from '@/components/BrandMark';
 
+// The full-screen wait: the mark with its dashes running, and a short pencil
+// line under it. With motion turned off the dashes hold still
+// and the word "Loading" shows instead.
 function Spinner() {
   return (
-    <div className="fixed inset-0 flex items-center justify-center" style={{ background: 'var(--color-bg)' }}>
-      <div
-        className="rounded-full animate-spin"
-        style={{ width: 34, height: 34, border: '4px solid var(--color-accent-200)', borderTopColor: 'var(--color-accent)' }}
-      />
+    <div className="pw-loading" role="status">
+      <BrandMark size={72} aria-hidden="true" />
+      <span className="lane-load" aria-hidden="true" />
+      <span className="pw-loading-word">Loading</span>
     </div>
   );
 }

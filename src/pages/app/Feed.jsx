@@ -1,30 +1,31 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
+import { PenLine, Search } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
-import { useProfile, ROLE_LABELS, CATEGORY_LABELS } from '@/lib/useProfile';
+import { useProfile, CATEGORY_LABELS } from '@/lib/useProfile';
 import { useAuth } from '@/lib/AuthContext';
-import EditPostModal from '@/components/app/EditPostModal';
-import AttachmentList from '@/components/attachments/AttachmentList';
 import AttachmentDropzone from '@/components/attachments/AttachmentDropzone';
 import useAttachmentQueue from '@/components/attachments/useAttachmentQueue';
-import { authorAvatar, initialsOf } from '@/lib/avatar';
-import CoverArt from '@/components/app/CoverArt';
-import SafetyActions from '@/components/safety/SafetyActions';
-import ConnectButton from '@/components/app/ConnectButton';
-import FollowButton from '@/components/app/FollowButton';
 import { useFollows } from '@/lib/useFollows';
 import { useBlocks } from '@/lib/useBlocks';
 import { useConnections } from '@/lib/useConnections';
 import Seo from '@/components/Seo';
-import SharePostButton from '@/components/app/SharePostButton';
-import SavePostButton from '@/components/app/SavePostButton';
 import OfflineBanner from '@/components/app/OfflineBanner';
 import PullToRefresh from '@/components/app/PullToRefresh';
 import PushOptInCard from '@/components/app/PushOptInCard';
+import PostArticle from '@/components/app/PostArticle';
 import FieldSelect from '@/components/ui/FieldSelect';
+import Plate from '@/components/kit/Plate';
+import Icon from '@/components/kit/Icon';
+import SuggestedPeople from '@/components/app/SuggestedPeople';
+import MiniProfile from '@/components/app/MiniProfile';
 import { useSavedPosts } from '@/lib/useSavedPosts';
+import { useReactions } from '@/lib/useReactions';
 import { useOnline } from '@/lib/useOnline';
 import { usePeopleByEmail } from '@/lib/usePeople';
-import { PenLine, Users } from 'lucide-react';
+import { signFor } from '@/lib/categories';
+import { GLOSSARY, termId } from '@/data/glossary';
+import { usePlan, dateParts, dueLabel } from '@/lib/usePlan';
 
 const PAGE_SIZE = 12;
 // Posts already read are kept here so the feed still has something to show with
@@ -39,219 +40,10 @@ function writeFeedCache(rows) {
   try { localStorage.setItem(FEED_CACHE_KEY, JSON.stringify(rows.slice(0, 40))); } catch { /* quota */ }
 }
 
-function timeAgo(iso) {
-  if (!iso) return '';
-  const secs = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
-  if (secs < 60) return 'just now';
-  const mins = Math.floor(secs / 60);
-  if (mins < 60) return `${mins}m ago`;
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h ago`;
-  const days = Math.floor(hrs / 24);
-  if (days < 7) return `${days}d ago`;
-  const weeks = Math.floor(days / 7);
-  if (weeks < 5) return `${weeks}w ago`;
-  return new Date(iso).toLocaleDateString();
-}
-
-function Avatar({ name, authorKey, size = 40 }) {
-  const [bg, fg] = authorAvatar(authorKey || name || '?');
-  return (
-    <span
-      className="flex items-center justify-center"
-      style={{
-        width: size, height: size, borderRadius: 999, flex: 'none',
-        background: bg, color: fg,
-        fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: size * 0.36, letterSpacing: '.02em',
-      }}
-    >
-      {initialsOf(name)}
-    </span>
-  );
-}
-
-function PostCard({
-  post, connection, busy, onConnect, isMine, onBlocked, canEdit, onSaved,
-  following, followBusy, onToggleFollow, saved, saveBusy, onToggleSave,
-}) {
-  const v = post.variant || 'plain';
-  const isLong = (post.body || '').length > 620;
-  const [open, setOpen] = useState(false);
-  const [editing, setEditing] = useState(false);
-
-  return (
-    <article className="card elev-sm" style={{ padding: 22, gap: 12 }}>
-      <div className="flex items-center gap-3">
-        <Avatar name={post.author_name} authorKey={post.author_key} />
-        <div className="flex flex-col" style={{ minWidth: 0 }}>
-          <span style={{ fontSize: 14, fontWeight: 600 }}>{post.author_name || 'A Pathways member'}</span>
-          <span style={{ fontSize: 12.5, color: 'var(--text-subtle)' }}>
-            {post.author_headline || ROLE_LABELS[post.author_role] || 'Member'}
-            {post.created_date ? ` · ${timeAgo(post.created_date)}` : ''}
-          </span>
-        </div>
-        <span className="tag tag-accent" style={{ marginLeft: 'auto', flex: 'none' }}>
-          {CATEGORY_LABELS[post.category] || 'Advice'}
-        </span>
-      </div>
-
-      {v === 'cover' && <CoverArt postId={post.id} category={post.category} />}
-
-      <h2 className="h-sans" style={{ fontSize: 19, margin: '2px 0 0', textWrap: 'balance' }}>{post.title}</h2>
-
-      {v === 'quote' && post.quote && (
-        <blockquote
-          style={{
-            margin: 0, padding: '14px 18px', borderRadius: 12,
-            borderLeft: '3px solid var(--color-accent)',
-            background: 'var(--color-surface-2)',
-            fontSize: 15.5, lineHeight: 1.5,
-          }}
-        >
-          {post.quote}
-        </blockquote>
-      )}
-
-      {v === 'stats' && Array.isArray(post.stats) && (
-        <div className="grid" style={{ gridTemplateColumns: `repeat(${Math.min(post.stats.length, 3)}, 1fr)`, gap: 10 }}>
-          {post.stats.map((s) => (
-            <div key={s.label} style={{ background: 'var(--color-surface-2)', borderRadius: 12, padding: '12px 14px' }}>
-              <div style={{ fontFamily: 'var(--font-heading)', fontSize: 24, color: 'var(--color-text)', lineHeight: 1.1 }}>
-                {s.n}
-              </div>
-              <div style={{ fontSize: 11.5, color: 'var(--text-muted)', lineHeight: 1.35, marginTop: 2 }}>
-                {s.label}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      <p
-        style={{
-          fontSize: 15, lineHeight: 1.65, color: 'var(--color-neutral-800)', margin: 0,
-          whiteSpace: 'pre-wrap',
-          display: isLong && !open ? '-webkit-box' : 'block',
-          WebkitLineClamp: isLong && !open ? 6 : 'unset',
-          WebkitBoxOrient: 'vertical',
-          overflow: isLong && !open ? 'hidden' : 'visible',
-        }}
-      >
-        {post.body}
-      </p>
-      <AttachmentList files={post.attachments} postId={post.id} />
-
-      {isLong && (
-        <button
-          type="button"
-          onClick={() => setOpen((o) => !o)}
-          className="self-start"
-          style={{
-            background: 'none', border: 0, padding: 0, font: 'inherit', cursor: 'pointer',
-            fontSize: 13.5, fontWeight: 600, color: 'var(--color-accent-700)',
-          }}
-        >
-          {open ? 'Show less' : 'Keep reading'}
-        </button>
-      )}
-
-      {v === 'checklist' && Array.isArray(post.items) && (
-        <div className="flex flex-col" style={{ gap: 9, marginTop: 2 }}>
-          {post.items.map((t, i) => (
-            <span key={t} className="flex gap-[10px] items-start" style={{ fontSize: 14, lineHeight: 1.5 }}>
-              <span
-                className="flex items-center justify-center"
-                style={{
-                  width: 20, height: 20, borderRadius: 999, flex: 'none', marginTop: 1,
-                  background: 'var(--color-accent-2-200)', color: 'var(--color-accent-2-800)',
-                  fontSize: 11, fontWeight: 700,
-                }}
-              >
-                {i + 1}
-              </span>
-              {t}
-            </span>
-          ))}
-        </div>
-      )}
-
-      {Array.isArray(post.tags) && post.tags.length > 0 && (
-        <div className="flex gap-[6px] flex-wrap">
-          {post.tags.map((t) => <span key={t} className="tag tag-accent-2">{t}</span>)}
-        </div>
-      )}
-
-      <div className="flex items-center gap-3 flex-wrap" style={{ marginTop: 2 }}>
-        {post.is_sample ? (
-          <span style={{ fontSize: 12, color: 'var(--text-subtle)' }}>
-            Sample post. Real members' posts appear here as they join.
-          </span>
-        ) : isMine ? (
-          <span className="badge badge-neutral">Your post</span>
-        ) : post.author_email ? (
-          // Messaging is unlocked by an accepted Connection. ConnectButton shows
-          // the right control for wherever this pair currently stands, and asks
-          // before it sends anything.
-          <>
-            {/* Following is the lightweight half: one tap, nothing sent to the
-                author, it only decides whether their posts follow you around. */}
-            <FollowButton
-              targetEmail={post.author_ref || post.author_email}
-              targetName={post.author_name}
-              following={following}
-              busy={followBusy}
-              onToggle={onToggleFollow}
-            />
-            <ConnectButton
-              targetEmail={post.author_email}
-              targetName={post.author_name}
-              connection={connection}
-              busy={busy}
-              onConnect={onConnect}
-            />
-          </>
-        ) : null}
-
-        {/* Save for later, and share out to any other app on the device. */}
-        {!post.is_sample && (
-          <>
-            <SavePostButton postId={post.id} saved={saved} busy={saveBusy} onToggle={onToggleSave} />
-            <SharePostButton post={post} />
-          </>
-        )}
-
-        {/* Only the app admin sees this. The server's rules on Post already
-            restrict editing to admins, so this button is convenience, not the
-            protection. */}
-        {canEdit && !post.is_sample && (
-          <>
-            <button
-              type="button"
-              className="btn btn-secondary btn-sm"
-              onClick={() => setEditing(true)}
-            >
-              Edit
-            </button>
-            <EditPostModal open={editing} onOpenChange={setEditing} post={post} onSaved={onSaved} />
-          </>
-        )}
-
-        {/* A post is often the first place something feels off, so report and
-            block live right here rather than only on the profile. */}
-        {!post.is_sample && !isMine && post.author_email && (
-          <span className="flex gap-4 items-center" style={{ marginLeft: 'auto' }}>
-            <SafetyActions
-              targetEmail={post.author_email}
-              targetName={post.author_name}
-              contextType="post"
-              contextId={post.id}
-              onBlocked={onBlocked}
-            />
-          </span>
-        )}
-      </div>
-    </article>
-  );
+// A different glossary term each day, the same one for everybody that day.
+function wordOfTheDay() {
+  const day = Math.floor(Date.now() / 86400000);
+  return GLOSSARY[day % GLOSSARY.length];
 }
 
 export default function Feed() {
@@ -262,20 +54,42 @@ export default function Feed() {
   const {
     connectionWith, requestConnection, busyEmail, connectionError, clearConnectionError,
   } = useConnections();
-  const { isFollowing, toggleFollow, followBusyEmail, followingEmails } = useFollows();
+  const {
+    isFollowing, toggleFollow, followBusyEmail, followingEmails, followingCount: myFollowing, followerCount: myFollowers,
+  } = useFollows();
   const { isSaved, toggleSave, busyPostId } = useSavedPosts();
+  const {
+    hasReacted, countFor: helpfulFor, toggleReaction, busyPostId: reactBusyId, reactionError, clearReactionError,
+  } = useReactions();
   const online = useOnline();
+  const { upcoming: planAhead, overdue: planLate } = usePlan();
   const [offlineCached, setOfflineCached] = useState(false);
   const [posts, setPosts] = useState([]);
   const { profileFor } = usePeopleByEmail(posts.map((p) => p.author_email));
   const [loading, setLoading] = useState(true);
+  // Two separate choices, the way a social feed has them: whose posts (the
+  // tabs), and what about (the row of topics under the tabs).
+  const [scope, setScope] = useState('all');
   const [filter, setFilter] = useState('all');
   const [visible, setVisible] = useState(PAGE_SIZE);
   const [composing, setComposing] = useState(false);
   const [draft, setDraft] = useState({ title: '', body: '', category: 'general' });
   const [posting, setPosting] = useState(false);
   const [error, setError] = useState('');
+  const [query, setQuery] = useState('');
+  const [params, setParams] = useSearchParams();
+  const focusId = params.get('post');
   const queue = useAttachmentQueue();
+
+  // The jump menu's "Write a post" lands here with ?compose=1.
+  useEffect(() => {
+    if (params.get('compose') === '1') {
+      setComposing(true);
+      const next = new URLSearchParams(params);
+      next.delete('compose');
+      setParams(next, { replace: true });
+    }
+  }, [params, setParams]);
 
   const load = async () => {
     try {
@@ -331,187 +145,307 @@ export default function Feed() {
     [loading, posts, blockedEmails, profileFor],
   );
 
-  // "Following" is a view of the same feed narrowed to the people I follow, so
-  // it lives alongside the topic filters rather than being a separate screen.
-  const filtered = useMemo(() => {
-    if (filter === 'all') return combined;
-    if (filter === 'following') {
-      return combined.filter(
-        (p) => followingEmails.includes(String(p.author_ref || p.author_email || '').toLowerCase()),
-      );
-    }
-    return combined.filter((p) => p.category === filter);
-  }, [combined, filter, followingEmails]);
+  const isFollowed = useMemo(() => {
+    const set = new Set(followingEmails);
+    return (p) => set.has(String(p.author_ref || p.author_email || '').toLowerCase());
+  }, [followingEmails]);
 
-  useEffect(() => { setVisible(PAGE_SIZE); }, [filter]);
+  // "Following" is the same feed narrowed to the people I follow, so it is a
+  // tab on this screen rather than a screen of its own.
+  const inScope = useMemo(
+    () => (scope === 'following' ? combined.filter(isFollowed) : combined),
+    [combined, scope, isFollowed],
+  );
+
+  const filtered = useMemo(() => {
+    let rows = inScope;
+    if (filter !== 'all') rows = rows.filter((p) => p.category === filter);
+    const needle = query.trim().toLowerCase();
+    if (needle) {
+      rows = rows.filter((p) => [p.title, p.body, p.author_name, p.author_headline, ...(p.tags || [])]
+        .join(' ').toLowerCase().includes(needle));
+    }
+    // A shared link puts its post first, so it is on screen without scrolling.
+    if (focusId) {
+      const hit = combined.find((p) => p.id === focusId);
+      if (hit) rows = [hit, ...rows.filter((p) => p.id !== focusId)];
+    }
+    return rows;
+  }, [inScope, combined, filter, query, focusId]);
+
+  useEffect(() => { setVisible(PAGE_SIZE); }, [scope, filter, query]);
 
   const counts = useMemo(() => {
     const c = {};
-    for (const p of combined) c[p.category] = (c[p.category] || 0) + 1;
+    for (const p of inScope) c[p.category] = (c[p.category] || 0) + 1;
     return c;
-  }, [combined]);
+  }, [inScope]);
+
+  const word = wordOfTheDay();
+  // Anything late comes first, then the next dated stops, three in all.
+  const nextStops = [
+    ...planLate.map((t) => ({ ...t, late: true })),
+    ...planAhead.filter((t) => t.due_date),
+  ].slice(0, 3);
+  const first = profile?.full_name ? profile.full_name.split(' ')[0] : '';
+  const followingCount = useMemo(() => combined.filter(isFollowed).length, [combined, isFollowed]);
+  const scopes = [['all', 'For you', combined.length], ['following', 'Following', followingCount]];
+  // Topics nobody has written about yet are left out of the row, apart from
+  // the one that is switched on.
+  const topics = [['all', 'All topics'], ...Object.entries(CATEGORY_LABELS).filter(([v]) => counts[v] > 0 || filter === v)];
 
   return (
     // Swipe down at the top of the feed to reload it, the way a native app does.
     <PullToRefresh onRefresh={load}>
-      <div className="flex flex-col" style={{ gap: 20 }}>
+      <div className="page">
         <Seo title="Your Feed | Pathways" description="Long-form, firsthand college and career advice from students, professors, and counselors on Pathways." path="/app" noindex />
-        <div>
-          <h1 style={{ fontSize: 'clamp(26px,3.2vw,36px)', margin: '0 0 6px' }}>
-            Welcome back{profile?.full_name ? `, ${profile.full_name.split(' ')[0]}` : ''}.
-          </h1>
-          <p style={{ color: 'var(--text-muted)', margin: 0, fontSize: 15 }}>
-            {combined.length === 0
-              ? 'Nothing here yet. Be the first to write something someone else needs to read.'
-              : `${combined.length} post${combined.length === 1 ? '' : 's'} from students, professors, and counselors who've been where you are.`}
-          </p>
-        </div>
 
-        {(!online || offlineCached) && <OfflineBanner cached={posts.length} />}
+        {/* No big headline here. Like any social app, the feed opens straight
+            onto the composer and the posts; the page still has a name for
+            screen readers. */}
+        <h1 className="sr-only">{first ? `Your feed, ${first}` : 'Your feed'}</h1>
 
-        {/* Asked here, inside the app, after onboarding, and only when the member
-            presses the button. Never a permission prompt on first load. */}
-        <PushOptInCard />
+        <div className="feed-layout">
+          <aside className="feed-left" aria-label="You">
+            <MiniProfile profile={profile} email={email} followerCount={myFollowers} followingCount={myFollowing} />
+          </aside>
 
-        {connectionError && (
-          <div
-            role="alert"
-            className="notice notice-warning flex items-start gap-3"
-            style={{ flexDirection: 'row' }}
-          >
-            <span style={{ flex: 1 }}>{connectionError}</span>
-            <button
-              type="button"
-              onClick={clearConnectionError}
-              style={{ background: 'none', border: 0, cursor: 'pointer', font: 'inherit', color: 'inherit', opacity: 0.7 }}
-            >
-              Dismiss
-            </button>
-          </div>
-        )}
+          <div className="feed-main">
+            {(!online || offlineCached) && <OfflineBanner cached={posts.length} />}
 
-        {composing ? (
-          <form onSubmit={publish} className="card elev-md" style={{ padding: 22, gap: 14 }}>
-            <div className="field">
-              <label htmlFor="p-title">Title</label>
-              <input
-                id="p-title" className="input" autoFocus value={draft.title}
-                onChange={(e) => setDraft({ ...draft, title: e.target.value })}
-                placeholder="What did you learn?"
-              />
-            </div>
-            <div className="field">
-              <label htmlFor="p-cat">Topic</label>
-              <FieldSelect
-                id="p-cat"
-                value={draft.category}
-                onValueChange={(category) => setDraft({ ...draft, category })}
-                options={Object.entries(CATEGORY_LABELS)}
-              />
-            </div>
-            <div className="field">
-              <label htmlFor="p-body">Your post</label>
-              <textarea
-                id="p-body" className="input" style={{ minHeight: 150 }} value={draft.body}
-                onChange={(e) => setDraft({ ...draft, body: e.target.value })}
-                placeholder="Be specific and honest. What actually worked?"
-              />
-            </div>
-            <AttachmentDropzone queue={queue} disabled={posting} />
-            <p className="field-hint">Post attachments are shared with signed-in members. Non-image files are not content-scanned; do not share confidential student records.</p>
-            {error && <span role="alert" className="msg msg-error">{error}</span>}
-            <div className="flex gap-2">
-              <button type="submit" className="btn btn-primary" disabled={posting || queue.blocked}>
-                {posting ? 'Posting…' : 'Post to the feed'}
-              </button>
-              <button type="button" className="btn btn-secondary" disabled={posting} onClick={() => setComposing(false)}>Cancel</button>
-            </div>
-          </form>
-        ) : (
-          /* The composer entry point looks like a composer: your avatar, a
-             field, and a button. */
-          <div className="card elev-sm flex items-center gap-3" style={{ flexDirection: 'row', padding: '14px 16px' }}>
-            <Avatar name={profile?.full_name} authorKey={email} size={38} />
-            <button
-              type="button"
-              onClick={() => setComposing(true)}
-              className="input text-left"
-              style={{ flex: 1, minWidth: 0, cursor: 'text', color: 'var(--text-subtle)', background: 'var(--color-surface-2)', borderColor: 'transparent', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
-            >
-              Share something you learned…
-            </button>
-            <button type="button" className="btn btn-primary" onClick={() => setComposing(true)}>
-              <PenLine size={15} aria-hidden="true" /> <span className="hide-mobile">Write a post</span><span className="show-mobile">Post</span>
-            </button>
-          </div>
-        )}
+            {/* Asked here, inside the app, after onboarding, and only when the
+                member presses the button. Never a permission prompt on load. */}
+            <PushOptInCard />
 
-        <div className="flex gap-2 flex-wrap">
-          {[['all', 'All'], ['following', 'Following'], ...Object.entries(CATEGORY_LABELS)].map(([v, l]) => (
-            <button
-              key={v}
-              type="button"
-              onClick={() => setFilter(v)}
-              className="btn btn-chip"
-              aria-pressed={filter === v}
-            >
-              {l}
-              {v !== 'all' && counts[v] ? (
-                <span style={{ opacity: 0.6, marginLeft: 2, fontSize: 12 }}>{counts[v]}</span>
-              ) : null}
-            </button>
-          ))}
-        </div>
+            {reactionError && (
+              <div role="alert" className="notice notice-warning flex items-start gap-3">
+                <span style={{ flex: 1 }}>{reactionError}</span>
+                <button type="button" className="link-btn" style={{ fontWeight: 700 }} onClick={clearReactionError}>Dismiss</button>
+              </div>
+            )}
 
-        {loading ? (
-          <p role="status" style={{ color: 'var(--text-subtle)' }}>Loading the feed…</p>
-        ) : filtered.length === 0 ? (
-          <div className="empty">
-            <span className="empty-icon"><Users size={20} aria-hidden="true" /></span>
-            <p className="empty-title">{filter === 'following' ? 'Nothing from people you follow yet' : 'Nothing here yet'}</p>
-            <p className="empty-body">
-              {filter === 'following'
-                ? 'Follow students and mentors from Explore and their posts will show up here.'
-                : 'Be the first to write something someone else needs to read.'}
-            </p>
-            {filter === 'following'
-              ? <a href="/app/explore" className="btn btn-secondary no-underline" style={{ marginTop: 6 }}>Find people to follow</a>
-              : <button type="button" className="btn btn-primary" style={{ marginTop: 6 }} onClick={() => setComposing(true)}>Write the first post</button>}
-          </div>
-        ) : (
-          <>
-            <div className="flex flex-col" style={{ gap: 16 }}>
-              {filtered.slice(0, visible).map((p) => (
-                <PostCard
-                  key={p.id}
-                  post={p}
-                  connection={p.author_email ? connectionWith(p.author_email) : null}
-                  busy={busyEmail === p.author_email}
-                  onConnect={requestConnection}
-                  isMine={Boolean(email && p.author_email === email)}
-                  onBlocked={reloadBlocks}
-                  canEdit={isAdmin}
-                  onSaved={load}
-                  following={isFollowing(p.author_ref || p.author_email)}
-                  followBusy={followBusyEmail === String(p.author_ref || p.author_email || '').toLowerCase()}
-                  onToggleFollow={toggleFollow}
-                  saved={isSaved(p.id)}
-                  saveBusy={busyPostId === p.id}
-                  onToggleSave={toggleSave}
+            {connectionError && (
+              <div role="alert" className="notice notice-warning flex items-start gap-3">
+                <span style={{ flex: 1 }}>{connectionError}</span>
+                <button type="button" className="link-btn" style={{ fontWeight: 700 }} onClick={clearConnectionError}>Dismiss</button>
+              </div>
+            )}
+
+            {composing ? (
+              <form onSubmit={publish} className="panel">
+                <div className="panel-head">New post</div>
+                <div className="panel-body" style={{ display: 'grid', gap: 16, padding: 18 }}>
+                  <div className="field">
+                    <label htmlFor="p-title">Title</label>
+                    <input
+                      id="p-title" className="input" autoFocus value={draft.title}
+                      onChange={(e) => setDraft({ ...draft, title: e.target.value })}
+                      placeholder="What did you learn?"
+                    />
+                  </div>
+                  <div className="field">
+                    <label htmlFor="p-cat">Topic</label>
+                    <FieldSelect
+                      id="p-cat"
+                      value={draft.category}
+                      onValueChange={(category) => setDraft({ ...draft, category })}
+                      options={Object.entries(CATEGORY_LABELS)}
+                    />
+                  </div>
+                  <div className="field">
+                    <label htmlFor="p-body">Your post</label>
+                    <textarea
+                      id="p-body" className="input" style={{ minHeight: 180, fontFamily: 'var(--font-read)', fontSize: 17, lineHeight: 1.6 }} value={draft.body}
+                      onChange={(e) => setDraft({ ...draft, body: e.target.value })}
+                      placeholder="Be specific and honest. What actually worked?"
+                    />
+                  </div>
+                  <AttachmentDropzone queue={queue} disabled={posting} />
+                  <p className="field-hint" style={{ margin: 0 }}>Post attachments are shared with signed-in members. Non-image files are not content-scanned; do not share confidential student records.</p>
+                  {error && <span role="alert" className="msg msg-error">{error}</span>}
+                  <div className="flex gap-2 flex-wrap">
+                    <button type="submit" className="btn btn-primary" disabled={posting || queue.blocked}>
+                      {posting ? 'Posting…' : 'Post to the feed'}
+                    </button>
+                    <button type="button" className="btn btn-quiet" disabled={posting} onClick={() => setComposing(false)}>Cancel</button>
+                  </div>
+                </div>
+              </form>
+            ) : (
+              /* The composer entry point looks like a composer: your plate, a
+                 field, and a button. */
+              <div className="composer-bar">
+                <Plate name={profile?.full_name} seed={email} size={40} />
+                <button type="button" className="composer-field" onClick={() => setComposing(true)}>
+                  {first ? `What did you learn this week, ${first}?` : 'What did you learn this week?'}
+                </button>
+                <button type="button" className="btn btn-primary btn-sm" onClick={() => setComposing(true)}>Post</button>
+              </div>
+            )}
+
+            {/* Whose posts, and a search, on one line. */}
+            <div className="feed-bar">
+              <div className="feed-tabs" role="tablist" aria-label="Whose posts to show">
+                {scopes.map(([v, l, n]) => (
+                  <button
+                    key={v} type="button" role="tab" className="feed-tab"
+                    aria-selected={scope === v} onClick={() => setScope(v)}
+                  >
+                    {l}
+                    <span className="num" aria-hidden="true">{n}</span>
+                  </button>
+                ))}
+              </div>
+              <div className="searchbox feed-search">
+                <Icon as={Search} size={17} />
+                <input
+                  className="input"
+                  type="search"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Search posts"
+                  aria-label="Search posts by word, person, or tag"
                 />
+              </div>
+            </div>
+
+            {/* What about. One row that scrolls sideways when it runs out of room. */}
+            <div className="feed-chips" role="group" aria-label="Filter posts by topic">
+              {topics.map(([v, l]) => (
+                <button key={v} type="button" className={`sign sign-${v === 'all' ? 'ink' : signFor(v)}`} aria-pressed={filter === v} onClick={() => setFilter(v)}>
+                  {l}
+                  {v !== 'all' && <span className="num" aria-hidden="true">{counts[v] || 0}</span>}
+                </button>
               ))}
             </div>
 
-            {visible < filtered.length && (
-              <button
-                type="button"
-                className="btn btn-secondary self-center"
-                onClick={() => setVisible((n) => n + PAGE_SIZE)}
-              >
-                Show more ({filtered.length - visible} left)
-              </button>
+            {loading ? (
+              <div role="status" aria-label="Loading the feed" style={{ display: 'grid', gap: 14, paddingTop: 8 }}>
+                <span className="skeleton skeleton-title" style={{ width: '70%' }} />
+                <span className="skeleton skeleton-line" />
+                <span className="skeleton skeleton-line" style={{ width: '92%' }} />
+                <span className="skeleton skeleton-line" style={{ width: '64%' }} />
+              </div>
+            ) : filtered.length === 0 ? (
+              <div className="empty">
+                <p className="empty-title">
+                  {query ? `No posts match “${query}”.` : scope === 'following' ? 'Nothing from people you follow yet.' : 'Nothing here yet.'}
+                </p>
+                <p className="empty-body">
+                  {query
+                    ? 'Try one word instead of a phrase, or clear the topic filter.'
+                    : scope === 'following'
+                      ? 'Follow students and mentors from Explore and their posts will show up here.'
+                      : 'Be the first to write something someone else needs to read.'}
+                </p>
+                {query
+                  ? <button type="button" className="btn btn-secondary" style={{ marginTop: 6 }} onClick={() => { setQuery(''); setFilter('all'); setScope('all'); }}>Clear search</button>
+                  : scope === 'following'
+                    ? <Link to="/app/explore" className="btn btn-secondary" style={{ marginTop: 6 }}>Find people to follow</Link>
+                    : <button type="button" className="btn btn-primary" style={{ marginTop: 6 }} onClick={() => setComposing(true)}>Write the first post</button>}
+              </div>
+            ) : (
+              <>
+                <div className="feed-stream">
+                  {filtered.slice(0, visible).map((p, i) => (
+                    <React.Fragment key={p.id}>
+                      {i > 0 && <hr className="lane lane-soft" />}
+                      <PostArticle
+                        post={p}
+                        connection={p.author_email ? connectionWith(p.author_email) : null}
+                        busy={busyEmail === p.author_email}
+                        onConnect={requestConnection}
+                        isMine={Boolean(email && p.author_email === email)}
+                        onBlocked={reloadBlocks}
+                        canEdit={isAdmin}
+                        onSaved={load}
+                        following={isFollowing(p.author_ref || p.author_email)}
+                        followBusy={followBusyEmail === String(p.author_ref || p.author_email || '').toLowerCase()}
+                        onToggleFollow={toggleFollow}
+                        saved={isSaved(p.id)}
+                        saveBusy={busyPostId === p.id}
+                        onToggleSave={toggleSave}
+                        verified={profileFor(p.author_email)?.verified === true}
+                        focused={focusId === p.id}
+                        helpfulCount={helpfulFor(p)}
+                        reacted={hasReacted(p.id)}
+                        reactBusy={reactBusyId === p.id}
+                        onToggleHelpful={toggleReaction}
+                      />
+                    </React.Fragment>
+                  ))}
+                </div>
+
+                {visible < filtered.length && (
+                  <button type="button" className="btn btn-secondary" style={{ justifySelf: 'center' }} onClick={() => setVisible((n) => n + PAGE_SIZE)}>
+                    Show more ({filtered.length - visible} left)
+                  </button>
+                )}
+              </>
             )}
-          </>
+          </div>
+
+          <aside className="feed-aside" aria-label="People and reference">
+            {/* Search lives up here when there is room for the side column, and
+                under the tabs when there is not. Both are the same search. */}
+            <div className="searchbox rail-search">
+              <Icon as={Search} size={17} />
+              <input
+                className="input"
+                type="search"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search posts"
+                aria-label="Search posts by word, person, or tag"
+              />
+            </div>
+
+            <SuggestedPeople isFollowing={isFollowing} toggleFollow={toggleFollow} followBusyEmail={followBusyEmail} />
+
+            <div className="panel">
+              <div className="panel-head">Next on your plan</div>
+              <div className="panel-body" style={{ display: 'grid', gap: 12 }}>
+                {nextStops.length === 0 ? (
+                  <p style={{ margin: 0, fontSize: 14.5, lineHeight: 1.5, color: 'var(--ink-2)' }}>
+                    Nothing with a date yet. Put your next deadline somewhere you will see it.
+                  </p>
+                ) : nextStops.map((t) => {
+                  const d = dateParts(t.due_date);
+                  return (
+                    <div key={t.id} style={{ display: 'grid', gridTemplateColumns: '46px minmax(0,1fr)', gap: 10, alignItems: 'center' }}>
+                      <span className="marker" data-tone={t.late ? 'late' : undefined} style={{ width: 46, minHeight: 44 }} aria-hidden="true">
+                        <small>{d.month}</small><b style={{ fontSize: 19 }}>{d.day}</b>
+                      </span>
+                      <span style={{ minWidth: 0 }}>
+                        <b style={{ display: 'block', fontSize: 14.5, lineHeight: 1.25 }}>{t.title}</b>
+                        <span className="meta">{dueLabel(t.due_date)}</span>
+                      </span>
+                    </div>
+                  );
+                })}
+                <Link to="/app/plan" style={{ fontWeight: 800, fontSize: 14.5 }}>{nextStops.length === 0 ? 'Start a plan' : 'Open your plan'}</Link>
+              </div>
+            </div>
+
+            <div className="panel aside-word">
+              <div className="panel-head">Word of the day</div>
+              <div className="panel-body">
+                <b>{word.term}</b>
+                <p>{word.def}</p>
+                <Link to={`/app/glossary#${termId(word.term)}`} style={{ fontWeight: 800, fontSize: 14.5 }}>Open the glossary</Link>
+              </div>
+            </div>
+          </aside>
+        </div>
+
+        {/* On a phone, writing a post is always one thumb away. */}
+        {!composing && (
+          <button
+            type="button" className="fab" aria-label="Write a post"
+            onClick={() => { setComposing(true); window.scrollTo({ top: 0, behavior: 'auto' }); }}
+          >
+            <Icon as={PenLine} size={22} />
+          </button>
         )}
       </div>
     </PullToRefresh>

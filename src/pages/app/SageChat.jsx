@@ -11,6 +11,8 @@ import SageMessages from '@/components/sage/SageMessages';
 import SageComposer from '@/components/sage/SageComposer';
 import { Spinner } from '@/components/RequireAuth';
 import Seo from '@/components/Seo';
+import PageHead from '@/components/kit/PageHead';
+import Icon from '@/components/kit/Icon';
 import { ArrowLeft } from 'lucide-react';
 
 export default function SageChat() {
@@ -128,13 +130,13 @@ export default function SageChat() {
   const showPane = !narrow || Boolean(threadParam);
 
   return (
-    <div className="flex flex-col" style={{ gap: 16 }}>
+    <div className="page fit-page">
       <Seo title="Ask Sage | Pathways" description="Chat with Sage, your AI college and career advisor on Pathways, personalized to your grade, school, and goals." path="/app/sage" noindex />
 
       {checkout === 'success' && (
-        <div className="notice notice-success flex items-center gap-3 flex-wrap">
+        <div className="notice notice-success sage-flash" role="status">
           You're subscribed to Sage. Ask it anything.
-          <button type="button" className="btn btn-ghost" style={{ fontSize: 13, marginLeft: 'auto' }} onClick={() => setParams({})}>
+          <button type="button" className="link-btn" onClick={() => setParams({})}>
             Dismiss
           </button>
         </div>
@@ -142,46 +144,37 @@ export default function SageChat() {
 
       {/* The header is a waste of a phone screen once a chat is open. */}
       {showList && (
-        <div className="flex items-start gap-4 flex-wrap">
-          <div style={{ flex: '1 1 340px' }}>
-            <h1 style={{ fontSize: 'clamp(26px,3.2vw,36px)', margin: '0 0 6px' }}>Ask Sage anything.</h1>
-            <p style={{ color: 'var(--text-muted)', margin: 0, maxWidth: '56ch', lineHeight: 1.6 }}>
-              Sage knows your grade, your school, and your goals. Keep separate chats for essays, your
-              college list, or summer plans, and attach a draft whenever you want it read.
-            </p>
-          </div>
-          <div className="flex flex-col items-end" style={{ gap: 4 }}>
+        <PageHead
+          kicker="Sage"
+          title="Ask Sage anything."
+          sub="Sage knows your grade, your school, and your goals. Keep separate chats for essays, your college list, or summer plans, and attach a draft whenever you want it read."
+        >
+          <div className="sage-billing">
             {/* No link out to an external payment page from inside a native
                 wrapper: Apple does not allow it. */}
             {native ? null : source === 'apple' ? (
-              <span style={{ fontSize: 11.5, color: 'var(--text-subtle)', maxWidth: 220, textAlign: 'right', lineHeight: 1.5 }}>
-                Manage this subscription in your device settings.
-              </span>
+              <span className="meta">Manage this subscription in your device settings.</span>
             ) : (
-              <button type="button" className="btn btn-secondary" style={{ fontSize: 13 }} onClick={manageBilling}>
+              <button type="button" className="btn btn-secondary btn-sm" onClick={manageBilling}>
                 Manage subscription
               </button>
             )}
             {renewalDate && (
-              <span style={{ fontSize: 11.5, color: 'var(--text-subtle)' }}>
+              <span className="meta">
                 {isCanceling ? `Renewal canceled. Sage stays available through ${renewalDate}.` : `Renews ${renewalDate}`}
               </span>
             )}
             {billingError && (
-              <span className="msg msg-error" style={{ maxWidth: 220, textAlign: 'right' }} role="alert">{billingError}</span>
+              <span className="msg msg-error" role="alert">{billingError}</span>
             )}
           </div>
-        </div>
+        </PageHead>
       )}
 
-      <div
-        className="grid app-split"
-        style={{
-          gridTemplateColumns: narrow ? 'minmax(0,1fr)' : 'minmax(0,260px) minmax(0,1fr)',
-          gap: 16,
-          alignItems: 'start',
-        }}
-      >
+      {/* One frame sized off the viewport. The transcript inside it grows to
+          fill what is left, so the page itself never becomes a second
+          scrolling surface on a phone. */}
+      <div className="duo sage-duo" data-narrow={String(narrow)}>
         {showList && (
           <ThreadList
             threads={chat.threads}
@@ -201,30 +194,24 @@ export default function SageChat() {
         )}
 
         {showPane && (
-          // One scroll region: the card is sized off the viewport and the
-          // transcript inside it grows to fill what is left, so the page itself
-          // never becomes a second scrolling surface on a phone.
-          <div
-            className="card elev-sm"
-            style={{
-              padding: 20, gap: 14, borderRadius: 16, overflow: 'hidden',
-              height: 'calc(100dvh - 260px)', minHeight: 380,
-            }}
-          >
-            <div className="flex items-center gap-2">
+          <section className="duo-main" aria-label={activeThread?.title || 'New chat'}>
+            <header className="convo-head sage-head">
               {narrow && (
                 <button
                   type="button"
                   className="btn btn-quiet btn-sm"
                   onClick={closeThread}
                   aria-label="Back to your chats"
-                  style={{ paddingLeft: 6, paddingRight: 8 }}
+                  style={{ paddingInline: 6, marginLeft: -8 }}
                 >
-                  <ArrowLeft size={16} aria-hidden="true" /> Chats
+                  <Icon as={ArrowLeft} size={16} /> Chats
                 </button>
               )}
-              <span className="card-kicker">{activeThread?.title || 'New chat'}</span>
-            </div>
+              <div style={{ minWidth: 0, flex: 1 }}>
+                <span className="kicker">Chat with Sage</span>
+                <h2 className="sage-title">{activeThread?.title || 'New chat'}</h2>
+              </div>
+            </header>
             <SageMessages
               messages={chat.messages}
               thinking={chat.thinking}
@@ -232,7 +219,7 @@ export default function SageChat() {
               onStarter={(s) => send(s, [])}
             />
             <SageComposer onSend={send} thinking={chat.thinking} />
-          </div>
+          </section>
         )}
       </div>
     </div>

@@ -5,7 +5,10 @@ import { useProfile } from '@/lib/useProfile';
 import { useSubscription, startSageCheckout } from '@/lib/useSubscription';
 import { isNativeApp } from '@/lib/platform';
 import SageComingSoonCard from '@/components/app/SageComingSoonCard';
+import Sign from '@/components/kit/Sign';
 
+// The price, on a yellow slip with a tear-off stub. Sage is the one thing
+// here that costs money, and it is honest to make that obvious.
 export default function PlanCard() {
   const [plan, setPlan] = useState('yearly');
   const [busy, setBusy] = useState(false);
@@ -35,73 +38,66 @@ export default function PlanCard() {
 
   if (isNativeApp()) {
     return hasSage ? (
-      <Link to="/app/sage" className="btn btn-primary no-underline">Open Sage</Link>
+      <Link to="/app/sage" className="btn btn-primary btn-lg btn-go">Open Sage</Link>
     ) : <SageComingSoonCard />;
   }
 
   return (
-    <div className="card elev-md" style={{ padding: 28, gap: 16 }}>
-      <div className="seg self-start">
-        {['monthly', 'yearly'].map((p) => (
-          <button
-            key={p}
-            type="button"
-            className="seg-opt"
-            data-on={String(plan === p)}
-            onClick={() => { setPlan(p); setError(''); }}
-          >
-            {p === 'monthly' ? 'Monthly' : 'Yearly'}
-          </button>
-        ))}
-      </div>
-
-      <div key={plan} className="anim-fade-swap">
-        <div className="flex items-baseline gap-2">
-          <span style={{ fontFamily: 'var(--font-heading)', fontSize: 52, lineHeight: 1 }}>{yearly ? '$40' : '$5'}</span>
-          <span style={{ fontSize: 14, fontWeight: 500, color: 'var(--text-muted)' }}>{yearly ? 'per year' : 'per month'}</span>
-          {yearly && <span className="tag tag-accent" style={{ marginLeft: 'auto' }}>Save 33%</span>}
+    <div className="ticket">
+      <div className="ticket-top">
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <span className="kicker" style={{ margin: 0 }}>Price · Sage</span>
+          <div className="seg" role="group" aria-label="Billing period">
+            {['monthly', 'yearly'].map((p) => (
+              <button
+                key={p}
+                type="button"
+                className="seg-opt"
+                data-on={String(plan === p)}
+                aria-pressed={plan === p}
+                onClick={() => { setPlan(p); setError(''); }}
+              >
+                {p === 'monthly' ? 'Monthly' : 'Yearly'}
+              </button>
+            ))}
+          </div>
         </div>
-        <table className="table" style={{ marginTop: 14, fontSize: 13.5 }}>
-          <tbody>
-            <tr><td style={{ color: 'var(--text-muted)', paddingLeft: 0 }}>Billed</td><td style={{ textAlign: 'right', fontWeight: 600, paddingRight: 0 }}>{yearly ? '$40 once a year' : '$5 every month'}</td></tr>
-            <tr><td style={{ color: 'var(--text-muted)', paddingLeft: 0 }}>Per week</td><td style={{ textAlign: 'right', fontWeight: 600, paddingRight: 0 }}>{yearly ? '$0.77' : '$1.15'}</td></tr>
-            <tr><td style={{ color: 'var(--text-muted)', paddingLeft: 0 }}>File attachments</td><td style={{ textAlign: 'right', fontWeight: 600, paddingRight: 0 }}>Included</td></tr>
-            <tr><td style={{ color: 'var(--text-muted)', paddingLeft: 0 }}>Cancel anytime</td><td style={{ textAlign: 'right', fontWeight: 600, paddingRight: 0 }}>Yes</td></tr>
-          </tbody>
-        </table>
+
+        <div className="ticket-price">
+          <b className="num">{yearly ? '$40' : '$5'}</b>
+          <span style={{ fontWeight: 700, color: 'var(--ink-2)' }}>{yearly ? 'per year' : 'per month'}</span>
+          {yearly && <Sign color="yellow" style={{ marginLeft: 'auto' }}>Save 33%</Sign>}
+        </div>
+
+        <ul className="ticket-rows">
+          <li><span>Billed</span><span>{yearly ? '$40 once a year' : '$5 every month'}</span></li>
+          <li><span>Per week</span><span className="num">{yearly ? '$0.77' : '$1.15'}</span></li>
+          <li><span>File attachments</span><span>Included</span></li>
+          <li><span>Cancel anytime</span><span>Yes</span></li>
+        </ul>
       </div>
 
-      {error && (
-        <span role="alert" className="msg msg-error">{error}</span>
-      )}
+      <div className="ticket-tear" aria-hidden="true" />
 
-      {hasSage ? (
-        <Link to="/app/sage" className="btn btn-primary btn-block no-underline" style={{ minHeight: 46, fontSize: 15 }}>
-          Open Sage
-        </Link>
-      ) : canCheckoutHere ? (
-        <button
-          type="button"
-          className="btn btn-primary btn-block"
-          style={{ minHeight: 46, fontSize: 15 }}
-          onClick={subscribe}
-          disabled={busy}
-        >
-          {busy ? 'Opening secure checkout…' : 'Subscribe to Sage'}
-        </button>
-      ) : (
-        <Link
-          to={`/join?plan=${planKey}`}
-          className="btn btn-primary btn-block no-underline"
-          style={{ minHeight: 46, fontSize: 15 }}
-        >
-          Create an account to get Sage
-        </Link>
-      )}
+      <div className="ticket-bottom">
+        {error && <span role="alert" className="msg msg-error">{error}</span>}
 
-      <span style={{ fontSize: 12, color: 'var(--text-subtle)', textAlign: 'center', lineHeight: 1.5 }}>
-        The core app never has a paid tier. That would defeat the point.
-      </span>
+        {hasSage ? (
+          <Link to="/app/sage" className="btn btn-primary btn-lg btn-block btn-go">Open Sage</Link>
+        ) : canCheckoutHere ? (
+          <button type="button" className="btn btn-sun btn-lg btn-block" onClick={subscribe} disabled={busy}>
+            {busy ? 'Opening secure checkout…' : 'Subscribe to Sage'}
+          </button>
+        ) : (
+          <Link to={`/join?plan=${planKey}`} className="btn btn-sun btn-lg btn-block">
+            Create an account to get Sage
+          </Link>
+        )}
+
+        <span className="meta" style={{ textAlign: 'center', lineHeight: 1.5 }}>
+          The core app never has a paid tier. That would defeat the point.
+        </span>
+      </div>
     </div>
   );
 }

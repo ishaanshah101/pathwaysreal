@@ -10,7 +10,7 @@ import {
 //
 // options: array of [value, label].
 export default function FieldSelect({
-  id, value, onValueChange, options, placeholder = 'Choose one', disabled, ariaLabel,
+  id = undefined, value, onValueChange, options, placeholder = 'Choose one', disabled = false, ariaLabel = undefined,
 }) {
   return (
     <Select value={value || undefined} onValueChange={onValueChange} disabled={disabled}>
@@ -18,7 +18,7 @@ export default function FieldSelect({
         id={id}
         aria-label={ariaLabel}
         className="input"
-        style={{ height: 'auto', minHeight: 42, textAlign: 'left' }}
+        style={{ textAlign: 'left' }}
       >
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>

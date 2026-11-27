@@ -4,7 +4,7 @@
  * Authenticated requests and API responses are network-only and never cached.
  */
 
-const VERSION = 'pathways-v3';
+const VERSION = 'pathways-v4';
 const SHELL = `${VERSION}-shell`;
 const SHELL_URLS = ['/', '/app', '/manifest.json', '/icon.svg'];
 

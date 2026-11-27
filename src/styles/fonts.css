@@ -1,0 +1,18 @@
+/* Typefaces, self-hosted. Nothing is fetched from a third-party font CDN, so a
+   student's browser never tells anyone which page of Pathways they opened, and
+   the installed app keeps its type with no connection.
+
+   Shantell Sans is a felt-tip marker you can actually read. It writes the
+   headlines, the tabs and the buttons.
+   Andika was drawn for teaching people to read. It is the typeface on a good
+   classroom worksheet, and it sets everything anyone wrote at length.
+   Kalam is the handwriting in the margin: short notes, never paragraphs.
+   Courier Prime is the label maker: dates, counts and small print. */
+@import '@fontsource-variable/shantell-sans/wght.css';
+@import '@fontsource/andika/latin-400.css';
+@import '@fontsource/andika/latin-400-italic.css';
+@import '@fontsource/andika/latin-700.css';
+@import '@fontsource/kalam/latin-400.css';
+@import '@fontsource/kalam/latin-700.css';
+@import '@fontsource/courier-prime/latin-400.css';
+@import '@fontsource/courier-prime/latin-700.css';

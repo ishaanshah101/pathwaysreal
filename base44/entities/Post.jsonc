@@ -1,10 +1,27 @@
 {
   "name": "Post",
   "type": "object",
-  "description": "Feed posts. Written ONLY by the create-post backend function, which sets the author from the session and runs the same safety screening as messaging.",
+  "description": "Feed posts. Written ONLY by the create-post backend function, which sets the author from the session and runs the same safety screening as messaging. Members read the feed through the getFeed function, which never hands out another member's email.",
   "properties": {
     "author_email": {
-      "type": "string"
+      "type": "string",
+      "rls": {
+        "read": {
+          "$or": [
+            {
+              "created_by_id": "{{user.id}}"
+            },
+            {
+              "data.author_email": "{{user.email}}"
+            },
+            {
+              "user_condition": {
+                "role": "admin"
+              }
+            }
+          ]
+        }
+      }
     },
     "author_name": {
       "type": "string"

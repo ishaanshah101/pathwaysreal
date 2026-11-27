@@ -22,7 +22,6 @@ import MiniProfile from '@/components/app/MiniProfile';
 import { useSavedPosts } from '@/lib/useSavedPosts';
 import { useReactions } from '@/lib/useReactions';
 import { useOnline } from '@/lib/useOnline';
-import { usePeopleByEmail } from '@/lib/usePeople';
 import { signFor } from '@/lib/categories';
 import { GLOSSARY, termId } from '@/data/glossary';
 import { usePlan, dateParts, dueLabel } from '@/lib/usePlan';
@@ -52,7 +51,7 @@ export default function Feed() {
   const isAdmin = user?.role === 'admin';
   const { blockedEmails, reloadBlocks } = useBlocks();
   const {
-    connectionWith, requestConnection, busyEmail, connectionError, clearConnectionError,
+    requestConnection, busyEmail, connectionError, clearConnectionError,
   } = useConnections();
   const {
     isFollowing, toggleFollow, followBusyEmail, followingEmails, followingCount: myFollowing, followerCount: myFollowers,
@@ -65,7 +64,6 @@ export default function Feed() {
   const { upcoming: planAhead, overdue: planLate } = usePlan();
   const [offlineCached, setOfflineCached] = useState(false);
   const [posts, setPosts] = useState([]);
-  const { profileFor } = usePeopleByEmail(posts.map((p) => p.author_email));
   const [loading, setLoading] = useState(true);
   // Two separate choices, the way a social feed has them: whose posts (the
   // tabs), and what about (the row of topics under the tabs).
@@ -93,8 +91,10 @@ export default function Feed() {
 
   const load = async () => {
     try {
-      const rows = await base44.entities.Post.list('-created_date', 100);
-      const list = Array.isArray(rows) ? rows : [];
+      // The feed comes from getFeed, which names each author by an opaque
+      // reference instead of handing out their email.
+      const res = await base44.functions.invoke('getFeed', {});
+      const list = Array.isArray(res?.data?.posts) ? res.data.posts : [];
       setPosts(list);
       setOfflineCached(false);
       writeFeedCache(list);
@@ -140,9 +140,8 @@ export default function Feed() {
   const combined = useMemo(
     () => (loading
       ? []
-      : posts.map((p) => ({ ...p, author_ref: profileFor(p.author_email)?.member_ref }))
-        .filter((p) => !blockedEmails.includes(p.author_email) && !blockedEmails.includes(p.author_ref))),
-    [loading, posts, blockedEmails, profileFor],
+      : posts.filter((p) => !blockedEmails.includes(p.author_email) && !blockedEmails.includes(p.author_ref))),
+    [loading, posts, blockedEmails],
   );
 
   const isFollowed = useMemo(() => {
@@ -352,10 +351,14 @@ export default function Feed() {
                       {i > 0 && <hr className="lane lane-soft" />}
                       <PostArticle
                         post={p}
-                        connection={p.author_email ? connectionWith(p.author_email) : null}
-                        busy={busyEmail === p.author_email}
-                        onConnect={requestConnection}
-                        isMine={Boolean(email && p.author_email === email)}
+                        connection={p.connection || null}
+                        busy={busyEmail === (p.author_email || p.author_ref)}
+                        onConnect={async (target) => {
+                          const res = await requestConnection(target);
+                          if (res.ok) load();
+                          return res;
+                        }}
+                        isMine={p.is_mine === true}
                         onBlocked={reloadBlocks}
                         canEdit={isAdmin}
                         onSaved={load}
@@ -365,7 +368,7 @@ export default function Feed() {
                         saved={isSaved(p.id)}
                         saveBusy={busyPostId === p.id}
                         onToggleSave={toggleSave}
-                        verified={profileFor(p.author_email)?.verified === true}
+                        verified={p.author_verified === true}
                         focused={focusId === p.id}
                         helpfulCount={helpfulFor(p)}
                         reacted={hasReacted(p.id)}

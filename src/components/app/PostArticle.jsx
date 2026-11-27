@@ -39,12 +39,15 @@ export default function PostArticle({
 
   const clamped = isLong && !open;
   const followRef = post.author_ref || post.author_email;
+  // Who the connect, report and block controls act on. Only people I am
+  // already connected with come with an email; everyone else is a reference.
+  const target = post.author_email || post.author_ref;
   const canFollow = !post.is_sample && !isMine && Boolean(followRef) && Boolean(onToggleFollow);
 
   return (
     <article ref={ref} className="post" data-focus={focused ? 'true' : undefined} id={`post-${post.id}`}>
       <div className="post-head">
-        <Plate name={post.author_name} seed={post.author_key || post.author_email || post.author_name} size={44} />
+        <Plate name={post.author_name} seed={post.author_key || post.author_email || post.author_ref || post.author_name} size={44} />
         <div style={{ minWidth: 0 }}>
           <div className="post-author">
             <span>{post.author_name || 'A Pathways member'}</span>
@@ -109,9 +112,9 @@ export default function PostArticle({
         {/* Following is the one-tap half and sits by the name. Connecting is
             mutual, unlocks messaging, and asks before it sends anything, so it
             is a real button down here. */}
-        {!post.is_sample && !isMine && post.author_email && (
+        {!post.is_sample && !isMine && target && (
           <ConnectButton
-            targetEmail={post.author_email}
+            targetEmail={target}
             targetName={post.author_name}
             connection={connection}
             busy={busy}
@@ -131,10 +134,10 @@ export default function PostArticle({
 
         {/* A post is often the first place something feels off, so report and
             block live right here rather than only on the profile. */}
-        {!post.is_sample && !isMine && post.author_email && (
+        {!post.is_sample && !isMine && target && (
           <span className="post-actions-end">
             <SafetyActions
-              targetEmail={post.author_email}
+              targetEmail={target}
               targetName={post.author_name}
               contextType="post"
               contextId={post.id}

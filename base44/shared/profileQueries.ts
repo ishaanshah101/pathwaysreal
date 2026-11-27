@@ -10,8 +10,7 @@ export async function relatedProfileEmails(base44, me, requested) {
     ];
   });
   const results = await Promise.all(tasks);
-  const posts = await db.Post.filter({ author_email: { $in: requested } }, { distinct: 'author_email', limit: 200 });
-  return new Set([me, ...results.flatMap((page) => page.items), ...posts.items].map(normalizeEmail));
+  return new Set([me, ...results.flatMap((page) => page.items)].map(normalizeEmail));
 }
 
 export async function pageConnections(base44, me, emails) {

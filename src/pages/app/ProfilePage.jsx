@@ -125,8 +125,8 @@ export default function ProfilePage() {
   useEffect(() => {
     let cancelled = false;
     if (!email) return undefined;
-    base44.entities.Post.filter({ author_email: email }, '-created_date', 50)
-      .then((rows) => { if (!cancelled) setMyPosts(Array.isArray(rows) ? rows : []); })
+    base44.functions.invoke('getFeed', { mine: true })
+      .then((res) => { if (!cancelled) setMyPosts(Array.isArray(res?.data?.posts) ? res.data.posts : []); })
       .catch(() => { if (!cancelled) setMyPosts([]); });
     return () => { cancelled = true; };
   }, [email]);

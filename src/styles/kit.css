@@ -83,7 +83,8 @@
 .btn-primary { background: var(--asphalt); border-color: var(--asphalt); color: var(--sheet); }
 .btn-primary:hover:not(:disabled) { background: var(--sun); border-color: var(--sun); color: #232732; }
 
-.btn-sun { background: var(--sun); border-color: #232732; color: #232732; }
+/* Near-black on the orange, so the label passes contrast at every size. */
+.btn-sun { background: var(--sun); border-color: #232732; color: #14161b; }
 .btn-sun:hover:not(:disabled) { background: var(--hl-yellow); }
 
 .btn-secondary { background: var(--sheet); border-color: var(--ink); color: var(--ink); }

@@ -477,6 +477,7 @@ export default function Messages() {
                 aria-relevant="additions"
                 aria-label="Conversation"
                 className="convo-log"
+                tabIndex={0}
               >
                 {activeSample ? (
                   activeSample.messages.map((m, i) => (

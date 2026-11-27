@@ -22,12 +22,12 @@
   --asphalt-2: #3a3f4d;
   --ink: #232732;
   --ink-2: #4a4f5c;
-  --ink-3: #6b6e78;
+  --ink-3: #5a5d68;
   --hairline: rgba(35, 39, 50, 0.16);
   --hairline-strong: rgba(35, 39, 50, 0.4);
   --rule: #c5d6e8;
   --margin: #e79b98;
-  --pen-red: #c2362b;
+  --pen-red: #b3291f;
 
   /* The sticker */
   --sun: #e05e12;
@@ -58,7 +58,7 @@
   --lime: #dbec86;
   --lime-deep: #4f5c0c;
   --lime-tint: #eef5c4;
-  --red: #c2362b;
+  --red: #b3291f;
   --red-deep: #8f2319;
   --red-tint: #fbdcd8;
 
@@ -339,7 +339,7 @@
     --ink: #232732; --ink-2: #3a3f4d; --ink-3: #555a66; --asphalt: #232732; --asphalt-2: #3a3f4d;
     --hairline: rgba(35, 39, 50, .16); --hairline-strong: rgba(35, 39, 50, .4);
     --sheet: #fffdf6; --paper: #eadfc6; --paper-2: #f4eedd; --on-dark: #fffdf6;
-    --pen-red: #c2362b; --red: #c2362b; --red-deep: #8f2319; --on-red: #ffffff;
+    --pen-red: #b3291f; --red: #b3291f; --red-deep: #8f2319; --on-red: #ffffff;
     --green: #23704a; --green-deep: #175236; --blue: #24548f; --blue-deep: #1a3f6e; --yellow-deep: #6b5300;
     --sun: #e05e12; --sun-deep: #a8420a;
     --mark-lane: #26231f; --mark-dash: #fbf6ee;

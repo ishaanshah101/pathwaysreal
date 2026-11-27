@@ -3,7 +3,7 @@ import { secrets } from 'base44:runtime';
 import { requirePost, readJsonObject, RequestError, safeFailure } from '../../shared/requestSafety.ts';
 import { consumeRateLimit } from '../../shared/rateLimit.ts';
 import { withActionLock } from '../../shared/actionLock.ts';
-import { deleteOwned, anonymizeOwned, anonymizeConversations } from '../../shared/accountCleanup.ts';
+import { deleteOwned, deleteOwnedIfPresent, anonymizeOwned, anonymizeConversations } from '../../shared/accountCleanup.ts';
 
 export default async function(req) {
   try {
@@ -49,10 +49,9 @@ export default async function(req) {
         ['ThreadArchive', { user_email: email }], ['ContactNote', { owner_email: email }],
         ['Notification', { user_email: email }], ['Signup', { email }],
         ['RateLimit', { user_email: email }], ['VerificationRequest', { user_email: email }],
-        ['PlanItem', { user_email: email }],
-        ['PostReaction', { user_email: email }],
       ];
       for (const [name, query] of owned) await deleteOwned(db[name], query);
+      for (const name of ['PlanItem', 'PostReaction']) await deleteOwnedIfPresent(db[name], { user_email: email });
       await anonymizeConversations(db, email, deletedRef);
       for (const field of ['reporter_email', 'reported_email']) await anonymizeOwned(db.Report, { [field]: email }, { [field]: '' });
       for (const field of ['sender_email', 'recipient_email']) await anonymizeOwned(db.ModerationEvent, { [field]: email }, { [field]: '' });

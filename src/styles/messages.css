@@ -401,3 +401,7 @@ textarea.input.notes-field { min-height: 150px; font-family: var(--font-read); f
 }
 .file-prev-video { max-height: 196px; background: #1d1f26; }
 .file-prev-none { color: var(--ink-3); }
+
+/* The transcripts scroll, so they can take keyboard focus to be scrolled with
+   the arrow keys. The ring sits inside the frame. */
+.convo-log:focus-visible, .sage-log:focus-visible { outline: 3px solid var(--sun); outline-offset: -3px; }

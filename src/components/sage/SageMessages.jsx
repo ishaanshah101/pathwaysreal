@@ -18,7 +18,7 @@ export default function SageMessages({ messages, thinking, loading, onStarter })
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages.length, thinking]);
 
   return (
-    <div className="sage-log">
+    <div className="sage-log" tabIndex={0} role="group" aria-label="Conversation with Sage">
       {loading ? (
         <p className="meta" role="status">Loading this conversation…</p>
       ) : messages.length === 0 ? (

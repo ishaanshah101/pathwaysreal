@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { Check, LogOut } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
@@ -21,6 +21,9 @@ import Icon from '@/components/kit/Icon';
 import { useFollows } from '@/lib/useFollows';
 import { useConnections } from '@/lib/useConnections';
 import { useBlocks } from '@/lib/useBlocks';
+import { useSavedPosts } from '@/lib/useSavedPosts';
+import { useReactions } from '@/lib/useReactions';
+import PostArticle from '@/components/app/PostArticle';
 import { INTEREST_OPTIONS, EXPERTISE_OPTIONS, ADULT_ROLES } from '@/components/app/profileFields';
 
 // The sign beside a member's name says which side of the conversation they are
@@ -104,6 +107,30 @@ export default function ProfilePage() {
   const { subscription, hasSage, isPastDue, isCanceling, source } = useSubscription();
   const native = isNativeApp();
   const { followingCount, followerCount } = useFollows();
+  const { isSaved, toggleSave, busyPostId } = useSavedPosts();
+  const { countFor: helpfulFor } = useReactions();
+
+  // The page is three tabs, the way a profile is on any social app: what
+  // people see, what you have posted, and the account behind it. The tab is in
+  // the address so a link can open the right one.
+  const [params, setParams] = useSearchParams();
+  const tab = ['posts', 'account'].includes(params.get('tab')) ? params.get('tab') : 'profile';
+  const openTab = (next) => {
+    const q = new URLSearchParams(params);
+    if (next === 'profile') q.delete('tab'); else q.set('tab', next);
+    setParams(q, { replace: true });
+  };
+
+  const [myPosts, setMyPosts] = useState(null);
+  useEffect(() => {
+    let cancelled = false;
+    if (!email) return undefined;
+    base44.entities.Post.filter({ author_email: email }, '-created_date', 50)
+      .then((rows) => { if (!cancelled) setMyPosts(Array.isArray(rows) ? rows : []); })
+      .catch(() => { if (!cancelled) setMyPosts([]); });
+    return () => { cancelled = true; };
+  }, [email]);
+  const postCount = myPosts ? myPosts.length : 0;
   const { respondToConnection } = useConnections();
   const [billingError, setBillingError] = useState('');
 
@@ -285,12 +312,15 @@ export default function ProfilePage() {
               <span className="profile-id">
                 {roleLabel && <Sign color={ROLE_SIGN[profile?.role] || 'ink'}>{roleLabel}</Sign>}
                 <VerifiedBadge verified={profile?.verified} />
-                {/* Following is one-way, so these two numbers are not the same
-                    thing as connections and are shown separately. */}
-                <span className="meta num">
-                  <Link to="/app/explore">{followingCount} following</Link>
-                  {` · ${followerCount} follower${followerCount === 1 ? '' : 's'}`}
-                </span>
+              </span>
+              {/* Following is one-way, so these numbers are not the same thing
+                  as connections. */}
+              <span className="stats">
+                <button type="button" className="stat" onClick={() => openTab('posts')}>
+                  <b className="num">{postCount}</b> {postCount === 1 ? 'post' : 'posts'}
+                </button>
+                <span className="stat"><b className="num">{followerCount}</b> {followerCount === 1 ? 'follower' : 'followers'}</span>
+                <Link to="/app/explore" className="stat"><b className="num">{followingCount}</b> following</Link>
               </span>
             </>
           )}
@@ -332,8 +362,20 @@ export default function ProfilePage() {
         </section>
       )}
 
+      <div className="tabs" role="tablist" aria-label="Sections of your profile">
+        {[['profile', 'Profile'], ['posts', 'Posts', postCount], ['account', 'Account']].map(([v, l, n]) => (
+          <button
+            key={v} type="button" role="tab" id={`pf-tab-${v}`} className="tab"
+            aria-selected={tab === v} aria-controls={`pf-panel-${v}`} onClick={() => openTab(v)}
+          >
+            {l}
+            {typeof n === 'number' && <span className="num" aria-hidden="true">{n}</span>}
+          </button>
+        ))}
+      </div>
+
       <div className="profile-layout">
-        <form onSubmit={submit} className="profile-form">
+        <form onSubmit={submit} className="profile-form" id="pf-panel-profile" role="tabpanel" aria-labelledby="pf-tab-profile" hidden={tab !== 'profile'}>
           <section className="profile-section" aria-labelledby="pf-sec-about">
             <h2 className="sub-head" id="pf-sec-about">About you</h2>
             <p className="profile-section-note">This is what other members see when they find you.</p>
@@ -544,7 +586,42 @@ export default function ProfilePage() {
           </div>
         </form>
 
-        <aside className="profile-aside" aria-label="Account settings">
+        <section className="profile-posts" id="pf-panel-posts" role="tabpanel" aria-labelledby="pf-tab-posts" hidden={tab !== 'posts'}>
+          {myPosts === null ? (
+            <div role="status" aria-label="Loading your posts" style={{ display: 'grid', gap: 12 }}>
+              <SkeletonTitle />
+              <SkeletonLine />
+              <SkeletonLine />
+            </div>
+          ) : myPosts.length === 0 ? (
+            <div className="empty">
+              <p className="empty-title">You have not posted yet.</p>
+              <p className="empty-body">
+                One thing you worked out the hard way is enough. Someone a year behind you is looking for it.
+              </p>
+              <Link to="/app?compose=1" className="btn btn-primary" style={{ marginTop: 6 }}>Write a post</Link>
+            </div>
+          ) : (
+            <div className="feed-stream">
+              {myPosts.map((p, i) => (
+                <React.Fragment key={p.id}>
+                  {i > 0 && <hr className="lane lane-soft" />}
+                  <PostArticle
+                    post={p}
+                    isMine
+                    saved={isSaved(p.id)}
+                    saveBusy={busyPostId === p.id}
+                    onToggleSave={toggleSave}
+                    verified={profile?.verified === true}
+                    helpfulCount={helpfulFor(p)}
+                  />
+                </React.Fragment>
+              ))}
+            </div>
+          )}
+        </section>
+
+        <aside className="profile-aside" id="pf-panel-account" role="tabpanel" aria-labelledby="pf-tab-account" aria-label="Account settings" hidden={tab !== 'account'}>
           {form.account_type === 'adult' && <VerificationCard profile={profile} email={email} />}
 
           {/* Subscription state is read-only here on purpose. It is written only

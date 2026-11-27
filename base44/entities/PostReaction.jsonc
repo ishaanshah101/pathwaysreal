@@ -1,0 +1,58 @@
+{
+  "name": "PostReaction",
+  "type": "object",
+  "description": "One member marking one post as helpful. Written ONLY by the react-to-post backend function, which sets the owner from the session and keeps Post.helpful_count in step. Private: a member can see which posts they marked, never who else marked a post. Everyone else sees only the number on the post.",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "Owner. Only they may read this row."
+    },
+    "post_id": {
+      "type": "string",
+      "description": "The Post this refers to"
+    },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "helpful"
+      ],
+      "default": "helpful"
+    },
+    "reacted_at": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "user_email",
+    "post_id"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "post_reaction_service_only"
+      }
+    },
+    "read": {
+      "$or": [
+        {
+          "data.user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "post_reaction_service_only"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "post_reaction_service_only"
+      }
+    }
+  }
+}

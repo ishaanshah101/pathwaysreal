@@ -1,0 +1,97 @@
+/* ---------------------------------------------------------------------------
+   Signed-in pages.
+   --------------------------------------------------------------------------- */
+
+/* ---- Feed ------------------------------------------------------------------ */
+.feed-layout { display: grid; grid-template-columns: minmax(0, 1fr) 296px; gap: clamp(28px, 4vw, 60px); align-items: start; }
+.feed-aside { position: sticky; top: 84px; display: grid; gap: 18px; }
+.feed-chips { display: none; }
+@media (max-width: 1239px) {
+  .feed-layout { grid-template-columns: minmax(0, 1fr); }
+  .feed-aside { display: none; }
+  .feed-chips { display: flex; gap: 8px; overflow-x: auto; padding: 2px 0 6px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+  .feed-chips::-webkit-scrollbar { display: none; }
+  .feed-chips > * { flex: none; }
+}
+
+.composer-bar {
+  display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; gap: 10px; align-items: center;
+  padding: 9px; background: var(--sheet); border: 2px solid var(--ink); border-radius: var(--r-3);
+}
+.composer-field {
+  height: 44px; padding: 0 12px; text-align: left; cursor: text; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  background: var(--paper-2); color: var(--ink-3); border: 0; border-radius: var(--r-2); font: 600 15.5px/1 var(--font-sign);
+}
+.composer-field:hover { color: var(--ink-2); }
+
+.searchbox { position: relative; }
+.searchbox .input { padding-left: 40px; }
+.searchbox > svg { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: var(--ink-3); pointer-events: none; }
+
+/* A post is an article, not a card. Type and a lane line do the separating. */
+.post { padding: 30px 0 28px; scroll-margin-top: 90px; }
+.post:first-child { padding-top: 6px; }
+.post-head { display: grid; grid-template-columns: 44px minmax(0, 1fr) auto; gap: 12px; align-items: center; }
+.post-author { display: flex; align-items: center; gap: 8px; min-width: 0; font-weight: 800; font-size: 15.5px; line-height: 1.2; }
+.post-author > span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.post-meta { margin-top: 3px; font-family: var(--font-mono); font-size: 12px; color: var(--ink-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.post-title { font-size: clamp(24px, 2.7vw, 33px); font-weight: 900; letter-spacing: -0.028em; line-height: 1.05; margin: 18px 0 12px; }
+.post-body { white-space: pre-wrap; }
+.post-body[data-clamped='true'] { display: -webkit-box; -webkit-line-clamp: 7; -webkit-box-orient: vertical; overflow: hidden; }
+.post-tags { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 16px; }
+.post-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 20px; }
+.post-actions-end { margin-left: auto; display: flex; align-items: center; gap: 4px; }
+.post[data-focus='true'] { margin-inline: -16px; padding-inline: 16px; background: var(--sun-wash); box-shadow: inset 5px 0 0 var(--sun); }
+@media (max-width: 560px) {
+  .post-head { grid-template-columns: 40px minmax(0, 1fr); }
+  .post-head > .sign { grid-column: 1 / -1; justify-self: start; }
+}
+
+/* Quiet text actions with a real hit area: report, block, and the like. */
+.quiet-link {
+  display: inline-flex; align-items: center; gap: 5px; min-height: 40px; padding: 0 8px;
+  background: none; border: 0; border-radius: var(--r-1); cursor: pointer;
+  font: 600 13px/1 var(--font-sign); color: var(--ink-3); text-decoration: none;
+}
+.quiet-link:hover { color: var(--ink); background: var(--paper-2); }
+
+/* Icon and word, no box, for save and share. */
+.tool-btn {
+  display: inline-flex; align-items: center; gap: 6px; min-height: 34px; padding: 0 10px;
+  background: transparent; border: 1.5px solid transparent; border-radius: var(--r-1); cursor: pointer;
+  font: 700 13.5px/1 var(--font-sign); color: var(--ink-2);
+}
+.tool-btn:hover:not(:disabled) { border-color: var(--hairline-strong); color: var(--ink); }
+.tool-btn[aria-pressed='true'] { color: var(--sun-deep); }
+.tool-btn:disabled { opacity: .45; cursor: not-allowed; }
+
+/* ---- The legend, used as a filter -------------------------------------------- */
+.legend-filter { list-style: none; margin: 0; padding: 6px; display: grid; gap: 1px; }
+.legend-row {
+  display: flex; align-items: center; gap: 10px; width: 100%; padding: 6px 8px; cursor: pointer;
+  background: transparent; border: 0; border-radius: var(--r-1); font: 700 14.5px/1 var(--font-sign); color: var(--ink); text-align: left;
+}
+.legend-row:hover { background: var(--paper-2); }
+.legend-row[aria-pressed='true'] { background: var(--asphalt); color: var(--paper); }
+.legend-row .meta { margin-left: auto; color: inherit; opacity: .7; }
+
+.aside-word b { display: block; font-size: 20px; font-weight: 900; letter-spacing: -0.018em; margin-bottom: 5px; }
+.aside-word p { margin: 0 0 10px; font-size: 14.5px; line-height: 1.5; color: var(--ink-2); }
+
+/* ---- People --------------------------------------------------------------------- */
+.people-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 0 clamp(24px, 3vw, 44px); }
+.person { display: flex; flex-direction: column; gap: 12px; padding: 22px 0; border-top: 1px solid var(--hairline); }
+.person-head { display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: 14px; align-items: center; }
+.person-name { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.person-name h2 { font-size: 19px; font-weight: 900; letter-spacing: -0.018em; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.person-line { font-size: 14px; line-height: 1.35; color: var(--ink-2); margin-top: 2px; }
+.person-bio { margin: 0; font-size: 15.5px; line-height: 1.5; color: var(--ink-2); }
+.person-foot { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: auto; }
+
+.filter-block { display: grid; gap: 12px; padding-bottom: 20px; margin-bottom: 4px; }
+.filter-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.filter-label { min-width: 52px; font-family: var(--font-mono); font-size: 11px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); }
+
+/* ---- Section headings inside a page ------------------------------------------------ */
+.sub-head { display: flex; align-items: baseline; gap: 10px; margin: 0 0 4px; font-size: 13px; font-family: var(--font-mono); font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-2); }
+.quote-note { margin: 0; padding: 10px 14px; border-left: 5px solid var(--sun); background: var(--paper-2); font-family: var(--font-read); font-size: 16px; line-height: 1.55; border-radius: 0 var(--r-1) var(--r-1) 0; }

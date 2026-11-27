@@ -1,31 +1,31 @@
 import React from 'react';
-import Reveal from '@/components/Reveal';
 
-// Every figure here has to be about the student reading it. A global
-// out-of-school statistic was doing nothing for a US high schooler deciding
-// whether to sign up, so it is gone.
-const stats = [
-  { num: '$200/hr', label: 'What a private college counselor can cost. Most families never have one.' },
-  { num: '16 million', label: 'US high schoolers making these decisions right now, with wildly unequal support.' },
-  { num: '$0', label: 'What Pathways costs a student. Forever, not as a trial.' },
+// Set as a highway distance sign, because that is exactly what it is: how far
+// away help is, depending on which road your family can afford. Every figure
+// is about the student reading it.
+const rows = [
+  { place: 'A private college counselor', num: '$200', unit: '/hr' },
+  { place: 'US high schoolers deciding now', num: '16 million' },
+  { place: 'Pathways, for every one of them', num: '$0' },
 ];
 
 export default function Stats() {
   return (
-    <Reveal
-      as="section"
-      aria-label="Why Pathways exists"
-      className="grid gap-[14px]"
-      style={{ gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))', padding: '4px 0 30px' }}
-    >
-      {stats.map((s) => (
-        <div key={s.num} className="card elev-sm" style={{ gap: 8, padding: '22px 24px' }}>
-          <span style={{ fontFamily: 'var(--font-heading)', fontSize: 34, color: 'var(--color-text)', lineHeight: 1 }}>
-            {s.num}
-          </span>
-          <span style={{ fontSize: 14, lineHeight: 1.5, color: 'var(--text-muted)' }}>{s.label}</span>
+    <section className="band band-tight" aria-label="Why Pathways exists">
+      <div className="wrap mileage-wrap">
+        <div className="mileage">
+          {rows.map((r) => (
+            <div key={r.place} className="mileage-row">
+              <span>{r.place}</span>
+              <span className="num">{r.num}{r.unit ? <small>{r.unit}</small> : null}</span>
+            </div>
+          ))}
         </div>
-      ))}
-    </Reveal>
+        <div className="mileage-posts" aria-hidden="true"><i /><i /></div>
+        <p className="meta mileage-note">
+          Most families never have a private counselor. Pathways is free forever, not as a trial.
+        </p>
+      </div>
+    </section>
   );
 }

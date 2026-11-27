@@ -24,22 +24,25 @@ export default function Faq() {
         description="Straight answers about Pathways: what it is, what it costs, who can join, how it differs from a private college counselor, and what Sage the AI advisor does."
         path="/faq"
       />
-      <section id="faq" className="page-hero" style={{ paddingBottom: 'clamp(40px,6vh,72px)' }}>
-        <span className="card-kicker" style={{ display: 'block', marginBottom: 12 }}>Frequently asked questions</span>
-        <h1 style={{ fontSize: 'clamp(32px,4.4vw,52px)', margin: '0 0 14px', textWrap: 'balance' }}>
-          Questions, answered plainly
-        </h1>
-        <p style={{ maxWidth: '56ch', color: 'var(--color-neutral-800)', fontSize: 'clamp(15.5px,1.3vw,17px)', lineHeight: 1.6, margin: '0 0 34px' }}>
-          If something you need isn't here, ask Sage once for free on the Sage page.
-        </p>
+      <section id="faq" className="band">
+        <div className="wrap faq-grid">
+          <div className="faq-side">
+            <span className="kicker kicker-sun">Frequently asked</span>
+            <h1 className="title-1">Questions, answered plainly</h1>
+            <p className="lede" style={{ marginTop: 18 }}>
+              If something you need isn't here, you can ask Sage one question for free.
+            </p>
+            <Link to="/sage#sage-free-sample" className="btn btn-secondary btn-go" style={{ marginTop: 20 }}>Ask Sage</Link>
+          </div>
 
-        <div className="grid gap-[14px]" style={{ gridTemplateColumns: 'repeat(auto-fit,minmax(320px,1fr))' }}>
-          {faqs.map((f) => (
-            <div key={f.q} className="card elev-sm" style={{ gap: 8, padding: '22px 24px' }}>
-              <h2 className="h-sans" style={{ fontSize: 16.5, margin: 0 }}>{f.q}</h2>
-              <p style={{ margin: 0, fontSize: 14.5, lineHeight: 1.62, color: 'var(--text-muted)' }}>{f.a}</p>
-            </div>
-          ))}
+          <div className="faq-list">
+            {faqs.map((f) => (
+              <div key={f.q} className="faq-item">
+                <h2>{f.q}</h2>
+                <p>{f.a}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
     </>

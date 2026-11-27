@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { Share2, Check } from 'lucide-react';
+import Icon from '@/components/kit/Icon';
 
 // Native share sheet where the platform has one, copy-link where it does not.
+// The link opens the feed with this post brought to the top and highlighted.
 export default function SharePostButton({ post }) {
   const [copied, setCopied] = useState(false);
   const url = `${window.location.origin}/app?post=${encodeURIComponent(post.id)}`;
@@ -19,10 +21,9 @@ export default function SharePostButton({ post }) {
   };
 
   return (
-    <button type="button" className="btn btn-secondary btn-sm" onClick={share}>
-      {copied
-        ? <><Check size={14} aria-hidden="true" /> Link copied</>
-        : <><Share2 size={14} aria-hidden="true" /> Share</>}
+    <button type="button" className="tool-btn" onClick={share}>
+      <Icon as={copied ? Check : Share2} size={16} />
+      {copied ? 'Link copied' : 'Share'}
     </button>
   );
 }

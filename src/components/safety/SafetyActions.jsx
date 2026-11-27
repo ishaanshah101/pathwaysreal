@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Flag, Ban } from 'lucide-react';
 import ReportModal from '@/components/safety/ReportModal';
 import BlockModal from '@/components/safety/BlockModal';
+import Icon from '@/components/kit/Icon';
 
 // The pair of quiet actions that sit on every profile, post, and thread.
 // Deliberately low-key so they are always available without dominating the UI.
@@ -18,25 +19,16 @@ export default function SafetyActions({
 
   if (!targetEmail) return null;
 
-  // Report and Block were 12px text with zero padding, which is about a 19px
-  // tap target — the smallest control in the product, on the highest-stakes
-  // action in it. The font size is unchanged so these still read as quiet
-  // secondary links; only the hit area grew.
-  const linkStyle = {
-    background: 'none', border: 0, font: 'inherit', cursor: 'pointer',
-    fontSize: 12, color: 'var(--text-subtle)', display: 'inline-flex',
-    alignItems: 'center', gap: 4,
-    minHeight: 44, padding: '11px 8px', marginInline: -8,
-  };
-
+  // These stay visually quiet, but each keeps a full-size hit area: they are the
+  // highest-stakes controls in the product and must never be hard to press.
   return (
     <>
-      <button type="button" style={linkStyle} onClick={() => setReporting(true)}>
-        <Flag size={13} aria-hidden="true" /> Report
+      <button type="button" className="quiet-link" onClick={() => setReporting(true)}>
+        <Icon as={Flag} size={14} /> Report
       </button>
       {showBlock && (
-        <button type="button" style={linkStyle} onClick={() => setBlocking(true)}>
-          <Ban size={13} aria-hidden="true" /> Block
+        <button type="button" className="quiet-link" onClick={() => setBlocking(true)}>
+          <Icon as={Ban} size={14} /> Block
         </button>
       )}
 

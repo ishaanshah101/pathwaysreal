@@ -1,0 +1,73 @@
+/* ---------------------------------------------------------------------------
+   Base elements.
+   --------------------------------------------------------------------------- */
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sign);
+  font-size: 16px;
+  line-height: 1.5;
+  font-optical-sizing: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+::selection { background: var(--yellow); color: #1d1a16; }
+
+:focus-visible {
+  outline: 3px solid var(--sun);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
+
+.skip-link {
+  position: absolute; left: -9999px; top: 0; z-index: 999;
+  background: var(--yellow); color: #1d1a16; font-weight: 800;
+  padding: 12px 18px; border-radius: 0 0 var(--r-2) 0;
+}
+.skip-link:focus { left: 0; }
+
+/* Headlines are sign lettering: heavy, tight, set in sentence case the way a
+   destination is written on a guide sign. */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-sign);
+  margin: 0 0 8px;
+  text-wrap: balance;
+}
+h1, h2 { font-weight: 900; line-height: 1.02; letter-spacing: -0.022em; }
+h3, h4, h5, h6 { font-weight: 800; line-height: 1.2; letter-spacing: -0.012em; }
+
+/* Legacy helpers some components still reference. */
+.h-sans { font-family: var(--font-sign) !important; font-weight: 800 !important; letter-spacing: -0.012em !important; line-height: 1.2 !important; }
+.h-display { font-family: var(--font-sign); font-weight: 900; letter-spacing: -0.022em; }
+
+p { margin: 0 0 1em; }
+p:last-child { margin-bottom: 0; }
+
+/* Links: ink, with the sun underneath. Colour alone never marks a link. */
+a { color: inherit; text-decoration-line: underline; text-decoration-color: var(--sun); text-decoration-thickness: 2px; text-underline-offset: 3px; }
+a:hover { text-decoration-color: currentColor; }
+a.no-underline, .btn, nav a { text-decoration: none; }
+
+b, strong { font-weight: 800; }
+
+hr { border: 0; height: 1px; background: var(--hairline); margin: 0; }
+
+.text-muted { color: var(--ink-3); }
+.text-quiet { color: var(--ink-2); }
+
+/* Numbers that line up: counts, prices, dates. */
+.num { font-variant-numeric: tabular-nums lining-nums; }

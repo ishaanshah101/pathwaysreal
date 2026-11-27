@@ -1,0 +1,336 @@
+/* ---------------------------------------------------------------------------
+   The kit: every reusable piece, in one place.
+   --------------------------------------------------------------------------- */
+
+/* ---- Page furniture ------------------------------------------------------ */
+.wrap { width: 100%; max-width: 1200px; margin-inline: auto; padding-inline: var(--gutter); }
+.wrap-read { width: 100%; max-width: 760px; margin-inline: auto; padding-inline: var(--gutter); }
+
+/* The small print above a headline. Mono, like the lettering on a mile marker. */
+.kicker {
+  display: block; margin: 0 0 12px;
+  font-family: var(--font-mono); font-size: 12px; font-weight: 600;
+  letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3);
+}
+.kicker-sun { color: var(--sun-deep); }
+.card-kicker { font-family: var(--font-mono); font-size: 11.5px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--sun-deep); font-style: normal; }
+
+.lede { font-size: clamp(17px, 1.5vw, 20px); line-height: 1.5; color: var(--ink-2); max-width: 56ch; }
+.meta { font-family: var(--font-mono); font-size: 12px; letter-spacing: .02em; color: var(--ink-3); }
+
+/* Long-form reading. Anything a person sat down and wrote. */
+.prose {
+  font-family: var(--font-read); font-size: 17.5px; line-height: 1.68; color: var(--ink);
+  font-variation-settings: 'opsz' 14;
+}
+.prose p { margin: 0 0 1.05em; }
+.prose-narrow { max-width: 62ch; }
+
+/* The lane line. The dashes in the mark, used as the divider everywhere. */
+.lane {
+  height: 3px; border: 0; margin: 0;
+  background-image: linear-gradient(to right, var(--ink) 0 22px, transparent 22px 36px);
+  background-size: 36px 3px; background-repeat: repeat-x;
+}
+.lane-soft { opacity: .22; }
+.lane-sun { background-image: linear-gradient(to right, var(--sun) 0 22px, transparent 22px 36px); }
+
+/* A strip of road. Always dark, in either theme, because roads are. */
+.road {
+  position: relative; height: 16px; background: #26231f;
+}
+.road::after {
+  content: ''; position: absolute; left: 0; right: 0; top: 50%; height: 2px; transform: translateY(-50%);
+  background-image: linear-gradient(to right, #fbf6ee 0 20px, transparent 20px 34px);
+  background-size: 34px 2px;
+}
+.road-v { height: auto; width: 14px; }
+.road-v::after {
+  left: 50%; right: auto; top: 0; bottom: 0; width: 2px; height: auto; transform: translateX(-50%);
+  background-image: linear-gradient(to bottom, #fbf6ee 0 18px, transparent 18px 32px);
+  background-size: 2px 32px;
+}
+
+.divider { height: 1px; background: var(--hairline); border: 0; margin: 0; }
+.rule-ink { height: 2px; background: var(--ink); border: 0; margin: 0; }
+
+/* ---- Buttons ------------------------------------------------------------- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 44px; padding: 0 18px;
+  font-family: var(--font-sign); font-weight: 800; font-size: 15px; line-height: 1;
+  letter-spacing: .005em; white-space: nowrap; text-decoration: none; cursor: pointer;
+  color: var(--ink); background: transparent;
+  border: 2px solid transparent; border-radius: var(--r-2);
+  transition: background var(--t) var(--ease), color var(--t) var(--ease), border-color var(--t) var(--ease);
+}
+.btn:disabled, .btn[aria-disabled='true'] { opacity: .45; cursor: not-allowed; }
+
+.btn-primary { background: var(--asphalt); border-color: var(--asphalt); color: var(--paper); }
+.btn-primary:hover:not(:disabled) { background: var(--sun); border-color: var(--sun); color: #1d1a16; }
+
+.btn-sun { background: var(--sun); border-color: var(--sun); color: #1d1a16; }
+.btn-sun:hover:not(:disabled) { background: var(--asphalt); border-color: var(--asphalt); color: var(--paper); }
+
+.btn-secondary { background: var(--sheet); border-color: var(--ink); color: var(--ink); }
+.btn-secondary:hover:not(:disabled) { background: var(--yellow); border-color: #1d1a16; color: #1d1a16; }
+
+.btn-ghost { color: var(--sun-deep); padding-inline: 10px; }
+.btn-ghost:hover:not(:disabled) { background: var(--sun-wash); }
+
+.btn-quiet { color: var(--ink-2); font-weight: 700; padding-inline: 10px; }
+.btn-quiet:hover:not(:disabled) { background: var(--paper-2); color: var(--ink); }
+
+.btn-danger { background: var(--red); border-color: var(--red); color: #fff; }
+.btn-danger:hover:not(:disabled) { background: #8f1c15; border-color: #8f1c15; }
+
+.btn-block { width: 100%; }
+.btn-sm { min-height: 34px; padding: 0 12px; font-size: 13.5px; }
+.btn-lg { min-height: 54px; padding: 0 26px; font-size: 17px; }
+
+/* The arrow that leans forward when you point at it. */
+.btn-go::after { content: '\2192'; font-weight: 700; transition: transform var(--t) var(--ease); }
+.btn-go:hover::after { transform: translateX(4px); }
+
+/* A plain text action that still has a real hit area. */
+.link-btn {
+  background: none; border: 0; padding: 0; font: inherit; color: inherit; cursor: pointer;
+  text-decoration: underline; text-decoration-color: var(--sun); text-decoration-thickness: 2px; text-underline-offset: 3px;
+}
+.link-btn:hover { text-decoration-color: currentColor; }
+
+/* Filter chips. Small plates, square-cornered. On is asphalt. */
+.btn-chip {
+  min-height: 34px; padding: 0 12px; gap: 6px;
+  font-weight: 700; font-size: 13.5px;
+  background: transparent; border: 1.5px solid var(--hairline-strong); border-radius: var(--r-1); color: var(--ink-2);
+}
+.btn-chip:hover:not(:disabled) { border-color: var(--ink); color: var(--ink); }
+.btn-chip[aria-pressed='true'], .btn-chip[data-on='true'] { background: var(--asphalt); border-color: var(--asphalt); color: var(--paper); }
+
+.btn-icon { width: 40px; min-height: 40px; padding: 0; border: 1.5px solid var(--hairline-strong); border-radius: var(--r-2); background: var(--sheet); }
+.btn-icon:hover:not(:disabled) { border-color: var(--ink); }
+
+/* ---- Forms --------------------------------------------------------------- */
+.field > label {
+  display: block; margin-bottom: 6px;
+  font-size: 13.5px; font-weight: 800; color: var(--ink);
+}
+.input {
+  width: 100%; min-height: 46px; padding: 10px 13px;
+  font-family: var(--font-sign); font-size: 16px; line-height: 1.4; color: var(--ink);
+  caret-color: var(--sun);
+  background: var(--sheet);
+  border: 1.5px solid var(--hairline-strong); border-radius: var(--r-2);
+  transition: border-color var(--t) ease, box-shadow var(--t) ease;
+}
+textarea.input { min-height: 104px; resize: vertical; line-height: 1.55; }
+select.input {
+  appearance: none; -webkit-appearance: none; padding-right: 38px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%236c655a' stroke-width='3' stroke-linecap='square'%3E%3Cpath d='m5 9 7 7 7-7'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 13px center;
+}
+.input:hover { border-color: var(--ink-3); }
+.input:focus-visible { outline: none; border-color: var(--ink); box-shadow: 0 0 0 3px color-mix(in srgb, var(--sun) 38%, transparent); }
+.input:disabled, .input[aria-disabled='true'] { cursor: not-allowed; background: var(--paper-2); color: var(--ink-3); border-color: var(--hairline); }
+.input::placeholder { color: var(--ink-3); opacity: .8; }
+.input[aria-invalid='true'] { border-color: var(--red); }
+.field-error { display: block; margin-top: 5px; font-size: 13.5px; font-weight: 600; color: var(--red); }
+.field-hint { display: block; margin-top: 6px; font-size: 13.5px; line-height: 1.45; color: var(--ink-3); }
+
+/* Segmented control. */
+.seg { display: inline-flex; border: 2px solid var(--ink); border-radius: var(--r-2); overflow: hidden; background: var(--sheet); }
+.seg-opt {
+  padding: 8px 16px; font: 800 14px/1.2 var(--font-sign); color: var(--ink);
+  background: transparent; border: 0; cursor: pointer;
+  transition: background var(--t) ease, color var(--t) ease;
+}
+.seg-opt + .seg-opt { border-left: 2px solid var(--ink); }
+.seg-opt[data-on='true'] { background: var(--asphalt); color: var(--paper); }
+.seg-opt[data-on='false']:hover { background: var(--yellow); color: #1d1a16; }
+
+/* ---- Feedback ------------------------------------------------------------ */
+.msg { display: inline-flex; align-items: center; gap: 6px; font-size: 13.5px; font-weight: 600; line-height: 1.35; }
+.msg-success { color: var(--green); }
+.msg-warning { color: var(--yellow-deep); }
+.msg-error { color: var(--red); }
+
+.notice {
+  padding: 12px 14px 12px 16px; font-size: 14.5px; line-height: 1.45;
+  border-radius: var(--r-2); border-left: 5px solid var(--ink); background: var(--paper-2); color: var(--ink);
+}
+.notice-success { border-left-color: var(--green); background: var(--green-tint); }
+.notice-warning { border-left-color: var(--yellow); background: var(--yellow-tint); }
+.notice-error { border-left-color: var(--red); background: var(--red-tint); }
+.notice-info { border-left-color: var(--blue); background: var(--blue-tint); }
+
+.badge {
+  display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;
+  font-family: var(--font-mono); font-size: 10.5px; font-weight: 600; letter-spacing: .07em; text-transform: uppercase;
+  padding: 3px 6px 2px; border-radius: var(--r-1);
+}
+.badge-neutral { background: var(--paper-3); color: var(--ink-2); }
+.badge-verified { background: #1d4c8a; color: #fff; }
+.badge-accent { background: var(--sun-tint); color: var(--color-accent-800); }
+.badge-success { background: var(--green-tint); color: var(--green-deep); }
+.badge-warning { background: var(--yellow); color: #1d1a16; }
+
+/* Topic tags: quiet, mono, underlined with a dash. Not a pill. */
+.tag {
+  display: inline-flex; align-items: center;
+  font-family: var(--font-mono); font-size: 12px; letter-spacing: .01em; color: var(--ink-2);
+  padding: 1px 0; border-bottom: 1.5px dashed var(--hairline-strong);
+}
+.tag-accent { color: var(--sun-deep); border-bottom-color: color-mix(in srgb, var(--sun) 55%, transparent); }
+.tag-accent-2 { color: var(--ink-2); }
+
+.skeleton {
+  background: repeating-linear-gradient(-45deg, var(--paper-2) 0 10px, var(--paper-3) 10px 20px);
+  background-size: 200% 100%; animation: skeleton-slide 1.2s linear infinite; border-radius: var(--r-1);
+}
+.skeleton-line { height: 12px; }
+.skeleton-title { height: 22px; }
+.skeleton-avatar { width: 40px; height: 40px; border-radius: var(--r-2); }
+@keyframes skeleton-slide { to { background-position: -56px 0; } }
+
+/* Empty states read as a rest area: a pull-off, a short sentence, a way on. */
+.empty {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 8px;
+  padding: 26px 24px; border: 2px dashed var(--hairline-strong); border-radius: var(--r-3);
+}
+.empty-icon { width: 40px; height: 40px; display: grid; place-items: center; background: #1d4c8a; color: #fff; border-radius: var(--r-2); margin-bottom: 4px; }
+.empty-title { margin: 0; font-size: 19px; font-weight: 900; letter-spacing: -0.015em; }
+.empty-body { margin: 0; font-size: 15px; line-height: 1.5; color: var(--ink-2); max-width: 46ch; }
+
+/* ---- Plates, signs, markers ------------------------------------------------ */
+
+/* An avatar is a plate: initials on sheet metal, square-cornered. */
+.avatar, .plate {
+  display: inline-flex; align-items: center; justify-content: center; flex: none; overflow: hidden;
+  border-radius: 22%; font-family: var(--font-sign); font-weight: 900; letter-spacing: .01em; line-height: 1;
+}
+.avatar-sm { width: 30px; height: 30px; font-size: 11.5px; }
+.avatar-md { width: 40px; height: 40px; font-size: 14.5px; }
+.avatar-lg { width: 56px; height: 56px; font-size: 20px; }
+.avatar-xl { width: 88px; height: 88px; font-size: 32px; }
+
+/* The guide sign. Field colour, and a thin border set in from the edge, which
+   is how you can tell a road sign from a coloured box. */
+.sign {
+  --sb: #17604a; --sf: #ffffff;
+  display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
+  background: var(--sb); color: var(--sf);
+  font-family: var(--font-sign); font-weight: 800; font-size: 12.5px; line-height: 1; letter-spacing: .02em;
+  padding: 7px 10px 6px; border-radius: 5px;
+  box-shadow: inset 0 0 0 1.5px var(--sb), inset 0 0 0 2.75px var(--sf);
+  text-decoration: none;
+}
+.sign-lg { font-size: 16px; padding: 11px 16px 10px; border-radius: 7px; box-shadow: inset 0 0 0 2.5px var(--sb), inset 0 0 0 4.5px var(--sf); }
+.sign-green { --sb: #17604a; --sf: #fff; }
+.sign-blue { --sb: #1d4c8a; --sf: #fff; }
+.sign-brown { --sb: #6a4322; --sf: #fff; }
+.sign-red { --sb: #b3261e; --sf: #fff; }
+.sign-ink { --sb: #26231f; --sf: #fbf6ee; }
+.sign-yellow { --sb: #f4c21f; --sf: #1d1a16; }
+.sign-lime { --sb: #cfe043; --sf: #1d1a16; }
+.sign-sun { --sb: #e05e12; --sf: #1d1a16; }
+.sign-white { --sb: #ffffff; --sf: #1d1a16; }
+button.sign { border: 0; cursor: pointer; }
+.sign[aria-pressed='false'] { background: transparent; color: var(--ink-2); box-shadow: inset 0 0 0 1.5px var(--hairline-strong); }
+.sign[aria-pressed='false']:hover { color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--ink); }
+
+/* The mile marker: a tall green tab with a number. Used for steps and counts. */
+.mile {
+  display: inline-flex; flex-direction: column; align-items: center; justify-content: center; flex: none;
+  min-width: 34px; padding: 5px 6px 4px; background: #17604a; color: #fff; border-radius: 3px;
+  font-family: var(--font-sign); font-weight: 900; font-size: 18px; line-height: 1;
+  box-shadow: inset 0 0 0 1.5px #17604a, inset 0 0 0 2.5px #fff;
+}
+.mile small { display: block; font-size: 7.5px; font-weight: 800; letter-spacing: .12em; margin-bottom: 2px; }
+
+/* A count on a nav row or a tab. */
+.count {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 20px; height: 20px; padding: 0 5px; border-radius: 3px;
+  background: var(--sun); color: #1d1a16; font: 900 12px/1 var(--font-sign);
+}
+
+/* ---- Surfaces -------------------------------------------------------------- */
+.card {
+  display: flex; flex-direction: column; gap: 10px;
+  padding: 20px; background: var(--sheet);
+  border: 1px solid var(--hairline); border-radius: var(--r-3);
+}
+.card-inset { background: var(--paper-2); border-color: transparent; }
+.card-interactive { cursor: pointer; transition: border-color var(--t) ease; }
+.card-interactive:hover { border-color: var(--ink); }
+.elev-sm, .elev-md { box-shadow: none; }
+.elev-lg { box-shadow: var(--lift); }
+
+/* A panel is a card that means it: ink border, like the edge of a sign. */
+.panel { background: var(--sheet); border: 2px solid var(--ink); border-radius: var(--r-3); }
+.panel-head {
+  display: flex; align-items: center; gap: 8px; padding: 10px 14px;
+  border-bottom: 2px solid var(--ink);
+  font-family: var(--font-mono); font-size: 11.5px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase;
+}
+.panel-body { padding: 14px; }
+
+/* Things that float above the page. */
+.popover {
+  background: var(--sheet); border: 2px solid var(--ink); border-radius: var(--r-3); box-shadow: var(--lift);
+}
+.menu-item {
+  display: flex; align-items: center; gap: 10px; width: 100%; padding: 9px 10px;
+  font: 700 14.5px/1.2 var(--font-sign); color: var(--ink); text-align: left; text-decoration: none;
+  background: transparent; border: 0; border-radius: var(--r-1); cursor: pointer;
+}
+.menu-item:hover { background: var(--paper-2); }
+
+/* ---- Tables ---------------------------------------------------------------- */
+.table { width: 100%; border-collapse: collapse; font-size: 15px; }
+.table th {
+  text-align: left; padding: 10px 12px; border-bottom: 2px solid var(--ink);
+  font-family: var(--font-mono); font-size: 11.5px; font-weight: 600; letter-spacing: .09em; text-transform: uppercase; color: var(--ink-2);
+}
+.table td { padding: 13px 12px; border-bottom: 1px solid var(--hairline); vertical-align: top; }
+.table tbody tr:last-child td { border-bottom: 0; }
+
+/* ---- Legacy layout helpers still used by a few components ------------------ */
+.page-hero { padding: clamp(36px, 6vh, 72px) 0 clamp(20px, 3vh, 32px); }
+.page-section { padding: clamp(32px, 5vh, 64px) 0; }
+.washed { filter: saturate(.6) contrast(.85) brightness(1.1) opacity(.94); }
+.anim-fade-up, .anim-fade-swap, .anim-drift, .anim-drift-slow { animation: none; }
+.frame { border: 2px solid var(--ink); border-radius: var(--r-3); background: var(--sheet); overflow: hidden; }
+.frame-bar { display: flex; align-items: center; gap: 6px; padding: 9px 12px; border-bottom: 2px solid var(--ink); background: var(--paper-2); }
+.frame-dot { width: 9px; height: 9px; border-radius: 2px; background: var(--ink-3); }
+
+@media (max-width: 860px) {
+  .hide-mobile { display: none !important; }
+  .show-mobile { display: inline-flex !important; }
+  .app-split { grid-template-columns: minmax(0, 1fr) !important; }
+  .split-aside { position: static !important; order: -1; }
+  .msg-split[data-active='false'] .msg-pane { display: none; }
+  .msg-split[data-active='true'] .msg-list { display: none; }
+}
+@media (min-width: 861px) { .show-mobile { display: none !important; } }
+
+button, .btn, .btn-chip, .seg-opt, .badge, .tag, .sign, .bottom-tab, .rail-link {
+  -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent;
+}
+
+/* ---- Radix primitives, in the house style ------------------------------------ */
+.pw-overlay { background: rgba(20, 18, 16, .62); }
+.pw-dialog {
+  background: var(--sheet); color: var(--ink);
+  border: 2px solid var(--ink); border-radius: var(--r-3); box-shadow: var(--lift);
+  width: calc(100% - 28px); max-height: calc(100dvh - 28px); overflow-y: auto;
+}
+.pw-dialog-title { font-family: var(--font-sign); font-weight: 900; font-size: 24px; letter-spacing: -0.02em; line-height: 1.1; padding-right: 30px; }
+.pw-dialog-close {
+  display: grid; place-items: center; width: 32px; height: 32px; border-radius: var(--r-1); color: var(--ink-2);
+}
+.pw-dialog-close:hover { background: var(--paper-2); color: var(--ink); }
+.pw-pop { background: var(--sheet); color: var(--ink); border: 2px solid var(--ink); border-radius: var(--r-2); box-shadow: var(--lift); }
+.pw-option { font-size: 15.5px; font-weight: 600; border-radius: var(--r-1); }
+.pw-option:focus, .pw-option[data-highlighted] { background: var(--asphalt); color: var(--paper); }

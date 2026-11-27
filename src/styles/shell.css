@@ -1,0 +1,149 @@
+/* ---------------------------------------------------------------------------
+   The signed-in shell.
+
+   Desktop: a rail of destinations on the left, a strip of road beside it, and
+   the page to the right. Phone and tablet: a top bar, and a tab bar at the
+   bottom where a thumb can reach it.
+   --------------------------------------------------------------------------- */
+.app-scroll-root { overscroll-behavior: none; }
+
+.shell { display: grid; grid-template-columns: var(--rail-w) 14px minmax(0, 1fr); min-height: 100dvh; }
+
+.rail {
+  position: sticky; top: 0; height: 100dvh; overflow-y: auto;
+  display: flex; flex-direction: column; padding: 16px 12px 12px;
+}
+.rail .brand { margin: 2px 6px 0; }
+.rail-head {
+  margin: 24px 8px 6px; font-family: var(--font-mono); font-size: 10.5px; font-weight: 600;
+  letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3);
+}
+.rail-nav { display: grid; gap: 2px; margin-top: 22px; }
+.rail-link {
+  display: grid; grid-template-columns: 30px minmax(0, 1fr) auto; align-items: center; gap: 12px;
+  padding: 6px 8px 6px 6px; border-radius: var(--r-2);
+  font-weight: 800; font-size: 15.5px; letter-spacing: -0.005em; color: var(--ink); text-decoration: none;
+  transition: background var(--t-fast) ease;
+}
+.rail-link:hover { background: var(--paper-2); }
+.rail-link[aria-current='page'] { background: var(--asphalt); color: var(--paper); }
+.rail-link-quiet { font-weight: 700; font-size: 14.5px; color: var(--ink-2); }
+
+/* The pictogram plate beside each destination. */
+.picto {
+  width: 30px; height: 30px; display: grid; place-items: center; flex: none; border-radius: 5px;
+  background: var(--pb, #17604a); color: var(--pf, #fff);
+}
+.picto-green { --pb: #17604a; --pf: #fff; }
+.picto-blue { --pb: #1d4c8a; --pf: #fff; }
+.picto-ink { --pb: #26231f; --pf: #fbf6ee; }
+.picto-white { --pb: #ffffff; --pf: #1d1a16; box-shadow: inset 0 0 0 1.5px #1d1a16; }
+.picto-sun { --pb: #e05e12; --pf: #1d1a16; }
+.picto-yellow { --pb: #f4c21f; --pf: #1d1a16; }
+.picto-lime { --pb: #cfe043; --pf: #1d1a16; }
+.picto-brown { --pb: #6a4322; --pf: #fff; }
+.picto-red { --pb: #b3261e; --pf: #fff; }
+.rail-link[aria-current='page'] .picto-ink { box-shadow: inset 0 0 0 1.5px #fbf6ee; }
+@media (prefers-color-scheme: dark) { .picto-ink { box-shadow: inset 0 0 0 1.5px #8a8375; } }
+
+.rail-foot { margin-top: auto; padding-top: 16px; }
+.rail-user {
+  display: grid; grid-template-columns: 38px minmax(0, 1fr); gap: 10px; align-items: center;
+  padding: 8px; border-radius: var(--r-2); border: 1.5px solid var(--hairline-strong); background: var(--sheet);
+  color: var(--ink); text-decoration: none;
+}
+.rail-user:hover { border-color: var(--ink); }
+.rail-user b { display: block; font-size: 14.5px; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rail-user small { display: block; font-family: var(--font-mono); font-size: 11px; color: var(--ink-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.shell-road { position: sticky; top: 0; height: 100dvh; }
+.shell-main { min-width: 0; display: flex; flex-direction: column; }
+
+.topbar {
+  position: sticky; top: 0; z-index: 30;
+  display: flex; align-items: center; gap: 10px;
+  min-height: 60px; padding: env(safe-area-inset-top) var(--gutter) 0;
+  background: var(--paper); border-bottom: 1px solid var(--hairline);
+}
+.topbar .brand { display: none; margin-right: auto; }
+.topbar-spacer { flex: 1; }
+.topbar-road { display: none; }
+
+/* Looks like a search field, opens the jump menu. */
+.jump {
+  display: flex; align-items: center; gap: 10px; width: min(380px, 100%); height: 40px; padding: 0 10px 0 12px;
+  background: var(--sheet); color: var(--ink-3); border: 1.5px solid var(--hairline-strong); border-radius: var(--r-2);
+  font: 600 14.5px/1 var(--font-sign); cursor: pointer; text-align: left;
+}
+.jump:hover { border-color: var(--ink); color: var(--ink-2); }
+.jump kbd {
+  margin-left: auto; padding: 3px 6px 2px; border: 1px solid var(--hairline-strong); border-radius: 3px;
+  font: 600 11px/1 var(--font-mono); color: var(--ink-3);
+}
+.icon-btn {
+  position: relative; display: inline-grid; place-items: center; width: 40px; height: 40px; flex: none;
+  background: var(--sheet); color: var(--ink); border: 1.5px solid var(--hairline-strong); border-radius: var(--r-2); cursor: pointer;
+  text-decoration: none;
+}
+.icon-btn:hover { border-color: var(--ink); }
+.icon-btn .count { position: absolute; top: -7px; right: -7px; box-shadow: 0 0 0 2px var(--paper); }
+.topbar-only-small { display: none; }
+
+.app-main { flex: 1; padding: 30px var(--gutter) 96px; }
+.page { width: 100%; max-width: 1120px; margin-inline: auto; }
+.page-read { width: 100%; max-width: 740px; margin-inline: auto; }
+
+.page-head {
+  display: flex; align-items: flex-end; justify-content: space-between; gap: 16px 24px; flex-wrap: wrap;
+  padding-bottom: 18px; margin-bottom: 24px; border-bottom: 2px solid var(--ink);
+}
+.page-head .kicker { margin-bottom: 8px; }
+.page-head h1 { font-size: clamp(30px, 3.5vw, 44px); font-weight: 900; letter-spacing: -0.03em; line-height: 1; margin: 0; }
+.page-head p { margin: 10px 0 0; font-size: 16px; line-height: 1.45; color: var(--ink-2); max-width: 62ch; }
+.page-head-actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+
+/* ---- Bottom tab bar --------------------------------------------------------- */
+.bottom-tabs { display: none; }
+
+@media (max-width: 999px) {
+  .shell { display: block; }
+  .rail, .shell-road { display: none; }
+  .topbar { min-height: 56px; }
+  .topbar .brand { display: inline-flex; }
+  .topbar .brand-name { font-size: 20px; }
+  .topbar .jump { display: none; }
+  .topbar-spacer { display: none; }
+  .topbar-only-small { display: inline-grid; }
+  .topbar-road { display: block; height: 10px; }
+  .app-main { padding: 22px var(--gutter) calc(92px + env(safe-area-inset-bottom)); }
+
+  .bottom-tabs {
+    display: flex; position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; align-items: stretch;
+    background: var(--sheet); border-top: 2px solid var(--ink); padding-bottom: env(safe-area-inset-bottom);
+  }
+  .bottom-tab { flex: 1; display: flex; text-decoration: none; }
+  .bottom-tab-inner {
+    position: relative; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+    min-height: 58px; padding: 8px 2px 6px; color: var(--ink-3);
+  }
+  .bottom-tab-inner[data-on='true'] { color: var(--ink); }
+  .bottom-tab-inner[data-on='true']::before { content: ''; position: absolute; top: -2px; left: 22%; right: 22%; height: 4px; background: var(--sun); }
+  .bottom-tab-label { font-size: 11.5px; font-weight: 800; letter-spacing: .01em; }
+
+  /* Every control stays tappable on a phone. */
+  .btn, .btn-chip { min-height: 44px; }
+  .btn-sm { min-height: 40px; }
+}
+
+/* ---- The jump menu -------------------------------------------------------------- */
+.jump-dialog .pw-dialog-close { display: none; }
+.jump-input { display: flex; align-items: center; gap: 10px; padding: 0 16px; border-bottom: 2px solid var(--ink); color: var(--ink-3); }
+.jump-input input { flex: 1; min-width: 0; height: 56px; background: transparent; border: 0; outline: 0; font: 600 17px/1 var(--font-sign); color: var(--ink); }
+.jump-input input::placeholder { color: var(--ink-3); }
+.jump-list { max-height: min(56dvh, 440px); overflow-y: auto; padding: 6px; }
+.jump-list [cmdk-group-heading] { padding: 10px 10px 5px; font-family: var(--font-mono); font-size: 10.5px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3); }
+.jump-item { display: flex; align-items: center; gap: 12px; padding: 8px 10px; border-radius: var(--r-1); font-weight: 800; font-size: 15.5px; cursor: pointer; }
+.jump-item[data-selected='true'] { background: var(--asphalt); color: var(--paper); }
+.jump-term > span { display: grid; gap: 2px; min-width: 0; }
+.jump-term span span { font-weight: 500; font-size: 13.5px; line-height: 1.4; opacity: .8; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.jump-empty { padding: 22px 14px; font-size: 15px; color: var(--ink-2); }

@@ -18,7 +18,7 @@ export default function FieldSelect({
         id={id}
         aria-label={ariaLabel}
         className="input"
-        style={{ height: 'auto', minHeight: 42, textAlign: 'left' }}
+        style={{ textAlign: 'left' }}
       >
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>

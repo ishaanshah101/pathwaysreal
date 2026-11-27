@@ -39,9 +39,9 @@ export default function EditPostModal({ open, onOpenChange, post, onSaved }) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent style={{ background: 'var(--color-surface)', borderRadius: 16, maxWidth: 560 }}>
+      <DialogContent style={{ maxWidth: 580 }}>
         <DialogHeader>
-          <DialogTitle style={{ fontFamily: 'var(--font-heading)', fontWeight: 400, fontSize: 24 }}>Edit post</DialogTitle>
+          <DialogTitle>Edit post</DialogTitle>
         </DialogHeader>
         <form onSubmit={submit} className="flex flex-col" style={{ gap: 14 }}>
           <div className="field">
@@ -67,7 +67,7 @@ export default function EditPostModal({ open, onOpenChange, post, onSaved }) {
               onChange={(e) => setForm({ ...form, body: e.target.value })}
             />
           </div>
-          {error && <span style={{ fontSize: 13, color: 'var(--color-accent-700)' }}>{error}</span>}
+          {error && <span role="alert" className="msg msg-error">{error}</span>}
           <div className="flex gap-2">
             <button type="submit" className="btn btn-primary" disabled={saving}>
               {saving ? 'Saving…' : 'Save changes'}

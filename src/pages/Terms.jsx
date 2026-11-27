@@ -7,24 +7,24 @@ import {
 } from '@/lib/company';
 
 const S = ({ title, children }) => (
-  <section style={{ marginBottom: 26 }}>
-    <h2 className="h-sans" style={{ fontSize: 18, margin: '0 0 8px' }}>{title}</h2>
-    <div className="prose" style={{ fontSize: 15, lineHeight: 1.7, color: 'var(--text-muted)' }}>{children}</div>
+  <section>
+    <h2>{title}</h2>
+    <div className="prose">{children}</div>
   </section>
 );
 
 export default function Terms() {
   return (
-    <section className="page-hero" style={{ paddingBottom: 'clamp(40px,6vh,72px)', maxWidth: '68ch' }}>
+    <section className="band doc">
+      <div className="wrap-read">
       <Seo
         title="Terms of Service | Pathways"
         description="The terms for using Pathways: who operates it, who can join, how members must behave, and how the free core app and optional Sage subscription work."
         path="/terms"
       />
-      <h1 style={{ fontSize: 'clamp(30px,4.2vw,46px)', margin: '0 0 8px' }}>Terms of Service</h1>
-      <p style={{ color: 'var(--text-subtle)', fontSize: 13, marginBottom: 32 }}>
-        Last updated August 2026
-      </p>
+      <span className="kicker kicker-sun">Rules of the road</span>
+      <h1 className="title-1">Terms of Service</h1>
+      <p className="meta" style={{ margin: '14px 0 8px' }}>Last updated August 2026</p>
 
       <S title="1. Who operates Pathways">
         {PRODUCT_NAME} ({PRODUCT_DOMAIN}) is operated by <b>{COMPANY_NAME}</b>, based in {COMPANY_LOCATION}{' '}
@@ -158,6 +158,7 @@ export default function Terms() {
         Questions about these terms, or anything else, go to <ContactEmail />. Safety reports are
         handled through the in-app Report action or the same address, and are treated as urgent.
       </S>
+      </div>
     </section>
   );
 }

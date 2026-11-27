@@ -1,0 +1,15 @@
+/* Typefaces, self-hosted. Nothing is fetched from a third-party font CDN, so a
+   student's browser never tells Google which page of Pathways they opened, and
+   the installed app keeps its type with no connection.
+
+   Overpass is the open descendant of Highway Gothic, the lettering on American
+   road signs. It carries headlines and every control.
+   Literata was drawn for long reading on screens. It carries anything a member
+   wrote at length: posts, Sage answers, the legal pages.
+   Overpass Mono is for the small print: mile markers, dates, counts. */
+@import '@fontsource-variable/overpass/wght.css';
+@import '@fontsource-variable/overpass/wght-italic.css';
+@import '@fontsource-variable/literata/opsz.css';
+@import '@fontsource-variable/literata/opsz-italic.css';
+@import '@fontsource/overpass-mono/latin-400.css';
+@import '@fontsource/overpass-mono/latin-600.css';

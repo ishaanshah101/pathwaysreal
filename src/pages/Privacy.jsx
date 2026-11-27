@@ -7,24 +7,24 @@ import {
 } from '@/lib/company';
 
 const S = ({ title, children }) => (
-  <section style={{ marginBottom: 26 }}>
-    <h2 className="h-sans" style={{ fontSize: 18, margin: '0 0 8px' }}>{title}</h2>
-    <div className="prose" style={{ fontSize: 15, lineHeight: 1.7, color: 'var(--text-muted)' }}>{children}</div>
+  <section>
+    <h2>{title}</h2>
+    <div className="prose">{children}</div>
   </section>
 );
 
 export default function Privacy() {
   return (
-    <section className="page-hero" style={{ paddingBottom: 'clamp(40px,6vh,72px)', maxWidth: '68ch' }}>
+    <section className="band doc">
+      <div className="wrap-read">
       <Seo
         title="Privacy Policy | Pathways"
         description="How Pathways handles student information: what we collect, who can see it, how long we keep it, and how to delete it. We never sell student data."
         path="/privacy"
       />
-      <h1 style={{ fontSize: 'clamp(30px,4.2vw,46px)', margin: '0 0 8px' }}>Privacy Policy</h1>
-      <p style={{ color: 'var(--text-subtle)', fontSize: 13, marginBottom: 32 }}>
-        Last updated August 2026
-      </p>
+      <span className="kicker kicker-sun">Rules of the road</span>
+      <h1 className="title-1">Privacy Policy</h1>
+      <p className="meta" style={{ margin: '14px 0 8px' }}>Last updated August 2026</p>
 
       <S title="1. Who we are">
         {PRODUCT_NAME} ({PRODUCT_DOMAIN}) is a platform that connects high school students with students,
@@ -189,6 +189,7 @@ export default function Privacy() {
         Questions, requests, or concerns about privacy go to <ContactEmail />. Safety concerns are
         treated as urgent — see our <Link to="/safety">Safety page</Link>.
       </S>
+      </div>
     </section>
   );
 }

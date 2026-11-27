@@ -33,8 +33,7 @@ export default function ContactEmail({ className, style, bold = true }) {
       href={`mailto:${address}`}
       className={className}
       style={{
-        color: 'var(--color-accent-700)',
-        fontWeight: bold ? 600 : 400,
+        fontWeight: bold ? 700 : 400,
         wordBreak: 'break-word',
         ...style,
       }}

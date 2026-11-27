@@ -302,6 +302,9 @@ export default function ProfilePage() {
       {/* The top of the page is the member as other people meet them: plate,
           name, the one line under it, and the signs that say who they are. */}
       <div className="profile-top">
+        {/* A cover strip with the picture overlapping it, the way a profile
+            opens on any social app. Decoration only. */}
+        <div className="profile-cover" aria-hidden="true" />
         <span className="kicker">Your profile</span>
         <Plate name={profile?.full_name} seed={email} size={88} />
         <PageHead

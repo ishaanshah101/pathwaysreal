@@ -66,8 +66,8 @@ Dark mode is homework after dark: a darker desk and paper under a lamp. Sticky n
 
 The signed-in app borrows its layout from social apps on purpose, so nobody has to learn where things are. The drawing stays in the notebook.
 
-- **Feed tabs.** "For you" and "Following" are tabs above the stream, with highlighter over the one you are on. Topics are one row of labels under the tabs that scrolls sideways.
-- **A post.** Follow sits beside the author's name. One row of actions sits under the post: Helpful (counted, and nobody can see who pressed it), Save, Share, then Connect.
-- **People to learn from.** A short list beside the feed with a Follow button on each row. Verified educators and counselors come first.
-- **Compose on a phone.** One round orange button above the tab bar.
-- **Profile.** Posts, followers and following as numbers under the name, then three tabs: Profile, Posts, Account.
+- **Feed.** It opens straight onto the composer. "For you" and "Following" are tabs above the stream, with highlighter over the one you are on. Topics are one row of labels under the tabs that scrolls sideways.
+- **A post.** Follow sits beside the author's name. One row of actions sits under the post: Helpful (counted, and nobody can see who pressed it), Save, Share, then Message or Connect.
+- **Beside the feed.** You as a small card with a strip of the notebook cover, then a search, "People to learn from" with a Follow button on each row, and your plan.
+- **Profile.** A strip of the marbled cover with your sticker standing on its edge, then posts, followers and following as numbers, then three tabs: Profile, Posts, Account.
+- **Phone.** One round orange compose button above the tab bar, and icon-only actions under posts.

@@ -14,7 +14,7 @@ export default function SavePostButton({ postId, saved, busy, onToggle }) {
       title={saved ? 'Remove from your saved posts' : 'Save this to read later, even offline'}
     >
       <Icon as={saved ? BookmarkCheck : Bookmark} size={16} />
-      {saved ? 'Saved' : 'Save'}
+      <span className="act-label">{saved ? 'Saved' : 'Save'}</span>
     </button>
   );
 }

@@ -9,8 +9,8 @@
     <link rel="preconnect" href="https://media.base44.com" crossorigin />
     <link rel="dns-prefetch" href="https://media.base44.com" />
     <link rel="manifest" href="/manifest.json" />
-    <!-- Installed-app behaviour on iOS: full-screen standalone, cream status bar
-         matching --color-bg, and the same mark as the home screen icon. -->
+    <!-- Installed-app behaviour on iOS: full-screen standalone, status bar
+         matching the page, and the same mark as the home screen icon. -->
     <link rel="apple-touch-icon" href="/icon.svg" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="Pathways" />
@@ -23,7 +23,8 @@
     <meta name="description" content="Free college and career guidance for high school students, from real college students, professors, and admissions counselors who have been there." />
     <link rel="canonical" href="https://pathways.uno/" />
     <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large" />
-    <meta name="theme-color" content="#f5ead8" />
+    <meta name="theme-color" content="#f3efe4" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#171512" media="(prefers-color-scheme: dark)" />
     <meta name="author" content="iPathways" />
 
     <!-- Open Graph -->
@@ -91,6 +92,9 @@
             "Connect and message verified mentors one on one",
             "Safety-screened messaging with reporting and blocking built in",
             "Search people, high schools, colleges, summer programs, and majors",
+            "A private planner with a dated checklist and a college list",
+            "A plain-English glossary of admissions and financial aid terms",
+            "A season-by-season guide for 9th to 12th grade",
             "Sage, an optional AI college and career advisor"
           ],
           "offers": [
@@ -187,9 +191,10 @@
     <!--
       The markup inside #root is a static, crawler-readable mirror of the live
       app. Pathways is a client-rendered SPA, and AI crawlers (GPTBot,
-      ClaudeBot, PerplexityBot) do not execute JavaScript — without this they
+      ClaudeBot, PerplexityBot) do not execute JavaScript, so without this they
       would see an empty page. React replaces this content on mount, so real
-      visitors never see it. The wording matches the rendered app exactly.
+      visitors never see it. The wording follows the rendered home page; if
+      the home page copy changes, change it here too.
 
       The wrapper below is the standard visually-hidden pattern: the text stays
       in the normal DOM where crawlers and text extractors read it at full
@@ -204,28 +209,34 @@
       <main style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0">
         <h1>Every student deserves someone who's been there.</h1>
         <p>
-          Pathways is a free platform that gives every high school student equal access to real,
-          firsthand guidance on college and careers. Students, professors, and admissions counselors
-          share experience, connect as mentors, and answer questions in one focused space, with no
-          addiction loops and no data selling. The core app is free forever. Sage, the optional AI
-          advisor, is $5 per month or $40 per year.
+          Pathways is where high schoolers get straight answers about college and careers from the
+          students, professors, and counselors who already made the trip. It is free for every
+          student, and it stays free. Sage, the optional AI advisor, is $5 per month or $40 per year,
+          and it is the only thing on Pathways that costs money.
         </p>
 
-        <h2>How Pathways works</h2>
+        <h2>One place, built for the decision you are making.</h2>
         <ul>
-          <li><strong>A feed that respects your time.</strong> Long-form posts about campus visits, competitions, internships, and scholarships. No short-form video loops, no reposts.</li>
-          <li><strong>Follow or connect.</strong> Follow to stay updated. Connect, mutually, to message and learn from someone directly.</li>
-          <li><strong>Verified mentors.</strong> Professors and counselors are checked by a person against their institution's public directory before they get the badge.</li>
-          <li><strong>A safer inbox.</strong> One-on-one only, never group chats, with contact-sharing blocked automatically.</li>
-          <li><strong>Sage, when you need an answer now.</strong> The optional AI advisor built into Pathways, $5 a month, and the only thing here that costs anything.</li>
-          <li><strong>Search that finds your future.</strong> People, high schools, colleges, summer programs, and majors in one search.</li>
+          <li><strong>Long posts from people who did it.</strong> Campus visits, rejections, scholarships that came through. No reposts and no short video, so you leave knowing more than when you arrived.</li>
+          <li><strong>Mentors checked by a person, not a bot.</strong> Professors and counselors get the verified badge only after someone compares them against their school's public directory.</li>
+          <li><strong>Messages one on one, and only if you both say yes.</strong> Nobody can message you until you accept their request. No group chats. Phone numbers and meetup requests are blocked automatically.</li>
+          <li><strong>Deadlines you will actually see coming.</strong> A college list and a checklist with dates, starting from what students in your grade usually need to do next.</li>
+          <li><strong>FAFSA, ED, SAI, in plain English.</strong> The words everyone assumes you already know, each explained in a sentence or two.</li>
+          <li><strong>An AI advisor for when it is 11 p.m.</strong> Sage is optional, $5 a month, and the only thing on Pathways that costs money. It is what keeps the rest free.</li>
         </ul>
 
         <h2>Why Pathways exists</h2>
         <p>
           A private college counselor can cost $200 an hour, and most families never have one. About
-          16 million US high schoolers navigate the same decisions with wildly unequal support.
-          Pathways gives every student the same access, free.
+          16 million US high schoolers are making these decisions right now. Pathways costs every one
+          of them $0, forever, not as a trial.
+        </p>
+
+        <h2>Who is behind this</h2>
+        <p>
+          Pathways was built by a high school student who went looking for honest advice about college
+          and could not find it. It is operated by iPathways in San Ramon, California. Every mentor is
+          verified one by one by a person, not an algorithm.
         </p>
 
         <h2>Frequently asked questions</h2>
@@ -253,6 +264,8 @@
 
         <nav>
           <a href="/how-it-works">How it works</a>
+          <a href="/by-grade">What to do in each grade</a>
+          <a href="/glossary">College glossary</a>
           <a href="/sage">Sage, the AI advisor</a>
           <a href="/faq">FAQ</a>
           <a href="/join">Join free</a>

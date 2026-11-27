@@ -4,12 +4,13 @@ import { Search } from 'lucide-react';
 import Seo from '@/components/Seo';
 import Sign from '@/components/kit/Sign';
 import Icon from '@/components/kit/Icon';
+import PageHead from '@/components/kit/PageHead';
 import { GLOSSARY, GLOSSARY_GROUPS, termId } from '@/data/glossary';
 
 // The college process runs on words nobody stops to explain. This page is a
 // plain-English index of them, public and searchable, because the students who
 // most need it are the ones with nobody at home to ask.
-export default function Glossary() {
+export default function Glossary({ embedded = false }) {
   const [q, setQ] = useState('');
   const [group, setGroup] = useState('all');
 
@@ -24,27 +25,40 @@ export default function Glossary() {
     .map((g) => ({ ...g, terms: matches.filter((t) => t.group === g.id).sort((a, b) => a.term.localeCompare(b.term)) }))
     .filter((g) => g.terms.length > 0);
 
-  return (
+  const body = (
     <>
-      <Seo
-        title="College Glossary: FAFSA, Early Decision, SAI and More, in Plain English | Pathways"
-        description="A plain-English glossary of college admissions and financial aid terms for high school students: FAFSA, CSS Profile, Early Decision, net price, and more."
-        path="/glossary"
-      />
+      {embedded ? (
+        <>
+          <Seo title="Glossary | Pathways" path="/app/glossary" noindex />
+          <PageHead
+            kicker="Reference"
+            title="Glossary"
+            sub={`${GLOSSARY.length} terms from college admissions and financial aid, each explained in a couple of sentences.`}
+          />
+        </>
+      ) : (
+        <>
+          <Seo
+            title="College Glossary: FAFSA, Early Decision, SAI and More, in Plain English | Pathways"
+            description="A plain-English glossary of college admissions and financial aid terms for high school students: FAFSA, CSS Profile, Early Decision, net price, and more."
+            path="/glossary"
+          />
 
-      <section className="page-top gridded" style={{ paddingBottom: 'clamp(20px,3vh,32px)' }}>
-        <div className="wrap">
-          <span className="kicker kicker-sun">Glossary</span>
-          <h1 className="title-1" style={{ maxWidth: '17ch' }}>The words everyone assumes you already know.</h1>
-          <p className="lede">
-            {GLOSSARY.length} terms from college admissions and financial aid, each explained in a
-            couple of sentences. No account needed.
-          </p>
-        </div>
-      </section>
+          <section className="page-top gridded" style={{ paddingBottom: 'clamp(20px,3vh,32px)' }}>
+            <div className="wrap">
+              <span className="kicker kicker-sun">Glossary</span>
+              <h1 className="title-1" style={{ maxWidth: '17ch' }}>The words everyone assumes you already know.</h1>
+              <p className="lede">
+                {GLOSSARY.length} terms from college admissions and financial aid, each explained in a
+                couple of sentences. No account needed.
+              </p>
+            </div>
+          </section>
+        </>
+      )}
 
-      <div className="gloss-bar">
-        <div className="wrap gloss-bar-inner">
+      <div className={embedded ? 'gloss-bar gloss-bar-embedded' : 'gloss-bar'}>
+        <div className={embedded ? 'gloss-bar-inner' : 'wrap gloss-bar-inner'}>
           <div className="gloss-search">
             <Icon as={Search} size={18} />
             <input
@@ -70,8 +84,8 @@ export default function Glossary() {
         </div>
       </div>
 
-      <section style={{ paddingBottom: 'clamp(48px,8vh,96px)' }}>
-        <div className="wrap">
+      <section style={{ paddingBottom: embedded ? 0 : 'clamp(48px,8vh,96px)' }}>
+        <div className={embedded ? undefined : 'wrap'}>
           {shownGroups.length === 0 ? (
             <div className="empty" style={{ marginTop: 40 }}>
               <p className="empty-title">Nothing matches “{q}”.</p>
@@ -106,12 +120,16 @@ export default function Glossary() {
         </div>
       </section>
 
-      <section className="band band-road">
-        <div className="wrap closer">
-          <h2 className="title-2" style={{ maxWidth: '22ch' }}>Still not sure what something means? Ask a person who has done it.</h2>
-          <Link to="/join" className="btn btn-sun btn-lg btn-go">Join free</Link>
-        </div>
-      </section>
+      {!embedded && (
+        <section className="band band-road">
+          <div className="wrap closer">
+            <h2 className="title-2" style={{ maxWidth: '22ch' }}>Still not sure what something means? Ask a person who has done it.</h2>
+            <Link to="/join" className="btn btn-sun btn-lg btn-go">Join free</Link>
+          </div>
+        </section>
+      )}
     </>
   );
+
+  return embedded ? <div className="page">{body}</div> : body;
 }

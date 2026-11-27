@@ -24,6 +24,7 @@ import { useOnline } from '@/lib/useOnline';
 import { usePeopleByEmail } from '@/lib/usePeople';
 import { signFor } from '@/lib/categories';
 import { GLOSSARY, termId } from '@/data/glossary';
+import { usePlan, dateParts, dueLabel } from '@/lib/usePlan';
 
 const PAGE_SIZE = 12;
 // Posts already read are kept here so the feed still has something to show with
@@ -55,6 +56,7 @@ export default function Feed() {
   const { isFollowing, toggleFollow, followBusyEmail, followingEmails } = useFollows();
   const { isSaved, toggleSave, busyPostId } = useSavedPosts();
   const online = useOnline();
+  const { upcoming: planAhead, overdue: planLate } = usePlan();
   const [offlineCached, setOfflineCached] = useState(false);
   const [posts, setPosts] = useState([]);
   const { profileFor } = usePeopleByEmail(posts.map((p) => p.author_email));
@@ -167,6 +169,11 @@ export default function Feed() {
   }, [combined]);
 
   const word = wordOfTheDay();
+  // Anything late comes first, then the next dated stops, three in all.
+  const nextStops = [
+    ...planLate.map((t) => ({ ...t, late: true })),
+    ...planAhead.filter((t) => t.due_date),
+  ].slice(0, 3);
   const first = profile?.full_name ? profile.full_name.split(' ')[0] : '';
   const filters = [['all', 'All posts'], ['following', 'Following'], ...Object.entries(CATEGORY_LABELS)];
   const followingCount = combined.filter(
@@ -359,6 +366,31 @@ export default function Feed() {
                   </li>
                 ))}
               </ul>
+            </div>
+
+            <div className="panel">
+              <div className="panel-head">Next on your plan</div>
+              <div className="panel-body" style={{ display: 'grid', gap: 12 }}>
+                {nextStops.length === 0 ? (
+                  <p style={{ margin: 0, fontSize: 14.5, lineHeight: 1.5, color: 'var(--ink-2)' }}>
+                    Nothing with a date yet. Put your next deadline somewhere you will see it.
+                  </p>
+                ) : nextStops.map((t) => {
+                  const d = dateParts(t.due_date);
+                  return (
+                    <div key={t.id} style={{ display: 'grid', gridTemplateColumns: '46px minmax(0,1fr)', gap: 10, alignItems: 'center' }}>
+                      <span className="marker" data-tone={t.late ? 'late' : undefined} style={{ width: 46, minHeight: 44 }} aria-hidden="true">
+                        <small>{d.month}</small><b style={{ fontSize: 19 }}>{d.day}</b>
+                      </span>
+                      <span style={{ minWidth: 0 }}>
+                        <b style={{ display: 'block', fontSize: 14.5, lineHeight: 1.25 }}>{t.title}</b>
+                        <span className="meta">{dueLabel(t.due_date)}</span>
+                      </span>
+                    </div>
+                  );
+                })}
+                <Link to="/app/plan" style={{ fontWeight: 800, fontSize: 14.5 }}>{nextStops.length === 0 ? 'Start a plan' : 'Open your plan'}</Link>
+              </div>
             </div>
 
             <div className="panel aside-word">

@@ -1,1 +1,90 @@
-/* plan screens. */
+/* ---------------------------------------------------------------------------
+   The planner. A plan is drawn as a route: a road down the left, and every
+   dated task a mile marker on it.
+   --------------------------------------------------------------------------- */
+.plan-layout { display: grid; grid-template-columns: minmax(0, 1fr) 296px; gap: clamp(28px, 4vw, 60px); align-items: start; }
+.plan-aside { position: sticky; top: 84px; display: grid; gap: 18px; }
+@media (max-width: 1239px) { .plan-layout { grid-template-columns: minmax(0, 1fr); } .plan-aside { position: static; } }
+
+.plan-add { display: grid; grid-template-columns: minmax(0, 1fr) 170px 190px auto; gap: 10px; align-items: end; }
+.plan-add .field > label { font-family: var(--font-mono); font-size: 11px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); }
+@media (max-width: 860px) { .plan-add { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .plan-add > :first-child, .plan-add > :last-child { grid-column: 1 / -1; } }
+
+.plan-section-head {
+  position: relative; z-index: 1; display: flex; align-items: baseline; gap: 12px;
+  margin: 26px 0 0 54px; padding: 0 0 8px clamp(18px, 3vw, 30px);
+  font-size: 20px; font-weight: 900; letter-spacing: -0.02em; border-bottom: 2px solid var(--ink);
+}
+.plan-section-head:first-child { margin-top: 6px; }
+.plan-section-head .meta { margin-left: auto; }
+.plan-section-head[data-tone='late'] { border-bottom-color: var(--red); color: var(--red-deep); }
+
+.plan-stop {
+  position: relative; z-index: 1; display: grid; grid-template-columns: 54px auto minmax(0, 1fr) auto;
+  column-gap: 14px; align-items: start; padding: 16px 0;
+}
+.plan-stop > :nth-child(2) { margin-left: clamp(4px, 1.4vw, 16px); }
+.tick-space { display: block; width: 30px; }
+.plan-stop + .plan-stop::before { content: ''; position: absolute; left: calc(54px + clamp(18px, 3vw, 30px)); right: 0; top: 0; height: 1px; background: var(--hairline); }
+
+/* The date, as a mile marker standing on the road. */
+.marker {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; width: 54px; min-height: 52px; padding: 6px 2px 5px;
+  background: #17604a; color: #fff; border-radius: 4px; box-shadow: inset 0 0 0 1.5px #17604a, inset 0 0 0 2.75px #fff;
+  font-family: var(--font-sign); line-height: 1; text-align: center;
+}
+.marker small { font-size: 9.5px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 3px; }
+.marker b { font-size: 22px; font-weight: 900; letter-spacing: -0.02em; }
+.marker[data-tone='late'] { background: #b3261e; box-shadow: inset 0 0 0 1.5px #b3261e, inset 0 0 0 2.75px #fff; }
+.marker[data-tone='done'] { background: var(--paper-3); color: var(--ink-3); box-shadow: inset 0 0 0 1.5px var(--paper-3), inset 0 0 0 2.75px var(--ink-3); }
+.marker[data-tone='none'] { background: var(--sheet); color: var(--ink-3); box-shadow: inset 0 0 0 2px var(--ink-3); }
+.marker[data-tone='college'] { background: #1d4c8a; box-shadow: inset 0 0 0 1.5px #1d4c8a, inset 0 0 0 2.75px #fff; }
+
+.tick {
+  width: 30px; height: 30px; margin-top: 11px; display: grid; place-items: center; cursor: pointer; flex: none;
+  background: var(--sheet); color: transparent; border: 2px solid var(--ink); border-radius: 4px;
+  transition: background var(--t-fast) ease, color var(--t-fast) ease;
+}
+.tick:hover { background: var(--yellow); }
+.tick[aria-checked='true'] { background: #17604a; border-color: #17604a; color: #fff; }
+
+.plan-stop-title { font-size: 18px; font-weight: 800; letter-spacing: -0.012em; line-height: 1.25; margin: 6px 0 6px; overflow-wrap: anywhere; }
+.plan-stop[data-done='true'] .plan-stop-title { color: var(--ink-3); text-decoration: line-through; text-decoration-color: var(--ink-3); text-decoration-thickness: 2px; }
+.plan-stop-meta { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; }
+.plan-stop-notes { margin: 8px 0 0; font-size: 15px; line-height: 1.5; color: var(--ink-2); white-space: pre-wrap; overflow-wrap: anywhere; }
+.plan-stop-actions { display: flex; gap: 2px; margin-top: 4px; }
+.plan-edit { grid-column: 3 / -1; display: grid; gap: 12px; padding: 4px 0 6px; }
+.plan-edit-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; }
+@media (max-width: 640px) {
+  .plan-stop { grid-template-columns: 54px auto minmax(0, 1fr); column-gap: 10px; }
+  .plan-stop-actions { grid-column: 3 / -1; margin-top: 2px; }
+  .plan-section-head { font-size: 18px; }
+}
+
+.plan-progress { height: 14px; background: var(--paper-3); border-radius: 3px; overflow: hidden; }
+.plan-progress > i { display: block; height: 100%; background: #17604a; }
+.plan-big { font-size: 44px; font-weight: 900; letter-spacing: -0.04em; line-height: .9; }
+
+/* ---- College list -------------------------------------------------------------- */
+.college-add { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 1fr) 170px auto; gap: 10px; align-items: end; }
+.college-add .field > label { font-family: var(--font-mono); font-size: 11px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); }
+@media (max-width: 1000px) { .college-add { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .college-add > :first-child, .college-add > :last-child { grid-column: 1 / -1; } }
+
+.fit-strip { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.fit-cell { padding: 14px 16px 12px; border-radius: 8px; color: #fff; box-shadow: inset 0 0 0 2px var(--fc), inset 0 0 0 3.75px currentColor; background: var(--fc); }
+.fit-cell b { display: block; font-size: 40px; font-weight: 900; letter-spacing: -0.04em; line-height: .9; }
+.fit-cell span { display: block; margin-top: 6px; font-weight: 800; font-size: 14px; }
+
+.college-row { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr) 180px auto; gap: 8px 18px; align-items: center; padding: 16px 0; border-top: 1px solid var(--hairline); }
+.college-row:first-child { border-top: 2px solid var(--ink); }
+.college-name { display: flex; align-items: center; gap: 10px; min-width: 0; flex-wrap: wrap; }
+.college-name h3 { margin: 0; font-size: 20px; font-weight: 900; letter-spacing: -0.02em; overflow-wrap: anywhere; }
+@media (max-width: 860px) { .college-row { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .college-name { grid-column: 1 / -1; } }
+
+.starter-list { list-style: none; margin: 0; padding: 0; max-height: min(52dvh, 420px); overflow-y: auto; border-top: 2px solid var(--ink); border-bottom: 2px solid var(--ink); }
+.starter-item { display: grid; grid-template-columns: 26px minmax(0, 1fr) auto; gap: 12px; align-items: start; padding: 12px 2px; border-top: 1px solid var(--hairline); cursor: pointer; }
+.starter-item:first-child { border-top: 0; }
+.starter-item input { width: 22px; height: 22px; margin-top: 1px; accent-color: #17604a; }
+.starter-item b { display: block; font-size: 16px; line-height: 1.3; }
+.starter-item small { display: block; margin-top: 3px; font-size: 13.5px; line-height: 1.45; color: var(--ink-2); }
+.starter-item[data-have='true'] { opacity: .5; cursor: default; }

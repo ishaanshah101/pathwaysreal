@@ -49,6 +49,7 @@ export default async function(req) {
         ['ThreadArchive', { user_email: email }], ['ContactNote', { owner_email: email }],
         ['Notification', { user_email: email }], ['Signup', { email }],
         ['RateLimit', { user_email: email }], ['VerificationRequest', { user_email: email }],
+        ['PlanItem', { user_email: email }],
       ];
       for (const [name, query] of owned) await deleteOwned(db[name], query);
       await anonymizeConversations(db, email, deletedRef);

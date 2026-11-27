@@ -1,0 +1,114 @@
+{
+  "name": "PlanItem",
+  "type": "object",
+  "description": "One line on a member's private plan: a task with an optional date, or a college on their list. Strictly private. Only the owner can read, write or delete their own rows; it is never shown to other members, to mentors, or in the directory. Removed with the rest of the member's data by the delete-account function.",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "The owner. Only they may read or write this row."
+    },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "task",
+        "college"
+      ],
+      "default": "task",
+      "description": "A task is one thing to do. A college is one school on the member's list."
+    },
+    "title": {
+      "type": "string",
+      "maxLength": 160,
+      "description": "What the task is, or the college's name"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "applications",
+        "essays",
+        "testing",
+        "money",
+        "recs",
+        "visits",
+        "school",
+        "other"
+      ],
+      "default": "other"
+    },
+    "due_date": {
+      "type": "string",
+      "description": "Optional calendar date as YYYY-MM-DD. For a college, its application deadline."
+    },
+    "done": {
+      "type": "boolean",
+      "default": false
+    },
+    "done_at": {
+      "type": "string",
+      "description": "ISO timestamp of when the task was ticked off"
+    },
+    "notes": {
+      "type": "string",
+      "maxLength": 2000
+    },
+    "college_fit": {
+      "type": "string",
+      "enum": [
+        "likely",
+        "target",
+        "reach"
+      ],
+      "description": "Colleges only: how the member rates their own chances"
+    },
+    "college_round": {
+      "type": "string",
+      "enum": [
+        "ed",
+        "ea",
+        "rea",
+        "rd",
+        "rolling",
+        "unsure"
+      ],
+      "description": "Colleges only: which application round"
+    },
+    "college_status": {
+      "type": "string",
+      "enum": [
+        "researching",
+        "applying",
+        "submitted",
+        "admitted",
+        "waitlisted",
+        "deferred",
+        "denied",
+        "committed"
+      ],
+      "default": "researching",
+      "description": "Colleges only: where the application stands"
+    },
+    "source": {
+      "type": "string",
+      "maxLength": 80,
+      "description": "Set to starter:<grade>:<slug> when the task came from the by-grade starter list, so the same suggestion is never added twice"
+    }
+  },
+  "required": [
+    "user_email",
+    "title"
+  ],
+  "rls": {
+    "create": {
+      "data.user_email": "{{user.email}}"
+    },
+    "read": {
+      "data.user_email": "{{user.email}}"
+    },
+    "update": {
+      "data.user_email": "{{user.email}}"
+    },
+    "delete": {
+      "data.user_email": "{{user.email}}"
+    }
+  }
+}

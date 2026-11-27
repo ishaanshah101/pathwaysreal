@@ -4,7 +4,7 @@ import React from 'react';
 export default function DeletionDetails() {
   return (
     <div className="doc" style={{ display: 'grid', gap: 4 }}>
-      <p><b>What is deleted:</b> your profile, every post you wrote, your Sage conversations, folders and free-sample counters, all your connections and pending requests, the blocks you placed on other people, your rate-limit counters, any verification request you submitted, and your sign-in itself, so the account can no longer be used to log in.</p>
+      <p><b>What is deleted:</b> your profile, every post you wrote, your Sage conversations, folders and free-sample counters, your plan and college list, all your connections and pending requests, the blocks you placed on other people, your rate-limit counters, any verification request you submitted, and your sign-in itself, so the account can no longer be used to log in.</p>
       <p><b>If you subscribe to Sage:</b> we cancel your subscription with Stripe before anything is deleted. If that cancellation fails, we stop and delete nothing, so you are never left paying for an account that no longer exists.</p>
       <p><b>What we keep, and why:</b></p>
       <ul>

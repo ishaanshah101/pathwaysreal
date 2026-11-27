@@ -66,3 +66,16 @@ Topic to sign colour is decided in one place: `src/lib/categories.js`.
 6. Every control is at least 40px tall on a phone, and every state (loading,
    empty, error) says what happened and what to do next.
 7. Dark mode comes from the tokens. Do not hard-code light colours.
+
+## Social patterns
+
+The signed-in app borrows its layout from social apps on purpose, so nobody has to learn where things are. The drawing stays in the house style.
+
+- **Feed tabs.** "For you" and "Following" are tabs above the stream, with the lane-line orange under the one you are on. Topics are one row of signs under the tabs that scrolls sideways.
+- **A post.** Follow sits beside the author's name. One row of actions sits under the post: Helpful (counted, and nobody can see who pressed it), Save, Share, then Connect.
+- **People to learn from.** A short list beside the feed with a Follow button on each row. Verified educators and counselors come first.
+- **Compose on a phone.** One orange button above the tab bar.
+- **Profile.** Posts, followers and following as numbers under the name, then three tabs: Profile, Posts, Account.
+
+All of this is styled in `src/styles/social.css`.
+

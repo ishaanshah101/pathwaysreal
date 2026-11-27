@@ -17,9 +17,10 @@ import PostArticle from '@/components/app/PostArticle';
 import FieldSelect from '@/components/ui/FieldSelect';
 import PageHead from '@/components/kit/PageHead';
 import Plate from '@/components/kit/Plate';
-import Sign from '@/components/kit/Sign';
 import Icon from '@/components/kit/Icon';
+import SuggestedPeople from '@/components/app/SuggestedPeople';
 import { useSavedPosts } from '@/lib/useSavedPosts';
+import { useReactions } from '@/lib/useReactions';
 import { useOnline } from '@/lib/useOnline';
 import { usePeopleByEmail } from '@/lib/usePeople';
 import { signFor } from '@/lib/categories';
@@ -55,12 +56,18 @@ export default function Feed() {
   } = useConnections();
   const { isFollowing, toggleFollow, followBusyEmail, followingEmails } = useFollows();
   const { isSaved, toggleSave, busyPostId } = useSavedPosts();
+  const {
+    hasReacted, countFor: helpfulFor, toggleReaction, busyPostId: reactBusyId, reactionError, clearReactionError,
+  } = useReactions();
   const online = useOnline();
   const { upcoming: planAhead, overdue: planLate } = usePlan();
   const [offlineCached, setOfflineCached] = useState(false);
   const [posts, setPosts] = useState([]);
   const { profileFor } = usePeopleByEmail(posts.map((p) => p.author_email));
   const [loading, setLoading] = useState(true);
+  // Two separate choices, the way a social feed has them: whose posts (the
+  // tabs), and what about (the row of topics under the tabs).
+  const [scope, setScope] = useState('all');
   const [filter, setFilter] = useState('all');
   const [visible, setVisible] = useState(PAGE_SIZE);
   const [composing, setComposing] = useState(false);
@@ -136,17 +143,21 @@ export default function Feed() {
     [loading, posts, blockedEmails, profileFor],
   );
 
-  // "Following" is a view of the same feed narrowed to the people I follow, so
-  // it lives alongside the topic filters rather than being a separate screen.
+  const isFollowed = useMemo(() => {
+    const set = new Set(followingEmails);
+    return (p) => set.has(String(p.author_ref || p.author_email || '').toLowerCase());
+  }, [followingEmails]);
+
+  // "Following" is the same feed narrowed to the people I follow, so it is a
+  // tab on this screen rather than a screen of its own.
+  const inScope = useMemo(
+    () => (scope === 'following' ? combined.filter(isFollowed) : combined),
+    [combined, scope, isFollowed],
+  );
+
   const filtered = useMemo(() => {
-    let rows = combined;
-    if (filter === 'following') {
-      rows = rows.filter(
-        (p) => followingEmails.includes(String(p.author_ref || p.author_email || '').toLowerCase()),
-      );
-    } else if (filter !== 'all') {
-      rows = rows.filter((p) => p.category === filter);
-    }
+    let rows = inScope;
+    if (filter !== 'all') rows = rows.filter((p) => p.category === filter);
     const needle = query.trim().toLowerCase();
     if (needle) {
       rows = rows.filter((p) => [p.title, p.body, p.author_name, p.author_headline, ...(p.tags || [])]
@@ -158,15 +169,15 @@ export default function Feed() {
       if (hit) rows = [hit, ...rows.filter((p) => p.id !== focusId)];
     }
     return rows;
-  }, [combined, filter, followingEmails, query, focusId]);
+  }, [inScope, combined, filter, query, focusId]);
 
-  useEffect(() => { setVisible(PAGE_SIZE); }, [filter, query]);
+  useEffect(() => { setVisible(PAGE_SIZE); }, [scope, filter, query]);
 
   const counts = useMemo(() => {
     const c = {};
-    for (const p of combined) c[p.category] = (c[p.category] || 0) + 1;
+    for (const p of inScope) c[p.category] = (c[p.category] || 0) + 1;
     return c;
-  }, [combined]);
+  }, [inScope]);
 
   const word = wordOfTheDay();
   // Anything late comes first, then the next dated stops, three in all.
@@ -175,11 +186,11 @@ export default function Feed() {
     ...planAhead.filter((t) => t.due_date),
   ].slice(0, 3);
   const first = profile?.full_name ? profile.full_name.split(' ')[0] : '';
-  const filters = [['all', 'All posts'], ['following', 'Following'], ...Object.entries(CATEGORY_LABELS)];
-  const followingCount = combined.filter(
-    (p) => followingEmails.includes(String(p.author_ref || p.author_email || '').toLowerCase()),
-  ).length;
-  const countFor = (v) => (v === 'all' ? combined.length : v === 'following' ? followingCount : counts[v] || 0);
+  const followingCount = useMemo(() => combined.filter(isFollowed).length, [combined, isFollowed]);
+  const scopes = [['all', 'For you', combined.length], ['following', 'Following', followingCount]];
+  // Topics nobody has written about yet are left out of the row, apart from
+  // the one that is switched on.
+  const topics = [['all', 'All topics'], ...Object.entries(CATEGORY_LABELS).filter(([v]) => counts[v] > 0 || filter === v)];
 
   return (
     // Swipe down at the top of the feed to reload it, the way a native app does.
@@ -208,6 +219,13 @@ export default function Feed() {
             {/* Asked here, inside the app, after onboarding, and only when the
                 member presses the button. Never a permission prompt on load. */}
             <PushOptInCard />
+
+            {reactionError && (
+              <div role="alert" className="notice notice-warning flex items-start gap-3">
+                <span style={{ flex: 1 }}>{reactionError}</span>
+                <button type="button" className="link-btn" style={{ fontWeight: 700 }} onClick={clearReactionError}>Dismiss</button>
+              </div>
+            )}
 
             {connectionError && (
               <div role="alert" className="notice notice-warning flex items-start gap-3">
@@ -268,23 +286,38 @@ export default function Feed() {
               </div>
             )}
 
-            <div className="searchbox">
-              <Icon as={Search} size={17} />
-              <input
-                className="input"
-                type="search"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search posts by word, person, or tag"
-                aria-label="Search posts"
-              />
+            {/* Whose posts, and a search, on one line. */}
+            <div className="feed-bar">
+              <div className="feed-tabs" role="tablist" aria-label="Whose posts to show">
+                {scopes.map(([v, l, n]) => (
+                  <button
+                    key={v} type="button" role="tab" className="feed-tab"
+                    aria-selected={scope === v} onClick={() => setScope(v)}
+                  >
+                    {l}
+                    <span className="num" aria-hidden="true">{n}</span>
+                  </button>
+                ))}
+              </div>
+              <div className="searchbox feed-search">
+                <Icon as={Search} size={17} />
+                <input
+                  className="input"
+                  type="search"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Search posts"
+                  aria-label="Search posts by word, person, or tag"
+                />
+              </div>
             </div>
 
-            {/* On narrower screens the legend becomes a row of signs. */}
-            <div className="feed-chips" role="group" aria-label="Filter posts">
-              {filters.map(([v, l]) => (
-                <button key={v} type="button" className={`sign sign-${v === 'all' || v === 'following' ? 'ink' : signFor(v)}`} aria-pressed={filter === v} onClick={() => setFilter(v)}>
+            {/* What about. One row that scrolls sideways when it runs out of room. */}
+            <div className="feed-chips" role="group" aria-label="Filter posts by topic">
+              {topics.map(([v, l]) => (
+                <button key={v} type="button" className={`sign sign-${v === 'all' ? 'ink' : signFor(v)}`} aria-pressed={filter === v} onClick={() => setFilter(v)}>
                   {l}
+                  {v !== 'all' && <span className="num" aria-hidden="true">{counts[v] || 0}</span>}
                 </button>
               ))}
             </div>
@@ -299,24 +332,24 @@ export default function Feed() {
             ) : filtered.length === 0 ? (
               <div className="empty">
                 <p className="empty-title">
-                  {query ? `No posts match “${query}”.` : filter === 'following' ? 'Nothing from people you follow yet.' : 'Nothing here yet.'}
+                  {query ? `No posts match “${query}”.` : scope === 'following' ? 'Nothing from people you follow yet.' : 'Nothing here yet.'}
                 </p>
                 <p className="empty-body">
                   {query
                     ? 'Try one word instead of a phrase, or clear the topic filter.'
-                    : filter === 'following'
+                    : scope === 'following'
                       ? 'Follow students and mentors from Explore and their posts will show up here.'
                       : 'Be the first to write something someone else needs to read.'}
                 </p>
                 {query
-                  ? <button type="button" className="btn btn-secondary" style={{ marginTop: 6 }} onClick={() => { setQuery(''); setFilter('all'); }}>Clear search</button>
-                  : filter === 'following'
+                  ? <button type="button" className="btn btn-secondary" style={{ marginTop: 6 }} onClick={() => { setQuery(''); setFilter('all'); setScope('all'); }}>Clear search</button>
+                  : scope === 'following'
                     ? <Link to="/app/explore" className="btn btn-secondary" style={{ marginTop: 6 }}>Find people to follow</Link>
                     : <button type="button" className="btn btn-primary" style={{ marginTop: 6 }} onClick={() => setComposing(true)}>Write the first post</button>}
               </div>
             ) : (
               <>
-                <div>
+                <div className="feed-stream">
                   {filtered.slice(0, visible).map((p, i) => (
                     <React.Fragment key={p.id}>
                       {i > 0 && <hr className="lane lane-soft" />}
@@ -337,6 +370,10 @@ export default function Feed() {
                         onToggleSave={toggleSave}
                         verified={profileFor(p.author_email)?.verified === true}
                         focused={focusId === p.id}
+                        helpfulCount={helpfulFor(p)}
+                        reacted={hasReacted(p.id)}
+                        reactBusy={reactBusyId === p.id}
+                        onToggleHelpful={toggleReaction}
                       />
                     </React.Fragment>
                   ))}
@@ -351,22 +388,8 @@ export default function Feed() {
             )}
           </div>
 
-          <aside className="feed-aside" aria-label="Filter and reference">
-            <div className="panel">
-              <div className="panel-head">Legend · filter by topic</div>
-              <ul className="legend-filter">
-                {filters.map(([v, l]) => (
-                  <li key={v}>
-                    <button type="button" className="legend-row" aria-pressed={filter === v} onClick={() => setFilter(v)}>
-                      {v === 'all' || v === 'following'
-                        ? <span style={{ fontWeight: 800 }}>{l}</span>
-                        : <Sign color={signFor(v)}>{l}</Sign>}
-                      <span className="meta num">{countFor(v)}</span>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
+          <aside className="feed-aside" aria-label="People and reference">
+            <SuggestedPeople isFollowing={isFollowing} toggleFollow={toggleFollow} followBusyEmail={followBusyEmail} />
 
             <div className="panel">
               <div className="panel-head">Next on your plan</div>
@@ -403,6 +426,16 @@ export default function Feed() {
             </div>
           </aside>
         </div>
+
+        {/* On a phone, writing a post is always one thumb away. */}
+        {!composing && (
+          <button
+            type="button" className="fab" aria-label="Write a post"
+            onClick={() => { setComposing(true); window.scrollTo({ top: 0, behavior: 'auto' }); }}
+          >
+            <Icon as={PenLine} size={22} />
+          </button>
+        )}
       </div>
     </PullToRefresh>
   );

@@ -48,6 +48,9 @@ export default function Privacy() {
         <b>Your plan:</b> the tasks, dates, colleges, and notes you add to your private planner. Only you can see
         them. They are not shown to other members, to mentors, or in search.
         <br /><br />
+        <b>Posts you mark helpful:</b> which posts you marked. Other members see only the total on a post,
+        never who marked it.
+        <br /><br />
         <b>Notes you keep on other members:</b> a private nickname and up to 4,000 characters of free-text notes you
         can write about another member, the way the notes field on a phone contact works. The person you are writing
         about is never told a note exists.
@@ -116,7 +119,7 @@ export default function Privacy() {
         afterwards.
         <br /><br />
         <b>What is deleted:</b> your profile, every post you wrote, your Sage conversations, folders and
-        free-sample counters, your plan and college list, all your connections and pending requests, the
+        free-sample counters, your plan and college list, your helpful marks, all your connections and pending requests, the
         blocks you placed on other people, your rate-limit counters, any verification request you submitted,
         and your sign-in itself, so the account can no longer be used to log in.
         <br /><br />

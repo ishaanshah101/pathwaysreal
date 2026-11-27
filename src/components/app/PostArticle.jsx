@@ -8,18 +8,21 @@ import EditPostModal from '@/components/app/EditPostModal';
 import AttachmentList from '@/components/attachments/AttachmentList';
 import SafetyActions from '@/components/safety/SafetyActions';
 import ConnectButton from '@/components/app/ConnectButton';
-import FollowButton from '@/components/app/FollowButton';
 import SharePostButton from '@/components/app/SharePostButton';
 import SavePostButton from '@/components/app/SavePostButton';
 import VerifiedBadge from '@/components/app/VerifiedBadge';
+import HelpfulButton from '@/components/app/HelpfulButton';
 
-// One post in the feed. Set like an article: who wrote it, a headline, and the
-// body in a reading face, with the actions underneath. The topic is a road
-// sign so the colour tells you what kind of post it is before you read a word.
+// One post in the feed. The top line is who wrote it, with Follow right beside
+// the name the way a social app has it. Then a headline and the body in a
+// reading face. Underneath is one row of actions: helpful, save, share, and
+// connect. The topic label's colour tells you what kind of post it is before
+// you read a word.
 export default function PostArticle({
   post, connection = null, busy = false, onConnect, isMine = false, onBlocked, canEdit = false, onSaved,
   following = false, followBusy = false, onToggleFollow, saved = false, saveBusy = false, onToggleSave,
   verified = false, focused = false,
+  helpfulCount = 0, reacted = false, reactBusy = false, onToggleHelpful,
 }) {
   const isLong = (post.body || '').length > 620;
   const [open, setOpen] = useState(focused);
@@ -35,6 +38,8 @@ export default function PostArticle({
   }, [focused]);
 
   const clamped = isLong && !open;
+  const followRef = post.author_ref || post.author_email;
+  const canFollow = !post.is_sample && !isMine && Boolean(followRef) && Boolean(onToggleFollow);
 
   return (
     <article ref={ref} className="post" data-focus={focused ? 'true' : undefined} id={`post-${post.id}`}>
@@ -43,7 +48,19 @@ export default function PostArticle({
         <div style={{ minWidth: 0 }}>
           <div className="post-author">
             <span>{post.author_name || 'A Pathways member'}</span>
-            <VerifiedBadge verified={verified} />
+            <VerifiedBadge verified={verified} compact />
+            {canFollow && (
+              <button
+                type="button"
+                className="post-follow"
+                aria-pressed={following}
+                disabled={followBusy}
+                onClick={() => onToggleFollow(followRef, post.author_name)}
+              >
+                {followBusy ? '…' : following ? 'Following' : 'Follow'}
+                <span className="sr-only"> {post.author_name}</span>
+              </button>
+            )}
           </div>
           <div className="post-meta">
             {post.author_headline || ROLE_LABELS[post.author_role] || 'Member'}
@@ -72,39 +89,36 @@ export default function PostArticle({
         </div>
       )}
 
-      <div className="post-actions">
+      <div className="post-actions post-bar">
         {post.is_sample ? (
           <span className="meta">Sample post. Real members' posts appear here as they join.</span>
-        ) : isMine ? (
-          <span className="badge badge-neutral">Your post</span>
-        ) : post.author_email ? (
-          // Following is the lightweight half: one tap, nothing sent to the
-          // author. Connecting is mutual, unlocks messaging, and asks before
-          // it sends anything.
+        ) : (
           <>
-            <FollowButton
-              targetEmail={post.author_ref || post.author_email}
-              targetName={post.author_name}
-              following={following}
-              busy={followBusy}
-              onToggle={onToggleFollow}
+            <HelpfulButton
+              count={helpfulCount}
+              reacted={reacted}
+              busy={reactBusy}
+              readOnly={isMine || !onToggleHelpful}
+              onToggle={() => onToggleHelpful?.(post)}
             />
-            <ConnectButton
-              targetEmail={post.author_email}
-              targetName={post.author_name}
-              connection={connection}
-              busy={busy}
-              onConnect={onConnect}
-            />
-          </>
-        ) : null}
-
-        {!post.is_sample && (
-          <>
             <SavePostButton postId={post.id} saved={saved} busy={saveBusy} onToggle={onToggleSave} />
             <SharePostButton post={post} />
           </>
         )}
+
+        {/* Following is the one-tap half and sits by the name. Connecting is
+            mutual, unlocks messaging, and asks before it sends anything, so it
+            is a real button down here. */}
+        {!post.is_sample && !isMine && post.author_email && (
+          <ConnectButton
+            targetEmail={post.author_email}
+            targetName={post.author_name}
+            connection={connection}
+            busy={busy}
+            onConnect={onConnect}
+          />
+        )}
+        {!post.is_sample && isMine && <span className="badge badge-neutral">Your post</span>}
 
         {/* Only the app admin sees this. The server's rules on Post already
             restrict editing, so this button is convenience, not the protection. */}

@@ -20,7 +20,7 @@ const STOP_COUNT = 4;
 function Stop({ n, id, title, hint, current = false, children }) {
   return (
     <section className="ob-step" aria-labelledby={id}>
-      <span className={`kicker${current ? ' kicker-sun' : ''}`}>Stop {n} of {STOP_COUNT}</span>
+      <span className={`kicker${current ? ' kicker-sun' : ''}`}>Question {n} of {STOP_COUNT}</span>
       <h2 className="ob-q" id={id}>{title}</h2>
       {hint && <p className="ob-hint">{hint}</p>}
       <div className="ob-fields">{children}</div>
@@ -219,7 +219,7 @@ export default function Onboarding() {
         <header className="ob-intro">
           <div className="ob-bar">
             <span className="brand">
-              <BrandMark size={38} tone="light" />
+              <BrandMark size={38} />
               <span className="brand-name">Pathways</span>
             </span>
             <button type="button" className="ob-signout" onClick={() => logout(true)}>
@@ -244,9 +244,9 @@ export default function Onboarding() {
                   <span className="mile" aria-hidden="true"><small>{state === 'done' ? 'DONE' : 'STOP'}</small>{i + 1}</span>
                   <span className="ob-stop-text">
                     <b>
-                      <span className="sr-only">Stop {i + 1}{state === 'done' ? ', done' : ''}: </span>
+                      <span className="sr-only">Question {i + 1}{state === 'done' ? ', done' : ''}: </span>
                       {s.label}
-                      {state === 'current' && <Sign color="yellow">You are here</Sign>}
+                      {state === 'current' && <Sign color="yellow">Up next</Sign>}
                     </b>
                     <small>{s.note}</small>
                   </span>
@@ -258,9 +258,9 @@ export default function Onboarding() {
               <span className="ob-stop-text">
                 <b>
                   Enter Pathways
-                  {here === -1 && <Sign color="yellow">You are here</Sign>}
+                  {here === -1 && <Sign color="yellow">Up next</Sign>}
                 </b>
-                <small>Your feed is on the other side</small>
+                <small>Your feed opens next</small>
               </span>
             </li>
           </ol>

@@ -13,7 +13,7 @@ const UserNotRegisteredError = () => {
     <main className="lost">
       <div className="lost-inner">
         <div className="gate-sign" aria-hidden="true">
-          <b>Road closed</b>
+          <b>Not on the list</b>
           <span>Account not registered</span>
         </div>
 

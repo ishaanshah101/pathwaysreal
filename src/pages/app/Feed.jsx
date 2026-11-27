@@ -353,7 +353,7 @@ export default function Feed() {
 
           <aside className="feed-aside" aria-label="Filter and reference">
             <div className="panel">
-              <div className="panel-head">Legend · filter by topic</div>
+              <div className="panel-head">Key: tap to filter</div>
               <ul className="legend-filter">
                 {filters.map(([v, l]) => (
                   <li key={v}>

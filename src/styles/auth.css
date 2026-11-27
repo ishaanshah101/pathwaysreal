@@ -2,14 +2,13 @@
    Getting in: log in, sign up, passwords, two-step codes, and the last stop
    before the feed.
 
-   On a wide screen every one of these is two columns. The form sits on paper,
-   and beside it is a slab of asphalt with the mark on it, drawn the way the
-   homepage draws it but at night. On a phone the asphalt folds down to the
-   strip of road under the brand, the same strip the public site and the app
-   already use.
+   On a wide screen every one of these is an open notebook. The form is the
+   page you are writing on, with its margin line and punched holes, and beside
+   it is the marbled cover with the label filled in. On a phone there is only
+   the page.
 
-   The asphalt keeps literal colours, like every other piece of road in the
-   system, so it looks the same in either theme.
+   The cover and the legal pad keep literal colours, so they look the same in
+   either theme.
    --------------------------------------------------------------------------- */
 
 /* ---- The frame ------------------------------------------------------------- */
@@ -17,14 +16,13 @@
   --auth-pad: var(--gutter);
   display: grid; grid-template-columns: minmax(0, 1fr); min-height: 100dvh;
 }
-.auth-main { display: flex; flex-direction: column; min-width: 0; }
+.auth-main { position: relative; display: flex; flex-direction: column; min-width: 0; background: var(--sheet); }
 .auth-top {
   display: flex; align-items: center; min-height: 60px;
   padding: env(safe-area-inset-top) var(--auth-pad) 0;
 }
 .auth-top .brand { margin-right: 0; }
 .auth-top .brand-name { font-size: 21px; }
-.auth-strip { height: 10px; }
 .auth-body {
   flex: 1; display: flex; flex-direction: column;
   width: 100%; max-width: calc(470px + 2 * var(--auth-pad));
@@ -34,16 +32,16 @@
 .auth-head .kicker { margin-bottom: 14px; }
 .auth-title {
   margin: 0; max-width: 13ch;
-  font-size: clamp(40px, 5.2vw, 68px); font-weight: 900; line-height: .95; letter-spacing: -0.038em;
+  font-size: clamp(40px, 5.2vw, 68px); font-weight: 800; line-height: .98; letter-spacing: -0.02em;
 }
 /* Two-step titles run long ("Pathways requires multi-factor authentication"),
    so they are set a size down. */
-.auth-title-sm { max-width: 19ch; font-size: clamp(30px, 3.5vw, 44px); line-height: 1; letter-spacing: -0.03em; }
+.auth-title-sm { max-width: 19ch; font-size: clamp(30px, 3.5vw, 44px); line-height: 1.04; letter-spacing: -0.015em; }
 .auth-sub { margin: 16px 0 0; max-width: 42ch; font-size: 17px; line-height: 1.45; color: var(--ink-2); overflow-wrap: anywhere; }
 
-/* Everything under the headline hangs off one ink rule, the way a page in the
-   app hangs off its page head. */
-.auth-stack { display: grid; gap: 18px; margin-top: 26px; padding-top: 24px; border-top: 2px solid var(--ink); }
+/* Everything under the headline hangs off one pencil line, the way a page in
+   the app hangs off its page head. */
+.auth-stack { display: grid; gap: 18px; margin-top: 26px; padding-top: 24px; border-top: 2px dashed var(--hairline-strong); }
 .auth-form { display: grid; gap: 16px; }
 .auth-group { display: grid; gap: 12px; }
 .auth-foot { margin: 26px 0 0; font-size: 15.5px; line-height: 1.5; color: var(--ink-2); }
@@ -58,54 +56,59 @@
 .field-top > a { font-size: 13.5px; font-weight: 700; }
 
 .auth-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-.auth-step-title { margin: 0; font-size: 22px; font-weight: 900; letter-spacing: -0.02em; line-height: 1.12; }
+.auth-step-title { margin: 0; font-size: 22px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.12; }
 
 /* The other half of the page. */
 .auth-side { display: none; }
 
-/* A tablet held upright has room to spare and no asphalt to fill it, so the
+/* A tablet held upright has room to spare and no cover to fill it, so the
    form takes the middle. */
 @media (min-width: 640px) and (max-width: 899px) {
   .auth-body { margin-inline: auto; padding-top: clamp(40px, 8vh, 88px); }
 }
 
 @media (min-width: 900px) {
-  .auth { --auth-pad: clamp(36px, 6.4vw, 104px); grid-template-columns: minmax(0, 1fr) minmax(380px, 44%); }
+  .auth { --auth-pad: clamp(56px, 6.4vw, 104px); grid-template-columns: minmax(0, 1fr) minmax(380px, 44%); }
   .auth-top { min-height: 88px; }
   .auth-top .brand-name { font-size: 23px; }
-  .auth-strip { display: none; }
   .auth-body { justify-content: center; padding-top: 24px; padding-bottom: clamp(64px, 14vh, 150px); }
 
+  /* The page: a red margin line, and the holes a binder goes through. */
+  .auth-main {
+    background-image: linear-gradient(to right, transparent calc(var(--auth-pad) - 24px), var(--margin) calc(var(--auth-pad) - 24px), var(--margin) calc(var(--auth-pad) - 22px), transparent calc(var(--auth-pad) - 22px));
+  }
+  .auth-main::before {
+    content: ''; position: absolute; top: 0; bottom: 0; left: calc((var(--auth-pad) - 24px) / 2 - 10px); width: 20px; pointer-events: none;
+    background: radial-gradient(circle at 10px 10px, var(--desk) 8.5px, transparent 9.5px) 0 18vh / 20px 32vh repeat-y;
+  }
+
+  /* The cover. The strip down the seam is the cloth tape on the spine. */
   .auth-side {
     position: sticky; top: 0; height: 100dvh; overflow: hidden;
-    display: flex; flex-direction: column;
-    background: #26231f; color: #fbf6ee;
+    display: grid; place-items: center;
+    padding: 40px clamp(28px, 4vw, 64px) 40px calc(clamp(28px, 4vw, 64px) + 30px);
   }
-  /* The lane line on the seam, where the app keeps its strip of road. */
-  .auth-side-edge { position: absolute; left: 0; top: 0; bottom: 0; }
-  .auth-side-copy { padding: 37px clamp(28px, 4vw, 60px) 0 clamp(44px, 5vw, 80px); }
-  .auth-side-kicker {
-    display: block; margin: 0 0 22px;
-    font-family: var(--font-mono); font-size: 12px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: #c9c1b0;
+  .auth-side::before {
+    content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 30px;
+    background: #14161b; box-shadow: inset -1px 0 0 rgba(255, 255, 255, .13), 4px 0 10px rgba(0, 0, 0, .4);
   }
-  .auth-side-line {
-    margin: 0; max-width: 12ch; text-wrap: balance;
-    font-size: clamp(30px, 3.1vw, 46px); font-weight: 900; line-height: .98; letter-spacing: -0.032em;
+  .auth-cover {
+    display: grid; justify-items: center; gap: 6px; width: min(100%, 400px); padding: 28px 28px 22px; text-align: center;
+    background: #fffdf6; color: #232732; box-shadow: 0 0 0 5px #fffdf6, 0 0 0 7px #1d1f26;
   }
-  .auth-side-fine { margin: 20px 0 0; font-family: var(--font-mono); font-size: 12px; letter-spacing: .02em; line-height: 1.6; color: #b5ad9c; }
-  /* The mark stands on the bottom edge so the road runs off the page toward
-     whoever is looking at it. The 3% is the empty strip under the artwork. */
-  .auth-side-mark {
-    width: min(88%, calc(100dvh - 330px)); height: auto; aspect-ratio: 1; margin: auto auto 0;
-    transform: translateY(3%);
-  }
-  .auth-side-mark path[stroke-dasharray] { animation: auth-drive 1.1s linear infinite; }
+  .auth-cover-mark { width: 92px; height: 92px; }
+  .auth-cover-title { font: 800 40px/1 var(--font-marker); letter-spacing: -0.02em; }
+  .auth-cover-sub { font: 700 11.5px/1.4 var(--font-mono); letter-spacing: .14em; text-transform: uppercase; color: #4a4f5c; }
+  .auth-cover-lines { display: grid; gap: 12px; width: 100%; margin: 20px 0 16px; text-align: left; }
+  .auth-cover-lines > div { display: grid; grid-template-columns: 70px minmax(0, 1fr); align-items: end; gap: 10px; }
+  .auth-cover-lines dt { padding-bottom: 5px; font: 700 11px/1 var(--font-mono); letter-spacing: .12em; text-transform: uppercase; color: #4a4f5c; }
+  .auth-cover-lines dd { margin: 0; padding: 0 4px 1px; border-bottom: 1.5px solid #232732; font: 400 22px/1.2 var(--font-hand); color: #24548f; }
+  .auth-cover-fine { font: 400 11px/1.5 var(--font-mono); color: #6b6e78; }
 }
-@keyframes auth-drive { to { stroke-dashoffset: -14; } }
 
 /* ---- Waiting ----------------------------------------------------------------- */
 
-/* A short run of lane line with the dashes moving. It stands in wherever a
+/* A short pencil line with the dashes moving. It stands in wherever a
    spinning ring used to be, and takes the colour of the text around it. */
 .lane-load {
   display: inline-block; flex: none; width: 36px; height: 3px;
@@ -122,6 +125,7 @@
   background: var(--paper); color: var(--ink);
 }
 .pw-loading svg path[stroke-dasharray] { animation: auth-drive .55s linear infinite; }
+@keyframes auth-drive { to { stroke-dashoffset: -14; } }
 .pw-loading .lane-load { width: 60px; }
 .pw-loading-word {
   position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap;
@@ -129,7 +133,7 @@
 }
 /* With motion turned off nothing moves, so the word has to be seen. */
 @media (prefers-reduced-motion: reduce) {
-  .lane-load, .pw-loading svg path[stroke-dasharray], .auth-side-mark path[stroke-dasharray] { animation: none; }
+  .lane-load, .pw-loading svg path[stroke-dasharray] { animation: none; }
   .pw-loading-word { position: static; width: auto; height: auto; overflow: visible; clip-path: none; }
 }
 
@@ -143,7 +147,7 @@
   width: 48px; height: 58px;
   background: var(--sheet); color: var(--ink);
   border: 1.5px solid var(--hairline-strong); border-radius: var(--r-2);
-  font: 900 27px/1 var(--font-sign); font-variant-numeric: tabular-nums lining-nums;
+  font: 800 27px/1 var(--font-sign); font-variant-numeric: tabular-nums lining-nums;
   transition: border-color var(--t) ease, box-shadow var(--t) ease;
 }
 .otp-slot[data-active='true'] { border-color: var(--ink); box-shadow: 0 0 0 3px color-mix(in srgb, var(--sun) 38%, transparent); }
@@ -168,7 +172,7 @@
 }
 .mfa-method:first-child { padding-top: 0; }
 .mfa-method > svg { margin-top: 2px; }
-.mfa-method-name { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; font-size: 16.5px; font-weight: 900; letter-spacing: -0.012em; }
+.mfa-method-name { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; font-size: 16.5px; font-weight: 800; letter-spacing: -0.012em; }
 .mfa-method p { margin: 3px 0 0; font-size: 14.5px; line-height: 1.45; color: var(--ink-2); }
 .mfa-method-actions { display: flex; gap: 8px; }
 @media (max-width: 480px) {
@@ -180,8 +184,7 @@
 .auth-steps li { counter-increment: step; display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 10px; font-size: 15.5px; line-height: 1.45; color: var(--ink-2); }
 .auth-steps li::before { content: counter(step); font: 600 13px/1.7 var(--font-mono); color: var(--ink); }
 
-/* The setup key, set like a plate number so each group of four is easy to copy
-   by eye. */
+/* The setup key, typed out so each group of four is easy to copy by eye. */
 .keycode {
   display: block; padding: 13px 14px; text-align: center; overflow-wrap: anywhere;
   font-family: var(--font-mono); font-size: 15.5px; font-weight: 600; letter-spacing: .08em; color: var(--ink);
@@ -197,7 +200,7 @@
 .dial-trigger { display: flex; align-items: center; justify-content: space-between; gap: 6px; cursor: pointer; text-align: left; }
 .dial-pop.dial-pop { width: 150px; padding: 0; }
 .dial-pop .dial-list { max-height: 216px; }
-.dial-pop .dial-list .dial-item[data-selected='true'] { background: var(--asphalt); color: var(--paper); }
+.dial-pop .dial-list .dial-item[data-selected='true'] { background: var(--hl-yellow); color: #232732; }
 
 /* ---- Granting access to an outside app -------------------------------------------- */
 .grant-list { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--hairline); }
@@ -205,48 +208,51 @@
 .grant-list b { font-size: 16px; font-weight: 800; letter-spacing: -0.008em; }
 .grant-list span { font-size: 14.5px; line-height: 1.45; color: var(--ink-2); }
 
-/* ---- Onboarding: four stops and a destination --------------------------------------- */
+/* ---- Onboarding: four questions on a legal pad ---------------------------------------
 
-/* The same two halves as the sign-in pages, the other way round, because the
-   next screen is the app and the app keeps its rail on the left. The asphalt
-   carries the route. The questions are on paper. */
-.ob { min-height: 100dvh; }
+   The same two halves as the sign-in pages, the other way round, because the
+   next screen is the app. The yellow pad carries the checklist. The questions
+   are on the desk beside it. */
+.ob { --pad: #fff3ad; --pad-ink: #232732; --pad-2: #5d5632; min-height: 100dvh; }
 .ob-side { display: contents; }
-.ob-intro { background: #26231f; color: #fbf6ee; padding: env(safe-area-inset-top) var(--gutter) 28px; }
+.ob-intro {
+  background: var(--pad); color: var(--pad-ink);
+  border-top: 14px solid #8f2319;
+  padding: env(safe-area-inset-top) var(--gutter) 26px;
+}
 .ob-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 60px; }
-.ob-bar .brand { margin: 0; color: #fbf6ee; }
+.ob-bar .brand { margin: 0; color: var(--pad-ink); }
 .ob-bar .brand-name { font-size: 21px; }
 .ob-signout {
   min-height: 40px; padding: 0 2px; background: none; border: 0; cursor: pointer;
-  font: 700 14.5px/1 var(--font-sign); color: #fbf6ee;
-  text-decoration: underline; text-decoration-color: #e05e12; text-decoration-thickness: 2px; text-underline-offset: 4px;
+  font: 700 14.5px/1 var(--font-sign); color: var(--pad-ink);
+  text-decoration: underline; text-decoration-color: #c2362b; text-decoration-thickness: 2px; text-underline-offset: 4px;
 }
 .ob-signout:hover { text-decoration-color: currentColor; }
-.ob-intro .kicker { margin: 22px 0 12px; color: #c9c1b0; }
-.ob-title { margin: 0; max-width: 11ch; font-size: clamp(40px, 4.2vw, 58px); font-weight: 900; line-height: .95; letter-spacing: -0.036em; }
-.ob-lede { margin: 16px 0 0; max-width: 46ch; font-size: 16px; line-height: 1.52; color: #ded6c6; }
+.ob-intro .kicker { margin: 18px 0 10px; color: var(--pad-2); }
+.ob-title { margin: 0; max-width: 11ch; font-size: clamp(40px, 4.2vw, 58px); font-weight: 800; line-height: 1; letter-spacing: -0.02em; }
+.ob-lede { margin: 14px 0 0; max-width: 46ch; font-size: 16px; line-height: 1.55; color: #3d3a2a; }
 .ob-who { display: none; }
 
-/* On a phone the route is a strip of road that stays put while the page
-   scrolls under it: markers in a row, dashes between them, the sun at the end. */
+/* On a phone the checklist is a strip that stays put while the page scrolls
+   under it: circled numbers in a row, pencil dashes between them. */
 .ob-route-wrap {
   position: sticky; top: 0; z-index: 20;
-  background: #26231f; color: #fbf6ee;
-  padding: 10px var(--gutter) 11px; border-top: 1px solid rgba(251, 246, 238, .16);
+  background: var(--pad); color: var(--pad-ink);
+  padding: 8px var(--gutter) 9px; border-top: 1px solid rgba(35, 39, 50, .16); box-shadow: 0 6px 10px -8px rgba(60, 45, 15, .6);
 }
 .ob-route { list-style: none; margin: 0; padding: 0; display: flex; align-items: center; }
 .ob-stop { display: flex; align-items: center; flex: 1; min-width: 0; }
 .ob-stop::after {
-  content: ''; flex: 1; height: 2px; margin: 0 7px; opacity: .55;
-  background-image: linear-gradient(to right, #fbf6ee 0 9px, transparent 9px 15px); background-size: 15px 2px;
+  content: ''; flex: 1; height: 0; margin: 0 7px; border-top: 2px dashed rgba(35, 39, 50, .38);
 }
 .ob-stop:last-child { flex: none; }
 .ob-stop:last-child::after { display: none; }
-.ob-stop .mile { min-width: 36px; }
-.ob-stop[data-state='todo'] .mile { background: transparent; color: #b5ad9c; box-shadow: inset 0 0 0 1.5px #6c655a; }
-.ob-stop[data-state='done'] .mile { background: #fbf6ee; color: #26231f; box-shadow: inset 0 0 0 1.5px #fbf6ee, inset 0 0 0 2.5px #26231f; }
-.ob-stop[data-state='done']::after { opacity: 1; }
-/* The destination is the sun, as it is in the mark. */
+.ob-stop .mile { width: 38px; height: 36px; font-size: 21px; }
+/* Not yet: pencil. Done: ticked off in green. Now: the red pen. */
+.ob-stop[data-state='todo'] .mile { color: #8f8963; border-color: #b9b184; }
+.ob-stop[data-state='done'] .mile { color: #175236; border-color: #23704a; background: #b4e3b9; }
+/* The last thing on the list is the sticker. */
 .ob-sun { display: block; flex: none; width: 26px; height: 26px; border-radius: 50%; background: #e05e12; }
 .ob-stop-text {
   position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap;
@@ -255,67 +261,72 @@
 .ob-main { padding: 8px var(--gutter) calc(64px + env(safe-area-inset-bottom)); }
 .ob-form { width: 100%; max-width: 700px; }
 .ob-step { padding: 30px 0 34px; scroll-margin-top: 72px; }
-/* The lane line between one stop and the next. */
-.ob-step + .ob-step {
-  background-image: linear-gradient(to right, var(--ink) 0 22px, transparent 22px 36px);
-  background-size: 36px 3px; background-repeat: repeat-x; background-position: left top;
-}
+/* A pencil line between one question and the next. */
+.ob-step + .ob-step { border-top: 2px dashed var(--hairline-strong); }
 .ob-step .kicker { margin-bottom: 10px; }
-.ob-q { margin: 0; max-width: 18ch; font-size: clamp(27px, 2.9vw, 38px); font-weight: 900; line-height: 1; letter-spacing: -0.03em; }
+.ob-q { margin: 0; max-width: 18ch; font-size: clamp(27px, 2.9vw, 38px); font-weight: 800; line-height: 1.04; letter-spacing: -0.015em; }
 .ob-hint { margin: 10px 0 0; max-width: 52ch; font-size: 16px; line-height: 1.5; color: var(--ink-2); }
 .ob-fields { display: grid; gap: 18px; margin-top: 24px; }
 .ob-pair { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); gap: 14px; }
 .ob-short { max-width: 190px; }
-/* A picked chip keeps its light lettering while the pointer is still on it. */
-.ob-form .btn-chip[aria-pressed='true']:hover:not(:disabled) { color: var(--paper); border-color: var(--asphalt); }
 .ob-end { display: grid; gap: 14px; padding-top: 28px; border-top: 2px solid var(--ink); }
 .ob-end .meta { text-align: center; line-height: 1.6; }
 @media (max-width: 560px) { .ob-pair { grid-template-columns: minmax(0, 1fr); gap: 18px; } }
 
 @media (min-width: 900px) {
   .ob { display: grid; grid-template-columns: clamp(340px, 35vw, 480px) minmax(0, 1fr); }
+  /* The pad: a glued red top edge, the double margin line, faint blue rules. */
   .ob-side {
     position: sticky; top: 0; height: 100dvh; overflow-y: auto;
     display: flex; flex-direction: column;
-    background: #26231f; color: #fbf6ee; padding: 0 clamp(28px, 3.2vw, 48px) 26px;
+    color: var(--pad-ink); padding: 0 clamp(28px, 3.2vw, 48px) 26px 58px;
+    border-top: 16px solid #8f2319;
+    background-color: var(--pad);
+    background-image:
+      linear-gradient(to right, transparent 34px, #e79b98 34px, #e79b98 35.5px, transparent 35.5px, transparent 39px, #e79b98 39px, #e79b98 40.5px, transparent 40.5px),
+      repeating-linear-gradient(to bottom, transparent 0, transparent 31px, rgba(36, 84, 143, .17) 31px, rgba(36, 84, 143, .17) 32px);
+    background-attachment: local;
+    box-shadow: 6px 0 16px -10px rgba(60, 45, 15, .7);
   }
-  .ob-intro { padding: 0; background: none; }
-  .ob-bar { min-height: 88px; }
+  .ob-intro { padding: 0; background: none; border-top: 0; }
+  .ob-bar { min-height: 80px; }
   .ob-bar .brand-name { font-size: 23px; }
   .ob-intro .kicker { margin-top: 12px; }
 
-  /* Wide, the route stands up: one stop under the next, each with its name. */
-  .ob-route-wrap { position: static; padding: 0; border: 0; margin: 32px 0 24px; }
+  /* Wide, the checklist stands up: one line under the next, each with its name. */
+  .ob-route-wrap { position: static; padding: 0; border: 0; background: none; box-shadow: none; margin: 30px 0 24px; }
   .ob-route { display: grid; }
-  .ob-stop { position: relative; display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 16px; align-items: start; padding-bottom: 28px; }
+  .ob-stop { position: relative; display: grid; grid-template-columns: 46px minmax(0, 1fr); gap: 14px; align-items: start; padding-bottom: 24px; }
   .ob-stop::after {
-    position: absolute; left: 19px; top: 43px; bottom: 5px; width: 2px; height: auto; margin: 0;
-    background-image: linear-gradient(to bottom, #fbf6ee 0 8px, transparent 8px 13px); background-size: 2px 13px;
+    position: absolute; left: 22px; top: 49px; bottom: 5px; width: 0; height: auto; margin: 0;
+    border-top: 0; border-left: 2px dashed rgba(35, 39, 50, .38);
   }
   .ob-stop:last-child { padding-bottom: 0; }
-  .ob-stop .mile { min-width: 40px; }
-  .ob-sun { width: 28px; height: 28px; margin: 3px 6px 0; }
-  .ob-stop-text { position: static; width: auto; height: auto; overflow: visible; clip-path: none; white-space: normal; display: grid; gap: 3px; padding-top: 3px; }
-  .ob-stop-text b { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; font-size: 17px; font-weight: 900; letter-spacing: -0.014em; line-height: 1.15; }
-  .ob-stop-text small { font-family: var(--font-mono); font-size: 11.5px; letter-spacing: .02em; color: #b5ad9c; }
-  .ob-stop[data-state='todo'] .ob-stop-text b { color: #c9c1b0; font-weight: 800; }
-  .ob-who { display: block; margin: auto 0 0; padding-top: 14px; border-top: 1px solid rgba(251, 246, 238, .16); font-family: var(--font-mono); font-size: 11.5px; letter-spacing: .02em; line-height: 1.5; color: #b5ad9c; overflow-wrap: anywhere; }
+  .ob-stop .mile { width: 46px; height: 44px; font-size: 26px; }
+  .ob-sun { width: 28px; height: 28px; margin: 6px 9px 0; }
+  .ob-stop-text { position: static; width: auto; height: auto; overflow: visible; clip-path: none; white-space: normal; display: grid; gap: 3px; padding-top: 7px; }
+  .ob-stop-text b { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; font-size: 17px; font-weight: 800; line-height: 1.15; }
+  .ob-stop-text small { font-family: var(--font-mono); font-size: 12px; color: var(--pad-2); }
+  .ob-stop[data-state='todo'] .ob-stop-text b { color: var(--pad-2); font-weight: 700; }
+  .ob-stop[data-state='done'] .ob-stop-text b { text-decoration: line-through; text-decoration-color: rgba(35, 39, 50, .55); text-decoration-thickness: 2px; }
+  .ob-who { display: block; margin: auto 0 0; padding-top: 14px; border-top: 1px solid rgba(35, 39, 50, .2); font-family: var(--font-mono); font-size: 12px; line-height: 1.5; color: var(--pad-2); overflow-wrap: anywhere; }
 
   .ob-main { padding: 58px clamp(36px, 6vw, 96px) 96px; }
   .ob-step:first-child { padding-top: 0; }
 }
 
-/* ---- Student or adult: two signs at a fork ---------------------------------------- */
+/* ---- Student or adult: two index cards, pick one --------------------------------- */
 .choices { display: grid; grid-template-columns: repeat(auto-fit, minmax(236px, 1fr)); gap: 14px; }
 .choice {
   position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 10px;
   padding: 20px 20px 22px; text-align: left; cursor: pointer;
   font-family: var(--font-sign); color: var(--ink);
-  background: var(--sheet); border: 2px solid var(--ink); border-radius: var(--r-3);
+  background: var(--sheet); border: 2px solid var(--ink); border-radius: var(--wobble);
+  box-shadow: var(--paper-shadow);
   transition: background var(--t) var(--ease), color var(--t) var(--ease), border-color var(--t) var(--ease);
 }
 .choice-kicker { padding-right: 34px; font-family: var(--font-mono); font-size: 11.5px; font-weight: 600; letter-spacing: .09em; text-transform: uppercase; line-height: 1.4; color: var(--ink-3); }
-.choice-title { font-size: clamp(27px, 2.7vw, 33px); font-weight: 900; line-height: 1; letter-spacing: -0.03em; }
+.choice-title { font-size: clamp(27px, 2.7vw, 33px); font-weight: 800; line-height: 1.02; letter-spacing: -0.015em; }
 .choice-blurb { font-size: 15.5px; line-height: 1.45; color: var(--ink-2); }
 .choice-points { display: grid; gap: 7px; margin-top: 4px; padding-top: 13px; border-top: 1px solid var(--hairline); width: 100%; }
 .choice-points > span { position: relative; padding-left: 21px; font-size: 14.5px; font-weight: 600; line-height: 1.4; }
@@ -327,25 +338,20 @@
 }
 .choice-box svg { opacity: 0; }
 @media (hover: hover) {
-  .choice:hover { background: var(--yellow); border-color: #1d1a16; color: #1d1a16; }
-  .choice:hover .choice-kicker, .choice:hover .choice-blurb { color: #1d1a16; }
-  .choice:hover .choice-points { border-top-color: rgba(29, 26, 22, .3); }
+  .choice:hover { background: var(--yellow-tint); border-color: #232732; color: #232732; }
+  .choice:hover .choice-kicker, .choice:hover .choice-blurb { color: #232732; }
+  .choice:hover .choice-points { border-top-color: rgba(35, 39, 50, .3); }
 }
-/* Picked, it becomes the sign itself: green for the student's road, blue for
-   the people who are the help along it. */
-.choice[aria-pressed='true'] {
-  --cb: #17604a;
-  background: var(--cb); border-color: var(--cb); color: #fff;
-  box-shadow: inset 0 0 0 3px var(--cb), inset 0 0 0 5px #fff;
-}
-.choice-adult[aria-pressed='true'] { --cb: #1d4c8a; }
-.choice[aria-pressed='true'] .choice-kicker { color: rgba(255, 255, 255, .82); }
-.choice[aria-pressed='true'] .choice-blurb { color: #fff; }
-.choice[aria-pressed='true'] .choice-points { border-top-color: rgba(255, 255, 255, .34); }
-.choice[aria-pressed='true'] .choice-box { background: #fff; border-color: #fff; color: var(--cb); }
+/* Picked, it is highlighted: green for the student, blue for the people who
+   are the help. The box gets a red-pen tick. */
+.choice[aria-pressed='true'] { --cb: var(--hl-green); background: var(--cb); border-color: #232732; color: #232732; }
+.choice-adult[aria-pressed='true'] { --cb: var(--hl-blue); }
+.choice[aria-pressed='true'] .choice-kicker, .choice[aria-pressed='true'] .choice-blurb { color: #232732; }
+.choice[aria-pressed='true'] .choice-points { border-top-color: rgba(35, 39, 50, .34); }
+.choice[aria-pressed='true'] .choice-box { background: #fffdf6; border-color: #232732; color: #c2362b; }
 .choice[aria-pressed='true'] .choice-box svg { opacity: 1; }
 
-/* Follow and connect, explained the way a map explains its symbols. */
+/* Follow and connect, explained the way a key explains its symbols. */
 .reach-list { list-style: none; margin: 0; padding: 4px 16px 6px; }
 .reach-list li { display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 14px; align-items: start; padding: 12px 0; border-bottom: 1px solid var(--hairline); font-size: 14.5px; line-height: 1.5; color: var(--ink-2); }
 .reach-list li:last-child { border-bottom: 0; }
@@ -355,12 +361,11 @@
 
 /* ---- Signed in, but not let in ------------------------------------------------------- */
 .gate-sign {
-  display: inline-block; margin-bottom: 30px; padding: 20px 28px 16px; transform: rotate(-1.5deg);
-  background: #ffffff; color: #1d1a16; border-radius: 10px;
-  box-shadow: inset 0 0 0 4px #ffffff, inset 0 0 0 7.5px #1d1a16;
+  display: inline-block; margin-bottom: 30px; padding: 20px 26px 18px; transform: rotate(-2deg);
+  background: #ffe45e; color: #232732; border-radius: 2px; box-shadow: var(--paper-shadow);
 }
-.gate-sign b { display: block; font-size: clamp(40px, 8vw, 84px); font-weight: 900; letter-spacing: -0.04em; line-height: .9; }
-.gate-sign span { display: block; margin-top: 8px; font-family: var(--font-mono); font-size: 12px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; }
-.gate-list { list-style: none; margin: 26px 0 0; padding: 0; border-top: 2px solid var(--ink); }
+.gate-sign b { display: block; font-size: clamp(38px, 7.5vw, 76px); font-weight: 800; letter-spacing: -0.02em; line-height: .95; }
+.gate-sign span { display: block; margin-top: 8px; font-family: var(--font-mono); font-size: 12px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+.gate-list { list-style: none; margin: 26px 0 0; padding: 0; border-top: 2px dashed var(--hairline-strong); }
 .gate-list li { padding: 13px 0; border-bottom: 1px solid var(--hairline); font-size: 16.5px; line-height: 1.5; color: var(--ink-2); }
 .gate-list b { color: var(--ink); }

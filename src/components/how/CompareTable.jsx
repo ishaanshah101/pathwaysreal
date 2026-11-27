@@ -14,7 +14,7 @@ export default function CompareTable() {
   return (
     <section id="compare" className="band">
       <div className="wrap">
-        <span className="kicker">Other roads</span>
+        <span className="kicker">Compare notes</span>
         <h2 className="title-2" style={{ maxWidth: '22ch' }}>Where students look today, and what Pathways adds</h2>
         <p className="lede" style={{ margin: '16px 0 clamp(24px,4vh,40px)' }}>
           These are all places students already go, and each is good at what it was built for.

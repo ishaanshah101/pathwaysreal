@@ -22,7 +22,7 @@ export default function Privacy() {
         description="How Pathways handles student information: what we collect, who can see it, how long we keep it, and how to delete it. We never sell student data."
         path="/privacy"
       />
-      <span className="kicker kicker-sun">Rules of the road</span>
+      <span className="kicker kicker-sun">The rules</span>
       <h1 className="title-1">Privacy Policy</h1>
       <p className="meta" style={{ margin: '14px 0 8px' }}>Last updated November 2026</p>
 

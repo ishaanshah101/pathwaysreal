@@ -11,7 +11,7 @@ export default function DeleteAccount() {
     <section className="band doc">
       <div className="wrap-read">
         <Seo title="Delete your Pathways account" description="Delete your Pathways account from your Profile page or request deletion by email within 30 days. Learn what is deleted and what is retained." path="/delete-account" />
-        <span className="kicker kicker-sun">Exit</span>
+        <span className="kicker kicker-sun">Erase</span>
         <h1 className="title-1">Delete your Pathways account</h1>
 
         <section>

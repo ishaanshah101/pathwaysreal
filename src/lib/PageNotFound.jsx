@@ -48,8 +48,8 @@ export default function PageNotFound() {
       <Seo title="Page not found | Pathways" noindex />
       <div className="lost-inner">
         <div className="lost-sign" aria-hidden="true">
-          <b>Wrong exit</b>
-          <span>Error 404 · No such road</span>
+          <b>Wrong page</b>
+          <span>Error 404 · nothing is written here</span>
         </div>
 
         <h1 className="title-2">This page isn't here.</h1>

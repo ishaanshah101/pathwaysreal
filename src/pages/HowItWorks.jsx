@@ -44,7 +44,7 @@ export default function HowItWorks() {
           </div>
 
           <aside className="legend" aria-label="How posts are labelled">
-            <div className="legend-title">Legend: how posts are labelled</div>
+            <div className="legend-title">Key: how posts are labelled</div>
             <ul className="legend-list">
               {Object.entries(CATEGORY_LABELS).filter(([k]) => k !== 'general').map(([key, label]) => (
                 <li key={key}>
@@ -59,14 +59,14 @@ export default function HowItWorks() {
 
       <section className="band band-sheet" id="how">
         <div className="wrap">
-          <span className="kicker">The route</span>
+          <span className="kicker">Six things</span>
           <h2 className="title-2" style={{ maxWidth: '20ch', marginBottom: 'clamp(20px,3vh,36px)' }}>
-            Six stops, built for students, by a student.
+            Six things, built for students, by a student.
           </h2>
           <div className="route">
             {stops.map((s, i) => (
               <div key={s.title} className="stop">
-                <span className="mile" aria-hidden="true"><small>STOP</small>{i + 1}</span>
+                <span className="mile" aria-hidden="true">{i + 1}</span>
                 <div className="stop-body">
                   <h3>{s.title}</h3>
                   <p>{s.body}</p>
@@ -82,7 +82,7 @@ export default function HowItWorks() {
       <section className="band band-road">
         <div className="wrap closer">
           <div>
-            <h2 className="title-2" style={{ maxWidth: '20ch' }}>That is the whole map. It costs nothing to get on it.</h2>
+            <h2 className="title-2" style={{ maxWidth: '20ch' }}>That is all of it. It costs nothing to join.</h2>
           </div>
           <Link to="/join" className="btn btn-sun btn-lg btn-go">Join free</Link>
         </div>

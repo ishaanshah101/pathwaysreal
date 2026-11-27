@@ -22,7 +22,7 @@ export default function Terms() {
         description="The terms for using Pathways: who operates it, who can join, how members must behave, and how the free core app and optional Sage subscription work."
         path="/terms"
       />
-      <span className="kicker kicker-sun">Rules of the road</span>
+      <span className="kicker kicker-sun">The rules</span>
       <h1 className="title-1">Terms of Service</h1>
       <p className="meta" style={{ margin: '14px 0 8px' }}>Last updated August 2026</p>
 

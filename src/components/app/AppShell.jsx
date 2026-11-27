@@ -12,21 +12,23 @@ import JumpMenu from '@/components/app/JumpMenu';
 import Icon from '@/components/kit/Icon';
 import Plate from '@/components/kit/Plate';
 import { useAuth } from '@/lib/AuthContext';
-import { useProfile, ROLE_LABELS } from '@/lib/useProfile';
+import { useProfile } from '@/lib/useProfile';
 import { useMessages } from '@/lib/MessagesContext';
 import { useConnections } from '@/lib/useConnections';
 import { SECTIONS, REFERENCE, PROFILE, MODERATION, ACTIONS, PHONE_TABS } from '@/lib/sections';
 
-function RailLink({ to, end, label, glyph, tone, count = 0, countLabel, quiet = false }) {
+function Tab({ to, end, label, tone, count = 0, countLabel, quiet = false }) {
   return (
-    <NavLink to={to} end={end} className={`rail-link${quiet ? ' rail-link-quiet' : ''}`}>
-      <span className={`picto picto-${tone}`}><Icon as={glyph} size={17} /></span>
-      <span>{label}</span>
+    <NavLink to={to} end={end} className={`nb-tab nb-tab-${tone}${quiet ? ' nb-tab-quiet' : ''}`}>
+      {label}
       {count > 0 && <span className="count" aria-label={`${count} ${countLabel}`}>{count > 99 ? '99+' : count}</span>}
     </NavLink>
   );
 }
 
+// The signed-in frame is a binder: the brand and the tools along the top, and
+// under them the sections as coloured divider tabs. On a phone the tabs move
+// to the bottom edge.
 export default function AppShell() {
   const { logout, user } = useAuth();
   const { profile, email } = useProfile();
@@ -87,100 +89,79 @@ export default function AppShell() {
   const destinations = [...SECTIONS, ...REFERENCE, PROFILE, ...(isAdmin ? [MODERATION] : [])];
 
   return (
-    <div className="app-scroll-root shell">
+    <div className="app-scroll-root">
       {/* Signed-in screens hold nothing a search engine should index. */}
       <Seo title="Pathways" noindex />
       <a href="#main" className="skip-link">Skip to content</a>
 
-      <aside className="rail">
-        <Link to="/app" className="brand" aria-label="Pathways, your feed">
-          <BrandMark size={34} />
-          <span className="brand-name">Pathways</span>
-        </Link>
+      <header className="nb-top">
+        <div className="wrap">
+          <div className="nb-top-row">
+            <Link to="/app" className="brand" aria-label="Pathways, your feed">
+              <BrandMark size={34} />
+              <span className="brand-name">Pathways</span>
+            </Link>
 
-        <nav className="rail-nav" aria-label="App sections">
-          {SECTIONS.map((s) => (
-            <RailLink key={s.to} {...s} count={countFor(s.to)} countLabel={countLabelFor(s.to)} />
-          ))}
-        </nav>
-
-        <span className="rail-head" id="rail-ref">Reference</span>
-        <nav style={{ display: 'grid', gap: 2 }} aria-labelledby="rail-ref">
-          {REFERENCE.map((s) => <RailLink key={s.to} {...s} quiet />)}
-          {isAdmin && <RailLink {...MODERATION} quiet />}
-        </nav>
-
-        <div className="rail-foot">
-          <Link to="/app/profile" className="rail-user">
-            <Plate name={name || first} seed={email} size={38} />
-            <span style={{ minWidth: 0 }}>
-              <b>{name || 'Your profile'}</b>
-              <small>{profile?.grade || profile?.job_title || ROLE_LABELS[profile?.role] || 'Profile'}</small>
-            </span>
-          </Link>
-        </div>
-      </aside>
-
-      <div className="road road-v shell-road" aria-hidden="true" />
-
-      <div className="shell-main">
-        <div className="topbar">
-          <Link to="/app" className="brand" aria-label="Pathways, your feed">
-            <BrandMark size={30} />
-            <span className="brand-name">Pathways</span>
-          </Link>
-
-          <button type="button" className="jump" onClick={() => setJumpOpen(true)}>
-            <Icon as={Search} size={16} />
-            Go to a page, or look up a word
-            <kbd>{mac ? '⌘K' : 'Ctrl K'}</kbd>
-          </button>
-
-          <span className="topbar-spacer" />
-
-          <button type="button" className="icon-btn topbar-only-small" aria-label="Search and jump" onClick={() => setJumpOpen(true)}>
-            <Icon as={Search} size={18} />
-          </button>
-          <Link to="/app/requests" className="icon-btn topbar-only-small" aria-label={pendingCount > 0 ? `Requests, ${pendingCount} waiting` : 'Requests'}>
-            <Icon as={UserPlus} size={18} />
-            {pendingCount > 0 && <span className="count" aria-hidden="true">{pendingCount > 9 ? '9+' : pendingCount}</span>}
-          </Link>
-          <NotificationBell />
-
-          <div className="relative" ref={menuRef}>
-            <button
-              type="button"
-              aria-expanded={menuOpen}
-              aria-label="Account menu"
-              onClick={() => setMenuOpen((o) => !o)}
-              style={{ display: 'block', padding: 0, border: 0, background: 'none', cursor: 'pointer', borderRadius: 9 }}
-            >
-              <Plate name={name || first} seed={email} size={40} />
+            <button type="button" className="jump" onClick={() => setJumpOpen(true)}>
+              <Icon as={Search} size={16} />
+              Go to a page, or look up a word
+              <kbd>{mac ? '⌘K' : 'Ctrl K'}</kbd>
             </button>
-            {menuOpen && (
-              <div className="popover" style={{ position: 'absolute', right: 0, top: 48, width: 232, zIndex: 40 }}>
-                <div className="panel-head">Signed in as {first}</div>
-                <div style={{ padding: 6 }} onClick={() => setMenuOpen(false)}>
-                  <Link to="/app/profile" className="menu-item">Your profile</Link>
-                  <Link to="/app/saved" className="menu-item">Saved posts</Link>
-                  <Link to="/app/glossary" className="menu-item">Glossary</Link>
-                  <Link to="/app/by-grade" className="menu-item">By grade</Link>
-                  {isAdmin && <Link to="/app/admin/moderation" className="menu-item">Moderation</Link>}
-                  <Link to="/safety" className="menu-item">Safety and reporting</Link>
-                  <button type="button" onClick={() => logout(true)} className="menu-item" style={{ color: 'var(--red)' }}>
-                    <Icon as={LogOut} size={16} /> Sign out
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-        <div className="road topbar-road" aria-hidden="true" />
 
-        <main id="main" className="app-main">
-          {isNativeApp() ? <NativeTabOutlet tabs={PHONE_TABS} /> : <RouteTransition />}
-        </main>
-      </div>
+            <span className="topbar-spacer" />
+
+            <button type="button" className="icon-btn topbar-only-small" aria-label="Search and jump" onClick={() => setJumpOpen(true)}>
+              <Icon as={Search} size={18} />
+            </button>
+            <Link to="/app/requests" className="icon-btn topbar-only-small" aria-label={pendingCount > 0 ? `Requests, ${pendingCount} waiting` : 'Requests'}>
+              <Icon as={UserPlus} size={18} />
+              {pendingCount > 0 && <span className="count" aria-hidden="true">{pendingCount > 9 ? '9+' : pendingCount}</span>}
+            </Link>
+            <NotificationBell />
+
+            <div className="relative" ref={menuRef}>
+              <button
+                type="button"
+                aria-expanded={menuOpen}
+                aria-label="Account menu"
+                onClick={() => setMenuOpen((o) => !o)}
+                style={{ display: 'block', padding: 0, border: 0, background: 'none', cursor: 'pointer', borderRadius: '50%' }}
+              >
+                <Plate name={name || first} seed={email} size={40} />
+              </button>
+              {menuOpen && (
+                <div className="popover" style={{ position: 'absolute', right: 0, top: 48, width: 236, zIndex: 40 }}>
+                  <div className="panel-head">Signed in as {first}</div>
+                  <div style={{ padding: 6 }} onClick={() => setMenuOpen(false)}>
+                    <Link to="/app/profile" className="menu-item">Your profile</Link>
+                    <Link to="/app/saved" className="menu-item">Saved posts</Link>
+                    <Link to="/app/glossary" className="menu-item">Glossary</Link>
+                    <Link to="/app/by-grade" className="menu-item">By grade</Link>
+                    {isAdmin && <Link to="/app/admin/moderation" className="menu-item">Moderation</Link>}
+                    <Link to="/safety" className="menu-item">Safety and reporting</Link>
+                    <button type="button" onClick={() => logout(true)} className="menu-item" style={{ color: 'var(--red)' }}>
+                      <Icon as={LogOut} size={16} /> Sign out
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <nav className="nb-tabs" aria-label="App sections">
+            {SECTIONS.map((s) => (
+              <Tab key={s.to} {...s} count={countFor(s.to)} countLabel={countLabelFor(s.to)} />
+            ))}
+            <span className="nb-tabs-gap" aria-hidden="true" />
+            {REFERENCE.map((s) => <Tab key={s.to} {...s} quiet />)}
+            {isAdmin && <Tab {...MODERATION} quiet />}
+          </nav>
+        </div>
+      </header>
+
+      <main id="main" className="app-main">
+        {isNativeApp() ? <NativeTabOutlet tabs={PHONE_TABS} /> : <RouteTransition />}
+      </main>
 
       <BottomTabBar tabs={PHONE_TABS} badgeFor={countFor} />
 

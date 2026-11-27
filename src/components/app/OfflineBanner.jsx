@@ -8,7 +8,7 @@ export default function OfflineBanner({ cached = 0 }) {
     <div className="notice notice-warning flex items-center gap-3" role="status">
       <Icon as={WifiOff} size={17} />
       <span>
-        <b>No signal.</b>{' '}
+        <b>You are offline.</b>{' '}
         {cached > 0
           ? `Showing the ${cached} post${cached === 1 ? '' : 's'} you already read. New posts appear when you reconnect.`
           : 'Posts you have already read will show up here. Saved posts are always available.'}

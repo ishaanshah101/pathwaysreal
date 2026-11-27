@@ -9,11 +9,11 @@
 /* The empty state component. The box itself is .empty from the kit. */
 .empty-action { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
 .empty.empty-error { border-color: var(--red); }
-.empty-error .empty-icon { background: #b3261e; }
+.empty-error .empty-icon { background: var(--red); }
 
-/* Two more badge colours, taken from the signs: red stops you, blue informs. */
-.badge-red { background: #b3261e; color: #fff; }
-.badge-blue { background: #1d4c8a; color: #fff; }
+/* Two more badge colours from the highlighter set: pink warns, blue informs. */
+.badge-red { background: var(--hl-pink); color: #232732; }
+.badge-blue { background: var(--hl-blue); color: #232732; }
 
 .skeleton-block { display: block; }
 .skeleton-row { display: flex; align-items: flex-start; gap: 12px; padding: 10px 12px; }
@@ -21,11 +21,6 @@
 
 /* A group of chips that toggle: topic pickers on the profile and at sign-up. */
 .chip-picker { display: flex; flex-wrap: wrap; gap: 8px; }
-
-/* A chip that is on stays readable under the pointer. The kit's hover rule
-   outranks its pressed rule and would turn the label ink on asphalt. */
-.chip-picker .btn-chip[aria-pressed='true']:hover:not(:disabled),
-.dir-chips .btn-chip[aria-pressed='true']:hover:not(:disabled) { border-color: var(--asphalt); color: var(--paper); }
 
 /* ---- Explore: the directory --------------------------------------------------- */
 
@@ -73,8 +68,8 @@
 .req-section > .sub-head { margin-bottom: 10px; }
 .req-section > .empty { margin-top: 4px; }
 
-/* A request is a ruled row. The plate hangs in the margin and everything else
-   lines up on the name. */
+/* A request is a ruled row. The sticker hangs in the margin and everything
+   else lines up on the name. */
 .req-row {
   display: grid; grid-template-columns: 48px minmax(0, 1fr); gap: 12px 14px;
   padding: 20px 0 18px; border-top: 1px solid var(--hairline);
@@ -82,7 +77,7 @@
 .req-row > * { grid-column: 2; }
 .req-row > .plate { grid-column: 1; grid-row: 1; }
 .req-line { margin: 0; font-size: 17.5px; font-weight: 600; line-height: 1.3; letter-spacing: -0.005em; }
-.req-line b { font-weight: 900; letter-spacing: -0.015em; }
+.req-line b { font-weight: 800; letter-spacing: -0.015em; }
 .req-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; margin-top: 5px; }
 .req-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .req-actions-end { margin-left: auto; display: flex; align-items: center; gap: 2px; }
@@ -111,10 +106,10 @@
 
 /* ---- Profile -------------------------------------------------------------------- */
 
-/* The page head, with the member's plate hung beside it. */
+/* The page head, with the member's sticker beside it. */
 .profile-top {
   display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px 22px; align-items: start;
-  padding-bottom: 20px; margin-bottom: 24px; border-bottom: 2px solid var(--ink);
+  padding-bottom: 20px; margin-bottom: 24px; border-bottom: 2px dashed var(--hairline-strong);
 }
 .profile-top > .kicker { grid-column: 1 / -1; margin: 0; }
 .profile-top .page-head { padding: 2px 0 0; margin: 0; border: 0; }
@@ -158,7 +153,7 @@
 .profile-panel .panel-body { display: grid; gap: 10px; justify-items: start; padding: 16px; }
 .profile-panel .panel-body > p { margin: 0; font-size: 14.5px; line-height: 1.5; color: var(--ink-2); }
 .profile-panel .panel-body > .field { justify-self: stretch; }
-.profile-panel .panel-lead { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; font-size: 19px; font-weight: 900; letter-spacing: -0.018em; line-height: 1.15; color: var(--ink); }
+.profile-panel .panel-lead { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; font-size: 19px; font-weight: 800; letter-spacing: -0.018em; line-height: 1.15; color: var(--ink); }
 .profile-panel .panel-lead .meta { font-weight: 600; letter-spacing: .02em; }
 .profile-panel-acts { display: flex; flex-wrap: wrap; gap: 8px; }
 
@@ -167,8 +162,8 @@
 .profile-blocked li + li { border-top: 1px solid var(--hairline); }
 .profile-blocked .quiet-link { margin-right: -8px; }
 
-/* Deleting an account is the one stop sign on the page. */
-.profile-panel-danger .panel-head { background: #b3261e; color: #fff; }
+/* Deleting an account is the one thing on the page marked in red. */
+.profile-panel-danger .panel-head { background: var(--hl-pink); color: #232732; border-bottom-color: var(--red); }
 
 /* Requests waiting on you, repeated at the top of your own profile. */
 .profile-requests { margin-bottom: 28px; }
@@ -184,7 +179,7 @@
   width: calc(100% - 28px); background: var(--sheet); color: var(--ink);
   border: 2px solid var(--ink); border-radius: var(--r-3); box-shadow: var(--lift);
 }
-.profile-danger-dialog .pw-dialog-title { font-size: 24px; font-weight: 900; line-height: 1.1; text-align: left; }
+.profile-danger-dialog .pw-dialog-title { font-size: 24px; font-weight: 800; line-height: 1.1; text-align: left; }
 .profile-danger-dialog .profile-danger-copy { display: grid; gap: 10px; font-size: 15px; line-height: 1.55; color: var(--ink); text-align: left; }
 .profile-danger-dialog .profile-danger-acts { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
 
@@ -204,7 +199,7 @@
 .mod-table .mod-col-status { width: 112px; }
 .mod-table .mod-col-when { width: 204px; }
 .mod-reason { display: block; font-size: 15.5px; font-weight: 800; letter-spacing: -0.008em; }
-.mod-details { margin: 6px 0 0; padding-left: 12px; border-left: 3px solid var(--ink); font-family: var(--font-read); font-size: 15.5px; line-height: 1.5; }
+.mod-details { display: inline-block; margin: 6px 0 0; padding: 3px 10px; background: var(--yellow-tint); color: #232732; font-family: var(--font-read); font-size: 15.5px; line-height: 1.5; }
 .mod-detail { margin: 4px 0 0; color: var(--ink-2); }
 .mod-who { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 3px 10px; margin: 0; }
 .mod-who dt { font-family: var(--font-mono); font-size: 10.5px; font-weight: 600; letter-spacing: .09em; text-transform: uppercase; color: var(--ink-3); padding-top: 3px; }
@@ -249,25 +244,26 @@
 
 /* ---- Toasts ---------------------------------------------------------------------- */
 
-/* A toast floats, so it is one of the few things allowed the lift shadow. */
+/* A toast is a sticky note slapped on the corner of the page. It keeps its
+   literal colours in either theme, the way a real one would. */
 .pw-toast {
-  background: var(--sheet); color: var(--ink);
-  border: 2px solid var(--ink); border-radius: var(--r-3); box-shadow: var(--lift);
+  background: #ffe45e; color: #232732;
+  border: 0; border-radius: 2px; box-shadow: var(--lift);
   padding: 13px 42px 13px 16px;
 }
-.pw-toast-destructive { padding-left: 21px; box-shadow: inset 5px 0 0 var(--red), var(--lift); }
+.pw-toast-destructive { background: #f8c0d2; }
 .pw-toast-title { font-family: var(--font-sign); font-size: 15.5px; font-weight: 800; line-height: 1.3; letter-spacing: -0.005em; }
-.pw-toast-desc { font-size: 14.5px; line-height: 1.45; color: var(--ink-2); }
+.pw-toast-desc { font-size: 14.5px; line-height: 1.45; color: #3a3f4d; }
 .pw-toast-action {
   display: inline-flex; align-items: center; justify-content: center; flex: none;
   min-height: 34px; padding: 0 12px; cursor: pointer;
-  background: var(--sheet); color: var(--ink); border: 2px solid var(--ink); border-radius: var(--r-2);
-  font: 800 13.5px/1 var(--font-sign);
+  background: #fffdf6; color: #232732; border: 2px solid #232732; border-radius: var(--r-2);
+  font: 700 13.5px/1 var(--font-sign);
 }
-.pw-toast-action:hover { background: var(--yellow); border-color: #1d1a16; color: #1d1a16; }
+.pw-toast-action:hover { background: #232732; color: #fffdf6; }
 .pw-toast-action:disabled { opacity: .45; pointer-events: none; }
 .pw-toast-close {
   position: absolute; top: 8px; right: 8px; display: grid; place-items: center; width: 28px; height: 28px;
-  color: var(--ink-3); border-radius: var(--r-1);
+  color: #4a4f5c; border-radius: var(--r-1);
 }
-.pw-toast-close:hover { background: var(--paper-2); color: var(--ink); }
+.pw-toast-close:hover { background: rgba(35, 39, 50, .12); color: #232732; }

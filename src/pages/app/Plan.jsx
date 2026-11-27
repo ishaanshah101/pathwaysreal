@@ -15,7 +15,6 @@ import {
 } from '@/lib/usePlan';
 
 const CATEGORY_OPTIONS = Object.entries(PLAN_CATEGORIES).map(([k, v]) => [k, v.label]);
-const FIT_SIGN_COLORS = { likely: '#17604a', target: '#1d4c8a', reach: '#e05e12' };
 
 function Marker({ iso, tone }) {
   const p = dateParts(iso);
@@ -288,7 +287,7 @@ export default function Plan() {
     <div className="page">
       <Seo title="Your Plan | Pathways" description="Your private checklist and college list on Pathways." path="/app/plan" noindex />
 
-      <PageHead kicker="Plan" title="Your route" sub={sub}>
+      <PageHead kicker="Plan" title="Your planner" sub={sub}>
         <button type="button" className="btn btn-secondary" onClick={() => setStarterOpen(true)}>
           <Icon as={Milestone} size={16} /> Start from my grade
         </button>
@@ -313,7 +312,7 @@ export default function Plan() {
         <div className="plan-layout">
           <div style={{ minWidth: 0 }}>
             <form className="panel" onSubmit={addTask} style={{ marginBottom: 8 }}>
-              <div className="panel-head">Add a stop</div>
+              <div className="panel-head">Write something down</div>
               <div className="panel-body plan-add">
                 <div className="field">
                   <label htmlFor="plan-title">What needs doing</label>
@@ -341,7 +340,7 @@ export default function Plan() {
               </div>
             ) : total === 0 && collegeStops.length === 0 ? (
               <div className="empty" style={{ marginTop: 20 }}>
-                <p className="empty-title">No stops on your route yet.</p>
+                <p className="empty-title">This page is blank.</p>
                 <p className="empty-body">
                   Add the next thing you know you have to do, even if it is small. Or start from the list
                   for your grade and delete what does not apply.
@@ -352,7 +351,7 @@ export default function Plan() {
               <div className="route">
                 {overdue.length > 0 && (
                   <>
-                    <h2 className="plan-section-head" data-tone="late">Behind you <span className="meta">{overdue.length} past their date</span></h2>
+                    <h2 className="plan-section-head" data-tone="late">Late <span className="meta">{overdue.length} past their date</span></h2>
                     <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
                       {overdue.map((t) => <TaskStop key={t.id} task={t} tone="late" onToggle={toggleDone} onSave={update} onRemove={remove} />)}
                     </ul>
@@ -361,7 +360,7 @@ export default function Plan() {
 
                 {months.map((m) => (
                   <React.Fragment key={m.label}>
-                    <h2 className="plan-section-head">{m.label} <span className="meta">{m.entries.length} {m.entries.length === 1 ? 'stop' : 'stops'}</span></h2>
+                    <h2 className="plan-section-head">{m.label} <span className="meta">{m.entries.length} {m.entries.length === 1 ? 'thing' : 'things'}</span></h2>
                     <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
                       {m.entries.map((entry) => (entry.type === 'task'
                         ? <TaskStop key={entry.row.id} task={entry.row} onToggle={toggleDone} onSave={update} onRemove={remove} />
@@ -400,7 +399,7 @@ export default function Plan() {
 
           <aside className="plan-aside" aria-label="Progress">
             <div className="panel">
-              <div className="panel-head">Distance covered</div>
+              <div className="panel-head">How far along</div>
               <div className="panel-body" style={{ display: 'grid', gap: 12 }}>
                 <div className="flex items-baseline gap-2">
                   <span className="plan-big num">{doneCount}</span>
@@ -411,7 +410,7 @@ export default function Plan() {
                 </div>
                 {next ? (
                   <p style={{ margin: 0, fontSize: 15, lineHeight: 1.45, color: 'var(--ink-2)' }}>
-                    <b style={{ color: 'var(--ink)' }}>Next stop:</b> {next.title}. {dueLabel(next.due_date)}.
+                    <b style={{ color: 'var(--ink)' }}>Next up:</b> {next.title}. {dueLabel(next.due_date)}.
                   </p>
                 ) : (
                   <p style={{ margin: 0, fontSize: 15, lineHeight: 1.45, color: 'var(--ink-2)' }}>Nothing with a date is coming up.</p>
@@ -435,7 +434,7 @@ export default function Plan() {
         <div style={{ display: 'grid', gap: 22 }}>
           <div className="fit-strip" aria-label="Your list by fit">
             {Object.entries(COLLEGE_FITS).map(([key, fit]) => (
-              <div key={key} className="fit-cell" style={{ '--fc': FIT_SIGN_COLORS[key], color: key === 'reach' ? '#1d1a16' : '#fff' }}>
+              <div key={key} className="fit-cell">
                 <b className="num">{fitCounts[key]}</b>
                 <span>{fit.label}</span>
               </div>
@@ -484,7 +483,7 @@ export default function Plan() {
               <Link to="/app/glossary#net-price-calculator" className="btn btn-secondary" style={{ marginTop: 6 }}>What is a net price calculator?</Link>
             </div>
           ) : (
-            <div>
+            <div className="plan-colleges">
               {colleges.map((c) => {
                 const fit = COLLEGE_FITS[c.college_fit];
                 const p = dateParts(c.due_date);

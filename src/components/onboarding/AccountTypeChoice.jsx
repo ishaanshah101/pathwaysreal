@@ -54,12 +54,12 @@ function Choice({ option, selected, onSelect }) {
 // The two ways people reach each other on Pathways. Explained here, at the
 // moment someone picks an account type, because that is when it actually
 // matters: it is the difference between reading someone and messaging them.
-// Set as a map legend, with each word on the same kind of button it will be
+// Set as a key, with each word on the same kind of button it will be
 // in the app: Follow outlined, Connect solid.
 function FollowVsConnect() {
   return (
     <div className="panel">
-      <div className="panel-head">Legend · Two ways to reach someone here</div>
+      <div className="panel-head">Key · Two ways to reach someone here</div>
       <ul className="reach-list">
         <li>
           <Sign color="white">Follow</Sign>

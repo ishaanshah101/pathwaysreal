@@ -41,7 +41,7 @@ export default function Join() {
       <section className="band gridded">
         <div className="wrap join-grid">
           <div>
-            <span className="kicker kicker-sun">On-ramp</span>
+            <span className="kicker kicker-sun">Sign-up sheet</span>
             <h1 className="title-1" style={{ maxWidth: '12ch' }}>Start your path. It's free.</h1>
             <p className="lede" style={{ marginTop: 20 }}>
               Create your account and we'll match you with mentors who've been exactly where you

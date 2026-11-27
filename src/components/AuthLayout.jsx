@@ -5,10 +5,10 @@ import BrandMark from "@/components/BrandMark";
 
 // The frame around Log in, Register, the password pages, and two-step sign-in.
 //
-// Wide, it is two halves: the form on paper, and a slab of asphalt with the
-// mark on it, the homepage's road scene after dark. On a phone the asphalt
-// folds down to the strip of road under the brand. The asphalt is decoration,
-// so it is hidden from assistive tech; the headline says what the page is.
+// Wide, it is an open notebook: the form is the page you are writing on, and
+// beside it is the marbled cover with its label filled in. On a phone there is
+// only the page. The cover is decoration, so it is hidden from assistive tech;
+// the headline says what the page is.
 export function AuthFrame({ children }) {
   return (
     <div className="auth">
@@ -19,18 +19,21 @@ export function AuthFrame({ children }) {
             <span className="brand-name">Pathways</span>
           </Link>
         </header>
-        <div className="road auth-strip" aria-hidden="true" />
         <main className="auth-body">{children}</main>
       </div>
 
-      <aside className="auth-side" aria-hidden="true">
-        <div className="road road-v auth-side-edge" />
-        <div className="auth-side-copy">
-          <span className="auth-side-kicker">Free college and career guidance</span>
-          <p className="auth-side-line">Directions from people who already made the trip.</p>
-          <p className="auth-side-fine">13+ · COPPA and FERPA aligned · Student data is never sold</p>
+      <aside className="auth-side band-road" aria-hidden="true">
+        <div className="cover-label auth-cover">
+          <BrandMark size={92} className="auth-cover-mark" />
+          <span className="auth-cover-title">Pathways</span>
+          <span className="auth-cover-sub">College and career notebook</span>
+          <dl className="auth-cover-lines">
+            <div><dt>Name</dt><dd>you</dd></div>
+            <div><dt>Subject</dt><dd>what comes after high school</dd></div>
+            <div><dt>Price</dt><dd>free. actually free.</dd></div>
+          </dl>
+          <span className="auth-cover-fine">13+ · COPPA and FERPA aligned · Student data is never sold</span>
         </div>
-        <BrandMark tone="light" className="auth-side-mark" />
       </aside>
     </div>
   );

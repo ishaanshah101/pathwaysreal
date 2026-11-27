@@ -1,24 +1,18 @@
 /* Typefaces, self-hosted. Nothing is fetched from a third-party font CDN, so a
-   student's browser never tells Google which page of Pathways they opened, and
+   student's browser never tells anyone which page of Pathways they opened, and
    the installed app keeps its type with no connection.
 
-   Overpass is the open descendant of Highway Gothic, the lettering on American
-   road signs. It carries headlines and every control.
-   Literata was drawn for long reading on screens. It carries anything a member
-   wrote at length: posts, Sage answers, the legal pages.
-   Overpass Mono is for the small print: mile markers, dates, counts. */
-@import '@fontsource-variable/overpass/wght.css';
-@import '@fontsource-variable/overpass/wght-italic.css';
-@import '@fontsource-variable/literata/opsz.css';
-@import '@fontsource-variable/literata/opsz-italic.css';
-@import '@fontsource/overpass-mono/latin-400.css';
-@import '@fontsource/overpass-mono/latin-600.css';
-
-/* Overpass draws its middle dot hard against the next letter, so "11th grade ·
-   Skyline High" reads as "grade ·Skyline". Take that one character from the
-   system's own sans instead; nothing else changes. */
-@font-face {
-  font-family: 'Pathways Dot';
-  src: local('Helvetica Neue'), local('Helvetica'), local('Arial'), local('Roboto'), local('Liberation Sans'), local('DejaVu Sans');
-  unicode-range: U+00B7;
-}
+   Shantell Sans is a felt-tip marker you can actually read. It writes the
+   headlines, the tabs and the buttons.
+   Andika was drawn for teaching people to read. It is the typeface on a good
+   classroom worksheet, and it sets everything anyone wrote at length.
+   Kalam is the handwriting in the margin: short notes, never paragraphs.
+   Courier Prime is the label maker: dates, counts and small print. */
+@import '@fontsource-variable/shantell-sans/wght.css';
+@import '@fontsource/andika/latin-400.css';
+@import '@fontsource/andika/latin-400-italic.css';
+@import '@fontsource/andika/latin-700.css';
+@import '@fontsource/kalam/latin-400.css';
+@import '@fontsource/kalam/latin-700.css';
+@import '@fontsource/courier-prime/latin-400.css';
+@import '@fontsource/courier-prime/latin-700.css';

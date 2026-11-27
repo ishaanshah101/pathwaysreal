@@ -63,7 +63,7 @@ export default function AskSage() {
     <section id="sage-free-sample" className="band band-sheet">
       <div className="wrap top-split" style={{ alignItems: 'start' }}>
         <div>
-          <span className="kicker">Test drive</span>
+          <span className="kicker">Try it</span>
           <h2 className="title-2">Ask Sage one question, free</h2>
           <p className="lede" style={{ marginTop: 16 }}>
             {native
@@ -119,7 +119,7 @@ export default function AskSage() {
                 role="status"
                 aria-live="polite"
                 className="prose"
-                style={{ borderLeft: '5px solid #17604a', paddingLeft: 16, whiteSpace: 'pre-wrap' }}
+                style={{ whiteSpace: 'pre-wrap' }}
               >
                 {answer}
               </div>

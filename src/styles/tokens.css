@@ -1,69 +1,87 @@
 /* ---------------------------------------------------------------------------
-   Design tokens: "Wayfinding".
+   Design tokens: "The Notebook".
 
-   The mark is a road running to a sun, so the whole system is borrowed from the
-   road. Map paper for the page. Asphalt for ink. The sun's orange for the one
-   thing on a screen that matters most. And the sign colours a driver already
-   knows how to read: green tells you where things are, blue tells you what help
-   is nearby, yellow says pay attention, brown marks somewhere worth a detour.
+   Pathways was made by a student, for students, so it looks like what is in a
+   student's backpack. A desk, sheets of lined paper, binder tabs, a set of
+   highlighters, a red pen for the things that matter, and index cards for
+   anything short. The mark sits on it like a sticker on a cover.
 
-   The older token names (--color-bg, --color-accent-700 and friends) are kept
-   as aliases at the bottom so every component written against them still
-   resolves.
+   The token names match the previous system so every component resolves.
    --------------------------------------------------------------------------- */
 :root {
-  /* Paper and ink */
-  --paper: #f3efe4;
-  --paper-2: #eae5d7;
-  --paper-3: #dfd9c8;
-  --sheet: #fdfbf5;
-  --asphalt: #26231f;
-  --asphalt-2: #3a362f;
-  --ink: #26231f;
-  --ink-2: #4b463d;
-  --ink-3: #6c655a;
-  --hairline: rgba(38, 35, 31, 0.15);
-  --hairline-strong: rgba(38, 35, 31, 0.34);
+  /* The desk, and what sits on it */
+  --desk: #eadfc6;
+  --desk-2: #dfd2b4;
+  --paper: var(--desk);
+  --paper-2: #f4eedd;
+  --paper-3: #e2d7bd;
+  --sheet: #fffdf6;
 
-  /* The sun, from the mark */
+  /* Pen and pencil */
+  --asphalt: #232732;
+  --asphalt-2: #3a3f4d;
+  --ink: #232732;
+  --ink-2: #4a4f5c;
+  --ink-3: #6b6e78;
+  --hairline: rgba(35, 39, 50, 0.16);
+  --hairline-strong: rgba(35, 39, 50, 0.4);
+  --rule: #c5d6e8;
+  --margin: #e79b98;
+  --pen-red: #c2362b;
+
+  /* The sticker */
   --sun: #e05e12;
-  --sun-deep: #b0450a;
-  --sun-tint: #fbe2cf;
-  --sun-wash: #fdf1e6;
+  --sun-deep: #a8420a;
+  --sun-tint: #f9d6bd;
+  --sun-wash: #fdeede;
 
-  /* Sign colours */
-  --green: #17604a;
-  --green-deep: #0f4a38;
-  --green-tint: #d9eae1;
-  --blue: #1d4c8a;
-  --blue-deep: #153a6b;
-  --blue-tint: #dbe6f3;
-  --brown: #6a4322;
-  --brown-tint: #ecdfd0;
-  --yellow: #f4c21f;
-  --yellow-deep: #7a5a00;
-  --yellow-tint: #fbefc0;
-  --lime: #cfe043;
-  --lime-deep: #4f5a06;
-  --lime-tint: #eef3c4;
-  --red: #b3261e;
-  --red-deep: #8f1c15;
-  --red-tint: #f7dbd7;
+  /* The highlighter set */
+  --hl-yellow: #ffe45e;
+  --hl-green: #b4e3b9;
+  --hl-blue: #b9d4f2;
+  --hl-pink: #f8c0d2;
+  --hl-orange: #fbc79a;
+  --hl-lime: #dbec86;
 
-  --on-dark: #fbf6ee;
+  /* Status inks */
+  --green: #23704a;
+  --green-deep: #175236;
+  --green-tint: #d5efd9;
+  --blue: #24548f;
+  --blue-deep: #1a3f6e;
+  --blue-tint: #d8e7f8;
+  --brown: #7a5a36;
+  --brown-tint: #efe2cb;
+  --yellow: #ffe45e;
+  --yellow-deep: #6b5300;
+  --yellow-tint: #fff3ad;
+  --lime: #dbec86;
+  --lime-deep: #4f5c0c;
+  --lime-tint: #eef5c4;
+  --red: #c2362b;
+  --red-deep: #8f2319;
+  --red-tint: #fbdcd8;
+
+  --on-dark: #fffdf6;
+  /* Lettering on the red pen colour. */
+  --on-red: #ffffff;
 
   /* Type */
-  --font-sign: 'Pathways Dot', 'Overpass Variable', 'Overpass', 'Helvetica Neue', Arial, sans-serif;
-  --font-read: 'Literata Variable', 'Literata', Georgia, 'Times New Roman', serif;
-  --font-mono: 'Overpass Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  --font-marker: 'Shantell Sans Variable', 'Shantell Sans', 'Comic Neue', 'Trebuchet MS', sans-serif;
+  --font-read: 'Andika', 'Trebuchet MS', 'Helvetica Neue', Arial, sans-serif;
+  --font-hand: 'Kalam', 'Segoe Print', 'Bradley Hand', cursive;
+  --font-mono: 'Courier Prime', 'Courier New', Courier, monospace;
+  /* The name the components already use for headings and controls. */
+  --font-sign: var(--font-marker);
 
-  /* Shape. Signs are sheet metal: small corners, never pills. */
+  /* Shape. Paper has square corners; things drawn by hand wobble a little. */
   --r-1: 3px;
-  --r-2: 5px;
-  --r-3: 8px;
-  --r-4: 12px;
+  --r-2: 4px;
+  --r-3: 3px;
+  --r-4: 4px;
+  --wobble: 255px 14px 225px 16px / 14px 225px 16px 255px;
+  --wobble-2: 14px 225px 16px 255px / 255px 16px 225px 14px;
 
-  /* Rhythm */
   --s-1: 4px;
   --s-2: 8px;
   --s-3: 12px;
@@ -74,71 +92,72 @@
   --s-8: 64px;
   --s-9: 96px;
 
-  --gutter: clamp(20px, 4.5vw, 56px);
+  --gutter: clamp(16px, 4vw, 44px);
   --measure: 66ch;
-  --rail-w: 236px;
+  --rail-w: 0px;
+  --line: 32px;
 
   --ease: cubic-bezier(.2, .7, .2, 1);
   --t-fast: .12s;
   --t: .18s;
 
-  /* A lifted sheet. One soft shadow, used on things that float (menus,
-     dialogs). Nothing that sits in the page flow casts one. */
-  --lift: 0 1px 0 rgba(38, 35, 31, .06), 0 12px 32px -12px rgba(38, 35, 31, .28);
+  /* Paper on a desk casts a small, real shadow. */
+  --paper-shadow: 0 1px 0 rgba(60, 45, 15, .1), 0 9px 18px -12px rgba(60, 45, 15, .55);
+  --lift: 0 2px 0 rgba(60, 45, 15, .1), 0 22px 44px -18px rgba(60, 45, 15, .6);
 
   /* -------------------------------------------------------------------------
-     Aliases for the previous token names.
+     Aliases for the older token names.
      ------------------------------------------------------------------------- */
-  --color-bg: var(--paper);
+  --color-bg: var(--desk);
   --color-surface: var(--sheet);
   --color-surface-2: var(--paper-2);
   --color-text: var(--ink);
   --color-ink: var(--asphalt);
   --color-ink-hover: var(--asphalt-2);
-  --color-ink-active: #141210;
+  --color-ink-active: #15171e;
   --color-accent: var(--sun);
   --color-accent-2: var(--green);
   --color-action: var(--asphalt);
   --color-action-hover: var(--asphalt-2);
-  --color-action-active: #141210;
+  --color-action-active: #15171e;
   --color-action-2: var(--green);
   --color-border: var(--hairline);
   --color-border-strong: var(--hairline-strong);
   --color-divider: var(--hairline);
 
-  --color-neutral-100: #f7f4ec;
+  --color-neutral-100: #fbf7ea;
   --color-neutral-200: var(--paper-2);
   --color-neutral-300: var(--paper-3);
-  --color-neutral-400: #bdb5a2;
-  --color-neutral-500: #948c7c;
+  --color-neutral-400: #c3b89c;
+  --color-neutral-500: #989079;
   --color-neutral-600: var(--ink-3);
-  --color-neutral-700: #5c564c;
+  --color-neutral-700: #585c68;
   --color-neutral-800: var(--ink-2);
   --color-neutral-900: var(--ink);
 
   --color-accent-100: var(--sun-wash);
   --color-accent-200: var(--sun-tint);
-  --color-accent-300: #f6c19c;
-  --color-accent-400: #ee8f52;
+  --color-accent-300: #f4b58a;
+  --color-accent-400: #ec8a4a;
   --color-accent-500: var(--sun);
-  --color-accent-600: #c9530e;
+  --color-accent-600: #c4520e;
   --color-accent-700: var(--sun-deep);
-  --color-accent-800: #7d3208;
-  --color-accent-900: #4f2006;
+  --color-accent-800: #7a3008;
+  --color-accent-900: #4d1f05;
 
-  --color-accent-2-100: #eaf3ee;
+  --color-accent-2-100: #e9f6eb;
   --color-accent-2-200: var(--green-tint);
-  --color-accent-2-300: #b5d3c5;
-  --color-accent-2-400: #7fb09b;
-  --color-accent-2-500: #3f8a70;
-  --color-accent-2-600: #22705a;
+  --color-accent-2-300: var(--hl-green);
+  --color-accent-2-400: #7cc08a;
+  --color-accent-2-500: #3f9463;
+  --color-accent-2-600: #2c8055;
   --color-accent-2-700: var(--green);
   --color-accent-2-800: var(--green-deep);
-  --color-accent-2-900: #0a3528;
+  --color-accent-2-900: #0e3a25;
 
-  --font-heading: var(--font-sign);
-  --font-body: var(--font-sign);
-  --font-display: var(--font-sign);
+  --font-heading: var(--font-marker);
+  --font-body: var(--font-read);
+  --font-display: var(--font-marker);
 
   --text-xs: 12px;
   --text-sm: 13.5px;
@@ -150,10 +169,10 @@
   --text-3xl: clamp(30px, 3.4vw, 42px);
   --text-4xl: clamp(40px, 6vw, 76px);
 
-  --leading-tight: 1.04;
+  --leading-tight: 1.06;
   --leading-snug: 1.3;
   --leading-normal: 1.5;
-  --leading-relaxed: 1.68;
+  --leading-relaxed: 1.7;
 
   --space-1: 4px;
   --space-2: 8px;
@@ -173,7 +192,7 @@
   --radius-pill: 999px;
 
   --shadow-sm: none;
-  --shadow-md: none;
+  --shadow-md: var(--paper-shadow);
   --shadow-lg: var(--lift);
 
   --transition-fast: var(--t-fast) ease;
@@ -196,111 +215,133 @@
   --text-on-accent: var(--on-dark);
 
   /* shadcn/ui primitives read these as hsl(var(--x)). */
-  --background: 44 38% 92%;
-  --foreground: 34 10% 14%;
-  --card: 45 67% 98%;
-  --card-foreground: 34 10% 14%;
-  --popover: 45 67% 98%;
-  --popover-foreground: 34 10% 14%;
-  --primary: 34 10% 14%;
-  --primary-foreground: 37 62% 96%;
-  --secondary: 44 31% 88%;
-  --secondary-foreground: 34 10% 14%;
-  --muted: 44 31% 88%;
-  --muted-foreground: 37 9% 39%;
-  --accent: 26 88% 90%;
-  --accent-foreground: 21 89% 26%;
-  --destructive: 3 71% 41%;
+  --background: 42 46% 85%;
+  --foreground: 224 18% 17%;
+  --card: 47 100% 98%;
+  --card-foreground: 224 18% 17%;
+  --popover: 47 100% 98%;
+  --popover-foreground: 224 18% 17%;
+  --primary: 224 18% 17%;
+  --primary-foreground: 47 100% 98%;
+  --secondary: 44 51% 91%;
+  --secondary-foreground: 224 18% 17%;
+  --muted: 44 51% 91%;
+  --muted-foreground: 226 6% 45%;
+  --accent: 25 88% 86%;
+  --accent-foreground: 21 89% 25%;
+  --destructive: 4 64% 46%;
   --destructive-foreground: 0 0% 100%;
-  --border: 40 14% 78%;
-  --input: 40 14% 70%;
+  --border: 42 24% 72%;
+  --input: 224 10% 55%;
   --ring: 22 85% 47%;
-  --radius: 5px;
+  --radius: 4px;
 }
 
-/* Night driving. The paper goes dark and the signs stay lit, which is what
-   retroreflective sheeting does. */
+/* Homework after dark: a darker desk, paper under a lamp. The highlighters
+   and the sticker keep their colours. */
 @media (prefers-color-scheme: dark) {
   :root {
-    --paper: #171512;
-    --paper-2: #1f1c18;
-    --paper-3: #2a2621;
-    --sheet: #221f1b;
-    --asphalt: #f1ecdf;
-    --asphalt-2: #ddd6c6;
-    --ink: #f1ecdf;
-    --ink-2: #cfc7b6;
-    --ink-3: #a29a8a;
-    --hairline: rgba(241, 236, 223, 0.16);
-    --hairline-strong: rgba(241, 236, 223, 0.36);
+    --desk: #1d1a15;
+    --desk-2: #15130f;
+    --paper-2: #2b2822;
+    --paper-3: #38342c;
+    --sheet: #26231e;
+    --asphalt: #f3eee1;
+    --asphalt-2: #ddd7c7;
+    --ink: #f3eee1;
+    --ink-2: #cbc5b6;
+    --ink-3: #a09a8c;
+    --hairline: rgba(243, 238, 225, 0.16);
+    --hairline-strong: rgba(243, 238, 225, 0.4);
+    --rule: #3a4350;
+    --margin: #7d4a48;
+    --pen-red: #f08377;
 
     --sun: #f07a33;
     --sun-deep: #f59a5f;
     --sun-tint: #46260f;
     --sun-wash: #2e1c0f;
 
-    --green: #2f8f71;
-    --green-deep: #8fd0b8;
-    --green-tint: #17332a;
-    --blue: #3f76bd;
-    --blue-deep: #a9c8ef;
-    --blue-tint: #172a44;
-    --brown: #9a6a41;
-    --brown-tint: #33261a;
-    --yellow: #f4c21f;
-    --yellow-deep: #f1d373;
-    --yellow-tint: #3a2f0a;
-    --lime: #cfe043;
-    --lime-deep: #dbe77f;
-    --lime-tint: #2c310c;
-    --red: #d9534a;
-    --red-deep: #f0a59f;
-    --red-tint: #3d1714;
+    --green: #6fc08c;
+    --green-deep: #a8dbb8;
+    --green-tint: #1c3325;
+    --blue: #86b3e6;
+    --blue-deep: #b9d4f2;
+    --blue-tint: #1b2d44;
+    --brown: #c4a06f;
+    --brown-tint: #33281a;
+    --yellow-deep: #f3dc7a;
+    --yellow-tint: #3b3410;
+    --lime-deep: #dbec86;
+    --lime-tint: #2d3210;
+    --red: #f08377;
+    --red-deep: #f6b1a9;
+    --red-tint: #40191a;
+
+    --paper-shadow: 0 1px 0 rgba(0, 0, 0, .4), 0 10px 20px -12px rgba(0, 0, 0, .8);
+    --lift: 0 2px 0 rgba(0, 0, 0, .4), 0 24px 48px -18px rgba(0, 0, 0, .85);
+
+    --mark-lane: #f3eee1;
+    --mark-dash: #1d1a15;
+    --on-red: #1d1a15;
 
     --color-ink-active: #ffffff;
     --color-action-active: #ffffff;
-    --color-neutral-100: #1c1a16;
-    --color-neutral-400: #5a5449;
-    --color-neutral-500: #7d7668;
-    --color-neutral-700: #b9b1a0;
+    --color-neutral-100: #211e19;
+    --color-neutral-400: #5c5649;
+    --color-neutral-500: #7f7868;
+    --color-neutral-700: #b8b2a2;
     --color-accent-300: #6b3a17;
     --color-accent-400: #a4521c;
     --color-accent-600: #f28a4a;
     --color-accent-800: #f8c29c;
     --color-accent-900: #fbdcc5;
-    --color-accent-2-100: #12261f;
-    --color-accent-2-300: #1f4437;
-    --color-accent-2-400: #2a5c4b;
-    --color-accent-2-500: #3f8a70;
-    --color-accent-2-600: #62ab91;
+    --color-accent-2-100: #14251b;
+    --color-accent-2-300: #24493a;
+    --color-accent-2-400: #2f6048;
+    --color-accent-2-500: #3f9463;
+    --color-accent-2-600: #6fc08c;
     --color-accent-2-900: #d5eee4;
-    --text-on-accent: #171512;
+    --text-on-accent: #1d1a15;
 
-    --lift: 0 1px 0 rgba(0, 0, 0, .4), 0 16px 40px -12px rgba(0, 0, 0, .7);
-
-    /* The mark's road reverses on a dark surface. */
-    --mark-lane: #f1ecdf;
-    --mark-dash: #171512;
-
-    --background: 36 12% 8%;
-    --foreground: 43 39% 91%;
-    --card: 34 12% 12%;
-    --card-foreground: 43 39% 91%;
-    --popover: 34 12% 12%;
-    --popover-foreground: 43 39% 91%;
-    --primary: 43 39% 91%;
-    --primary-foreground: 36 12% 8%;
-    --secondary: 34 12% 15%;
-    --secondary-foreground: 43 39% 91%;
-    --muted: 34 12% 15%;
-    --muted-foreground: 40 12% 62%;
+    --background: 38 16% 10%;
+    --foreground: 43 43% 92%;
+    --card: 38 12% 13%;
+    --card-foreground: 43 43% 92%;
+    --popover: 38 12% 13%;
+    --popover-foreground: 43 43% 92%;
+    --primary: 43 43% 92%;
+    --primary-foreground: 38 16% 10%;
+    --secondary: 40 12% 15%;
+    --secondary-foreground: 43 43% 92%;
+    --muted: 40 12% 15%;
+    --muted-foreground: 42 10% 59%;
     --accent: 25 64% 17%;
     --accent-foreground: 24 88% 67%;
-    --destructive: 4 65% 57%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 38 10% 24%;
-    --input: 38 10% 30%;
+    --destructive: 6 80% 70%;
+    --destructive-foreground: 0 0% 8%;
+    --border: 40 10% 26%;
+    --input: 40 10% 38%;
     --ring: 22 86% 57%;
   }
   html { color-scheme: dark; }
+}
+
+/* Sticky notes, highlighter, the legal pad and the notebook cover keep their
+   own colours after dark, so whatever is written on them has to stay dark
+   too. Re-pointing the ink tokens on those surfaces does it for every child
+   at once, instead of each child having to know where it is sitting. */
+@media (prefers-color-scheme: dark) {
+  .notice, .sticky, .pw-toast, .turn-q, .convo-note, .gate-sign, .fit-cell, .cover-label,
+  .said[data-mine='true'] .said-body, .thread-row[aria-current='true'], .chat-row[data-on='true'],
+  .side-tab[aria-selected='true'], .reason[data-on='true'], .choice[aria-pressed='true'],
+  .ob-intro, .ob-route-wrap, .ob-side, .profile-panel-danger .panel-head {
+    --ink: #232732; --ink-2: #3a3f4d; --ink-3: #555a66; --asphalt: #232732; --asphalt-2: #3a3f4d;
+    --hairline: rgba(35, 39, 50, .16); --hairline-strong: rgba(35, 39, 50, .4);
+    --sheet: #fffdf6; --paper: #eadfc6; --paper-2: #f4eedd; --on-dark: #fffdf6;
+    --pen-red: #c2362b; --red: #c2362b; --red-deep: #8f2319; --on-red: #ffffff;
+    --green: #23704a; --green-deep: #175236; --blue: #24548f; --blue-deep: #1a3f6e; --yellow-deep: #6b5300;
+    --sun: #e05e12; --sun-deep: #a8420a;
+    --mark-lane: #26231f; --mark-dash: #fbf6ee;
+  }
 }

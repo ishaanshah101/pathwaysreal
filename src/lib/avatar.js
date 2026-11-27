@@ -1,18 +1,17 @@
 // Avatar helpers.
 //
-// A member's avatar is a plate: their initials on one of the sign colours,
-// chosen from their email so a person always looks the same wherever they
-// appear. These are literal colours, not theme tokens, because a sign is the
-// same colour at night.
+// A member's avatar is a round sticker: their initials in marker on one of the
+// highlighter colours, chosen from their email so a person always looks the
+// same wherever they appear. Literal colours, because a sticker is the same
+// colour whatever the lamp is doing.
 const PLATES = [
-  ['#17604a', '#ffffff'],
-  ['#1d4c8a', '#ffffff'],
-  ['#6a4322', '#ffffff'],
-  ['#e05e12', '#1d1a16'],
-  ['#f4c21f', '#1d1a16'],
-  ['#cfe043', '#1d1a16'],
-  ['#26231f', '#fbf6ee'],
-  ['#b3261e', '#ffffff'],
+  ['#ffe45e', '#232732'],
+  ['#b4e3b9', '#232732'],
+  ['#b9d4f2', '#232732'],
+  ['#f8c0d2', '#232732'],
+  ['#fbc79a', '#232732'],
+  ['#dbec86', '#232732'],
+  ['#232732', '#fffdf6'],
 ];
 
 export function authorAvatar(key) {

@@ -43,7 +43,7 @@
   --duo-side: 336px;
   flex: 1 1 auto; min-height: 0;
   display: grid; grid-template-columns: minmax(0, var(--duo-side)) minmax(0, 1fr);
-  background: var(--sheet); border: 2px solid var(--ink); border-radius: var(--r-3); overflow: hidden;
+  background: var(--sheet); border: 2px solid var(--ink); border-radius: var(--r-3); overflow: hidden; box-shadow: var(--paper-shadow);
 }
 .duo-side { display: flex; flex-direction: column; min-width: 0; min-height: 0; border-right: 2px solid var(--ink); }
 .duo-main { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
@@ -67,7 +67,7 @@
   transition: background var(--t-fast) ease, color var(--t-fast) ease;
 }
 .side-tab + .side-tab { border-left: 2px solid var(--ink); }
-.side-tab[aria-selected='true'] { background: var(--asphalt); color: var(--paper); }
+.side-tab[aria-selected='true'] { background: var(--hl-yellow); color: #232732; font-weight: 700; }
 .side-tab[aria-selected='false']:hover { background: var(--paper-2); color: var(--ink); }
 .side-tab:focus-visible, .thread-row:focus-visible, .chat-row-open:focus-visible, .sage-starter:focus-visible { outline-offset: -3px; }
 
@@ -107,16 +107,15 @@
   font-family: var(--font-sign);
 }
 .thread-row:hover { background: var(--paper-2); }
-.thread-row[aria-current='true'] { background: var(--asphalt); color: var(--paper); border-bottom-color: var(--asphalt); }
-.thread-row[aria-current='true'] .plate { box-shadow: 0 0 0 1.5px var(--paper); }
+.thread-row[aria-current='true'] { background: var(--hl-yellow); color: #232732; }
 .thread-top, .thread-bottom { display: flex; align-items: baseline; gap: 10px; min-width: 0; }
 .thread-bottom { align-items: center; margin-top: 3px; }
 .thread-name { flex: 1; min-width: 0; font-weight: 800; font-size: 15.5px; line-height: 1.25; letter-spacing: -0.005em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .thread-top .meta { flex: none; font-size: 11.5px; }
 .thread-preview { flex: 1; min-width: 0; font-size: 14px; line-height: 1.35; color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.thread-row[data-unread='true'] .thread-name { font-weight: 900; }
+.thread-row[data-unread='true'] .thread-name { font-weight: 800; }
 .thread-row[data-unread='true'] .thread-preview { color: var(--ink); font-weight: 700; }
-.thread-row[aria-current='true'] .meta, .thread-row[aria-current='true'] .thread-preview { color: inherit; opacity: .76; }
+.thread-row[aria-current='true'] .meta, .thread-row[aria-current='true'] .thread-preview { color: inherit; opacity: .8; }
 
 /* ---- The open conversation ---------------------------------------------------------- */
 .convo-head {
@@ -125,18 +124,19 @@
 }
 .convo-who { display: flex; align-items: center; gap: 12px; flex: 1 1 200px; min-width: 0; }
 .convo-who > div { min-width: 0; }
-.convo-name { display: flex; align-items: center; gap: 8px; min-width: 0; margin: 0; font-size: 19px; font-weight: 900; letter-spacing: -0.018em; line-height: 1.2; }
+.convo-name { display: flex; align-items: center; gap: 8px; min-width: 0; margin: 0; font-size: 19px; font-weight: 800; letter-spacing: -0.018em; line-height: 1.2; }
 .convo-name > span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .convo-sub { margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .convo-tools { display: flex; align-items: center; flex-wrap: wrap; gap: 0 2px; margin-left: auto; }
 .convo-tools .tool-btn { min-height: 40px; }
 
-/* The private note, pinned under the name like a slip clipped to a map. */
+/* The private note, pinned under the name like a sticky note. Your own
+   handwriting, because only you ever see it. */
 .convo-note {
-  display: flex; align-items: baseline; gap: 12px; padding: 8px 16px; background: var(--paper-2); border-bottom: 1px solid var(--hairline-strong);
+  display: flex; align-items: baseline; gap: 12px; padding: 7px 16px 6px; background: var(--hl-yellow); color: #232732; border-bottom: 1px solid var(--hairline-strong);
 }
-.convo-note > span:first-child { flex: none; font-family: var(--font-mono); font-size: 10.5px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); }
-.convo-note > span:last-child { min-width: 0; font-family: var(--font-read); font-size: 15px; line-height: 1.4; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.convo-note > span:first-child { flex: none; font-family: var(--font-mono); font-size: 10.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: #4a4f5c; }
+.convo-note > span:last-child { min-width: 0; font-family: var(--font-hand); font-size: 18px; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 .convo-log {
   flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain;
@@ -150,20 +150,20 @@
 }
 .day-sep::before, .day-sep::after { content: ''; flex: 1; height: 1px; background: var(--hairline-strong); }
 
-/* What someone said. A block, not a bubble: square shoulders, no tail. Mine is
-   asphalt and sits right; theirs is a sheet with a rule round it and sits left. */
+/* What someone said. A slip of paper, not a bubble: square corners, no tail.
+   Theirs is a white card on the left. Mine is a yellow sticky note on the right. */
 .said { display: flex; flex-direction: column; align-items: flex-start; align-self: flex-start; max-width: min(80%, 62ch); }
 .said-body {
-  padding: 10px 14px 9px; border-radius: 7px; background: var(--sheet); color: var(--ink);
-  border: 1.5px solid var(--hairline-strong);
-  font-family: var(--font-sign); font-size: 16px; line-height: 1.5; white-space: pre-wrap; overflow-wrap: anywhere;
+  padding: 10px 14px 9px; border-radius: 2px; background: var(--sheet); color: var(--ink);
+  box-shadow: var(--paper-shadow);
+  font-family: var(--font-read); font-size: 16px; line-height: 1.55; white-space: pre-wrap; overflow-wrap: anywhere;
 }
 .said-meta { display: flex; align-items: center; gap: 0 8px; flex-wrap: wrap; margin-top: 5px; padding-inline: 2px; font-size: 11.5px; }
 .said[data-mine='true'] { align-self: flex-end; align-items: flex-end; }
-.said[data-mine='true'] .said-body { background: var(--asphalt); border-color: var(--asphalt); color: var(--paper); }
+.said[data-mine='true'] .said-body { background: #ffe45e; color: #232732; }
 .said[data-state='sending'] .said-body { opacity: .72; }
 /* Held back or lost: visibly not part of the conversation. */
-.said[data-state='failed'] .said-body { background: transparent; border: 1.5px dashed var(--red); color: var(--ink-2); }
+.said[data-state='failed'] .said-body { background: transparent; box-shadow: none; border: 1.5px dashed var(--red); color: var(--ink-2); }
 
 .receipt { display: inline-flex; align-items: center; gap: 4px; }
 .receipt > svg { flex: none; }
@@ -202,7 +202,7 @@
 .inline-edit .input { min-height: 40px; padding: 6px 10px; }
 @media (max-width: 999px) { .mini-tool { width: 40px; height: 40px; } }
 
-/* The lane line, moving. Used wherever something is on its way. */
+/* A pencil line being drawn. Used wherever something is on its way. */
 .lane-run {
   display: block; height: 3px; width: 100%;
   background-image: linear-gradient(to right, currentColor 0 22px, transparent 22px 36px);
@@ -216,15 +216,15 @@
 /* ---- Sage: the list of chats ---------------------------------------------------------------- */
 .chat-row { display: flex; align-items: center; min-width: 0; padding-right: 4px; border-bottom: 1px solid var(--hairline); color: var(--ink); }
 .chat-row:hover { background: var(--paper-2); }
-.chat-row[data-on='true'] { background: var(--asphalt); color: var(--paper); border-bottom-color: var(--asphalt); }
+.chat-row[data-on='true'] { background: var(--hl-yellow); color: #232732; }
 .chat-row-open {
   flex: 1; min-width: 0; min-height: 46px; padding: 8px 6px 8px 14px; text-align: left; cursor: pointer;
   background: none; border: 0; color: inherit; font: 700 15px/1.3 var(--font-sign);
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .chat-row[data-on='true'] .chat-row-open { font-weight: 800; }
-/* Chats filed in a folder hang off a route line. */
-.folder-body { margin-left: 14px; border-left: 2px solid var(--ink); }
+/* Chats filed in a folder are indented under it. */
+.folder-body { margin-left: 14px; border-left: 2px dashed var(--hairline-strong); }
 .folder-body .chat-row-open { padding-left: 12px; }
 .folder-empty { display: block; padding: 8px 12px 10px; border-bottom: 1px solid var(--hairline); }
 
@@ -235,17 +235,17 @@
   border: 2px solid var(--ink); border-radius: var(--r-2); box-shadow: var(--lift);
 }
 .row-menu-item.row-menu-item { gap: 10px; padding: 9px 10px; border-radius: var(--r-1); cursor: pointer; font: 700 14.5px/1.2 var(--font-sign); color: var(--ink); }
-.row-menu-item.row-menu-item[data-highlighted] { background: var(--asphalt); color: var(--paper); }
+.row-menu-item.row-menu-item[data-highlighted] { background: var(--hl-yellow); color: #232732; }
 .row-menu-item.row-menu-item[data-danger='true'] { color: var(--red); }
-.row-menu-item.row-menu-item[data-danger='true'][data-highlighted] { background: var(--red); color: #fff; }
+.row-menu-item.row-menu-item[data-danger='true'][data-highlighted] { background: var(--red); color: var(--on-red); }
 .row-menu-sep.row-menu-sep { height: 1px; margin: 5px -5px; background: var(--hairline-strong); }
 
 /* ---- Sage: the transcript --------------------------------------------------------------------
-   Set like a printed interview. The question in the sign face on a paper
-   block, the answer in the reading face behind a sign-green rule. */
+   Set like a page of notes. Your question is a yellow sticky note. The answer
+   is written out underneath it in the reading face, under a green label. */
 .sage-head { min-height: 56px; }
 .sage-head .kicker { margin: 0 0 3px; font-size: 10.5px; }
-.sage-title { margin: 0; font-size: 18px; font-weight: 900; letter-spacing: -0.015em; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sage-title { margin: 0; font-size: 18px; font-weight: 800; letter-spacing: -0.015em; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .sage-log {
   flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain;
   display: flex; flex-direction: column; gap: 20px; padding: 20px clamp(14px, 3vw, 34px) 22px;
@@ -254,27 +254,27 @@
 .sage-log > .lane { margin: 8px 0; max-width: 70ch; }
 .turn { width: 100%; max-width: 70ch; }
 .turn-label { display: block; margin-bottom: 6px; font-family: var(--font-mono); font-size: 11px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); }
-.turn-label[data-who='sage'] { color: var(--green-deep); }
+.turn-label[data-who='sage'] { display: inline-block; padding: 3px 8px 2px; background: var(--hl-green); color: #232732; transform: rotate(-1deg); }
 .turn-q {
-  padding: 12px 16px; background: var(--paper-2); border: 1px solid var(--hairline); border-radius: var(--r-2);
-  font-family: var(--font-sign); font-size: 16.5px; font-weight: 700; line-height: 1.45; white-space: pre-wrap; overflow-wrap: anywhere;
+  display: inline-block; padding: 11px 16px 12px; background: #ffe45e; color: #232732; border-radius: 2px; box-shadow: var(--paper-shadow);
+  font-family: var(--font-sign); font-size: 16.5px; font-weight: 600; line-height: 1.45; white-space: pre-wrap; overflow-wrap: anywhere;
 }
-.turn-a { padding-left: 16px; border-left: 5px solid #17604a; white-space: pre-wrap; overflow-wrap: anywhere; }
-.turn-thinking { display: grid; gap: 12px; padding: 6px 0 6px 16px; border-left: 5px solid #17604a; color: var(--green); }
+.turn-a { white-space: pre-wrap; overflow-wrap: anywhere; }
+.turn-thinking { display: grid; gap: 12px; padding: 6px 0; color: var(--green); }
 .turn-thinking .lane-run { max-width: 220px; }
 .turn-thinking > span:last-child { font-size: 15px; color: var(--ink-2); }
 
 /* Somewhere to start: a short index of questions, each a way in. */
 .sage-starters { width: 100%; max-width: 70ch; }
 .sage-starters .kicker { margin-bottom: 4px; }
-.sage-starter-list { list-style: none; margin: 0; padding: 0; border-top: 2px solid var(--ink); }
+.sage-starter-list { list-style: none; margin: 0; padding: 0; border-top: 2px solid var(--margin); }
 .sage-starter {
   display: flex; align-items: center; justify-content: space-between; gap: 16px; width: 100%; min-height: 46px; padding: 8px 6px;
-  background: transparent; border: 0; border-bottom: 1px solid var(--hairline); cursor: pointer; text-align: left; color: var(--ink);
-  font: 700 16.5px/1.35 var(--font-sign);
+  background: transparent; border: 0; border-bottom: 1px solid var(--rule); cursor: pointer; text-align: left; color: var(--ink);
+  font: 600 16.5px/1.35 var(--font-sign);
 }
 .sage-starter::after { content: '\2192'; flex: none; font-weight: 700; color: var(--ink-3); transition: transform var(--t) var(--ease), color var(--t) ease; }
-.sage-starter:hover { background: var(--paper-2); }
+.sage-starter:hover { background: var(--yellow-tint); color: #232732; }
 .sage-starter:hover::after { transform: translateX(4px); color: var(--ink); }
 
 .sage-compose textarea.input { min-height: 52px; }
@@ -334,7 +334,7 @@
 textarea.input.notes-field { min-height: 150px; font-family: var(--font-read); font-size: 17px; line-height: 1.6; }
 
 /* One question, one answer. Each reason is a full-width row in an ink frame;
-   the chosen one turns to asphalt, the way the current page does in the rail. */
+   the chosen one is highlighted and ticked in red pen. */
 .reason-set { min-width: 0; margin: 0; padding: 0; border: 0; }
 .reason-set > legend { margin-bottom: 6px; padding: 0; font-size: 13.5px; font-weight: 800; color: var(--ink); }
 .reason-list { background: var(--sheet); border: 2px solid var(--ink); border-radius: var(--r-2); overflow: hidden; }
@@ -347,11 +347,11 @@ textarea.input.notes-field { min-height: 150px; font-family: var(--font-read); f
 .reason > input { position: absolute; width: 1px; height: 1px; margin: 0; opacity: 0; }
 .reason-mark { position: relative; width: 20px; height: 20px; background: var(--sheet); border: 2px solid var(--ink); border-radius: 3px; }
 .reason:hover { background: var(--paper-2); }
-.reason[data-on='true'] { background: var(--asphalt); color: var(--paper); }
-.reason[data-on='true'] .reason-mark { background: var(--paper); border-color: var(--paper); }
+.reason[data-on='true'] { background: var(--hl-yellow); color: #232732; }
+.reason[data-on='true'] .reason-mark { background: #fffdf6; border-color: #232732; }
 .reason[data-on='true'] .reason-mark::after {
   content: ''; position: absolute; left: 5px; top: 1px; width: 6px; height: 11px;
-  border: solid var(--asphalt); border-width: 0 2.5px 2.5px 0; transform: rotate(45deg);
+  border: solid #c2362b; border-width: 0 2.5px 2.5px 0; transform: rotate(45deg);
 }
 .reason:has(> input:focus-visible) { outline: 3px solid var(--sun); outline-offset: -3px; }
 
@@ -396,8 +396,8 @@ textarea.input.notes-field { min-height: 150px; font-family: var(--font-read); f
 .file-prev-frame { height: 164px; background: var(--sheet); border: 1.5px solid var(--hairline-strong); }
 .file-prev-text {
   max-height: 148px; margin: 0; padding: 10px 12px; overflow: auto; background: var(--paper-2); color: var(--ink);
-  border-left: 3px solid var(--hairline-strong); border-radius: 0 var(--r-1) var(--r-1) 0;
+  border: 1px solid var(--hairline-strong); border-radius: var(--r-1);
   font-family: var(--font-mono); font-size: 12px; line-height: 1.55; white-space: pre-wrap; word-break: break-all;
 }
-.file-prev-video { max-height: 196px; background: #26231f; }
+.file-prev-video { max-height: 196px; background: #1d1f26; }
 .file-prev-none { color: var(--ink-3); }

@@ -24,7 +24,7 @@ export default function GoogleButton({
       {/* Google's mark always sits on white, whatever the button colour. */}
       <span
         className="flex items-center justify-center"
-        style={{ width: chip, height: chip, borderRadius: 3, background: '#fff', flex: 'none' }}
+        style={{ width: chip, height: chip, borderRadius: '50%', background: '#fff', flex: 'none' }}
       >
         <GoogleIcon style={{ width: chip - 6, height: chip - 6 }} />
       </span>

@@ -7,8 +7,8 @@ import { isNativeApp } from '@/lib/platform';
 import SageComingSoonCard from '@/components/app/SageComingSoonCard';
 import Sign from '@/components/kit/Sign';
 
-// The price, printed as a toll ticket: Sage is the one toll road on a map
-// where every other road is free, and it is honest to make that obvious.
+// The price, on a yellow slip with a tear-off stub. Sage is the one thing
+// here that costs money, and it is honest to make that obvious.
 export default function PlanCard() {
   const [plan, setPlan] = useState('yearly');
   const [busy, setBusy] = useState(false);
@@ -46,7 +46,7 @@ export default function PlanCard() {
     <div className="ticket">
       <div className="ticket-top">
         <div className="flex items-center justify-between gap-3 flex-wrap">
-          <span className="kicker" style={{ margin: 0 }}>Toll ticket · Sage</span>
+          <span className="kicker" style={{ margin: 0 }}>Price · Sage</span>
           <div className="seg" role="group" aria-label="Billing period">
             {['monthly', 'yearly'].map((p) => (
               <button

@@ -1,7 +1,7 @@
 {
   "name": "Post",
   "type": "object",
-  "description": "Feed posts. Written ONLY by the create-post backend function, which sets the author from the session and runs the same safety screening as messaging. Members read the feed through the getFeed function, which never hands out another member's email.",
+  "description": "Feed posts. Written ONLY by the create-post backend function, which sets the author from the session and runs the same safety screening as messaging. Members read the feed through the getFeed function, which never hands out another member's email. Only an admin can edit a published post, so nothing can be changed after it passed screening.",
   "properties": {
     "author_email": {
       "type": "string",
@@ -115,16 +115,9 @@
     },
     "read": null,
     "update": {
-      "$or": [
-        {
-          "created_by_id": "{{user.id}}"
-        },
-        {
-          "user_condition": {
-            "role": "admin"
-          }
-        }
-      ]
+      "user_condition": {
+        "role": "admin"
+      }
     },
     "delete": {
       "$or": [

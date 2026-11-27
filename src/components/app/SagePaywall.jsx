@@ -52,13 +52,13 @@ export default function SagePaywall({ notice }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // The price, printed as a toll ticket, the same one the public Sage page
-  // shows: this is the one toll road on a map where every other road is free.
+  // The price, on the same yellow sticky note the public Sage page shows: this
+  // is the one paid thing in a notebook where everything else is free.
   const pricing = native ? <SageComingSoonCard /> : (
     <div className="ticket">
       <div className="ticket-top">
         <div className="flex items-center justify-between gap-3 flex-wrap">
-          <span className="kicker" style={{ margin: 0 }}>Toll ticket · Sage</span>
+          <span className="kicker" style={{ margin: 0 }}>Price · Sage</span>
           <div className="seg" role="group" aria-label="Billing period">
             {['sage_monthly', 'sage_yearly'].map((p) => (
               <button

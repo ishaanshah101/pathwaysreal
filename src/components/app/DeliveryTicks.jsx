@@ -4,10 +4,10 @@ import React from 'react';
 // word for it, in the same small print as the time, so nobody has to learn
 // what one tick or two ticks means.
 //
-//   sending    a moving lane line, the row has not reached the server yet
+//   sending    a moving pencil line, the row has not reached the server yet
 //   sent       one check, stored
 //   delivered  two checks, the recipient's app has it
-//   read       two checks in sign green, they opened the conversation
+//   read       two checks in green ink, they opened the conversation
 //   failed     a red mark, held back or lost
 
 const WORDS = {

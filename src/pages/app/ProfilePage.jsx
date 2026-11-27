@@ -26,9 +26,9 @@ import { useReactions } from '@/lib/useReactions';
 import PostArticle from '@/components/app/PostArticle';
 import { INTEREST_OPTIONS, EXPERTISE_OPTIONS, ADULT_ROLES } from '@/components/app/profileFields';
 
-// The sign beside a member's name says which side of the conversation they are
-// on. Students get the yellow-green of a school crossing. The adults who
-// answer them get the blue of a services sign: help is nearby.
+// The label beside a member's name says which side of the conversation they
+// are on. Students are highlighted in lime. The adults who answer them are
+// highlighted in blue.
 const ROLE_SIGN = {
   student: 'lime',
   college_student: 'lime',

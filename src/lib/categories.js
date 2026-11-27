@@ -1,12 +1,9 @@
 // One place that decides how a post topic looks, so the feed, the composer,
 // saved posts and the marketing pages can never disagree about it.
 //
-// Each topic borrows the sign colour that fits it on a real road: applications
-// are destinations (green), essays are information (blue), scholarships are a
-// heads-up about money (yellow), majors are places worth the detour (brown),
-// campus life is a school zone (the yellow-green of a school crossing),
-// internships are work zones (orange), test prep is the one that makes people
-// stop (red).
+// Each topic has its own highlighter, and keeps it everywhere: applications
+// green, essays blue, scholarships yellow, majors brown, campus life lime,
+// internships orange, test prep pink.
 export const CATEGORY_SIGN = {
   general: 'ink',
   applications: 'green',

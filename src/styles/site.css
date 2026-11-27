@@ -144,6 +144,18 @@
 
 /* ---- Long documents: typed and stapled -------------------------------------------------- */
 .doc .wrap-read { background: var(--sheet); box-shadow: var(--paper-shadow); padding-block: clamp(28px, 4vw, 52px); padding-inline: clamp(20px, 5vw, 60px); }
+/* On a wide screen the legal pages are a sheet from the binder: a red margin
+   line, and the holes it was filed by. */
+@media (min-width: 760px) {
+  .doc .wrap-read {
+    position: relative; padding-left: 96px;
+    background-image: linear-gradient(to right, transparent 66px, var(--margin) 66px, var(--margin) 68px, transparent 68px);
+  }
+  .doc .wrap-read::before {
+    content: ''; position: absolute; left: 22px; top: 0; bottom: 0; width: 20px; pointer-events: none;
+    background: radial-gradient(circle at 10px 10px, var(--desk) 8.5px, transparent 9.5px) 0 64px / 20px 260px repeat-y;
+  }
+}
 .doc h2 { font-size: 23px; font-weight: 800; margin: 34px 0 8px; padding-top: 18px; border-top: 1px solid var(--rule); }
 .doc h3 { font-size: 18px; margin: 20px 0 6px; }
 .doc p, .doc li { font-family: var(--font-read); font-size: 16.5px; line-height: 1.7; color: var(--ink); }

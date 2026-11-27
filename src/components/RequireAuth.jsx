@@ -4,8 +4,8 @@ import { useAuth } from '@/lib/AuthContext';
 import { useProfile } from '@/lib/useProfile';
 import BrandMark from '@/components/BrandMark';
 
-// The full-screen wait: the mark with its lane dashes running, and a short
-// piece of lane line under it. With motion turned off the dashes hold still
+// The full-screen wait: the mark with its dashes running, and a short pencil
+// line under it. With motion turned off the dashes hold still
 // and the word "Loading" shows instead.
 function Spinner() {
   return (

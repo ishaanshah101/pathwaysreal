@@ -22,7 +22,7 @@ Built by Ishaan Shah, a sophomore at The Athenian School in Danville, California
 ## Tech stack
 
 - **Frontend:** React, Vite, Tailwind CSS and shadcn/ui (Radix) components
-- **Design system:** documented in [DESIGN.md](DESIGN.md). Fonts are self-hosted through Fontsource, so no page view is reported to a font CDN.
+- **Design system:** "The Notebook", documented in [DESIGN.md](DESIGN.md). The welcome email (`base44/shared/welcomeEmailTemplate.ts`) and the link-preview image (`public/og.jpg`) follow it too. Fonts are self-hosted through Fontsource, so no page view is reported to a font CDN.
 - **Backend:** [Base44](https://base44.com), which provides the database entities, authentication and serverless backend functions
 - **Payments:** Stripe Checkout and Customer Portal for the Sage subscription
 - **AI:** Base44's LLM integration, used for Sage and for content moderation

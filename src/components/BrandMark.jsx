@@ -5,8 +5,8 @@ import React from 'react';
 // behind it. Shapes are kept chunky on purpose: thin lanes turn to mush at
 // favicon size.
 //
-// The road is asphalt on paper. On a dark surface it flips to paper on
-// asphalt, the same way a printed logo has a reversed version. Pass
+// The road is dark on paper. On a dark surface it flips to paper on dark,
+// the same way a printed logo has a reversed version. Pass
 // tone="light" where the surface is always dark (the footer); everywhere else
 // it follows the colour scheme through the --mark-* variables.
 export default function BrandMark({ size = 36, tone = 'auto', style = {}, ...rest }) {

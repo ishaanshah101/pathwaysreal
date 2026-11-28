@@ -9,6 +9,8 @@ import BrandMark from '@/components/BrandMark';
 import NotificationBell from '@/components/app/NotificationBell';
 import BottomTabBar from '@/components/app/BottomTabBar';
 import JumpMenu from '@/components/app/JumpMenu';
+import NameWarning from '@/components/app/NameWarning';
+import NameLock from '@/components/app/NameLock';
 import Icon from '@/components/kit/Icon';
 import Plate from '@/components/kit/Plate';
 import { useAuth } from '@/lib/AuthContext';
@@ -88,6 +90,10 @@ export default function AppShell() {
 
   const destinations = [...SECTIONS, ...REFERENCE, PROFILE, ...(isAdmin ? [MODERATION] : [])];
 
+  // The week to enter a real name ran out: nothing else is reachable until
+  // they enter one.
+  if (profile?.suspended && profile?.name_locked) return <NameLock />;
+
   return (
     <div className="app-scroll-root">
       {/* Signed-in screens hold nothing a search engine should index. */}
@@ -160,6 +166,7 @@ export default function AppShell() {
       </header>
 
       <main id="main" className="app-main">
+        <NameWarning profile={profile} />
         {isNativeApp() ? <NativeTabOutlet tabs={PHONE_TABS} /> : <RouteTransition />}
       </main>
 

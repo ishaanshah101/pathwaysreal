@@ -2,6 +2,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
 import { requirePost, readJsonObject, RequestError, safeFailure } from '../../shared/requestSafety.ts';
 import { consumeRateLimit } from '../../shared/rateLimit.ts';
 import { withActionLock } from '../../shared/actionLock.ts';
+import { looksLikeRealName, REAL_NAME_MESSAGE } from '../../shared/realName.ts';
 
 // The only place a Profile should be written from the app.
 //
@@ -62,7 +63,11 @@ export default async function (req: Request): Promise<Response> {
     const { items: existingRows } = await base44.asServiceRole.entities.Profile.filter({ user_email: email }, { limit: 1 });
     const existing = existingRows[0] || null;
 
-    if (existing?.suspended) {
+    // Locked for not having a real name is the one lock a member can lift
+    // themselves, and only by entering one.
+    const nameLocked = Boolean(existing?.suspended && existing?.name_locked);
+
+    if (existing?.suspended && !nameLocked) {
       return Response.json(
         { code: 'suspended', error: 'Your account is under review. Email ishaan@pathways.uno if you think that is a mistake.' },
         { status: 403 },
@@ -77,6 +82,9 @@ export default async function (req: Request): Promise<Response> {
       if (payload[key] !== undefined) patch[key] = payload[key];
     }
     for (const key of SERVER_ONLY) delete patch[key];
+    if (nameLocked) {
+      for (const key of Object.keys(patch)) if (key !== 'full_name') delete patch[key];
+    }
 
     if (patch.role !== undefined && !ROLES.includes(String(patch.role))) {
       return Response.json({ error: 'That is not a valid role.' }, { status: 400 });
@@ -177,6 +185,18 @@ export default async function (req: Request): Promise<Response> {
     if (existing?.verified && ['full_name', 'role', 'institution', 'job_title'].some((field) =>
       patch[field] !== undefined && String(patch[field]).trim() !== String(existing[field] || '').trim())) {
       patch.verified = false;
+    }
+
+    // Real names. A name that is not a real first and last name starts a
+    // one-week clock the first time it is seen. Changing to another made-up
+    // name does not restart it; only a real name clears it.
+    if (looksLikeRealName(patch.full_name ?? existing?.full_name)) {
+      patch.name_flagged_at = '';
+      if (nameLocked) { patch.suspended = false; patch.name_locked = false; }
+    } else if (nameLocked) {
+      return Response.json({ code: 'real_name_required', error: REAL_NAME_MESSAGE }, { status: 400 });
+    } else if (!existing?.name_flagged_at) {
+      patch.name_flagged_at = new Date().toISOString();
     }
 
     let saved;

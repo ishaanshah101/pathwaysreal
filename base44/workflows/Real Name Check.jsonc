@@ -1,0 +1,45 @@
+{
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 3 * * *",
+      "one_time_date": null,
+      "timezone": "America/Los_Angeles",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "description": "Every day, warns members whose name is not a real first and last name, and locks accounts whose one-week deadline has passed until they enter a real name.",
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "real_name_check",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "check_names": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "enforceRealNames",
+            "args": {}
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Check member names",
+            "description": "Warn, then lock after 7 days"
+          }
+        }
+      }
+    ]
+  },
+  "name": "Real Name Check"
+}

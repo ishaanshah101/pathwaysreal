@@ -12,7 +12,14 @@
       "enum": [
         "connection_request",
         "connection_accepted",
-        "connection_declined"
+        "connection_declined",
+        "account_notice"
+      ],
+      "enumColors": [
+        "blue",
+        "green",
+        "gray",
+        "yellow"
       ],
       "default": "connection_request",
       "description": "What happened. Drives the icon and the wording in the UI."

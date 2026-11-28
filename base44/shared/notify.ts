@@ -13,7 +13,8 @@ type Base44 = any;
 export type NotificationType =
   | 'connection_request'
   | 'connection_accepted'
-  | 'connection_declined';
+  | 'connection_declined'
+  | 'account_notice';
 
 export async function notify(
   base44: Base44,

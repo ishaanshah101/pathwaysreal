@@ -40,7 +40,7 @@ export function welcomeEmail(fullName: string) {
     ``,
     `And Pathways is free for students, and it stays free! Sage, the AI advisor, is the one optional add-on.`,
     ``,
-    `If you get stuck or something looks wrong, reply to this email. A person reads it.`,
+    `If you get stuck or something looks wrong, email ishaan@pathways.uno. A person reads it.`,
     ``,
     `The Pathways team`,
     SITE,
@@ -130,7 +130,7 @@ export function welcomeEmail(fullName: string) {
 
       <tr><td style="padding:18px 4px 0;font-family:${BODY};font-size:13px;line-height:1.7;color:#4a4f5c;">
         And Pathways is free for students, and it stays free! Sage, the AI advisor, is the one optional add-on.<br/><br/>
-        If you get stuck or something looks wrong, reply to this email. A person reads it.<br/><br/>
+        If you get stuck or something looks wrong, email <a href="mailto:ishaan@pathways.uno" style="color:#24548f;font-weight:bold;">ishaan@pathways.uno</a>. A person reads it.<br/><br/>
         The Pathways team<br/>
         <a href="${SITE}" style="color:#24548f;font-weight:bold;">pathways.uno</a>
       </td></tr>

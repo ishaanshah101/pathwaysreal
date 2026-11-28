@@ -91,11 +91,10 @@ export default async function(req: Request): Promise<Response> {
           const users = await db.User.filter({ email });
           const account = Array.isArray(users) ? users[0] : users?.items?.[0];
           if (account?.role === 'admin') { skippedAdmins += 1; continue; }
-          if (account?.id) {
-            await withActionLock(account.id, 'account_write', () => removeAccount(db, email, account.id));
-          } else {
-            await removeAccount(db, email, null);
-          }
+          // Never delete without having seen the login, so the admin check above
+          // can't be skipped by a lookup that came back empty.
+          if (!account?.id) throw new Error('Login not found for this profile');
+          await withActionLock(account.id, 'account_write', () => removeAccount(db, email, account.id));
           removed += 1;
         } catch (error) {
           console.error('Real-name removal failed for one account', error?.message || error);

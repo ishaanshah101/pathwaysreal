@@ -87,8 +87,9 @@ export default async function(req: Request): Promise<Response> {
           // Look again right before deleting, in case the name was fixed in the meantime.
           const fresh = await db.Profile.get(profileId).catch(() => null);
           if (fresh && looksLikeRealName(fresh.full_name)) continue;
-          const users = await db.User.filter({ email }, { limit: 2 });
-          const account = users.items?.[0] ?? (Array.isArray(users) ? users[0] : null);
+          // The User table takes a plain filter only, the same call sendWelcomeEmail makes.
+          const users = await db.User.filter({ email });
+          const account = Array.isArray(users) ? users[0] : users?.items?.[0];
           if (account?.role === 'admin') { skippedAdmins += 1; continue; }
           if (account?.id) {
             await withActionLock(account.id, 'account_write', () => removeAccount(db, email, account.id));

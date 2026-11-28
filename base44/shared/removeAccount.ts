@@ -38,7 +38,7 @@ export async function removeAccount(db: any, rawEmail: string, userId: string | 
   const references = [email, ...profiles.items.map((p) => `profile:${p.id}`)];
   const posts = await db.Post.filter({ author_email: email }, { limit: 500, fields: ['id'] });
   const postIds = posts.items.map((p) => p.id);
-  const owned = [
+  const owned: [string, Record<string, unknown>][] = [
     ['Subscription', { user_email: email }], ['Post', { author_email: email }],
     ['SageMessage', { user_email: email }], ['SageThread', { user_email: email }], ['SageFolder', { user_email: email }],
     ['SavedPost', { user_email: email }], ['Attachment', { user_email: email }],

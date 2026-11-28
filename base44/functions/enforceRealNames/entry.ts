@@ -1,5 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
-import { looksLikeRealName, NAME_GRACE_DAYS } from '../../shared/realName.ts';
+import { looksLikeRealName, hasRealFirstName, nameGraceDays } from '../../shared/realName.ts';
 import { notify } from '../../shared/notify.ts';
 import { removeAccount } from '../../shared/removeAccount.ts';
 import { withActionLock } from '../../shared/actionLock.ts';
@@ -13,9 +13,10 @@ const ALERT_TO = 'ishaan@pathways.uno';
 const MAX_REMOVALS_PER_RUN = 20;
 
 // Runs once a day from the "Real Name Check" workflow. Admin only.
-//   - A member whose name is not a real first and last name gets a warning and
-//     one week to change it.
-//   - Once the week is up, the account is removed for good: the login, the
+//   - A member whose name is not a real first and last name gets a warning.
+//     A real first name missing a proper last name gets a month to fix it,
+//     anything else (a handle, digits, no real first name) gets a week.
+//   - Once that time is up, the account is removed for good: the login, the
 //     profile, posts, connections, follows, Sage chats, plan, and everything
 //     else delete-account removes. Admin accounts are never removed.
 //   - Anyone who fixed their name has the warning cleared.
@@ -29,7 +30,6 @@ export default async function(req: Request): Promise<Response> {
     const db = base44.asServiceRole.entities;
     const now = Date.now();
     const stamp = new Date(now).toISOString();
-    const graceMs = NAME_GRACE_DAYS * 86400000;
     const updates = [];
     const warned = [];
     const due = new Map();
@@ -43,7 +43,8 @@ export default async function(req: Request): Promise<Response> {
       );
       for (const profile of page.items) {
         if (profile.suspended && !profile.name_locked) continue;
-        if (looksLikeRealName(profile.full_name)) {
+        const graceDays = nameGraceDays(profile.full_name);
+        if (!graceDays) {
           if (profile.name_flagged_at) { updates.push({ id: profile.id, name_flagged_at: '' }); cleared += 1; }
           continue;
         }
@@ -51,9 +52,9 @@ export default async function(req: Request): Promise<Response> {
         if (!Number.isFinite(flaggedAt)) {
           if (!profile.name_locked) {
             updates.push({ id: profile.id, name_flagged_at: stamp });
-            warned.push(profile.user_email);
+            warned.push({ userEmail: profile.user_email, lastNameOnly: hasRealFirstName(profile.full_name), days: graceDays });
           }
-        } else if (now - flaggedAt >= graceMs || profile.name_locked) {
+        } else if (now - flaggedAt >= graceDays * 86400000 || profile.name_locked) {
           const email = String(profile.user_email || '').toLowerCase();
           if (email) due.set(email, profile.id);
         }
@@ -65,11 +66,13 @@ export default async function(req: Request): Promise<Response> {
       await db.Profile.bulkUpdate(updates.slice(i, i + 500));
     }
     for (let i = 0; i < warned.length; i += 6) {
-      await Promise.allSettled(warned.slice(i, i + 6).map((userEmail) => notify(base44, {
+      await Promise.allSettled(warned.slice(i, i + 6).map(({ userEmail, lastNameOnly, days }) => notify(base44, {
         userEmail,
         type: 'account_notice',
         actorName: 'Pathways',
-        body: `Pathways needs your real first and last name. Change it within ${NAME_GRACE_DAYS} days or your account and everything on it will be deleted.`,
+        body: lastNameOnly
+          ? `Pathways needs your last name too. Add it within ${days} days or your account and everything on it will be deleted.`
+          : `Pathways needs your real first and last name. Change it within ${days} days or your account and everything on it will be deleted.`,
         link: '/app/profile',
       })));
     }

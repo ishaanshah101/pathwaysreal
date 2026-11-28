@@ -36,7 +36,7 @@ export default function NameLock() {
         <div className="panel-body" style={{ display: 'grid', gap: 16, padding: 18 }}>
           <p style={{ margin: 0, fontSize: 16, lineHeight: 1.55 }}>
             Everyone on Pathways goes by their real first and last name, and the week to change yours has passed.
-            Enter your real name to get back in. Nothing on your account has been deleted.
+            Enter your real name now to keep your account. If you don't, it will be deleted along with everything on it.
           </p>
           <div className="field">
             <label htmlFor="nl-name">Your first and last name</label>

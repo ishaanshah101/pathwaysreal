@@ -16,7 +16,7 @@
       "ends_after_count": null
     }
   },
-  "description": "Every day, warns members whose name is not a real first and last name, and locks accounts whose one-week deadline has passed until they enter a real name.",
+  "description": "Every day, warns members whose name is not a real first and last name, and deletes accounts (with all their posts, connections and other data) once their one-week deadline has passed.",
   "definition": {
     "document": {
       "dsl": "1.0.0",
@@ -35,7 +35,7 @@
           "then": "end",
           "x-base44": {
             "title": "Check member names",
-            "description": "Warn, then lock after 7 days"
+            "description": "Warn, then delete the account after 7 days"
           }
         }
       }

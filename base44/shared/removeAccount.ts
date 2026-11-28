@@ -7,10 +7,12 @@ import { deleteOwned, deleteOwnedIfPresent, anonymizeOwned, anonymizeConversatio
 // to enter a real name ran out), so both always wipe exactly the same things.
 // Messages are anonymized rather than deleted so the other person's side of
 // the conversation survives, which is how account deletion has always worked.
-export async function removeAccount(db: any, rawEmail: string, userId: string): Promise<void> {
+// userId may be null only when the login is already gone and just the app
+// records are left behind.
+export async function removeAccount(db: any, rawEmail: string, userId: string | null): Promise<void> {
   const email = String(rawEmail || '').toLowerCase();
-  if (!email || !userId) throw new Error('removeAccount needs an email and a user id');
-  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(`deleted-account:${userId}`));
+  if (!email) throw new Error('removeAccount needs an email');
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(`deleted-account:${userId || email}`));
   const deletedRef = 'deleted:' + Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, '0')).join('');
 
   // Billing cancellation must succeed before any app data is changed.
@@ -65,5 +67,5 @@ export async function removeAccount(db: any, rawEmail: string, userId: string): 
   await db.ModerationEvent.create({ sender_email: '', surface: 'message', rule: 'account_deleted', severity: 'low',
     detail: 'Personal app records were removed for an account deletion. No identifiers retained.', status: 'dismissed', occurred_at: new Date().toISOString() });
   // Never report success if deleting the actual login fails.
-  await db.User.delete(userId);
+  if (userId) await db.User.delete(userId);
 }

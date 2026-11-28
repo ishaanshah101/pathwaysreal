@@ -59,7 +59,7 @@
     "suspended": {
       "type": "boolean",
       "default": false,
-      "description": "Set by an admin from the moderation queue, or by the daily real-name check together with name_locked. A suspended account cannot message, post, or send connection requests."
+      "description": "Set by an admin from the moderation queue, or by the old real-name lock together with name_locked (the daily check now deletes the account instead). A suspended account cannot message, post, or send connection requests."
     },
     "name_flagged_at": {
       "type": "string",

@@ -1,11 +1,13 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 import { consumeRateLimit } from '../../shared/rateLimit.ts';
-import { sendGmail } from '../../shared/gmail.ts';
 import { welcomeEmail } from '../../shared/welcomeEmailTemplate.ts';
 import { requirePost, readJsonObject, RequestError, safeFailure } from '../../shared/requestSafety.ts';
 
-// Mail goes out through the shared Gmail connector, via the shared helper that
-// the moderation alert uses too.
+// Mail goes out through Base44's built-in email sender (Base44's own domain,
+// shown as "Pathways"), not the pathways.uno Gmail connector. pathways.uno mail
+// was landing in Gmail spam because of the domain's outreach history, and a
+// welcome email that lands in spam is worse than none. Safety alerts still use
+// the Gmail connector through shared/gmail.ts.
 
 export default async function(req) {
   try {
@@ -49,16 +51,22 @@ export default async function(req) {
       return Response.json({ ok: false, reason: 'already_sent_today' }, { status: 429 });
     }
 
-    const { subject, plain, html } = welcomeEmail(fullName || target.full_name || '');
+    const { subject, html } = welcomeEmail(fullName || target.full_name || '');
 
     const globalLimit = await consumeRateLimit(base44, '__app__', 'welcome_email_budget', { hour: 50, day: 100 });
     if (!globalLimit.ok) return Response.json({ ok: false, error: 'Welcome emails have reached their allowance. Try again later.' }, { status: 429 });
-    const sent = await sendGmail(base44, { to: recipient, subject, plain, html });
-    if (!sent.ok) {
-      console.error('Welcome email delivery failed', sent.error || sent.reason);
+    try {
+      await base44.asServiceRole.integrations.Core.SendEmail({
+        to: recipient,
+        subject,
+        body: html,
+        from_name: 'Pathways',
+      });
+    } catch (mailError) {
+      console.error('Welcome email delivery failed', mailError?.message || mailError);
       return Response.json({ ok: false, error: 'Could not send the welcome email right now.' }, { status: 502 });
     }
-    return Response.json({ ok: true, id: sent.id });
+    return Response.json({ ok: true });
   } catch (error) {
     return safeFailure('sendWelcomeEmail', error, 'Could not send the welcome email right now.');
   }

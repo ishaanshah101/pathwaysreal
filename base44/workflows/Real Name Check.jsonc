@@ -16,7 +16,7 @@
       "ends_after_count": null
     }
   },
-  "description": "Every day, warns members whose name is not a real first and last name, and deletes accounts (with all their posts, connections and other data) once their one-week deadline has passed.",
+  "description": "Every day, warns members whose name is not a real first and last name, and deletes accounts (with all their posts, connections and other data) once their deadline has passed: a month when only the last name is missing, a week otherwise.",
   "definition": {
     "document": {
       "dsl": "1.0.0",
@@ -35,7 +35,7 @@
           "then": "end",
           "x-base44": {
             "title": "Check member names",
-            "description": "Warn, then delete the account after 7 days"
+            "description": "Warn, then delete the account after 30 days (missing last name) or 7 days (no real first name)"
           }
         }
       }

@@ -187,8 +187,9 @@ export default async function (req: Request): Promise<Response> {
       patch.verified = false;
     }
 
-    // Real names. A name that is not a real first and last name starts a
-    // one-week clock the first time it is seen. Changing to another made-up
+    // Real names. A name that is not a real first and last name starts the
+    // clock the first time it is seen (a month if only the last name is
+    // missing, a week otherwise, see shared/realName.ts). Changing to another made-up
     // name does not restart it; only a real name clears it.
     if (looksLikeRealName(patch.full_name ?? existing?.full_name)) {
       patch.name_flagged_at = '';

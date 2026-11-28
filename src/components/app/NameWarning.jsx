@@ -17,7 +17,7 @@ export default function NameWarning({ profile }) {
       <div className="notice notice-warning flex items-start gap-3 flex-wrap" role="alert">
         <span style={{ flex: 1, minWidth: 220 }}>
           <b>Pathways needs your real name.</b>{' '}
-          Everyone here goes by their real first and last name. Change yours {when}, or your account will be locked.
+          Everyone here goes by their real first and last name. Change yours {when}, or your account and everything on it will be deleted.
         </span>
         <Link to="/app/profile" style={{ fontWeight: 800 }}>Change my name</Link>
       </div>
